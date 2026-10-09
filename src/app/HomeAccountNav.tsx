@@ -107,10 +107,30 @@ export default function HomeAccountNav() {
       }
     }
 
+    const refreshAccount = () => {
+      if (document.visibilityState === "visible") {
+        void loadAccount();
+      }
+    };
+
     void loadAccount();
-    // Revalidate Discord membership periodically while Pixlo is open; if they leave the required server, the link is removed on the next check.
-    const membershipTimer = window.setInterval(() => { void loadAccount(); }, 30_000);
-    return () => { active = false; window.clearInterval(membershipTimer); };
+
+    window.addEventListener("pageshow", refreshAccount);
+    window.addEventListener("focus", refreshAccount);
+    document.addEventListener("visibilitychange", refreshAccount);
+
+    // Revalidate Discord membership periodically while Pixlo is open.
+    const membershipTimer = window.setInterval(() => {
+      void loadAccount();
+    }, 30_000);
+
+    return () => {
+      active = false;
+      window.clearInterval(membershipTimer);
+      window.removeEventListener("pageshow", refreshAccount);
+      window.removeEventListener("focus", refreshAccount);
+      document.removeEventListener("visibilitychange", refreshAccount);
+    };
   }, []);
 
   useEffect(() => {
