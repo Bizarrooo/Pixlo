@@ -372,13 +372,13 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             ref={videoRef}
             className="background-media"
             src={assets.backgroundVideo}
-            autoPlay={!settings.enterScreenEnabled || entered}
+            autoPlay={entered}
             loop
             playsInline
-            preload={settings.enterScreenEnabled && !entered ? "none" : "auto"}
+            preload="auto"
             onCanPlay={event => {
               const video = event.currentTarget;
-              if (settings.enterScreenEnabled && !entered) { video.pause(); video.currentTime = 0; return; }
+              if (!entered) { video.pause(); video.currentTime = 0; return; }
               video.volume = 1;
               video.muted = false;
               void video.play().catch(() => { video.muted = true; void video.play().catch(() => {}); });
@@ -394,7 +394,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       {settings.grain && <div className="effect-grain" aria-hidden="true" />}
       {settings.scanlines && <div className="effect-scanlines" aria-hidden="true" />}
 
-      {ready && settings.enterScreenEnabled && !entered && (
+      {ready && !entered && (
         <button
           type="button"
           aria-label="Enter profile"
