@@ -905,7 +905,7 @@ export default function Dashboard() {
             <Range label="Card horizontal position" value={settings.enterScreenCardPositionX} min={5} max={95} suffix="%" onChange={v => set("enterScreenCardPositionX", v)} />
             <Range label="Card vertical position" value={settings.enterScreenCardPositionY} min={5} max={95} suffix="%" onChange={v => set("enterScreenCardPositionY", v)} />
             <Range label="Card padding" value={settings.enterScreenCardPadding} min={4} max={48} suffix="px" onChange={v => set("enterScreenCardPadding", v)} />
-            <Range label="Background blur" value={settings.enterScreenCardBlur} min={0} max={40} suffix="px" onChange={v => set("enterScreenCardBlur", v)} />
+            <Range label="Screen background blur" value={settings.enterScreenCardBlur} min={0} max={40} suffix="px" onChange={v => set("enterScreenCardBlur", v)} />
           </div>}
         </section>
 
