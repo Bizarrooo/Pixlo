@@ -536,6 +536,8 @@ export default function Dashboard() {
   const previewShadow = settings.glow
     ? `0 0 ${previewGlowRadius}px ${rgbaFromHex(settings.accentColour, previewGlowAlpha)}, 0 0 ${Math.max(28, previewGlowRadius * 2.2)}px ${rgbaFromHex(settings.accentColour, previewGlowAlpha * 0.35)}, 0 28px 90px ${rgbaFromHex("#000000", Math.max(0.2, settings.shadowOpacity / 100))}`
     : `0 28px 90px ${rgbaFromHex("#000000", settings.shadowOpacity / 100)}`;
+  const readableTextOpacity = Math.max(85, Math.min(100, Number(settings.textOpacity) || 0));
+
   const previewStyle = useMemo(() => ({
     "--accent": settings.accentColour,
     "--preview-background": settings.backgroundColour,
@@ -544,11 +546,11 @@ export default function Dashboard() {
     "--preview-content-spacing-setting": `${settings.contentSpacing}px`,
     "--preview-card-shadow": previewShadow,
     "--preview-text": settings.textColour,
-    "--preview-text-opacity": `${settings.textOpacity}%`,
+    "--preview-text-opacity": `${readableTextOpacity}%`,
     "--preview-card-opacity": `${settings.profileOpacity / 100}`,
     "--preview-card-bg": `rgba(${parseInt(settings.backgroundColour.slice(1,3), 16) || 0},${parseInt(settings.backgroundColour.slice(3,5), 16) || 0},${parseInt(settings.backgroundColour.slice(5,7), 16) || 0},${settings.profileOpacity / 100})`,
-    "--preview-secondary-opacity": `${settings.textOpacity / 100}`,
-    "--preview-text-color": `rgba(${parseInt(settings.textColour.slice(1,3), 16) || 255},${parseInt(settings.textColour.slice(3,5), 16) || 255},${parseInt(settings.textColour.slice(5,7), 16) || 255},${settings.textOpacity / 100})`,
+    "--preview-secondary-opacity": `${readableTextOpacity / 100}`,
+    "--preview-text-color": `rgba(${parseInt(settings.textColour.slice(1,3), 16) || 255},${parseInt(settings.textColour.slice(3,5), 16) || 255},${parseInt(settings.textColour.slice(5,7), 16) || 255},${readableTextOpacity / 100})`,
     "--preview-blur": `${settings.profileBlur}px`,
     "--preview-radius": `${settings.borderRadius}px`,
     "--preview-border-opacity": `${settings.borderOpacity / 100}`,
@@ -677,7 +679,7 @@ export default function Dashboard() {
             <div className="colour-grid"><Colour label="Accent" value={settings.accentColour} onChange={v => set("accentColour", v)} /><Colour label="Page background" value={settings.backgroundColour} onChange={v => set("backgroundColour", v)} /><Colour label="Text" value={settings.textColour} onChange={v => set("textColour", v)} /><Colour label="Avatar border" value={settings.avatarBorderColour} onChange={v => set("avatarBorderColour", v)} /></div>
             <div className="presets"><span>Accent presets</span><div>{["#ffffff","#8b5cf6","#3b82f6","#22c55e","#f59e0b","#ec4899","#06b6d4","#ef4444"].map(c => <button type="button" key={c} style={{ background: c }} className={settings.accentColour === c ? "selected" : ""} onClick={() => set("accentColour", c)} />)}</div></div>
             <Range label="Profile opacity" value={settings.profileOpacity} min={0} max={100} suffix="%" onChange={v => set("profileOpacity", v)} />
-            <Range label="Text opacity" value={settings.textOpacity} min={10} max={100} suffix="%" onChange={v => set("textOpacity", v)} />
+            <Range label="Text opacity" value={Math.max(85, settings.textOpacity)} min={85} max={100} suffix="%" onChange={v => set("textOpacity", v)} />
             <Range label="Glass blur" value={settings.profileBlur} min={0} max={60} suffix="px" onChange={v => set("profileBlur", v)} />
             <Range label="Card border opacity" value={settings.borderOpacity} min={0} max={100} suffix="%" onChange={v => set("borderOpacity", v)} />
             <Range label="Shadow opacity" value={settings.shadowOpacity} min={0} max={100} suffix="%" onChange={v => set("shadowOpacity", v)} />
@@ -918,7 +920,7 @@ export default function Dashboard() {
                 {settings.description && <p className={`${settings.descriptionGlow ? "element-glow-description " : ""}${animationClass(settings.descriptionAnimation)}`} style={{ fontFamily: fontFamily(settings.descriptionFont), fontWeight: settings.descriptionBold ? 700 : 400, fontStyle: settings.descriptionItalic ? "italic" : "normal" }}>{settings.description}</p>}
                 {settings.showLocation && settings.location && <small className={`preview-location ${settings.locationGlow ? "element-glow-location " : ""}${animationClass(settings.locationAnimation)}`} style={{ fontFamily: fontFamily(settings.locationFont), fontWeight: settings.locationBold ? 700 : 400, fontStyle: settings.locationItalic ? "italic" : "normal" }}>⌖ {settings.location}</small>}
                 {settings.showMusicPlayer && settings.musicPlayerPosition === "top" && activeTrack && <div className="preview-music"><div className="preview-music-art">{previewAssets.musicCover ? <img src={previewAssets.musicCover} alt="" /> : <i>♫</i>}</div><span>{activeTrack.title}<small>{activeTrack.artist}</small></span><i className="preview-music-play">▶</i></div>}
-                <div className={`preview-links ${settings.socialsGlow ? "element-glow-socials " : ""}${animationClass(settings.socialsAnimation)}`} style={{ opacity: settings.textOpacity / 100, fontFamily: fontFamily(settings.socialsFont), fontWeight: settings.socialsBold ? 700 : 400, fontStyle: settings.socialsItalic ? "italic" : "normal", "--social-icon-size": `${settings.socialIconSize}px` } as React.CSSProperties}>{activeLinkKeys.map(key => {
+                <div className={`preview-links ${settings.socialsGlow ? "element-glow-socials " : ""}${animationClass(settings.socialsAnimation)}`} style={{ opacity: 1, fontFamily: fontFamily(settings.socialsFont), fontWeight: settings.socialsBold ? 700 : 400, fontStyle: settings.socialsItalic ? "italic" : "normal", "--social-icon-size": `${settings.socialIconSize}px` } as React.CSSProperties}>{activeLinkKeys.map(key => {
                   if (key.startsWith("social:")) {
                     const socialKey = key.slice(7) as SocialKey;
                     return <a key={key} href={normaliseUrl(settings.socials[socialKey])} target="_blank" rel="noreferrer" aria-label={socialLabels[socialKey]} title={socialLabels[socialKey]} className="social-preview-link" style={{ "--social-colour": settings.socialIconColour, "--social-icon-size": `${settings.socialIconSize}px` } as React.CSSProperties}><SocialIcon name={socialKey} /></a>;
