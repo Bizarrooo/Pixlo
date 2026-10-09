@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { accountSettingsStorageKey, defaultSettings, loadSettingsForAccount, saveSettingsToStorage, type CustomLink, type MusicTrack, type ProfileFont, type ProfileSettings, type SocialKey, type TextAnimation } from "../profile";
-import { deleteAsset, loadAsset, saveAsset } from "../assetStore";
+import { deleteAsset, loadAsset, migrateAssetToCloud, saveAsset } from "../assetStore";
 
 const sections = [
   ["General", "Identity & basics", "01"],
@@ -219,7 +219,20 @@ export default function Dashboard() {
         const localSettings = loadSettingsForAccount(authUser.id, { username, displayName });
         const cloudSettings = accountData.profile.settings && typeof accountData.profile.settings === "object" ? accountData.profile.settings as Partial<ProfileSettings> : {};
         const cloudHasSettings = Object.keys(cloudSettings).length > 0;
-        const loaded = cloudHasSettings ? { ...localSettings, ...cloudSettings, username, displayName } as ProfileSettings : localSettings;
+        let loaded = cloudHasSettings ? { ...localSettings, ...cloudSettings, username, displayName } as ProfileSettings : localSettings;
+        const migrate = async (value: string) => {
+          if (!value.startsWith("idb:")) return value;
+          try { return await migrateAssetToCloud(value) || value; } catch { return value; }
+        };
+        const [avatar, banner, backgroundImage, backgroundVideo, musicTracks, customLinks] = await Promise.all([
+          migrate(loaded.avatar),
+          migrate(loaded.banner),
+          migrate(loaded.backgroundImage),
+          migrate(loaded.backgroundVideo),
+          Promise.all(loaded.musicTracks.map(async track => ({ ...track, cover: await migrate(track.cover), audio: await migrate(track.audio) }))),
+          Promise.all(loaded.customLinks.map(async link => ({ ...link, icon: await migrate(link.icon) }))),
+        ]);
+        loaded = { ...loaded, avatar, banner, backgroundImage, backgroundVideo, musicTracks, customLinks };
         const linkedDiscord = accountData.user?.discordId ? accountData.user : null;
         if (accountData.discordUnlinkedForMembership) {
           setDiscordNotice("not-member");
