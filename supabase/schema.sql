@@ -217,4 +217,29 @@ $;
 revoke all on function public.register_pixlo_profile_view(text, uuid) from public;
 grant execute on function public.register_pixlo_profile_view(text, uuid) to anon, authenticated;
 
+
+-- Never let dashboard autosaves overwrite a newer server-side view total.
+create or replace function public.preserve_pixlo_profile_views()
+returns trigger
+language plpgsql
+set search_path = public
+as $
+declare
+  previous_views bigint;
+  incoming_views bigint;
+begin
+  previous_views := greatest(0, coalesce(nullif(old.settings->>'views', '')::bigint, 0));
+  incoming_views := greatest(0, coalesce(nullif(new.settings->>'views', '')::bigint, 0));
+  if incoming_views < previous_views then
+    new.settings := jsonb_set(coalesce(new.settings, '{}'::jsonb), '{views}', to_jsonb(previous_views), true);
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists profiles_preserve_views on public.profiles;
+create trigger profiles_preserve_views
+before update of settings on public.profiles
+for each row execute function public.preserve_pixlo_profile_views();
+
 notify pgrst, 'reload schema';
