@@ -122,7 +122,8 @@ function Setting({ label, text, children }: { label: string; text: string; child
 }
 
 function Range({ label, value, min, max, suffix = "", onChange }: { label: string; value: number; min: number; max: number; suffix?: string; onChange: (v: number) => void }) {
-  return <div className="range"><div><span>{label}</span><b>{value}{suffix}</b></div><input type="range" min={min} max={max} value={value} onChange={e => onChange(Number(e.target.value))} /></div>;
+  const progress = max > min ? ((value - min) / (max - min)) * 100 : 0;
+  return <div className="range"><div><span>{label}</span><b>{value}{suffix}</b></div><input type="range" min={min} max={max} value={value} style={{ "--range-progress": `${progress}%` } as React.CSSProperties} onChange={e => onChange(Number(e.target.value))} /></div>;
 }
 
 function Colour({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
@@ -901,6 +902,8 @@ export default function Dashboard() {
             <Range label="Card background transparency" value={settings.enterScreenCardOpacity} min={0} max={100} suffix="%" onChange={v => set("enterScreenCardOpacity", v)} />
             <Range label="Card corner roundness" value={settings.enterScreenCardRadius} min={0} max={48} suffix="px" onChange={v => set("enterScreenCardRadius", v)} />
             <Range label="Card width" value={settings.enterScreenCardWidth} min={180} max={760} suffix="px" onChange={v => set("enterScreenCardWidth", v)} />
+            <Range label="Card horizontal position" value={settings.enterScreenCardPositionX} min={5} max={95} suffix="%" onChange={v => set("enterScreenCardPositionX", v)} />
+            <Range label="Card vertical position" value={settings.enterScreenCardPositionY} min={5} max={95} suffix="%" onChange={v => set("enterScreenCardPositionY", v)} />
             <Range label="Card padding" value={settings.enterScreenCardPadding} min={4} max={48} suffix="px" onChange={v => set("enterScreenCardPadding", v)} />
             <Range label="Background blur" value={settings.enterScreenCardBlur} min={0} max={40} suffix="px" onChange={v => set("enterScreenCardBlur", v)} />
           </div>}
@@ -950,7 +953,7 @@ export default function Dashboard() {
               </div>
             </div>
             {active === "Enter Screen" && !previewEntered && <button type="button" onClick={() => setPreviewEntering(true)} onTransitionEnd={() => { if (previewEntering) { setPreviewEntered(true); setPreviewEntering(false); } }} style={{ position: "absolute", inset: 0, zIndex: 20, width: "100%", height: "100%", padding: 16, border: 0, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", cursor: "pointer", backgroundColor: `rgba(${parseInt(settings.enterScreenBackgroundColour.slice(1,3),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(3,5),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(5,7),16)||0},${previewAssets.backgroundVideo ? Math.min(settings.enterScreenBackgroundOpacity / 100, 0.28) : settings.enterScreenBackgroundOpacity / 100})`, color: settings.enterScreenTextColour, textAlign: "center", fontFamily: fontFamily(settings.enterScreenFont), opacity: previewEntering ? 0 : 1, transition: "opacity 450ms ease" }}>
-              <span style={{ position: "relative", zIndex: 2, display: "block", width: `min(90%, ${settings.enterScreenCardWidth}px)`, boxSizing: "border-box", padding: `${settings.enterScreenCardPadding}px`, borderRadius: settings.enterScreenCardRadius, border: `1px solid ${settings.enterScreenCardBorderColour}${Math.round(settings.enterScreenCardBorderOpacity*2.55).toString(16).padStart(2,"0")}`, background: `${settings.enterScreenCardBackgroundColour}${Math.round(settings.enterScreenCardOpacity*2.55).toString(16).padStart(2,"0")}`, color: settings.enterScreenTextColour, backdropFilter: `blur(${settings.enterScreenCardBlur}px)`, WebkitBackdropFilter: `blur(${settings.enterScreenCardBlur}px)`, fontSize: "clamp(12px, 2.5vw, 20px)", fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
+              <span style={{ position: "absolute", zIndex: 2, left: `${settings.enterScreenCardPositionX}%`, top: `${settings.enterScreenCardPositionY}%`, transform: "translate(-50%, -50%)", display: "block", width: `min(90%, ${settings.enterScreenCardWidth}px)`, boxSizing: "border-box", padding: `${settings.enterScreenCardPadding}px`, borderRadius: settings.enterScreenCardRadius, border: `1px solid ${settings.enterScreenCardBorderColour}${Math.round(settings.enterScreenCardBorderOpacity*2.55).toString(16).padStart(2,"0")}`, background: `${settings.enterScreenCardBackgroundColour}${Math.round(settings.enterScreenCardOpacity*2.55).toString(16).padStart(2,"0")}`, color: settings.enterScreenTextColour, backdropFilter: `blur(${settings.enterScreenCardBlur}px)`, WebkitBackdropFilter: `blur(${settings.enterScreenCardBlur}px)`, fontSize: "clamp(12px, 2.5vw, 20px)", fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
             </button>}
             <div className="preview-badge"><i /> LIVE</div>
           </div>
