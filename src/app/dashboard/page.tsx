@@ -216,7 +216,10 @@ export default function Dashboard() {
         const profile = accountData.profile as { id?: string; username?: string; displayName?: string; usernameChangeAvailableAt?: string | null };
         const username = String(profile.username || authUser.user_metadata?.username || authUser.email?.split("@")[0] || "user").trim().toLowerCase();
         const displayName = String(profile.displayName || authUser.user_metadata?.display_name || authUser.user_metadata?.full_name || username).trim() || username;
-        const loaded = loadSettingsForAccount(authUser.id, { username, displayName });
+        const localSettings = loadSettingsForAccount(authUser.id, { username, displayName });
+        const cloudSettings = accountData.profile.settings && typeof accountData.profile.settings === "object" ? accountData.profile.settings as Partial<ProfileSettings> : {};
+        const cloudHasSettings = Object.keys(cloudSettings).length > 0;
+        const loaded = cloudHasSettings ? { ...localSettings, ...cloudSettings, username, displayName } as ProfileSettings : localSettings;
         const linkedDiscord = accountData.user?.discordId ? accountData.user : null;
         if (accountData.discordUnlinkedForMembership) {
           setDiscordNotice("not-member");
@@ -256,6 +259,25 @@ export default function Dashboard() {
           ? { ...settings, username: savedIdentity.username, displayName: savedIdentity.displayName || settings.displayName }
           : settings;
         saveSettingsToStorage(settingsForStorage, accountSettingsStorageKey(profileUserId));
+        void fetch("/api/account", {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ settings: settingsForStorage }),
+        }).then(async response => {
+          if (!response.ok) {
+            const result = await response.json().catch(() => ({}));
+            console.error("Pixlo cloud settings save failed:", result.error || response.status);
+            setSaved(false);
+            return;
+          }
+          setSaved(true);
+          window.setTimeout(() => setSaved(false), 900);
+        }).catch(error => {
+          console.error("Pixlo cloud settings save failed:", error);
+          setSaved(false);
+        });
+        return;
       }
       setSaved(true);
       window.setTimeout(() => setSaved(false), 900);
