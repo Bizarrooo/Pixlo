@@ -3357,3 +3357,20 @@ html, body, *, *::before, *::after {
 
 /* Stats dashboard visibility fix */
 .stats-page{display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-content:start!important;width:100%!important;max-width:760px!important;color:#fff!important;overflow:visible!important}.stats-page .section-intro h2{color:#fff!important}.stats-page .section-intro p{color:#a8a8b5!important}.stats-grid,.leaderboard-heading,.leaderboard-list,.leaderboard-empty,.leaderboard-load,.stats-footnote{grid-column:1/-1!important;width:100%!important;min-width:0!important}.leaderboard-heading{display:flex!important;visibility:visible!important;opacity:1!important}.leaderboard-list{display:grid!important;visibility:visible!important;opacity:1!important}.leaderboard-row{display:grid!important;visibility:visible!important;opacity:1!important}.leaderboard-load{display:block!important;color:#fff!important}.leaderboard-empty{display:block!important;color:#fff!important}
+
+
+/* Text legibility and private owner view controls */
+.profile-page .username,.preview-frame .preview-username{color:color-mix(in srgb,var(--text,#fff) 72%,transparent)!important;opacity:1!important}
+.profile-page .location,.preview-frame .preview-location{color:color-mix(in srgb,var(--text,var(--preview-text,#fff)) 76%,transparent)!important;opacity:1!important}
+.profile-page .profile-footer,.preview-frame .preview-profile-footer{color:color-mix(in srgb,var(--text,var(--preview-text,#fff)) 68%,transparent)!important;opacity:1!important}
+.preview-frame .preview-card-inner>p{opacity:1!important}
+.view-admin-tool{display:grid;gap:14px;padding:18px;border:1px solid rgba(145,130,255,.28);border-radius:16px;background:linear-gradient(135deg,rgba(112,91,255,.13),rgba(255,255,255,.025))}
+.view-admin-tool>div:first-child>b{display:block;color:#fff;font-size:13px}
+.view-admin-tool>div:first-child>p{margin:6px 0 0;color:#b9b9c8;font-size:11px;line-height:1.6}
+.view-admin-tool .field>span{color:#f4f4fb}
+.view-admin-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.view-admin-actions button{min-height:42px;border:1px solid rgba(255,255,255,.17);border-radius:11px;padding:10px;background:rgba(255,255,255,.08);color:#fff;font-size:11px;font-weight:700;cursor:pointer}
+.view-admin-actions button:first-child{background:#8a72ff;border-color:#8a72ff;color:#fff}
+.view-admin-actions button:disabled{opacity:.55;cursor:wait}
+.view-admin-message{margin:0;color:#d7d3ff;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+@media(max-width:420px){.view-admin-actions{grid-template-columns:1fr}}
