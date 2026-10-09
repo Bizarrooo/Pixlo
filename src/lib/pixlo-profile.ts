@@ -14,6 +14,7 @@ export type PixloProfile = {
   discord_membership_verified?: boolean | null;
   use_discord_avatar?: boolean | null;
   use_discord_decoration?: boolean | null;
+  settings?: Record<string, unknown> | null;
 };
 
 export type SupabaseAuthUser = {
@@ -212,6 +213,7 @@ export function profileToDashboardUser(profile: PixloProfile) {
   return {
     id: profile.id,
     username: profile.username,
+    settings: profile.settings && typeof profile.settings === "object" ? profile.settings : {},
     displayName: profile.display_name || profile.username,
     createdAt: profile.created_at || null,
     usernameChangedAt: lastUsernameChange,
