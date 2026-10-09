@@ -127,7 +127,7 @@ export async function GET(request: Request) {
         const detail = unlinkError instanceof Error ? unlinkError.message : "Unknown profile error.";
         return cleanup(dashboardRedirect(baseUrl, "error", `You're not in the required Discord server, and the previous link could not be cleared: ${detail.slice(0, 180)}`));
       }
-      const response = cleanup(dashboardRedirect(baseUrl, "not-member", "Join https://discord.gg/rdAyWGGDCe before linking Discord. Any previous Discord link on this Pixlo account has been disconnected."));
+      const response = cleanup(dashboardRedirect(baseUrl, "not-member", "You must join the official Pixlo Discord server before linking your account: https://discord.gg/Bkz4P9gVy7. Any previous Discord link on this Pixlo account has been disconnected."));
       response.cookies.delete(`pixlo_discord_access_${authUser.id}`);
       response.cookies.delete(`pixlo_discord_refresh_${authUser.id}`);
       response.cookies.delete("pixlo_discord_access_token");
