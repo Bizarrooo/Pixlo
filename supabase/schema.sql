@@ -173,7 +173,7 @@ returns bigint
 language plpgsql
 security definer
 set search_path = public
-as $
+as $pixlo$
 declare
   target_profile_id uuid;
   inserted_profile_id uuid;
@@ -212,7 +212,7 @@ begin
 
   return coalesce(current_views, 0);
 end;
-$;
+$pixlo$;
 
 revoke all on function public.register_pixlo_profile_view(text, uuid) from public;
 grant execute on function public.register_pixlo_profile_view(text, uuid) to anon, authenticated;
@@ -223,7 +223,7 @@ create or replace function public.preserve_pixlo_profile_views()
 returns trigger
 language plpgsql
 set search_path = public
-as $
+as $pixlo$
 declare
   previous_views bigint;
   incoming_views bigint;
@@ -235,7 +235,7 @@ begin
   end if;
   return new;
 end;
-$;
+$pixlo$;
 
 drop trigger if exists profiles_preserve_views on public.profiles;
 create trigger profiles_preserve_views
