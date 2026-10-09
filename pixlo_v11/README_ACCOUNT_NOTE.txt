@@ -1,0 +1,1 @@
+Supabase packages were added to package.json. The environment did not have node_modules and the network install timed out, so package-lock.json was not regenerated here. Run `npm install` in the Pixlo folder on the user's PC to install/update the lockfile.

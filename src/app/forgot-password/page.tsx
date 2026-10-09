@@ -1,0 +1,8 @@
+"use client";
+import { FormEvent, useState } from "react";
+import Link from "next/link";
+export default function ForgotPasswordPage() {
+  const [email,setEmail]=useState(""); const [sent,setSent]=useState(false); const [error,setError]=useState(""); const [loading,setLoading]=useState(false);
+  async function submit(e:FormEvent){e.preventDefault();setError("");setLoading(true);try{const r=await fetch("/api/auth/recover",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});const d=await r.json();if(!r.ok)return setError(d.error||"Unable to send the reset email.");setSent(true);}catch{setError("Something went wrong. Try again.")}finally{setLoading(false)}}
+  return <main className="auth-page"><div className="auth-glow auth-glow-a" /><div className="auth-glow auth-glow-b" /><section className="auth-card"><Link href="/" className="auth-brand" aria-label="Pixlo home"><img className="auth-brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></Link><div className="auth-heading"><span>ACCOUNT RECOVERY</span><h1>Reset your password.</h1><p>{sent ? "If that email exists, a password reset message is on its way." : "Enter your account email and we'll send a reset link."}</p></div>{sent ? <Link className="auth-submit auth-submit-link" href="/login">Back to login</Link> : <form onSubmit={submit} className="auth-form"><label>Email<input value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="you@example.com" required /></label>{error&&<div className="auth-error">{error}</div>}<button className="auth-submit" disabled={loading}>{loading?"Sending…":"Send reset email"}</button></form>}<p className="auth-switch"><Link href="/login">Back to login</Link></p></section></main>;
+}
