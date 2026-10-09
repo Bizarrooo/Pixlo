@@ -130,6 +130,8 @@ export type ProfileSettings = {
   enterScreenCardBorderOpacity: number;
   enterScreenCardRadius: number;
   enterScreenCardWidth: number;
+  enterScreenCardPositionX: number;
+  enterScreenCardPositionY: number;
   enterScreenCardPadding: number;
   enterScreenCardBlur: number;
   enterScreenCardTitleSize: number;
@@ -255,6 +257,8 @@ export const defaultSettings: ProfileSettings = {
   enterScreenCardBorderOpacity: 22,
   enterScreenCardRadius: 16,
   enterScreenCardWidth: 360,
+  enterScreenCardPositionX: 50,
+  enterScreenCardPositionY: 50,
   enterScreenCardPadding: 18,
   enterScreenCardBlur: 18,
   enterScreenCardTitleSize: 10,
