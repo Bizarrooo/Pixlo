@@ -158,4 +158,63 @@ on storage.objects for select to anon, authenticated
 using (bucket_id = 'pixlo-assets');
 
 -- Refresh PostgREST's schema cache so newly added Discord fields are immediately visible.
+
+-- Unique profile views per persistent browser/device visitor ID.
+create table if not exists public.profile_view_visitors (
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  visitor_id uuid not null,
+  first_seen_at timestamptz not null default now(),
+  primary key (profile_id, visitor_id)
+);
+alter table public.profile_view_visitors enable row level security;
+
+create or replace function public.register_pixlo_profile_view(p_username text, p_visitor_id uuid)
+returns bigint
+language plpgsql
+security definer
+set search_path = public
+as $
+declare
+  target_profile_id uuid;
+  inserted_profile_id uuid;
+  current_views bigint;
+begin
+  select id into target_profile_id
+  from public.profiles
+  where lower(username) = lower(trim(p_username))
+  limit 1;
+
+  if target_profile_id is null then
+    return null;
+  end if;
+
+  insert into public.profile_view_visitors (profile_id, visitor_id)
+  values (target_profile_id, p_visitor_id)
+  on conflict (profile_id, visitor_id) do nothing
+  returning profile_id into inserted_profile_id;
+
+  if inserted_profile_id is not null then
+    update public.profiles
+    set settings = jsonb_set(
+      coalesce(settings, '{}'::jsonb),
+      '{views}',
+      to_jsonb(greatest(0, coalesce(nullif(settings->>'views', '')::bigint, 0)) + 1),
+      true
+    )
+    where id = target_profile_id
+    returning greatest(0, coalesce(nullif(settings->>'views', '')::bigint, 0)) into current_views;
+  else
+    select greatest(0, coalesce(nullif(settings->>'views', '')::bigint, 0))
+    into current_views
+    from public.profiles
+    where id = target_profile_id;
+  end if;
+
+  return coalesce(current_views, 0);
+end;
+$;
+
+revoke all on function public.register_pixlo_profile_view(text, uuid) from public;
+grant execute on function public.register_pixlo_profile_view(text, uuid) to anon, authenticated;
+
 notify pgrst, 'reload schema';
