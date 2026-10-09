@@ -178,7 +178,7 @@ export default function Dashboard() {
   const [usernameChangeAvailableAt, setUsernameChangeAvailableAt] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [previewAssets, setPreviewAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", musicCover: "", customLinkIcons: {} as Record<string, string> });
+  const [previewAssets, setPreviewAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", enterScreenBackgroundImage: "", enterScreenBackgroundVideo: "", musicCover: "", customLinkIcons: {} as Record<string, string> });
   const [draftTrack, setDraftTrack] = useState<{ title: string; artist: string; audio: string; cover: string }>({ title: "", artist: "", audio: "", cover: "" });
   const [discordUser, setDiscordUser] = useState<{ id?: string; username?: string; discordId?: string; discordUsername?: string; discordDisplayName?: string; discordAvatar?: string; discordAvatarDecoration?: string; useDiscordAvatar?: boolean; useDiscordDecoration?: boolean } | null>(null);
   const [discordLoading, setDiscordLoading] = useState(true);
@@ -224,15 +224,17 @@ export default function Dashboard() {
           if (!value.startsWith("idb:")) return value;
           try { return await migrateAssetToCloud(value) || value; } catch { return value; }
         };
-        const [avatar, banner, backgroundImage, backgroundVideo, musicTracks, customLinks] = await Promise.all([
+        const [avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks] = await Promise.all([
           migrate(loaded.avatar),
           migrate(loaded.banner),
           migrate(loaded.backgroundImage),
           migrate(loaded.backgroundVideo),
+          migrate(loaded.enterScreenBackgroundImage),
+          migrate(loaded.enterScreenBackgroundVideo),
           Promise.all(loaded.musicTracks.map(async track => ({ ...track, cover: await migrate(track.cover), audio: await migrate(track.audio) }))),
           Promise.all(loaded.customLinks.map(async link => ({ ...link, icon: await migrate(link.icon) }))),
         ]);
-        loaded = { ...loaded, avatar, banner, backgroundImage, backgroundVideo, musicTracks, customLinks };
+        loaded = { ...loaded, avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
         const linkedDiscord = accountData.user?.discordId ? accountData.user : null;
         if (accountData.discordUnlinkedForMembership) {
           setDiscordNotice("not-member");
@@ -307,6 +309,7 @@ export default function Dashboard() {
     const track = settings.musicTracks.find(item => item.id === settings.activeMusicId) || settings.musicTracks[0];
     Promise.all([
       loadAsset(settings.avatar), loadAsset(settings.banner), loadAsset(settings.backgroundImage), loadAsset(settings.backgroundVideo),
+      loadAsset(settings.enterScreenBackgroundImage), loadAsset(settings.enterScreenBackgroundVideo),
       loadAsset(track?.cover || ""),
       ...settings.customLinks.filter(link => link.icon).map(link => loadAsset(link.icon)),
     ])
@@ -314,8 +317,8 @@ export default function Dashboard() {
         if (cancelled) return;
         const customLinkIcons: Record<string, string> = {};
         const customLinksWithIcons = settings.customLinks.filter(link => link.icon);
-        customLinksWithIcons.forEach((link, index) => { customLinkIcons[link.id] = entries[5 + index] as string; });
-        setPreviewAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, musicCover: entries[4] as string, customLinkIcons });
+        customLinksWithIcons.forEach((link, index) => { customLinkIcons[link.id] = entries[7 + index] as string; });
+        setPreviewAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, enterScreenBackgroundImage: entries[4] as string, enterScreenBackgroundVideo: entries[5] as string, musicCover: entries[6] as string, customLinkIcons });
         if (!previewAssetsLoadedRef.current) {
           previewAssetsLoadedRef.current = true;
           setPreviewReady(true);
@@ -329,7 +332,7 @@ export default function Dashboard() {
         }
       });
     return () => { cancelled = true; };
-  }, [settingsReady, settings.avatar, settings.banner, settings.backgroundImage, settings.backgroundVideo, settings.customLinks, settings.musicTracks, settings.activeMusicId]);
+  }, [settingsReady, settings.avatar, settings.banner, settings.backgroundImage, settings.backgroundVideo, settings.enterScreenBackgroundImage, settings.enterScreenBackgroundVideo, settings.customLinks, settings.musicTracks, settings.activeMusicId]);
 
   const set = <K extends keyof ProfileSettings>(key: K, value: ProfileSettings[K]) => { setSettings(s => ({ ...s, [key]: value })); setSaved(false); };
   useEffect(() => {
@@ -784,10 +787,16 @@ export default function Dashboard() {
 
           {active === "Advanced" && <div className="form-stack">
             <SectionIntro number="10" title="Fine controls" text="These are the controls you only touch when you want to obsess over the final 5%." />
+            <div className="subsection-heading"><div><b>Click-to-enter screen</b><span>Visitors see this full-screen intro before your profile.</span></div></div>
+            <Setting label="Enable click-to-enter" text="Show an intro screen before the profile loads."><Toggle value={settings.enterScreenEnabled} onChange={v => set("enterScreenEnabled", v)} /></Setting>
+            <Field label="First message" hint="Up to 100 characters"><input maxLength={100} value={settings.enterScreenMessage} onChange={e => set("enterScreenMessage", e.target.value)} placeholder="Click to enter" /></Field>
+            <Colour label="Message colour" value={settings.enterScreenTextColour} onChange={v => set("enterScreenTextColour", v)} />
+            <Colour label="Background colour" value={settings.enterScreenBackgroundColour} onChange={v => set("enterScreenBackgroundColour", v)} />
+            <FileUpload label="Enter-screen background image" value={settings.enterScreenBackgroundImage} accept="image/*" type="image" onChange={v => set("enterScreenBackgroundImage", v)} note="Optional image behind the message · up to 25MB" />
+            <FileUpload label="Enter-screen background video" value={settings.enterScreenBackgroundVideo} accept="video/mp4,video/webm,video/quicktime" type="video" onChange={v => set("enterScreenBackgroundVideo", v)} note="Optional looping video · up to 50MB" />
             <Field label="Custom cursor image URL" hint="Optional"><input value={settings.customCursor} onChange={e => set("customCursor", e.target.value)} placeholder="https://..." /></Field>
             <Setting label="Keep the browser-native cursor" text="Leave this enabled by clearing the custom cursor URL."><span className="info-pill">AUTO</span></Setting>
-            <div className="info-card"><div><b>Unique views</b><span>The local prototype counts one view per browser/profile using local storage. A real global unique-view system needs a server database.</span></div><span className="info-pill">LOCAL</span></div>
-            <div className="info-card"><div><b>Media storage</b><span>Large uploads are stored in IndexedDB in this local prototype. Production hosting should move them to object storage.</span></div><span className="info-pill">INDEXEDDB</span></div>
+            <div className="info-card"><div><b>Unique views</b><span>Counts a visitor once per profile per browser/device, with totals stored on the server.</span></div><span className="info-pill">SERVER</span></div>
           </div>}
         </section>
 
