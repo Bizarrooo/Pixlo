@@ -406,6 +406,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         >
           <span style={{ position: "relative", zIndex: 2, fontSize: "clamp(1.2rem, 3vw, 2.2rem)", fontWeight: 700, textShadow: "0 2px 24px rgba(0,0,0,0.45)", maxWidth: 760, whiteSpace: "pre-wrap" }}>{settings.enterScreenMessage || "Click to enter"}</span>
           <span style={{ position: "relative", zIndex: 2, marginTop: 14, fontSize: 12, letterSpacing: "0.22em", textTransform: "uppercase", opacity: 0.78 }}>Click anywhere to enter</span>
+          <span style={{ position: "relative", zIndex: 2, marginTop: 22, width: "min(90%, 360px)", boxSizing: "border-box", padding: "18px 22px", borderRadius: 16, border: `1px solid ${settings.enterScreenCardColour}55`, background: `rgba(255,255,255,${settings.enterScreenCardOpacity / 100})`, color: settings.enterScreenCardColour, backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", display: "flex", flexDirection: "column", gap: 7 }}><b style={{ fontSize: 10, letterSpacing: "0.16em" }}>{settings.enterScreenCardTitle || "WELCOME TO MY PROFILE"}</b><span style={{ fontSize: 13, opacity: 0.85 }}>{settings.enterScreenCardText || "Take a look around"}</span></span>
         </button>
       )}
       <section className="profile-wrap">
