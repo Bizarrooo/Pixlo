@@ -131,5 +131,31 @@ grant select on public.profiles to anon, authenticated;
 grant insert, update on public.profiles to authenticated;
 
 
+-- Public profile media storage. Uploaded files are stored outside the browser so shared profiles can load them.
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('pixlo-assets', 'pixlo-assets', true, 52428800)
+on conflict (id) do update set public = true, file_size_limit = 52428800;
+
+drop policy if exists "Pixlo users can upload their own profile assets" on storage.objects;
+create policy "Pixlo users can upload their own profile assets"
+on storage.objects for insert to authenticated
+with check (bucket_id = 'pixlo-assets' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "Pixlo users can update their own profile assets" on storage.objects;
+create policy "Pixlo users can update their own profile assets"
+on storage.objects for update to authenticated
+using (bucket_id = 'pixlo-assets' and (storage.foldername(name))[1] = auth.uid()::text)
+with check (bucket_id = 'pixlo-assets' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "Pixlo users can delete their own profile assets" on storage.objects;
+create policy "Pixlo users can delete their own profile assets"
+on storage.objects for delete to authenticated
+using (bucket_id = 'pixlo-assets' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "Pixlo profile assets are publicly viewable" on storage.objects;
+create policy "Pixlo profile assets are publicly viewable"
+on storage.objects for select to anon, authenticated
+using (bucket_id = 'pixlo-assets');
+
 -- Refresh PostgREST's schema cache so newly added Discord fields are immediately visible.
 notify pgrst, 'reload schema';
