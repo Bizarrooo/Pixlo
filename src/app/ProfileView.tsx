@@ -108,6 +108,42 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   }, [forcedUsername]);
 
   useEffect(() => {
+    const username = (forcedUsername || "").trim().toLowerCase();
+    if (!username) return;
+    let cancelled = false;
+    fetch(`/api/public-profile/${encodeURIComponent(username)}`, { cache: "no-store" })
+      .then(async response => {
+        if (!response.ok) return null;
+        return await response.json().catch(() => null);
+      })
+      .then(async data => {
+        const remote = data?.profile?.settings;
+        if (cancelled || !remote || typeof remote !== "object" || Object.keys(remote).length === 0) return;
+        const current = { ...defaultSettings, ...(remote as Partial<ProfileSettings>), username: data.profile.username || username, displayName: data.profile.displayName || data.profile.username || username } as ProfileSettings;
+        setSettings(current);
+        setTrackIndex(Math.max(0, current.musicTracks.findIndex(track => track.id === current.activeMusicId)));
+        const selectedTrack = current.musicTracks.find(track => track.id === current.activeMusicId) || current.musicTracks[0];
+        const customLinksWithIcons = current.customLinks.filter(link => link.icon);
+        const entries = await Promise.all([
+          current.useDiscordAvatar && current.discordAvatarUrl ? Promise.resolve(current.discordAvatarUrl) : loadAsset(current.avatar),
+          loadAsset(current.banner),
+          loadAsset(current.backgroundImage),
+          loadAsset(current.backgroundVideo),
+          loadAsset(selectedTrack?.cover || ""),
+          loadAssetMedia(selectedTrack?.audio || ""),
+          ...customLinksWithIcons.map(link => loadAsset(link.icon)),
+        ]);
+        if (cancelled) return;
+        const customLinkIcons: Record<string, string> = {};
+        customLinksWithIcons.forEach((link, index) => { customLinkIcons[link.id] = entries[6 + index] as string; });
+        const musicAudio = entries[5] as { url: string; type: string };
+        setAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, musicCover: entries[4] as string, musicAudio: musicAudio.url, musicMediaType: musicAudio.type, customLinkIcons });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [forcedUsername]);
+
+  useEffect(() => {
     const track = settings.musicTracks[trackIndex] || settings.musicTracks.find(item => item.id === settings.activeMusicId) || settings.musicTracks[0];
     let cancelled = false;
     Promise.all([loadAsset(track?.cover || ""), loadAssetMedia(track?.audio || "")]).then(([musicCover, musicAudio]) => {
