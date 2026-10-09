@@ -18,6 +18,9 @@ set username = lower(trim(username));
 create unique index if not exists profiles_username_lower_unique
 on public.profiles (lower(username));
 
+-- Public profile customizations. Safe to run repeatedly.
+alter table public.profiles add column if not exists settings jsonb not null default '{}'::jsonb;
+
 -- Discord account linking fields. Safe to run repeatedly.
 alter table public.profiles add column if not exists discord_id text;
 alter table public.profiles add column if not exists discord_username text;
