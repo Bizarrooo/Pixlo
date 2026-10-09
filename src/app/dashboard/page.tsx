@@ -829,13 +829,22 @@ export default function Dashboard() {
             <p className="stats-footnote">Your highlighted row is easy to spot, even if you are outside the top 100.</p>
           </div>}
           {active === "Enter Screen" && <div className="form-stack">
-            <SectionIntro number="11" title="Your entrance" text="Customise the message, font, colour and transparency visitors see before entering your profile." />
+            <SectionIntro number="11" title="Your entrance" text="The message appears once, inside its own customisable bordered card." />
             <Setting label="Enable click-to-enter" text="Show this full-screen intro before your profile loads."><Toggle value={settings.enterScreenEnabled} onChange={v => set("enterScreenEnabled", v)} /></Setting>
-            <Field label="First message" hint="Up to 100 characters"><input maxLength={100} value={settings.enterScreenMessage} onChange={e => set("enterScreenMessage", e.target.value)} placeholder="Click to enter" /></Field>
+            <Field label="Entrance message" hint="Up to 100 characters"><input maxLength={100} value={settings.enterScreenMessage} onChange={e => set("enterScreenMessage", e.target.value)} placeholder="Click to enter" /></Field>
             <Field label="Message font"><FontDropdown id="enter-message-font" open={openDropdown} setOpen={setOpenDropdown} value={settings.enterScreenFont} onChange={v => set("enterScreenFont", v)} /></Field>
             <Colour label="Message colour" value={settings.enterScreenTextColour} onChange={v => set("enterScreenTextColour", v)} />
-            <Colour label="Background colour" value={settings.enterScreenBackgroundColour} onChange={v => set("enterScreenBackgroundColour", v)} />
-            <Range label="Background transparency" value={settings.enterScreenBackgroundOpacity} min={0} max={100} suffix="%" onChange={v => set("enterScreenBackgroundOpacity", v)} />
+            <Colour label="Screen background colour" value={settings.enterScreenBackgroundColour} onChange={v => set("enterScreenBackgroundColour", v)} />
+            <Range label="Screen background transparency" value={settings.enterScreenBackgroundOpacity} min={0} max={100} suffix="%" onChange={v => set("enterScreenBackgroundOpacity", v)} />
+            <SectionIntro title="Message card" text="Style the border and background wrapped around that same message." />
+            <Colour label="Card border colour" value={settings.enterScreenCardBorderColour} onChange={v => set("enterScreenCardBorderColour", v)} />
+            <Range label="Border transparency" value={settings.enterScreenCardBorderOpacity} min={0} max={100} suffix="%" onChange={v => set("enterScreenCardBorderOpacity", v)} />
+            <Colour label="Card background colour" value={settings.enterScreenCardBackgroundColour} onChange={v => set("enterScreenCardBackgroundColour", v)} />
+            <Range label="Card background transparency" value={settings.enterScreenCardOpacity} min={0} max={100} suffix="%" onChange={v => set("enterScreenCardOpacity", v)} />
+            <Range label="Card corner roundness" value={settings.enterScreenCardRadius} min={0} max={48} suffix="px" onChange={v => set("enterScreenCardRadius", v)} />
+            <Range label="Card width" value={settings.enterScreenCardWidth} min={180} max={760} suffix="px" onChange={v => set("enterScreenCardWidth", v)} />
+            <Range label="Card padding" value={settings.enterScreenCardPadding} min={4} max={48} suffix="px" onChange={v => set("enterScreenCardPadding", v)} />
+            <Range label="Background blur" value={settings.enterScreenCardBlur} min={0} max={40} suffix="px" onChange={v => set("enterScreenCardBlur", v)} />
           </div>}
         </section>
 
@@ -882,9 +891,8 @@ export default function Dashboard() {
                 {settings.showFooter && <div className="preview-profile-footer"><span><i className="preview-online-dot" /> Online</span>{settings.showViews && <span>{settings.views || 0} views</span>}</div>}
               </div>
             </div>
-            {active === "Enter Screen" && settings.enterScreenEnabled && !previewEntered && <button type="button" onClick={() => setPreviewEntering(true)} onTransitionEnd={() => { if (previewEntering) { setPreviewEntered(true); setPreviewEntering(false); } }} style={{ position: "absolute", inset: 0, zIndex: 20, width: "100%", height: "100%", padding: 16, border: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", overflow: "hidden", cursor: "pointer", backgroundColor: `rgba(${parseInt(settings.enterScreenBackgroundColour.slice(1,3),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(3,5),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(5,7),16)||0},${settings.enterScreenBackgroundOpacity / 100})`, color: settings.enterScreenTextColour, textAlign: "center", fontFamily: fontFamily(settings.enterScreenFont), opacity: previewEntering ? 0 : 1, transition: "opacity 450ms ease" }}>
-              <span style={{ position: "relative", zIndex: 2, fontSize: "clamp(12px, 2.5vw, 20px)", fontWeight: 700, textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
-              <span style={{ position: "relative", zIndex: 2, marginTop: 10, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.8 }}>Click anywhere to enter</span>
+            {active === "Enter Screen" && settings.enterScreenEnabled && !previewEntered && <button type="button" onClick={() => setPreviewEntering(true)} onTransitionEnd={() => { if (previewEntering) { setPreviewEntered(true); setPreviewEntering(false); } }} style={{ position: "absolute", inset: 0, zIndex: 20, width: "100%", height: "100%", padding: 16, border: 0, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", cursor: "pointer", backgroundColor: `rgba(${parseInt(settings.enterScreenBackgroundColour.slice(1,3),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(3,5),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(5,7),16)||0},${settings.enterScreenBackgroundOpacity / 100})`, color: settings.enterScreenTextColour, textAlign: "center", fontFamily: fontFamily(settings.enterScreenFont), opacity: previewEntering ? 0 : 1, transition: "opacity 450ms ease" }}>
+              <span style={{ position: "relative", zIndex: 2, display: "block", width: `min(90%, ${settings.enterScreenCardWidth}px)`, boxSizing: "border-box", padding: `${settings.enterScreenCardPadding}px`, borderRadius: settings.enterScreenCardRadius, border: `1px solid ${settings.enterScreenCardBorderColour}${Math.round(settings.enterScreenCardBorderOpacity*2.55).toString(16).padStart(2,"0")}`, background: `${settings.enterScreenCardBackgroundColour}${Math.round(settings.enterScreenCardOpacity*2.55).toString(16).padStart(2,"0")}`, color: settings.enterScreenTextColour, backdropFilter: `blur(${settings.enterScreenCardBlur}px)`, WebkitBackdropFilter: `blur(${settings.enterScreenCardBlur}px)`, fontSize: "clamp(12px, 2.5vw, 20px)", fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
             </button>}
             <div className="preview-badge"><i /> LIVE</div>
           </div>
