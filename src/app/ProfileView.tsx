@@ -257,7 +257,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   if (!ready) return <main className="profile-loading"><div className="loader" /></main>;
 
-  const textOpacity = `${settings.textOpacity}%`;
+  const readableTextOpacity = Math.max(85, Math.min(100, Number(settings.textOpacity) || 0));
+  const textOpacity = `${readableTextOpacity}%`;
   const cardBg = rgbaFromHex(settings.backgroundColour, settings.profileOpacity / 100);
   const border = rgbaFromHex("ffffff", settings.borderOpacity / 100);
   const glowRadius = Math.max(18, settings.glowIntensity * 1.8);
@@ -276,10 +277,10 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     "--accent": settings.accentColour,
     "--text": settings.textColour,
     "--text-opacity": textOpacity,
-    "--text-opacity-number": settings.textOpacity / 100,
+    "--text-opacity-number": readableTextOpacity / 100,
     "--element-glow": `${Math.max(2, settings.glowIntensity * 0.35)}px`,
     "--profile-bg": cardBg,
-    "--profile-text": rgbaFromHex(settings.textColour, settings.textOpacity / 100),
+    "--profile-text": rgbaFromHex(settings.textColour, readableTextOpacity / 100),
     "--profile-border": border,
     "--profile-blur": `${settings.profileBlur}px`,
     "--profile-opacity": settings.profileOpacity / 100,
@@ -428,13 +429,13 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
               <h1 className={`${settings.nameGlow ? "element-glow-name " : ""}${animationClass(settings.nameAnimation)}`} style={{ fontFamily: fontFamily(settings.nameFont), fontWeight: settings.nameBold ? 700 : 400, fontStyle: settings.nameItalic ? "italic" : "normal" }}>{settings.displayName || settings.username}</h1>
               {settings.username.toLowerCase() === "qasim" && settings.showVerified && <span className="verified-dot">✓</span>}
             </div>
-            <div className={`username ${animationClass(settings.usernameAnimation)}`} style={{ fontFamily: fontFamily(settings.usernameFont), fontWeight: settings.usernameBold ? 700 : 400, fontStyle: settings.usernameItalic ? "italic" : "normal", opacity: settings.textOpacity / 100 }}>@{settings.username}</div>
+            <div className={`username ${animationClass(settings.usernameAnimation)}`} style={{ fontFamily: fontFamily(settings.usernameFont), fontWeight: settings.usernameBold ? 700 : 400, fontStyle: settings.usernameItalic ? "italic" : "normal", opacity: 1 }}>@{settings.username}</div>
             {settings.description && <p className={`description ${settings.descriptionGlow ? "element-glow-description " : ""}${animationClass(settings.descriptionAnimation)}`} style={{ fontFamily: fontFamily(settings.descriptionFont), fontWeight: settings.descriptionBold ? 700 : 400, fontStyle: settings.descriptionItalic ? "italic" : "normal" }}>{settings.description}</p>}
-            {settings.showLocation && settings.location && <div className={`location ${settings.locationGlow ? "element-glow-location " : ""}${animationClass(settings.locationAnimation)}`} style={{ fontFamily: fontFamily(settings.locationFont), fontWeight: settings.locationBold ? 700 : 400, fontStyle: settings.locationItalic ? "italic" : "normal", opacity: settings.textOpacity / 100 }}><span>⌖</span>{settings.location}</div>}
+            {settings.showLocation && settings.location && <div className={`location ${settings.locationGlow ? "element-glow-location " : ""}${animationClass(settings.locationAnimation)}`} style={{ fontFamily: fontFamily(settings.locationFont), fontWeight: settings.locationBold ? 700 : 400, fontStyle: settings.locationItalic ? "italic" : "normal", opacity: 1 }}><span>⌖</span>{settings.location}</div>}
 
             {settings.showMusicPlayer && settings.musicPlayerPosition === "top" && activeTrack && <MusicPlayer track={activeTrack} cover={assets.musicCover} audioRef={audioRef} playing={playing} tracks={settings.musicTracks} onToggle={toggleMusic} onPrev={previousTrack} onNext={nextTrack} loop={settings.musicLoop} />}
 
-            {activeLinks.length > 0 && <div className={`socials ${settings.socialsGlow ? "element-glow-socials " : ""}${animationClass(settings.socialsAnimation)}`} style={{ opacity: settings.textOpacity / 100, fontFamily: fontFamily(settings.socialsFont), fontWeight: settings.socialsBold ? 700 : 400, fontStyle: settings.socialsItalic ? "italic" : "normal", "--social-icon-size": `${settings.socialIconSize}px` } as React.CSSProperties} aria-label="Active links">
+            {activeLinks.length > 0 && <div className={`socials ${settings.socialsGlow ? "element-glow-socials " : ""}${animationClass(settings.socialsAnimation)}`} style={{ opacity: 1, fontFamily: fontFamily(settings.socialsFont), fontWeight: settings.socialsBold ? 700 : 400, fontStyle: settings.socialsItalic ? "italic" : "normal", "--social-icon-size": `${settings.socialIconSize}px` } as React.CSSProperties} aria-label="Active links">
               {activeLinks.map(key => {
                 if (key.startsWith("social:")) {
                   const socialKey = key.slice(7);
