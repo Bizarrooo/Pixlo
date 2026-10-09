@@ -271,3 +271,30 @@ export async function updatePixloDiscordProfile(
   const rows = await response.json().catch(() => []);
   return Array.isArray(rows) && rows[0] ? rows[0] as PixloProfile : null;
 }
+
+
+export async function updatePixloSettings(
+  accessToken: string,
+  userId: string,
+  settings: Record<string, unknown>,
+): Promise<PixloProfile> {
+  const { url } = supabaseConfig();
+  const response = await fetch(`${url}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`, {
+    method: "PATCH",
+    headers: { ...authFetchHeaders(accessToken), Prefer: "return=representation" },
+    body: JSON.stringify({ settings, updated_at: new Date().toISOString() }),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    if (/column .*settings|settings.*column|schema cache/i.test(detail)) {
+      throw new Error("Cloud profile storage needs setup. Run the updated supabase/schema.sql in Supabase SQL Editor.");
+    }
+    throw new Error(`Unable to save your profile customizations (${response.status}). ${detail.slice(0, 180)}`);
+  }
+  const rows = await response.json().catch(() => []);
+  if (Array.isArray(rows) && rows[0]) return rows[0] as PixloProfile;
+  const updated = await getPixloProfile(accessToken, userId);
+  if (!updated) throw new Error("Pixlo did not return your saved customizations.");
+  return updated;
+}
