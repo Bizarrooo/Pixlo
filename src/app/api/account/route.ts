@@ -7,6 +7,7 @@ import {
   profileToDashboardUser,
   updatePixloDiscordProfile,
   updatePixloIdentity,
+  updatePixloSettings,
 } from "../../../lib/pixlo-profile";
 
 export const runtime = "nodejs";
@@ -171,6 +172,14 @@ export async function PATCH(request: Request) {
     if (Object.keys(discordPatch).length) {
       const updated = await updatePixloDiscordProfile(session.accessToken, session.authUser.id, discordPatch);
       if (updated) profile = updated;
+    }
+
+    if (body.settings && typeof body.settings === "object" && !Array.isArray(body.settings)) {
+      try {
+        profile = await updatePixloSettings(session.accessToken, session.authUser.id, body.settings as Record<string, unknown>);
+      } catch (error) {
+        return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Unable to save your profile customizations." }, { status: 500 });
+      }
     }
 
     if (!profile) return NextResponse.json({ ok: false, error: "Your Pixlo profile could not be loaded." }, { status: 404 });
