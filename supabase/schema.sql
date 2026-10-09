@@ -261,3 +261,5 @@ as $pixlo$
 $pixlo$;
 revoke all on function public.get_pixlo_view_leaderboard(text) from public;
 grant execute on function public.get_pixlo_view_leaderboard(text) to anon, authenticated;
+
+notify pgrst, 'reload schema';
