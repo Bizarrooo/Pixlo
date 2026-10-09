@@ -184,6 +184,18 @@ export default function Dashboard() {
   const [viewLeaderboard, setViewLeaderboard] = useState<{ leaderboard: { username: string; displayName: string; views: number; rank: number }[]; viewer: { username: string; displayName: string; views: number; rank: number } | null; totalProfiles: number } | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState("");
+  useEffect(() => {
+    if (active !== "Stats" || !settingsReady || !settings.username || viewLeaderboard || leaderboardLoading) return;
+    let cancelled = false;
+    setLeaderboardLoading(true);
+    setLeaderboardError("");
+    fetch('/api/profile-stats?username=' + encodeURIComponent(settings.username), { cache: "no-store" })
+      .then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || "Could not load leaderboard."); return data; })
+      .then(data => { if (!cancelled) setViewLeaderboard(data); })
+      .catch(error => { if (!cancelled) setLeaderboardError(error instanceof Error ? error.message : "Could not load leaderboard."); })
+      .finally(() => { if (!cancelled) setLeaderboardLoading(false); });
+    return () => { cancelled = true; };
+  }, [active, settingsReady, settings.username, viewLeaderboard, leaderboardLoading]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [previewAssets, setPreviewAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", enterScreenBackgroundImage: "", enterScreenBackgroundVideo: "", musicCover: "", customLinkIcons: {} as Record<string, string> });
   const [draftTrack, setDraftTrack] = useState<{ title: string; artist: string; audio: string; cover: string }>({ title: "", artist: "", audio: "", cover: "" });
