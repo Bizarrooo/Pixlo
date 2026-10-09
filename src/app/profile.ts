@@ -120,6 +120,10 @@ export type ProfileSettings = {
   enterScreenTextColour: string;
   enterScreenFont: ProfileFont;
   enterScreenBackgroundOpacity: number;
+  enterScreenCardTitle: string;
+  enterScreenCardText: string;
+  enterScreenCardColour: string;
+  enterScreenCardOpacity: number;
 };
 
 export const defaultSettings: ProfileSettings = {
@@ -227,6 +231,10 @@ export const defaultSettings: ProfileSettings = {
   enterScreenTextColour: "#ffffff",
   enterScreenFont: "Inter",
   enterScreenBackgroundOpacity: 100,
+  enterScreenCardTitle: "WELCOME TO MY PROFILE",
+  enterScreenCardText: "Take a look around",
+  enterScreenCardColour: "#ffffff",
+  enterScreenCardOpacity: 12,
 };
 
 export const LEGACY_PROFILE_SETTINGS_KEY = "profileSettings";
