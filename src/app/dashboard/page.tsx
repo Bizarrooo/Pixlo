@@ -178,6 +178,7 @@ export default function Dashboard() {
   const previewAssetsLoadedRef = useRef(false);
   const [profileUserId, setProfileUserId] = useState("");
   const [viewToolAmount, setViewToolAmount] = useState("100");
+  const [viewToolUsername, setViewToolUsername] = useState("");
   const [viewToolMessage, setViewToolMessage] = useState("");
   const [viewToolBusy, setViewToolBusy] = useState(false);
   const [savedIdentity, setSavedIdentity] = useState({ username: "", displayName: "" });
@@ -372,7 +373,7 @@ export default function Dashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ action, amount }),
+        body: JSON.stringify({ action, amount, username: viewToolUsername.trim() || settings.username }),
         cache: "no-store",
       });
       const data = await response.json().catch(() => ({}));
@@ -380,7 +381,7 @@ export default function Dashboard() {
       setSettings(current => ({ ...current, views: Number(data.views) || 0 }));
       setViewLeaderboard(null);
       setLeaderboardError("");
-      setViewToolMessage(action === "add" ? `Added ${amount.toLocaleString()} views to your profile.` : `Removed up to ${amount.toLocaleString()} views from your profile.`);
+      setViewToolMessage(action === "add" ? `Added ${amount.toLocaleString()} views to @${(viewToolUsername.trim() || settings.username).toLowerCase()}.` : `Removed up to ${amount.toLocaleString()} views from @${(viewToolUsername.trim() || settings.username).toLowerCase()}.`);
     } catch (error) {
       setViewToolMessage(error instanceof Error ? error.message : "Could not adjust your views.");
     } finally {
@@ -846,6 +847,7 @@ export default function Dashboard() {
             <div className="info-card"><div><b>Unique views</b><span>Counts a visitor once per profile per browser/device, with totals stored on the server.</span></div><span className="info-pill">SERVER</span></div>
             {canManageOwnViews && <div className="view-admin-tool">
               <div><b>Owner view controls</b><p>Only available on your account. Adjust the view total for your own profile.</p></div>
+              <Field label="Target username" hint="Enter any Pixlo username, or leave blank to use your own profile."><input value={viewToolUsername} onChange={e => setViewToolUsername(e.target.value)} placeholder={settings.username || "username"} autoComplete="off" /></Field>
               <Field label="Number of views"><input type="number" min={1} max={1000000} step={1} inputMode="numeric" value={viewToolAmount} onChange={e => setViewToolAmount(e.target.value)} /></Field>
               <div className="view-admin-actions">
                 <button type="button" disabled={viewToolBusy} onClick={() => void adjustOwnViews("add")}>{viewToolBusy ? "Working…" : "Generate views"}</button>
