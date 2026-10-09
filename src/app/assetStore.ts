@@ -24,6 +24,22 @@ export async function saveAsset(file: File): Promise<string> {
   return data.url;
 }
 
+export async function migrateAssetToCloud(value: string): Promise<string> {
+  if (!value.startsWith("idb:")) return value;
+  const key = value.slice(4);
+  const db = await openDB();
+  const file = await new Promise<Blob | undefined>((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readonly");
+    const request = tx.objectStore(STORE_NAME).get(key);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  db.close();
+  if (!file) return "";
+  const uploadFile = file instanceof File ? file : new File([file], "pixlo-upload", { type: file.type || "application/octet-stream" });
+  return saveAsset(uploadFile);
+}
+
 export async function loadAsset(value: string): Promise<string> {
   if (!value.startsWith("idb:")) return value;
   const key = value.slice(4);
