@@ -195,7 +195,7 @@ export default function Dashboard() {
       .catch(error => { if (!cancelled) setLeaderboardError(error instanceof Error ? error.message : "Could not load leaderboard."); })
       .finally(() => { if (!cancelled) setLeaderboardLoading(false); });
     return () => { cancelled = true; };
-  }, [active, settingsReady, settings.username, viewLeaderboard, leaderboardLoading]);
+  }, [active, settingsReady, settings.username]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [previewAssets, setPreviewAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", enterScreenBackgroundImage: "", enterScreenBackgroundVideo: "", musicCover: "", customLinkIcons: {} as Record<string, string> });
   const [draftTrack, setDraftTrack] = useState<{ title: string; artist: string; audio: string; cover: string }>({ title: "", artist: "", audio: "", cover: "" });
