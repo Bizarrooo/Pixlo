@@ -16,6 +16,7 @@ const sections = [
   ["Layout", "Structure & alignment", "09"],
   ["Advanced", "Fine controls", "10"],
   ["Enter Screen", "Intro & click-to-enter", "11"],
+  ["Stats", "Views & profile activity", "12"],
 ] as const;
 
 const socials: [SocialKey, string][] = [
@@ -793,6 +794,17 @@ export default function Dashboard() {
             <Field label="Custom cursor image URL" hint="Optional"><input value={settings.customCursor} onChange={e => set("customCursor", e.target.value)} placeholder="https://..." /></Field>
             <Setting label="Keep the browser-native cursor" text="Leave this enabled by clearing the custom cursor URL."><span className="info-pill">AUTO</span></Setting>
             <div className="info-card"><div><b>Unique views</b><span>Counts a visitor once per profile per browser/device, with totals stored on the server.</span></div><span className="info-pill">SERVER</span></div>
+          </div>}
+          {active === "Stats" && <div className="form-stack">
+            <SectionIntro number="12" title="Your stats" text="A quick look at how your Pixlo profile is doing." />
+            <div className="stats-grid">
+              <div className="stats-card"><span>Total profile views</span><strong>{Number(settings.views || 0).toLocaleString()}</strong><small>Unique browsers/devices counted by Pixlo</small></div>
+              <div className="stats-card"><span>Social links</span><strong>{socials.filter(([key]) => Boolean(settings.socials[key]?.trim())).length + settings.customLinks.filter(link => Boolean(link.url.trim())).length}</strong><small>Connected social and custom links</small></div>
+              <div className="stats-card"><span>Music tracks</span><strong>{settings.musicTracks.length}</strong><small>Tracks saved to your profile</small></div>
+              <div className="stats-card"><span>Profile completion</span><strong>{Math.round(([settings.avatar, settings.description, ...socials.map(([key]) => settings.socials[key]), ...settings.customLinks.map(link => link.url)].filter(value => Boolean(String(value || "").trim())).length / (3 + socials.length + settings.customLinks.length)) * 100)}%</strong><small>Based on your profile details and links</small></div>
+            </div>
+            <button type="button" className="secondary-button" onClick={async () => { try { const response = await fetch("/api/account", { cache: "no-store", credentials: "include" }); const data = await response.json(); if (response.ok && data.profile?.settings) { const latest = Number(data.profile.settings.views || 0); setSettings(current => ({ ...current, views: Math.max(Number(current.views || 0), latest) })); } } catch (error) { console.error("Could not refresh Pixlo stats:", error); } }}>Refresh stats ↻</button>
+            <p>Views are counted once per browser/device. The counter needs the latest Supabase schema applied to your project to save across visitors.</p>
           </div>}
           {active === "Enter Screen" && <div className="form-stack">
             <SectionIntro number="11" title="Your entrance" text="Customise the message, font, colour and transparency visitors see before entering your profile." />
