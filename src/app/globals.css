@@ -3382,10 +3382,10 @@ html, body, *, *::before, *::after {
   accent-color: #e84834 !important;
 }
 .dashboard .range input[type="range"]::-webkit-slider-runnable-track {
-  background: linear-gradient(to right, #ef513d 0%, #e84834 var(--range-progress), #29292f var(--range-progress), #29292f 100%) !important;
+  background: linear-gradient(to right, #ef513d 0%, #e84834 var(--range-progress), #ffffff var(--range-progress), #ffffff 100%) !important;
 }
 .dashboard .range input[type="range"]::-moz-range-track {
-  background: #29292f !important;
+  background: #ffffff !important;
 }
 .dashboard .range input[type="range"]::-moz-range-progress {
   background: linear-gradient(90deg, #ff8e2f 0%, #ef4f32 55%, #c92542 100%) !important;
