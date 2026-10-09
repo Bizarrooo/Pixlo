@@ -68,8 +68,11 @@ export async function POST(request: Request) {
       }
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
-    const redirectTo = `${appUrl.replace(/\/$/, "")}/auth/callback`;
+    const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    const requestOrigin = new URL(request.url).origin;
+    const configuredIsLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configuredAppUrl || "");
+    const appUrl = configuredAppUrl && !(process.env.NODE_ENV === "production" && configuredIsLocal) ? configuredAppUrl : requestOrigin;
+    const redirectTo = `${appUrl.replace(/\/$/, "")}/api/auth/callback`;
     const response = await fetch(`${url}/auth/v1/signup?redirect_to=${encodeURIComponent(redirectTo)}`, {
       method: "POST",
       headers: authHeaders(),
