@@ -222,6 +222,9 @@ export function accountSettingsStorageKey(userId: string) {
   return `${ACCOUNT_PROFILE_SETTINGS_PREFIX}${userId}`;
 }
 
+const PROFILE_FONTS: readonly ProfileFont[] = ["Inter", "DM Sans", "Manrope", "Poppins", "Montserrat", "Space Grotesk", "Outfit", "Plus Jakarta Sans", "Rubik", "Raleway", "Playfair Display", "Bebas Neue", "Oswald", "JetBrains Mono", "Fira Code", "Arial", "system", "monospace", "Georgia", "Courier New", "Trebuchet MS", "Impact", "Times New Roman", "Verdana"];
+const TEXT_ANIMATIONS: readonly TextAnimation[] = ["none", "fade-up", "blur-in", "typewriter", "glitch", "slide", "float", "pop"];
+
 function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {}): ProfileSettings {
   const parsed = parsedValue && typeof parsedValue === "object" ? parsedValue as Record<string, any> : {};
   const normalizedUsername = (identity.username ?? (typeof parsed.username === "string" ? parsed.username : defaultSettings.username)).trim().toLowerCase();
@@ -246,11 +249,12 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     discordAvatarDecorationUrl: typeof parsed.discordAvatarDecorationUrl === "string" ? parsed.discordAvatarDecorationUrl : "",
     useDiscordAvatar: typeof parsed.useDiscordAvatar === "boolean" ? parsed.useDiscordAvatar : false,
     useDiscordDecoration: typeof parsed.useDiscordDecoration === "boolean" ? parsed.useDiscordDecoration : false,
-    nameFont: typeof parsed.nameFont === "string" ? parsed.nameFont : defaultSettings.nameFont,
-    usernameFont: typeof parsed.usernameFont === "string" ? parsed.usernameFont : defaultSettings.usernameFont,
-    descriptionFont: typeof parsed.descriptionFont === "string" ? parsed.descriptionFont : defaultSettings.descriptionFont,
-    locationFont: typeof parsed.locationFont === "string" ? parsed.locationFont : defaultSettings.locationFont,
-    socialsFont: typeof parsed.socialsFont === "string" ? parsed.socialsFont : defaultSettings.socialsFont,
+    customFont: PROFILE_FONTS.includes(parsed.customFont) ? parsed.customFont : defaultSettings.customFont,
+    nameFont: PROFILE_FONTS.includes(parsed.nameFont) ? parsed.nameFont : defaultSettings.nameFont,
+    usernameFont: PROFILE_FONTS.includes(parsed.usernameFont) ? parsed.usernameFont : defaultSettings.usernameFont,
+    descriptionFont: PROFILE_FONTS.includes(parsed.descriptionFont) ? parsed.descriptionFont : defaultSettings.descriptionFont,
+    locationFont: PROFILE_FONTS.includes(parsed.locationFont) ? parsed.locationFont : defaultSettings.locationFont,
+    socialsFont: PROFILE_FONTS.includes(parsed.socialsFont) ? parsed.socialsFont : defaultSettings.socialsFont,
     nameBold: typeof parsed.nameBold === "boolean" ? parsed.nameBold : defaultSettings.nameBold,
     usernameBold: typeof parsed.usernameBold === "boolean" ? parsed.usernameBold : defaultSettings.usernameBold,
     descriptionBold: typeof parsed.descriptionBold === "boolean" ? parsed.descriptionBold : defaultSettings.descriptionBold,
@@ -261,11 +265,11 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     descriptionItalic: typeof parsed.descriptionItalic === "boolean" ? parsed.descriptionItalic : defaultSettings.descriptionItalic,
     locationItalic: typeof parsed.locationItalic === "boolean" ? parsed.locationItalic : defaultSettings.locationItalic,
     socialsItalic: typeof parsed.socialsItalic === "boolean" ? parsed.socialsItalic : defaultSettings.socialsItalic,
-    nameAnimation: typeof parsed.nameAnimation === "string" ? parsed.nameAnimation : defaultSettings.nameAnimation,
-    usernameAnimation: typeof parsed.usernameAnimation === "string" ? parsed.usernameAnimation : defaultSettings.usernameAnimation,
-    descriptionAnimation: typeof parsed.descriptionAnimation === "string" ? parsed.descriptionAnimation : defaultSettings.descriptionAnimation,
-    locationAnimation: typeof parsed.locationAnimation === "string" ? parsed.locationAnimation : defaultSettings.locationAnimation,
-    socialsAnimation: typeof parsed.socialsAnimation === "string" ? parsed.socialsAnimation : defaultSettings.socialsAnimation,
+    nameAnimation: TEXT_ANIMATIONS.includes(parsed.nameAnimation) ? parsed.nameAnimation : defaultSettings.nameAnimation,
+    usernameAnimation: TEXT_ANIMATIONS.includes(parsed.usernameAnimation) ? parsed.usernameAnimation : defaultSettings.usernameAnimation,
+    descriptionAnimation: TEXT_ANIMATIONS.includes(parsed.descriptionAnimation) ? parsed.descriptionAnimation : defaultSettings.descriptionAnimation,
+    locationAnimation: TEXT_ANIMATIONS.includes(parsed.locationAnimation) ? parsed.locationAnimation : defaultSettings.locationAnimation,
+    socialsAnimation: TEXT_ANIMATIONS.includes(parsed.socialsAnimation) ? parsed.socialsAnimation : defaultSettings.socialsAnimation,
     nameGlow: typeof parsed.nameGlow === "boolean" ? parsed.nameGlow : Boolean(parsed.textGlow),
     descriptionGlow: typeof parsed.descriptionGlow === "boolean" ? parsed.descriptionGlow : false,
     locationGlow: typeof parsed.locationGlow === "boolean" ? parsed.locationGlow : false,

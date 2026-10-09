@@ -92,7 +92,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       const customLinkIcons: Record<string, string> = {};
       const customLinksWithIcons = current.customLinks.filter(link => link.icon);
       customLinksWithIcons.forEach((link, index) => { customLinkIcons[link.id] = entries[6 + index] as string; });
-      const musicAudio = entries[5] as { url: string };
+      const musicAudio = entries[5] as { url: string; type: string };
       setAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, musicCover: entries[4] as string, musicAudio: musicAudio.url, musicMediaType: musicAudio.type, customLinkIcons });
     }).catch(() => {});
 

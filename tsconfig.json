@@ -30,5 +30,10 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+"exclude": [
+  "node_modules",
+  "pixlo_id_work",
+  "pixlo_fix_work",
+  "pixlo_v11"
+]
 }
