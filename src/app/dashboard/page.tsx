@@ -207,7 +207,6 @@ export default function Dashboard() {
   const [draftTrack, setDraftTrack] = useState<{ title: string; artist: string; audio: string; cover: string }>({ title: "", artist: "", audio: "", cover: "" });
   const [discordUser, setDiscordUser] = useState<{ id?: string; username?: string; discordId?: string; discordUsername?: string; discordDisplayName?: string; discordAvatar?: string; discordAvatarDecoration?: string; useDiscordAvatar?: boolean; useDiscordDecoration?: boolean } | null>(null);
   const [discordLoading, setDiscordLoading] = useState(true);
-  const [discordInviteOpen, setDiscordInviteOpen] = useState(false);
   const [discordNotice, setDiscordNotice] = useState<"connected" | "error" | "already-linked" | "not-member" | "cancelled" | null>(null);
   const [discordDetail, setDiscordDetail] = useState("");
 
@@ -664,7 +663,7 @@ export default function Dashboard() {
                   </div>
                   <p>{discordUser ? "Your Discord account is linked to this Pixlo account." : <>Connect your Discord account to bring your avatar and decoration into your Pixlo profile. <strong>Requirement: you must join the official Pixlo Discord server first.</strong> <a href="https://discord.gg/Bkz4P9gVy7" target="_blank" rel="noreferrer">Join the official server ↗</a></>}</p>
                 </div>
-                {discordUser ? <button type="button" className="discord-disconnect-button" onClick={async () => { const response = await fetch("/api/account", { method: "DELETE", credentials: "include" }); if (response.ok) { setDiscordUser(null); setDiscordNotice(null); set("useDiscordAvatar", false); set("useDiscordDecoration", false); set("discordAvatarUrl", ""); set("discordAvatarDecorationUrl", ""); } else { const data = await response.json().catch(() => ({})); window.alert(data.error || "Couldn't disconnect Discord."); } }}>Disconnect</button> : <button type="button" className="connect-button discord-connect-action" onClick={() => setDiscordInviteOpen(true)}>Connect Discord <span aria-hidden="true">↗</span></button>}
+                {discordUser ? <button type="button" className="discord-disconnect-button" onClick={async () => { const response = await fetch("/api/account", { method: "DELETE", credentials: "include" }); if (response.ok) { setDiscordUser(null); setDiscordNotice(null); set("useDiscordAvatar", false); set("useDiscordDecoration", false); set("discordAvatarUrl", ""); set("discordAvatarDecorationUrl", ""); } else { const data = await response.json().catch(() => ({})); window.alert(data.error || "Couldn't disconnect Discord."); } }}>Disconnect</button> : <a className="connect-button discord-connect-action" href="/api/auth/discord">Connect Discord <span aria-hidden="true">↗</span></a>}
               </div>
               {discordUser?.discordAvatar && <div className="discord-profile-preview">
                 <div className="discord-avatar-stack"><img className="discord-profile-avatar" src={discordUser.discordAvatar} alt="Discord profile" />{discordUser.discordAvatarDecoration && <img className="discord-profile-decoration" src={discordUser.discordAvatarDecoration} alt="" aria-hidden="true" />}</div>
@@ -675,16 +674,6 @@ export default function Dashboard() {
                 <Setting label="Use Discord avatar decoration" text={discordUser.discordAvatarDecoration ? "Show your Discord avatar frame around your Pixlo avatar." : "No Discord avatar decoration was detected on this account yet."}><Toggle value={Boolean(settings.useDiscordDecoration)} onChange={async v => { set("useDiscordDecoration", v); await fetch("/api/account", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ useDiscordDecoration: v }) }); }} /></Setting>
               </div>}
             </section>
-            {discordInviteOpen && !discordUser && <div role="dialog" aria-modal="true" aria-labelledby="discord-invite-title" style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(4, 5, 12, 0.78)", backdropFilter: "blur(8px)" }}>
-              <div style={{ width: "100%", maxWidth: 440, padding: 28, borderRadius: 22, border: "1px solid rgba(255,255,255,0.12)", background: "#171923", color: "#fff", boxShadow: "0 24px 90px rgba(0,0,0,0.5)", textAlign: "center" }}>
-                <div style={{ width: 62, height: 62, margin: "0 auto 16px", display: "grid", placeItems: "center", borderRadius: 18, background: "#5865F2", color: "#fff" }}><SocialIcon name="discord" /></div>
-                <h2 id="discord-invite-title" style={{ margin: "0 0 10px", fontSize: 23 }}>Join our Discord first</h2>
-                <p style={{ margin: "0 0 20px", color: "#c5c7d2", lineHeight: 1.6 }}>Joining the official Pixlo Discord server is required before you connect your Discord account.</p>
-                <a href="https://discord.gg/Bkz4P9gVy7" target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", boxSizing: "border-box", padding: "12px 16px", borderRadius: 12, background: "#5865F2", color: "#fff", fontWeight: 700, textDecoration: "none", marginBottom: 10 }}>Join official Pixlo server ↗</a>
-                <button type="button" onClick={() => { setDiscordInviteOpen(false); window.location.href = "/api/auth/discord"; }} style={{ width: "100%", padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.08)", color: "#fff", fontWeight: 650, cursor: "pointer", marginBottom: 10 }}>I’ve joined — Connect Discord</button>
-                <button type="button" onClick={() => setDiscordInviteOpen(false)} style={{ padding: 8, border: 0, background: "transparent", color: "#aeb1c0", cursor: "pointer" }}>Maybe later</button>
-              </div>
-            </div>}
             <Setting label="Show location" text="Display the location underneath your bio."><Toggle value={settings.showLocation} onChange={v => set("showLocation", v)} /></Setting>
             <Setting label="Online status" text="Show the status dot and online indicator."><Toggle value={settings.showDiscord} onChange={v => set("showDiscord", v)} /></Setting>
             {canUseVerifiedBadge && <Setting label="Verified badge" text="Show your custom verification badge beside your name."><Toggle value={settings.showVerified} onChange={v => set("showVerified", v)} /></Setting>}
