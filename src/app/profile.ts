@@ -118,6 +118,8 @@ export type ProfileSettings = {
   enterScreenBackgroundImage: string;
   enterScreenBackgroundVideo: string;
   enterScreenTextColour: string;
+  enterScreenFont: ProfileFont;
+  enterScreenBackgroundOpacity: number;
 };
 
 export const defaultSettings: ProfileSettings = {
@@ -223,6 +225,8 @@ export const defaultSettings: ProfileSettings = {
   enterScreenBackgroundImage: "",
   enterScreenBackgroundVideo: "",
   enterScreenTextColour: "#ffffff",
+  enterScreenFont: "Inter",
+  enterScreenBackgroundOpacity: 100,
 };
 
 export const LEGACY_PROFILE_SETTINGS_KEY = "profileSettings";
