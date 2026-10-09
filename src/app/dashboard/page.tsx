@@ -141,7 +141,7 @@ function FileUpload({ label, value, accept, type, onChange, note }: { label: str
     const isImage = file.type.startsWith("image/") || imageByExtension;
     const isAudio = file.type.startsWith("audio/") || audioByExtension;
     const isVideo = file.type.startsWith("video/") || videoByExtension;
-    const limits = { image: 25, video: 500, audio: 500 };
+    const limits = { image: 25, video: 50, audio: 50 };
     const max = limits[type] * 1024 * 1024;
     if (file.size > max) { alert(`Please use a ${type} smaller than ${limits[type]}MB.`); return; }
     const valid = type === "image" ? isImage : type === "video" ? isVideo : isAudio;
@@ -156,7 +156,7 @@ function FileUpload({ label, value, accept, type, onChange, note }: { label: str
       setBusy(false);
     }
   };
-  const fallbackNote = type === "video" ? "MP4 / WebM · up to 500MB" : type === "audio" ? "MP3 only · up to 500MB" : "Choose a file";
+  const fallbackNote = type === "video" ? "MP4 / WebM · up to 50MB" : type === "audio" ? "MP3 only · up to 50MB" : "Choose a file";
   return <div className="upload-row"><div><b>{label}</b><span>{value ? "File selected" : note || fallbackNote}</span></div><label className={`upload-button ${busy ? "upload-busy" : ""}`}>{busy ? "Saving…" : "Browse"}<input type="file" accept={accept} onChange={handle} disabled={busy} /></label>{value && <button type="button" className="clear-button" onClick={async () => { await deleteAsset(value); onChange(""); }}>Clear</button>}</div>;
 }
 function SectionIntro({ title }: { number?: string; title: string; text?: string }) {
