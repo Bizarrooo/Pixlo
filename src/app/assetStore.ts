@@ -14,16 +14,14 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 export async function saveAsset(file: File): Promise<string> {
-  const db = await openDB();
-  const key = `asset-${crypto.randomUUID()}`;
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    tx.objectStore(STORE_NAME).put(file, key);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-  db.close();
-  return `idb:${key}`;
+  const form = new FormData();
+  form.append("file", file);
+  const response = await fetch("/api/assets", { method: "POST", credentials: "include", body: form });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || typeof data.url !== "string") {
+    throw new Error(data.error || "The file could not be uploaded to cloud storage.");
+  }
+  return data.url;
 }
 
 export async function loadAsset(value: string): Promise<string> {
