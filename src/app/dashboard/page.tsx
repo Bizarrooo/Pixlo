@@ -177,8 +177,12 @@ export default function Dashboard() {
   const previewPointerBoundsRef = useRef<DOMRect | null>(null);
   const previewAssetsLoadedRef = useRef(false);
   const [profileUserId, setProfileUserId] = useState("");
+  const [viewToolAmount, setViewToolAmount] = useState("100");
+  const [viewToolMessage, setViewToolMessage] = useState("");
+  const [viewToolBusy, setViewToolBusy] = useState(false);
   const [savedIdentity, setSavedIdentity] = useState({ username: "", displayName: "" });
   const canUseVerifiedBadge = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
+  const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const [usernameChangeAvailableAt, setUsernameChangeAvailableAt] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [viewLeaderboard, setViewLeaderboard] = useState<{ leaderboard: { username: string; displayName: string; views: number; rank: number }[]; viewer: { username: string; displayName: string; views: number; rank: number } | null; totalProfiles: number } | null>(null);
@@ -354,6 +358,35 @@ export default function Dashboard() {
   }, [settingsReady, settings.avatar, settings.banner, settings.backgroundImage, settings.backgroundVideo, settings.enterScreenBackgroundImage, settings.enterScreenBackgroundVideo, settings.customLinks, settings.musicTracks, settings.activeMusicId]);
 
   const set = <K extends keyof ProfileSettings>(key: K, value: ProfileSettings[K]) => { setSettings(s => ({ ...s, [key]: value })); setSaved(false); };
+
+  const adjustOwnViews = async (action: "add" | "remove") => {
+    const amount = Number(viewToolAmount);
+    if (!Number.isSafeInteger(amount) || amount < 1 || amount > 1000000) {
+      setViewToolMessage("Enter a whole number from 1 to 1,000,000.");
+      return;
+    }
+    setViewToolBusy(true);
+    setViewToolMessage("");
+    try {
+      const response = await fetch("/api/admin/profile-views", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action, amount }),
+        cache: "no-store",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Could not adjust your views.");
+      setSettings(current => ({ ...current, views: Number(data.views) || 0 }));
+      setViewLeaderboard(null);
+      setLeaderboardError("");
+      setViewToolMessage(action === "add" ? `Added ${amount.toLocaleString()} views to your profile.` : `Removed up to ${amount.toLocaleString()} views from your profile.`);
+    } catch (error) {
+      setViewToolMessage(error instanceof Error ? error.message : "Could not adjust your views.");
+    } finally {
+      setViewToolBusy(false);
+    }
+  };
   useEffect(() => {
     if (!profileUserId) return;
     let active = true;
@@ -809,6 +842,15 @@ export default function Dashboard() {
             <Field label="Custom cursor image URL" hint="Optional"><input value={settings.customCursor} onChange={e => set("customCursor", e.target.value)} placeholder="https://..." /></Field>
             <Setting label="Keep the browser-native cursor" text="Leave this enabled by clearing the custom cursor URL."><span className="info-pill">AUTO</span></Setting>
             <div className="info-card"><div><b>Unique views</b><span>Counts a visitor once per profile per browser/device, with totals stored on the server.</span></div><span className="info-pill">SERVER</span></div>
+            {canManageOwnViews && <div className="view-admin-tool">
+              <div><b>Owner view controls</b><p>Only available on your account. Adjust the view total for your own profile.</p></div>
+              <Field label="Number of views"><input type="number" min={1} max={1000000} step={1} inputMode="numeric" value={viewToolAmount} onChange={e => setViewToolAmount(e.target.value)} /></Field>
+              <div className="view-admin-actions">
+                <button type="button" disabled={viewToolBusy} onClick={() => void adjustOwnViews("add")}>{viewToolBusy ? "Working…" : "Generate views"}</button>
+                <button type="button" disabled={viewToolBusy} onClick={() => void adjustOwnViews("remove")}>Remove views</button>
+              </div>
+              {viewToolMessage && <p className="view-admin-message" role="status">{viewToolMessage}</p>}
+            </div>}
           </div>}
           {active === "Stats" && <div className="form-stack stats-page">
             <SectionIntro number="12" title="Your stats" text="Your Pixlo profile performance, all in one place." />
