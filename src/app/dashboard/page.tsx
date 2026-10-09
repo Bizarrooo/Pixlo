@@ -378,10 +378,13 @@ export default function Dashboard() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Could not adjust your views.");
-      setSettings(current => ({ ...current, views: Number(data.views) || 0 }));
-      setViewLeaderboard(null);
-      setLeaderboardError("");
-      setViewToolMessage(action === "add" ? `Added ${amount.toLocaleString()} views to @${(viewToolUsername.trim() || settings.username).toLowerCase()}.` : `Removed up to ${amount.toLocaleString()} views from @${(viewToolUsername.trim() || settings.username).toLowerCase()}.`);
+      const targetUsername = (viewToolUsername.trim() || settings.username).toLowerCase();
+      if (targetUsername === settings.username.toLowerCase()) {
+        setSettings(current => ({ ...current, views: Number(data.views) || 0 }));
+        setViewLeaderboard(null);
+        setLeaderboardError("");
+      }
+      setViewToolMessage(action === "add" ? `Added ${amount.toLocaleString()} views to @${targetUsername}. Total: ${Number(data.views).toLocaleString()}.` : `Removed views from @${targetUsername}. Total: ${Number(data.views).toLocaleString()}.`);
     } catch (error) {
       setViewToolMessage(error instanceof Error ? error.message : "Could not adjust your views.");
     } finally {
