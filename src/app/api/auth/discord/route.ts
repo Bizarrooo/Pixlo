@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   const accessToken = cookieValue(request, "pixlo_access_token");
 
   if (!clientId) {
-    return NextResponse.json({ error: "Discord OAuth is not configured. Add DISCORD_CLIENT_ID to .env.local." }, { status: 500 });
+    return NextResponse.json({ error: "Discord OAuth is not configured. Add DISCORD_CLIENT_ID in Vercel Project Settings → Environment Variables (and in .env.local for local development), then redeploy." }, { status: 500 });
   }
   if (!accessToken) {
     return NextResponse.redirect(new URL("/login?next=/dashboard", baseUrl));
