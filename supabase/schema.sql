@@ -243,3 +243,21 @@ before update of settings on public.profiles
 for each row execute function public.preserve_pixlo_profile_views();
 
 notify pgrst, 'reload schema';
+
+create or replace function public.get_pixlo_view_leaderboard(p_username text)
+returns jsonb language sql stable security definer set search_path = public
+as $pixlo$
+  with ranked as (
+    select lower(username) as username, coalesce(nullif(display_name, ''), username) as display_name,
+      greatest(0, coalesce((settings->>'views')::bigint, 0)) as views,
+      row_number() over (order by greatest(0, coalesce((settings->>'views')::bigint, 0)) desc, lower(username) asc)::integer as rank
+    from public.profiles
+  )
+  select jsonb_build_object(
+    'leaderboard', coalesce((select jsonb_agg(jsonb_build_object('username', username, 'displayName', display_name, 'views', views, 'rank', rank) order by rank) from ranked where rank <= 100), '[]'::jsonb),
+    'viewer', (select jsonb_build_object('username', username, 'displayName', display_name, 'views', views, 'rank', rank) from ranked where username = lower(trim(p_username)) limit 1),
+    'totalProfiles', (select count(*) from ranked)
+  );
+$pixlo$;
+revoke all on function public.get_pixlo_view_leaderboard(text) from public;
+grant execute on function public.get_pixlo_view_leaderboard(text) to anon, authenticated;
