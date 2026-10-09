@@ -3441,9 +3441,12 @@ html, body, *, *::before, *::after {
 }
 .preview-parallax-on .preview-bg,
 .preview-parallax-on .preview-media {
-  transform: translate3d(calc(var(--preview-parallax-x, 0px) * -.14), calc(var(--preview-parallax-y, 0px) * -.14), 0) scale(1.08) !important;
-  transition: transform 180ms cubic-bezier(.2,.7,.2,1) !important;
-  will-change: transform;
+  translate: calc(var(--preview-parallax-x, 0px) * -.14) calc(var(--preview-parallax-y, 0px) * -.14);
+  transition: translate 180ms cubic-bezier(.2,.7,.2,1) !important;
+  will-change: transform, translate;
+}
+.preview-parallax-on .preview-media {
+  transform: scale(1.08) !important;
 }
 .preview-parallax-on .preview-card {
   transform:
@@ -3476,7 +3479,7 @@ html, body, *, *::before, *::after {
     transform: scale(1.06) !important;
   }
   .profile-page.parallax-on .profile-card {
-    transform: perspective(900px) rotateX(calc(var(--parallax-rotate-x, 0deg) * .35)) rotateY(calc(var(--parallax-rotate-y, 0deg) * .35)) translate3d(calc(var(--mouse-x, 0px) * .22), calc(var(--mouse-y, 0px) * .22), 0) scale(1.015) !important;
+    transform: perspective(900px) rotateX(var(--parallax-rotate-x, 0deg)) rotateY(var(--parallax-rotate-y, 0deg)) translate3d(calc(var(--mouse-x, 0px) * .22), calc(var(--mouse-y, 0px) * .22), 0) scale(1.015) !important;
   }
 }
 @media (prefers-reduced-motion: reduce) {
