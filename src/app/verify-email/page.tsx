@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const params = useSearchParams();
   const email = params.get("email") || "your email address";
   const [message, setMessage] = useState("");
@@ -49,8 +49,16 @@ export default function VerifyEmailPage() {
     <div className="verify-icon">@</div>
     <div className="auth-heading"><span>CHECK YOUR INBOX</span><h1>Verify your email.</h1><p>We sent a verification email to <strong>{email}</strong>. Click the confirmation link to finish creating your Pixlo account.</p></div>
     {message && <div className={message.startsWith("Verification email sent") ? "auth-success" : "auth-error"}>{message}</div>}
-    <button className="auth-submit" type="button" onClick={resend} disabled={loading || cooldown > 0}>{loading ? "Sending…" : cooldown > 0 ? `Resend in ${cooldown}s` : "Resend verification email"}</button>
+    <button className="auth-submit" type="button" onClick={resend} disabled={loading || cooldown > 0}>{loading ? "Sendingâ€¦" : cooldown > 0 ? `Resend in ${cooldown}s` : "Resend verification email"}</button>
     <Link className="auth-submit auth-submit-link" href="/login">Back to login</Link>
     <p className="auth-switch">No email? Check spam/junk. Supabase's default SMTP is restricted for testing, so public signup needs custom SMTP configured.</p>
   </section></main>;
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<main className="auth-page" />}>
+      <VerifyEmailContent />
+    </Suspense>
+  );
 }
