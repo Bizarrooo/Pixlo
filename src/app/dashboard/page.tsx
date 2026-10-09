@@ -169,6 +169,7 @@ export default function Dashboard() {
   const [settings, setSettings] = useState<ProfileSettings>(defaultSettings);
   const [settingsReady, setSettingsReady] = useState(false);
   const [previewReady, setPreviewReady] = useState(false);
+  const [previewEntered, setPreviewEntered] = useState(false);
   const [previewPointer, setPreviewPointer] = useState({ x: 0, y: 0 });
   const previewPointerBoundsRef = useRef<DOMRect | null>(null);
   const previewAssetsLoadedRef = useRef(false);
@@ -843,6 +844,12 @@ export default function Dashboard() {
                 {settings.showFooter && <div className="preview-profile-footer"><span><i className="preview-online-dot" /> Online</span>{settings.showViews && <span>{settings.views || 0} views</span>}</div>}
               </div>
             </div>
+            {settings.enterScreenEnabled && !previewEntered && <button type="button" onClick={() => setPreviewEntered(true)} style={{ position: "absolute", inset: 0, zIndex: 20, width: "100%", height: "100%", padding: 16, border: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", overflow: "hidden", cursor: "pointer", backgroundColor: settings.enterScreenBackgroundColour, backgroundImage: previewAssets.enterScreenBackgroundImage ? `url("${previewAssets.enterScreenBackgroundImage}")` : undefined, backgroundSize: "cover", backgroundPosition: "center", color: settings.enterScreenTextColour, textAlign: "center", fontFamily: fontFamily(settings.customFont) }}>
+              {previewAssets.enterScreenBackgroundVideo && <video src={previewAssets.enterScreenBackgroundVideo} autoPlay muted loop playsInline aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }} />}
+              {(previewAssets.enterScreenBackgroundImage || previewAssets.enterScreenBackgroundVideo) && <span aria-hidden="true" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.25)", zIndex: 1 }} />}
+              <span style={{ position: "relative", zIndex: 2, fontSize: "clamp(12px, 2.5vw, 20px)", fontWeight: 700, textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
+              <span style={{ position: "relative", zIndex: 2, marginTop: 10, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.8 }}>Click anywhere to enter</span>
+            </button>}
             <div className="preview-badge"><i /> LIVE</div>
           </div>
           </>}
