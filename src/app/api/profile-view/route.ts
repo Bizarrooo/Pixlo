@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     }
 
     const value = await response.json().catch(() => null);
+    if (value === null) return NextResponse.json({ error: "Profile not found." }, { status: 404 });
     const views = typeof value === "number" ? value : Number(value?.register_pixlo_profile_view ?? value?.views);
     if (!Number.isFinite(views)) return NextResponse.json({ error: "Invalid view counter response." }, { status: 502 });
 
