@@ -112,6 +112,12 @@ export type ProfileSettings = {
   locationAnimation: TextAnimation;
   socialsAnimation: TextAnimation;
   customCursor: string;
+  enterScreenEnabled: boolean;
+  enterScreenMessage: string;
+  enterScreenBackgroundColour: string;
+  enterScreenBackgroundImage: string;
+  enterScreenBackgroundVideo: string;
+  enterScreenTextColour: string;
 };
 
 export const defaultSettings: ProfileSettings = {
@@ -211,6 +217,12 @@ export const defaultSettings: ProfileSettings = {
   locationAnimation: "fade-up",
   socialsAnimation: "fade-up",
   customCursor: "",
+  enterScreenEnabled: true,
+  enterScreenMessage: "Click to enter",
+  enterScreenBackgroundColour: "#050505",
+  enterScreenBackgroundImage: "",
+  enterScreenBackgroundVideo: "",
+  enterScreenTextColour: "#ffffff",
 };
 
 export const LEGACY_PROFILE_SETTINGS_KEY = "profileSettings";
