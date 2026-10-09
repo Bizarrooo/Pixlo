@@ -115,7 +115,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         const remote = data?.profile?.settings;
         if (cancelled || !remote || typeof remote !== "object" || Object.keys(remote).length === 0) return;
         const current = { ...defaultSettings, ...(remote as Partial<ProfileSettings>), username: data.profile.username || username, displayName: data.profile.displayName || data.profile.username || username } as ProfileSettings;
-        setSettings(current);
+        setSettings(previous => ({ ...current, views: Math.max(Number(current.views) || 0, Number(previous.views) || 0) }));
         setTrackIndex(Math.max(0, current.musicTracks.findIndex(track => track.id === current.activeMusicId)));
         const selectedTrack = current.musicTracks.find(track => track.id === current.activeMusicId) || current.musicTracks[0];
         const customLinksWithIcons = current.customLinks.filter(link => link.icon);
