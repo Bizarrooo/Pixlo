@@ -15,6 +15,7 @@ const sections = [
   ["Effects", "Motion, glow & atmosphere", "08"],
   ["Layout", "Structure & alignment", "09"],
   ["Advanced", "Fine controls", "10"],
+  ["Enter Screen", "Intro & click-to-enter", "11"],
 ] as const;
 
 const socials: [SocialKey, string][] = [
@@ -788,16 +789,18 @@ export default function Dashboard() {
 
           {active === "Advanced" && <div className="form-stack">
             <SectionIntro number="10" title="Fine controls" text="These are the controls you only touch when you want to obsess over the final 5%." />
-            <div className="subsection-heading"><div><b>Click-to-enter screen</b><span>Visitors see this full-screen intro before your profile.</span></div></div>
-            <Setting label="Enable click-to-enter" text="Show an intro screen before the profile loads."><Toggle value={settings.enterScreenEnabled} onChange={v => set("enterScreenEnabled", v)} /></Setting>
-            <Field label="First message" hint="Up to 100 characters"><input maxLength={100} value={settings.enterScreenMessage} onChange={e => set("enterScreenMessage", e.target.value)} placeholder="Click to enter" /></Field>
-            <Colour label="Message colour" value={settings.enterScreenTextColour} onChange={v => set("enterScreenTextColour", v)} />
-            <Colour label="Background colour" value={settings.enterScreenBackgroundColour} onChange={v => set("enterScreenBackgroundColour", v)} />
-            <FileUpload label="Enter-screen background image" value={settings.enterScreenBackgroundImage} accept="image/*" type="image" onChange={v => set("enterScreenBackgroundImage", v)} note="Optional image behind the message · up to 25MB" />
-            <FileUpload label="Enter-screen background video" value={settings.enterScreenBackgroundVideo} accept="video/mp4,video/webm,video/quicktime" type="video" onChange={v => set("enterScreenBackgroundVideo", v)} note="Optional looping video · up to 50MB" />
             <Field label="Custom cursor image URL" hint="Optional"><input value={settings.customCursor} onChange={e => set("customCursor", e.target.value)} placeholder="https://..." /></Field>
             <Setting label="Keep the browser-native cursor" text="Leave this enabled by clearing the custom cursor URL."><span className="info-pill">AUTO</span></Setting>
             <div className="info-card"><div><b>Unique views</b><span>Counts a visitor once per profile per browser/device, with totals stored on the server.</span></div><span className="info-pill">SERVER</span></div>
+          </div>}
+          {active === "Enter Screen" && <div className="form-stack">
+            <SectionIntro number="11" title="Your entrance" text="Make visitors click into your profile with your own message, colours, image or video." />
+            <Setting label="Enable click-to-enter" text="Show this full-screen intro before your profile loads."><Toggle value={settings.enterScreenEnabled} onChange={v => set("enterScreenEnabled", v)} /></Setting>
+            <Field label="First message" hint="Up to 100 characters"><input maxLength={100} value={settings.enterScreenMessage} onChange={e => set("enterScreenMessage", e.target.value)} placeholder="Click to enter" /></Field>
+            <Colour label="Message colour" value={settings.enterScreenTextColour} onChange={v => set("enterScreenTextColour", v)} />
+            <Colour label="Background colour" value={settings.enterScreenBackgroundColour} onChange={v => set("enterScreenBackgroundColour", v)} />
+            <FileUpload label="Background image" value={settings.enterScreenBackgroundImage} accept="image/*" type="image" onChange={v => set("enterScreenBackgroundImage", v)} note="Optional image behind the message · up to 25MB" />
+            <FileUpload label="Background video" value={settings.enterScreenBackgroundVideo} accept="video/mp4,video/webm,video/quicktime" type="video" onChange={v => set("enterScreenBackgroundVideo", v)} note="Optional looping video · up to 50MB" />
           </div>}
         </section>
 
