@@ -53,8 +53,9 @@ function rgbaFromHex(hex: string, alpha: number) {
 export default function ProfileView({ forcedUsername }: { forcedUsername?: string }) {
   const [settings, setSettings] = useState<ProfileSettings>(defaultSettings);
   const [ready, setReady] = useState(false);
+  const [entered, setEntered] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [assets, setAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", musicCover: "", musicAudio: "", musicMediaType: "", customLinkIcons: {} as Record<string, string> });
+  const [assets, setAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", enterScreenBackgroundImage: "", enterScreenBackgroundVideo: "", musicCover: "", musicAudio: "", musicMediaType: "", customLinkIcons: {} as Record<string, string> });
   const [trackIndex, setTrackIndex] = useState(0);
   const [musicVideoFallback, setMusicVideoFallback] = useState(false);
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
@@ -85,26 +86,20 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       loadAsset(current.banner),
       loadAsset(current.backgroundImage),
       loadAsset(current.backgroundVideo),
+      loadAsset(current.enterScreenBackgroundImage),
+      loadAsset(current.enterScreenBackgroundVideo),
       loadAsset(current.musicTracks[selectedIndex]?.cover || ""),
       loadAssetMedia(current.musicTracks[selectedIndex]?.audio || ""),
       ...current.customLinks.filter(link => link.icon).map(link => loadAsset(link.icon)),
     ]).then(entries => {
       const customLinkIcons: Record<string, string> = {};
       const customLinksWithIcons = current.customLinks.filter(link => link.icon);
-      customLinksWithIcons.forEach((link, index) => { customLinkIcons[link.id] = entries[6 + index] as string; });
-      const musicAudio = entries[5] as { url: string; type: string };
-      setAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, musicCover: entries[4] as string, musicAudio: musicAudio.url, musicMediaType: musicAudio.type, customLinkIcons });
+      customLinksWithIcons.forEach((link, index) => { customLinkIcons[link.id] = entries[8 + index] as string; });
+      const musicAudio = entries[7] as { url: string; type: string };
+      setAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, enterScreenBackgroundImage: entries[4] as string, enterScreenBackgroundVideo: entries[5] as string, musicCover: entries[6] as string, musicAudio: musicAudio.url, musicMediaType: musicAudio.type, customLinkIcons });
     }).catch(() => {});
 
-    if (forcedUsername && current.username && forcedUsername.toLowerCase() === current.username.toLowerCase()) {
-      const viewedKey = `profile-viewed:${current.username.toLowerCase()}`;
-      if (localStorage.getItem(viewedKey) !== "1") {
-        const next = { ...current, views: (current.views || 0) + 1 };
-        saveSettingsToStorage(next, settingsStorageKeyRef.current);
-        localStorage.setItem(viewedKey, "1");
-        setSettings(next);
-      }
-    }
+    setEntered(false);
   }, [forcedUsername]);
 
   useEffect(() => {
@@ -129,17 +124,44 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           loadAsset(current.banner),
           loadAsset(current.backgroundImage),
           loadAsset(current.backgroundVideo),
+          loadAsset(current.enterScreenBackgroundImage),
+          loadAsset(current.enterScreenBackgroundVideo),
           loadAsset(selectedTrack?.cover || ""),
           loadAssetMedia(selectedTrack?.audio || ""),
           ...customLinksWithIcons.map(link => loadAsset(link.icon)),
         ]);
         if (cancelled) return;
         const customLinkIcons: Record<string, string> = {};
-        customLinksWithIcons.forEach((link, index) => { customLinkIcons[link.id] = entries[6 + index] as string; });
-        const musicAudio = entries[5] as { url: string; type: string };
-        setAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, musicCover: entries[4] as string, musicAudio: musicAudio.url, musicMediaType: musicAudio.type, customLinkIcons });
+        customLinksWithIcons.forEach((link, index) => { customLinkIcons[link.id] = entries[8 + index] as string; });
+        const musicAudio = entries[7] as { url: string; type: string };
+        setAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, enterScreenBackgroundImage: entries[4] as string, enterScreenBackgroundVideo: entries[5] as string, musicCover: entries[6] as string, musicAudio: musicAudio.url, musicMediaType: musicAudio.type, customLinkIcons });
       })
       .catch(() => {});
+    return () => { cancelled = true; };
+  }, [forcedUsername]);
+
+  useEffect(() => {
+    const username = (forcedUsername || "").trim().toLowerCase();
+    if (!username) return;
+    let visitorId = "";
+    try {
+      visitorId = localStorage.getItem("pixlo-visitor-id") || "";
+      if (!visitorId) {
+        visitorId = crypto.randomUUID();
+        localStorage.setItem("pixlo-visitor-id", visitorId);
+      }
+    } catch {
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/profile-view", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, visitorId }),
+      cache: "no-store",
+    }).then(response => response.ok ? response.json() : null).then(data => {
+      if (!cancelled && typeof data?.views === "number") setSettings(previous => ({ ...previous, views: data.views }));
+    }).catch(() => {});
     return () => { cancelled = true; };
   }, [forcedUsername]);
 
@@ -376,6 +398,19 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       {settings.grain && <div className="effect-grain" aria-hidden="true" />}
       {settings.scanlines && <div className="effect-scanlines" aria-hidden="true" />}
 
+      {ready && settings.enterScreenEnabled && !entered && (
+        <button
+          type="button"
+          aria-label="Enter profile"
+          onClick={() => setEntered(true)}
+          style={{ position: "fixed", inset: 0, zIndex: 10000, width: "100%", height: "100%", padding: 24, border: 0, margin: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", overflow: "hidden", cursor: "pointer", backgroundColor: settings.enterScreenBackgroundColour, backgroundImage: assets.enterScreenBackgroundImage ? `url("${assets.enterScreenBackgroundImage}")` : undefined, backgroundSize: "cover", backgroundPosition: "center", color: settings.enterScreenTextColour, fontFamily: fontFamily(settings.customFont), textAlign: "center" }}
+        >
+          {assets.enterScreenBackgroundVideo && <video src={assets.enterScreenBackgroundVideo} autoPlay muted loop playsInline preload="auto" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }} />}
+          {(assets.enterScreenBackgroundImage || assets.enterScreenBackgroundVideo) && <span aria-hidden="true" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.25)", zIndex: 1 }} />}
+          <span style={{ position: "relative", zIndex: 2, fontSize: "clamp(1.2rem, 3vw, 2.2rem)", fontWeight: 700, textShadow: "0 2px 24px rgba(0,0,0,0.45)", maxWidth: 760, whiteSpace: "pre-wrap" }}>{settings.enterScreenMessage || "Click to enter"}</span>
+          <span style={{ position: "relative", zIndex: 2, marginTop: 14, fontSize: 12, letterSpacing: "0.22em", textTransform: "uppercase", opacity: 0.78 }}>Click anywhere to enter</span>
+        </button>
+      )}
       <section className="profile-wrap">
         <div
           className={`profile-card ${settings.glow ? "glow-enabled" : ""} ${settings.alignment === "left" ? "text-left" : ""}`}
