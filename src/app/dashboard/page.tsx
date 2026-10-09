@@ -186,6 +186,7 @@ export default function Dashboard() {
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const [usernameChangeAvailableAt, setUsernameChangeAvailableAt] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [profileCopied, setProfileCopied] = useState(false);
   const [viewLeaderboard, setViewLeaderboard] = useState<{ leaderboard: { username: string; displayName: string; views: number; rank: number }[]; viewer: { username: string; displayName: string; views: number; rank: number } | null; totalProfiles: number } | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState("");
@@ -527,7 +528,16 @@ export default function Dashboard() {
   const usernameLockHint = usernameLocked && usernameChangeAvailableAt
     ? `Username locked until ${new Date(usernameChangeAvailableAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}. You can change it once every 3 days.`
     : "Usernames can be changed once every 3 days. Changing it updates your profile URL.";
-  const profileUrl = `/${settings.username || "username"}`;
+  const profileUrl = `https://pixlo1.vercel.app/${settings.username || "username"}`;
+  const copyProfileUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+      setProfileCopied(true);
+      window.setTimeout(() => setProfileCopied(false), 1800);
+    } catch {
+      window.prompt("Copy your Pixlo profile link:", profileUrl);
+    }
+  };
   const previewAvatar = settings.useDiscordAvatar && settings.discordAvatarUrl ? settings.discordAvatarUrl : previewAssets.avatar;
   const previewDecoration = settings.useDiscordDecoration && settings.discordAvatarDecorationUrl ? settings.discordAvatarDecorationUrl : "";
   const activeTrack = settings.musicTracks.find(t => t.id === settings.activeMusicId) || settings.musicTracks[0];
@@ -634,7 +644,7 @@ export default function Dashboard() {
           {active === "General" && <div className="form-stack">
             <SectionIntro number="01" title="Identity, presence and first impression" text="Control exactly what visitors see before they explore anything else." />
             <Field label="Username" hint={usernameLockHint}><input value={settings.username} disabled={usernameLocked} maxLength={24} autoCapitalize="none" autoCorrect="off" onChange={e => set("username", e.target.value.replace(/[^a-zA-Z0-9._-]/g, "").toLowerCase().slice(0, 24))} /></Field>
-            <div className="url-preview">Your profile: <b>localhost:3000/{settings.username || "username"}</b></div>
+            <div className="url-preview" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}><span>Your profile: <b style={{ overflowWrap: "anywhere" }}>{profileUrl}</b></span><button type="button" onClick={() => void copyProfileUrl()} style={{ flexShrink: 0, padding: "8px 12px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.08)", color: "inherit", cursor: "pointer", font: "inherit" }}>{profileCopied ? "✓ Copied!" : "Copy link"}</button></div>
             <Field label="Display name"><input value={settings.displayName} onChange={e => set("displayName", e.target.value)} /></Field>
             <Field label="Bio / description"><textarea value={settings.description} onChange={e => set("description", e.target.value)} placeholder="Tell people about yourself..." /></Field>
             <Field label="Location"><input value={settings.location} onChange={e => set("location", e.target.value)} placeholder="London, United Kingdom" /></Field>
