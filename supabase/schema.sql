@@ -265,15 +265,15 @@ grant execute on function public.get_pixlo_view_leaderboard(text) to anon, authe
 notify pgrst, 'reload schema';
 
 
--- Owner-only controls for adjusting the owner's own profile view total.
-create or replace function public.admin_adjust_pixlo_profile_views(p_delta bigint)
+-- Owner-only controls for adjusting profile view totals by Pixlo username.
+create or replace function public.admin_adjust_pixlo_profile_views(p_username text, p_delta bigint)
 returns bigint
 language plpgsql
 security definer
 set search_path = public
 as $pixlo$
 declare
-  current_views bigint;
+  target_profile_id uuid;
   next_views bigint;
 begin
   if auth.uid() is distinct from '3f29f647-4b99-4f53-adf0-eb678bef1c5f'::uuid then
@@ -282,10 +282,17 @@ begin
   if p_delta is null or p_delta = 0 or p_delta < -1000000 or p_delta > 1000000 then
     raise exception 'View adjustment must be between -1000000 and 1000000, excluding zero.';
   end if;
+  if p_username is null or lower(trim(p_username)) !~ '^[a-z0-9._-]{3,24}$' then
+    raise exception 'Invalid Pixlo username.';
+  end if;
 
-  if p_delta < 0 then
-    delete from public.profile_view_visitors
-    where profile_id = auth.uid();
+  select id into target_profile_id
+  from public.profiles
+  where lower(username) = lower(trim(p_username))
+  limit 1;
+
+  if target_profile_id is null then
+    raise exception 'Profile not found.';
   end if;
 
   update public.profiles
@@ -295,18 +302,14 @@ begin
     to_jsonb(greatest(0, coalesce(nullif(settings->>'views', '')::bigint, 0) + p_delta)),
     true
   )
-  where id = auth.uid()
+  where id = target_profile_id
   returning greatest(0, coalesce(nullif(settings->>'views', '')::bigint, 0)) into next_views;
 
-  if next_views is null then
-    raise exception 'Owner profile was not found.';
-  end if;
-
-  return next_views;
+  return coalesce(next_views, 0);
 end;
 $pixlo$;
 
-revoke all on function public.admin_adjust_pixlo_profile_views(bigint) from public, anon;
-grant execute on function public.admin_adjust_pixlo_profile_views(bigint) to authenticated;
+revoke all on function public.admin_adjust_pixlo_profile_views(text, bigint) from public, anon;
+grant execute on function public.admin_adjust_pixlo_profile_views(text, bigint) to authenticated;
 
 notify pgrst, 'reload schema';
