@@ -123,7 +123,21 @@ export type ProfileSettings = {
   enterScreenCardTitle: string;
   enterScreenCardText: string;
   enterScreenCardColour: string;
+  enterScreenCardFont: ProfileFont;
+  enterScreenCardBackgroundColour: string;
+  enterScreenCardBorderColour: string;
   enterScreenCardOpacity: number;
+  enterScreenCardBorderOpacity: number;
+  enterScreenCardRadius: number;
+  enterScreenCardWidth: number;
+  enterScreenCardPadding: number;
+  enterScreenCardBlur: number;
+  enterScreenCardTitleSize: number;
+  enterScreenCardTextSize: number;
+  enterScreenCardTitleBold: boolean;
+  enterScreenCardTextItalic: boolean;
+  enterScreenCardTitleAnimation: TextAnimation;
+  enterScreenCardTextAnimation: TextAnimation;
 };
 
 export const defaultSettings: ProfileSettings = {
@@ -234,7 +248,21 @@ export const defaultSettings: ProfileSettings = {
   enterScreenCardTitle: "WELCOME TO MY PROFILE",
   enterScreenCardText: "Take a look around",
   enterScreenCardColour: "#ffffff",
+  enterScreenCardFont: "Inter",
+  enterScreenCardBackgroundColour: "#ffffff",
+  enterScreenCardBorderColour: "#ffffff",
   enterScreenCardOpacity: 12,
+  enterScreenCardBorderOpacity: 22,
+  enterScreenCardRadius: 16,
+  enterScreenCardWidth: 360,
+  enterScreenCardPadding: 18,
+  enterScreenCardBlur: 18,
+  enterScreenCardTitleSize: 10,
+  enterScreenCardTextSize: 13,
+  enterScreenCardTitleBold: true,
+  enterScreenCardTextItalic: false,
+  enterScreenCardTitleAnimation: "none",
+  enterScreenCardTextAnimation: "none",
 };
 
 export const LEGACY_PROFILE_SETTINGS_KEY = "profileSettings";
