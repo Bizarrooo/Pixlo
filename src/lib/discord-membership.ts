@@ -1,6 +1,6 @@
 import { serverEnv } from "./server-env";
 
-const DEFAULT_REQUIRED_INVITE = "rdAyWGGDCe";
+const DEFAULT_REQUIRED_INVITE = "Bkz4P9gVy7";
 let cachedGuild: { id: string; expiresAt: number } | null = null;
 
 export type DiscordOAuthTokens = {
