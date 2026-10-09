@@ -171,6 +171,7 @@ export default function Dashboard() {
   const [settingsReady, setSettingsReady] = useState(false);
   const [previewReady, setPreviewReady] = useState(false);
   const [previewEntered, setPreviewEntered] = useState(false);
+  const [previewEntering, setPreviewEntering] = useState(false);
   const [previewPointer, setPreviewPointer] = useState({ x: 0, y: 0 });
   const previewPointerBoundsRef = useRef<DOMRect | null>(null);
   const previewAssetsLoadedRef = useRef(false);
@@ -562,7 +563,7 @@ export default function Dashboard() {
   return <main className="dashboard">
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Profile customization</small></div>
-      <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); }}><span className="nav-dot" /><b>{name}</b></button>)}</nav>
+      <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b></button>)}</nav>
       <div className="sidebar-bottom"><button type="button" className="reset-button" style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }} onClick={reset}>Reset to default</button></div>
     </aside>
 
@@ -794,13 +795,13 @@ export default function Dashboard() {
             <div className="info-card"><div><b>Unique views</b><span>Counts a visitor once per profile per browser/device, with totals stored on the server.</span></div><span className="info-pill">SERVER</span></div>
           </div>}
           {active === "Enter Screen" && <div className="form-stack">
-            <SectionIntro number="11" title="Your entrance" text="Make visitors click into your profile with your own message, colours, image or video." />
+            <SectionIntro number="11" title="Your entrance" text="Customise the message, font, colour and transparency visitors see before entering your profile." />
             <Setting label="Enable click-to-enter" text="Show this full-screen intro before your profile loads."><Toggle value={settings.enterScreenEnabled} onChange={v => set("enterScreenEnabled", v)} /></Setting>
             <Field label="First message" hint="Up to 100 characters"><input maxLength={100} value={settings.enterScreenMessage} onChange={e => set("enterScreenMessage", e.target.value)} placeholder="Click to enter" /></Field>
+            <Field label="Message font"><select value={settings.enterScreenFont} onChange={e => set("enterScreenFont", e.target.value as ProfileSettings["enterScreenFont"])}>{fontOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></Field>
             <Colour label="Message colour" value={settings.enterScreenTextColour} onChange={v => set("enterScreenTextColour", v)} />
             <Colour label="Background colour" value={settings.enterScreenBackgroundColour} onChange={v => set("enterScreenBackgroundColour", v)} />
-            <FileUpload label="Background image" value={settings.enterScreenBackgroundImage} accept="image/*" type="image" onChange={v => set("enterScreenBackgroundImage", v)} note="Optional image behind the message · up to 25MB" />
-            <FileUpload label="Background video" value={settings.enterScreenBackgroundVideo} accept="video/mp4,video/webm,video/quicktime" type="video" onChange={v => set("enterScreenBackgroundVideo", v)} note="Optional looping video · up to 50MB" />
+            <Range label="Background transparency" value={settings.enterScreenBackgroundOpacity} min={0} max={100} suffix="%" onChange={v => set("enterScreenBackgroundOpacity", v)} />
           </div>}
         </section>
 
@@ -847,9 +848,7 @@ export default function Dashboard() {
                 {settings.showFooter && <div className="preview-profile-footer"><span><i className="preview-online-dot" /> Online</span>{settings.showViews && <span>{settings.views || 0} views</span>}</div>}
               </div>
             </div>
-            {settings.enterScreenEnabled && !previewEntered && <button type="button" onClick={() => setPreviewEntered(true)} style={{ position: "absolute", inset: 0, zIndex: 20, width: "100%", height: "100%", padding: 16, border: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", overflow: "hidden", cursor: "pointer", backgroundColor: settings.enterScreenBackgroundColour, backgroundImage: previewAssets.enterScreenBackgroundImage ? `url("${previewAssets.enterScreenBackgroundImage}")` : undefined, backgroundSize: "cover", backgroundPosition: "center", color: settings.enterScreenTextColour, textAlign: "center", fontFamily: fontFamily(settings.customFont) }}>
-              {previewAssets.enterScreenBackgroundVideo && <video src={previewAssets.enterScreenBackgroundVideo} autoPlay muted loop playsInline aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }} />}
-              {(previewAssets.enterScreenBackgroundImage || previewAssets.enterScreenBackgroundVideo) && <span aria-hidden="true" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.25)", zIndex: 1 }} />}
+            {active === "Enter Screen" && settings.enterScreenEnabled && !previewEntered && <button type="button" onClick={() => setPreviewEntering(true)} onTransitionEnd={() => { if (previewEntering) { setPreviewEntered(true); setPreviewEntering(false); } }} style={{ position: "absolute", inset: 0, zIndex: 20, width: "100%", height: "100%", padding: 16, border: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", overflow: "hidden", cursor: "pointer", backgroundColor: `rgba(${parseInt(settings.enterScreenBackgroundColour.slice(1,3),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(3,5),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(5,7),16)||0},${settings.enterScreenBackgroundOpacity / 100})`, color: settings.enterScreenTextColour, textAlign: "center", fontFamily: fontFamily(settings.enterScreenFont), opacity: previewEntering ? 0 : 1, transition: "opacity 450ms ease" }}>
               <span style={{ position: "relative", zIndex: 2, fontSize: "clamp(12px, 2.5vw, 20px)", fontWeight: 700, textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
               <span style={{ position: "relative", zIndex: 2, marginTop: 10, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.8 }}>Click anywhere to enter</span>
             </button>}
