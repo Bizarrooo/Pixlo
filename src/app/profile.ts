@@ -25,6 +25,7 @@ export type ProfileSettings = {
   banner: string;
   backgroundImage: string;
   backgroundVideo: string;
+  backgroundVideoMusicDisabled: boolean;
   backgroundColour: string;
   accentColour: string;
   textColour: string;
@@ -286,9 +287,18 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
   const parsed = parsedValue && typeof parsedValue === "object" ? parsedValue as Record<string, any> : {};
   const normalizedUsername = (identity.username ?? (typeof parsed.username === "string" ? parsed.username : defaultSettings.username)).trim().toLowerCase();
   const normalizedDisplayName = (identity.displayName ?? (typeof parsed.displayName === "string" ? parsed.displayName : defaultSettings.displayName)).trim();
+  const backgroundVideoMusicDisabled = typeof parsed.backgroundVideoMusicDisabled === "boolean" ? parsed.backgroundVideoMusicDisabled : false;
+  let musicTracks: MusicTrack[] = Array.isArray(parsed.musicTracks) ? parsed.musicTracks : [];
+  const backgroundVideo = typeof parsed.backgroundVideo === "string" ? parsed.backgroundVideo : "";
+  if (backgroundVideo && !backgroundVideoMusicDisabled && !musicTracks.some(track => track?.source === "background-video")) {
+    musicTracks = [...musicTracks, { id: "imported-background-video", title: "Imported Music", artist: "Background video", audio: backgroundVideo, cover: "", source: "background-video" }];
+  }
   return {
     ...defaultSettings,
     ...parsed,
+    backgroundVideoMusicDisabled,
+    backgroundVideo,
+    musicTracks,
     username: normalizedUsername || defaultSettings.username,
     displayName: normalizedDisplayName || normalizedUsername || defaultSettings.displayName,
     // Older saved settings inherited the old enabled-by-default value. Treat those as
@@ -331,8 +341,7 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     descriptionGlow: typeof parsed.descriptionGlow === "boolean" ? parsed.descriptionGlow : false,
     locationGlow: typeof parsed.locationGlow === "boolean" ? parsed.locationGlow : false,
     socialsGlow: typeof parsed.socialsGlow === "boolean" ? parsed.socialsGlow : false,
-    musicTracks: Array.isArray(parsed.musicTracks) ? parsed.musicTracks : [],
-    musicAutoplay: typeof parsed.musicAutoplay === "boolean" ? parsed.musicAutoplay : defaultSettings.musicAutoplay,
+     musicAutoplay: typeof parsed.musicAutoplay === "boolean" ? parsed.musicAutoplay : defaultSettings.musicAutoplay,
     showMusicPlayer: typeof parsed.showMusicPlayer === "boolean" ? parsed.showMusicPlayer : defaultSettings.showMusicPlayer,
   };
 }
