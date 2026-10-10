@@ -3665,3 +3665,67 @@ html, body, *, *::before, *::after {
 }
 .preview-equipped-badges .pixlo-profile-badge { width:30px; height:30px; min-width:30px; padding:0; }
 .preview-equipped-badges .pixlo-profile-badge .pixlo-badge-icon-tint { width:16px; height:16px; }
+
+
+/* Final badge-tooltip override: show immediately while hovered, not after pointer-out. */
+.profile-page .pixlo-profile-badge[data-badge-name]::after,
+.preview-frame .pixlo-profile-badge[data-badge-name]::after {
+  content:attr(data-badge-name)!important;
+  position:absolute!important;
+  left:50%!important;
+  bottom:calc(100% + 6px)!important;
+  top:auto!important;
+  transform:translate(-50%,0)!important;
+  padding:4px 7px!important;
+  max-width:180px!important;
+  width:max-content!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  border-radius:6px!important;
+  background:rgba(13,13,17,.97)!important;
+  color:#fff!important;
+  font-size:10px!important;
+  font-weight:600!important;
+  line-height:1.2!important;
+  white-space:normal!important;
+  box-shadow:0 4px 12px rgba(0,0,0,.24)!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transition:opacity .1s ease,visibility .1s ease!important;
+}
+.profile-page .pixlo-profile-badge[data-badge-name]:hover::after,
+.profile-page .pixlo-profile-badge[data-badge-name]:focus-visible::after,
+.preview-frame .pixlo-profile-badge[data-badge-name]:hover::after,
+.preview-frame .pixlo-profile-badge[data-badge-name]:focus-visible::after {
+  opacity:1!important;
+  visibility:visible!important;
+}
+.profile-page .profile-name-row h1.element-glow-name,
+.preview-frame .preview-name-row .element-glow-name {
+  background:none!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  background-clip:border-box!important;
+  -webkit-background-clip:border-box!important;
+  -webkit-text-fill-color:currentColor!important;
+  box-decoration-break:slice!important;
+  -webkit-box-decoration-break:slice!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+  filter:
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .08px) color-mix(in srgb,var(--accent) 95%,transparent))
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .22px) color-mix(in srgb,var(--accent) 72%,transparent))
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .40px) color-mix(in srgb,var(--accent) 45%,transparent))!important;
+  text-shadow:none!important;
+}
+.profile-page .profile-name-row h1.element-glow-name::before,
+.profile-page .profile-name-row h1.element-glow-name::after,
+.preview-frame .preview-name-row .element-glow-name::before,
+.preview-frame .preview-name-row .element-glow-name::after {
+  content:none!important;
+  display:none!important;
+  background:none!important;
+  box-shadow:none!important;
+}
