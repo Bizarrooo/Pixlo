@@ -60,6 +60,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const [trackIndex, setTrackIndex] = useState(0);
   const [musicVideoFallback, setMusicVideoFallback] = useState(false);
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
+  const [parallaxReturning, setParallaxReturning] = useState(false);
+  const parallaxReturnTimerRef = useRef<number | null>(null);
   const pointerBoundsRef = useRef<DOMRect | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLMediaElement>(null);
@@ -200,11 +202,11 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
       if (video && video.paused) {
         video.volume = 1;
+        video.muted = Boolean(activeTrack);
         try {
-          video.muted = false;
           await video.play();
         } catch {
-          video.muted = true;
+          if (!activeTrack) video.muted = true;
           await video.play().catch(() => {});
         }
       }
@@ -339,6 +341,9 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   const updateCardPointer = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!settings.parallax || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
+    parallaxReturnTimerRef.current = null;
+    setParallaxReturning(false);
     const bounds = pointerBoundsRef.current || event.currentTarget.getBoundingClientRect();
     const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2));
     const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2));
@@ -348,6 +353,9 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     });
   };
   const handleCardPointerEnter = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
+    parallaxReturnTimerRef.current = null;
+    setParallaxReturning(false);
     pointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
   };
   const handleCardPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -357,14 +365,20 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   };
   const resetCardPointer = () => {
     pointerBoundsRef.current = null;
+    setParallaxReturning(true);
     setPointer({ x: 0, y: 0 });
+    if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
+    parallaxReturnTimerRef.current = window.setTimeout(() => {
+      setParallaxReturning(false);
+      parallaxReturnTimerRef.current = null;
+    }, 700);
   };
   const handleCardPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "touch" || event.type === "pointercancel") resetCardPointer();
   };
 
   return (
-    <main className={`profile-page ${settings.parallax ? "parallax-on" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
+    <main className={`profile-page ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
       <div className="background-media-layer" aria-hidden="true">
         {assets.backgroundImage && <div className="background-image" style={{ backgroundImage: `url("${assets.backgroundImage}")` }} />}
         {assets.backgroundVideo && (
@@ -374,6 +388,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             className="background-media"
             src={assets.backgroundVideo}
             autoPlay={entered}
+            muted={Boolean(activeTrack)}
             loop
             playsInline
             preload="auto"
@@ -381,8 +396,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
               const video = event.currentTarget;
               if (!entered) { video.pause(); video.currentTime = 0; return; }
               video.volume = 1;
-              video.muted = false;
-              void video.play().catch(() => { video.muted = true; void video.play().catch(() => {}); });
+              video.muted = Boolean(activeTrack);
+              void video.play().catch(() => { if (!activeTrack) video.muted = true; void video.play().catch(() => {}); });
             }}
           />
         )}
