@@ -26,3 +26,72 @@
 .pixlo-active-badges.pixlo-double-underline{width:max-content!important;max-width:100%!important}
 .pixlo-active-badges.pixlo-double-underline .pixlo-profile-badges-list{width:max-content;max-width:100%}
 .pixlo-active-badges.pixlo-double-underline::after{width:100%}
+
+
+/* Final badge decoration layout: two real, centred lines sized to the badge group. */
+.pixlo-double-underline{
+  display:table!important;
+  position:relative!important;
+  width:max-content!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  padding-bottom:16px!important;
+}
+.pixlo-double-underline::before,
+.pixlo-double-underline::after{
+  content:""!important;
+  position:absolute!important;
+  display:block!important;
+  left:50%!important;
+  right:auto!important;
+  transform:translateX(-50%)!important;
+  height:1.5px!important;
+  pointer-events:none!important;
+  border:0!important;
+  border-radius:99px!important;
+  background:var(--badge-colour,#fff)!important;
+  opacity:.92!important;
+  box-shadow:none;
+}
+.pixlo-double-underline::before{
+  width:100%!important;
+  bottom:8px!important;
+}
+.pixlo-double-underline::after{
+  width:68%!important;
+  bottom:3px!important;
+  top:auto!important;
+  background:color-mix(in srgb,var(--badge-colour,#fff) 78%,transparent)!important;
+}
+.pixlo-underline-glow::before,
+.pixlo-underline-glow::after{
+  box-shadow:0 0 4px var(--badge-colour,#fff),0 0 10px var(--badge-colour,#fff),0 0 18px color-mix(in srgb,var(--badge-colour,#fff) 72%,transparent)!important;
+  opacity:1!important;
+}
+.pixlo-badges-glow .pixlo-profile-badge{
+  box-shadow:0 0 calc(8px + 14px * var(--badge-glow-intensity, .65)) color-mix(in srgb,var(--badge-colour,#fff) 88%,transparent),0 0 calc(14px + 24px * var(--badge-glow-intensity, .65)) color-mix(in srgb,var(--badge-colour,#fff) 62%,transparent)!important;
+  filter:drop-shadow(0 0 calc(3px + 7px * var(--badge-glow-intensity, .65)) color-mix(in srgb,var(--badge-colour,#fff) 90%,transparent))!important;
+}
+.pixlo-badges-glow .pixlo-badge-icon-tint{
+  filter:drop-shadow(0 0 calc(4px + 7px * var(--badge-glow-intensity, .65)) var(--badge-colour,#fff)) drop-shadow(0 0 calc(8px + 12px * var(--badge-glow-intensity, .65)) var(--badge-colour,#fff))!important;
+}
+.profile-page .pixlo-active-badges.pixlo-double-underline,
+.preview-equipped-badges.pixlo-active-badges.pixlo-double-underline{
+  margin-top:30px!important;
+  margin-bottom:8px!important;
+  padding-top:0!important;
+  padding-bottom:16px!important;
+  width:max-content!important;
+  max-width:100%!important;
+}
+.profile-page .pixlo-active-badges.pixlo-double-underline .pixlo-profile-badges-list,
+.preview-equipped-badges.pixlo-active-badges.pixlo-double-underline .pixlo-profile-badges-list{
+  display:flex!important;
+  width:max-content!important;
+  max-width:100%!important;
+  justify-content:center!important;
+}
+.profile-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline,
+.preview-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline{
+  padding-bottom:16px!important;
+}
