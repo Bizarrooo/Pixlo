@@ -86,6 +86,11 @@ export type ProfileSettings = {
   socialIconSize: number;
   customLinks: CustomLink[];
   activeLinkOrder: string[];
+  activeBadgeIds: string[];
+  activeBadgeOrder: string[];
+  badgePosition: "username" | "bottom";
+  badgeColour: string;
+  badgeGlow: boolean;
   musicTracks: MusicTrack[];
   activeMusicId: string;
   musicAutoplay: boolean;
@@ -214,6 +219,11 @@ export const defaultSettings: ProfileSettings = {
   socialIconSize: 28,
   customLinks: [],
   activeLinkOrder: [],
+  activeBadgeIds: [],
+  activeBadgeOrder: [],
+  badgePosition: "username",
+  badgeColour: "#ffffff",
+  badgeGlow: true,
   musicTracks: [],
   activeMusicId: "",
   musicAutoplay: true,
@@ -320,6 +330,11 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     socialIconSize: typeof parsed.socialIconSize === "number" && Number.isFinite(parsed.socialIconSize) ? Math.min(48, Math.max(16, Math.round(parsed.socialIconSize))) : defaultSettings.socialIconSize,
     customLinks: Array.isArray(parsed.customLinks) ? parsed.customLinks.filter((item: any) => item && typeof item.id === "string" && typeof item.url === "string" && typeof item.icon === "string") : [],
     activeLinkOrder: Array.isArray(parsed.activeLinkOrder) ? parsed.activeLinkOrder.filter((item: any) => typeof item === "string") : [],
+    activeBadgeIds: Array.isArray(parsed.activeBadgeIds) ? parsed.activeBadgeIds.filter((item: any) => typeof item === "string") : [],
+    activeBadgeOrder: Array.isArray(parsed.activeBadgeOrder) ? parsed.activeBadgeOrder.filter((item: any) => typeof item === "string") : [],
+    badgePosition: parsed.badgePosition === "bottom" ? "bottom" : "username",
+    badgeColour: typeof parsed.badgeColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.badgeColour) ? parsed.badgeColour : defaultSettings.badgeColour,
+    badgeGlow: typeof parsed.badgeGlow === "boolean" ? parsed.badgeGlow : defaultSettings.badgeGlow,
     avatarDecoration: ["none", "halo", "orbit", "flame"].includes(parsed.avatarDecoration) ? parsed.avatarDecoration : defaultSettings.avatarDecoration,
     discordAvatarUrl: typeof parsed.discordAvatarUrl === "string" ? parsed.discordAvatarUrl : "",
     discordAvatarDecorationUrl: typeof parsed.discordAvatarDecorationUrl === "string" ? parsed.discordAvatarDecorationUrl : "",
