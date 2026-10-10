@@ -119,9 +119,9 @@ async function syncBadges() {
     });
 
     for (let index = 0; index < inserts.length; index += 100) {
-      await db("user_badges?on_conflict=user_id,badge_id,source_role_id", {
+      await db("user_badges", {
         method: "POST",
-        headers: { Prefer: "resolution=ignore-duplicates,return=minimal" },
+        headers: { Prefer: "return=minimal" },
         body: JSON.stringify(inserts.slice(index, index + 100)),
       });
     }
