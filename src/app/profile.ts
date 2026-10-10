@@ -73,6 +73,7 @@ export type ProfileSettings = {
   showLocation: boolean;
   showDiscord: boolean;
   showVerified: boolean;
+  showVerifiedBadgeNextToUsername: boolean;
   showViews: boolean;
   showFooter: boolean;
   socialPills: boolean;
@@ -211,6 +212,7 @@ export const defaultSettings: ProfileSettings = {
   showLocation: true,
   showDiscord: true,
   showVerified: true,
+  showVerifiedBadgeNextToUsername: false,
   showViews: true,
   showFooter: true,
   socialPills: true,
@@ -340,6 +342,7 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     socialIconSize: typeof parsed.socialIconSize === "number" && Number.isFinite(parsed.socialIconSize) ? Math.min(48, Math.max(16, Math.round(parsed.socialIconSize))) : defaultSettings.socialIconSize,
     customLinks: Array.isArray(parsed.customLinks) ? parsed.customLinks.filter((item: any) => item && typeof item.id === "string" && typeof item.url === "string" && typeof item.icon === "string") : [],
     activeLinkOrder: Array.isArray(parsed.activeLinkOrder) ? parsed.activeLinkOrder.filter((item: any) => typeof item === "string") : [],
+    showVerifiedBadgeNextToUsername: typeof parsed.showVerifiedBadgeNextToUsername === "boolean" ? parsed.showVerifiedBadgeNextToUsername : defaultSettings.showVerifiedBadgeNextToUsername,
     activeBadgeIds: Array.isArray(parsed.activeBadgeIds) ? parsed.activeBadgeIds.filter((item: any) => typeof item === "string") : [],
     activeBadgeOrder: Array.isArray(parsed.activeBadgeOrder) ? parsed.activeBadgeOrder.filter((item: any) => typeof item === "string") : [],
     badgePosition: ["left", "right", "bottom"].includes(parsed.badgePosition) ? parsed.badgePosition : defaultSettings.badgePosition,
