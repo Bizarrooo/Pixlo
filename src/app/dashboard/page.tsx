@@ -175,6 +175,8 @@ export default function Dashboard() {
   const [previewEntered, setPreviewEntered] = useState(false);
   const [previewEntering, setPreviewEntering] = useState(false);
   const [previewPointer, setPreviewPointer] = useState({ x: 0, y: 0 });
+  const [previewParallaxReturning, setPreviewParallaxReturning] = useState(false);
+  const previewParallaxReturnTimerRef = useRef<number | null>(null);
   const previewPointerBoundsRef = useRef<DOMRect | null>(null);
   const previewAssetsLoadedRef = useRef(false);
   const [profileUserId, setProfileUserId] = useState("");
@@ -589,12 +591,18 @@ export default function Dashboard() {
 
   const updatePreviewPointer = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!settings.parallax || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (previewParallaxReturnTimerRef.current !== null) window.clearTimeout(previewParallaxReturnTimerRef.current);
+    previewParallaxReturnTimerRef.current = null;
+    setPreviewParallaxReturning(false);
     const bounds = previewPointerBoundsRef.current || event.currentTarget.getBoundingClientRect();
     const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2));
     const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2));
     setPreviewPointer(previous => Math.abs(previous.x - x) < 0.002 && Math.abs(previous.y - y) < 0.002 ? previous : { x, y });
   };
   const handlePreviewPointerEnter = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (previewParallaxReturnTimerRef.current !== null) window.clearTimeout(previewParallaxReturnTimerRef.current);
+    previewParallaxReturnTimerRef.current = null;
+    setPreviewParallaxReturning(false);
     previewPointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
   };
   const handlePreviewPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -604,7 +612,13 @@ export default function Dashboard() {
   };
   const resetPreviewPointer = () => {
     previewPointerBoundsRef.current = null;
+    setPreviewParallaxReturning(true);
     setPreviewPointer({ x: 0, y: 0 });
+    if (previewParallaxReturnTimerRef.current !== null) window.clearTimeout(previewParallaxReturnTimerRef.current);
+    previewParallaxReturnTimerRef.current = window.setTimeout(() => {
+      setPreviewParallaxReturning(false);
+      previewParallaxReturnTimerRef.current = null;
+    }, 700);
   };
   const handlePreviewPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "touch" || event.type === "pointercancel") resetPreviewPointer();
@@ -927,7 +941,7 @@ export default function Dashboard() {
         <aside className={`preview-panel ${previewVisible ? "" : "preview-panel-loading"}`} aria-hidden={!previewVisible}>
           {previewVisible && <>
           <div className="preview-label"><div><span>Live preview</span><small>updates instantly</small></div><a href={profileUrl} target="_blank" rel="noreferrer">Open ↗</a></div>
-          <div className={`preview-frame preview-layout-${settings.layout.toLowerCase().replace(/\s+/g, "-")} ${settings.parallax ? "preview-parallax-on" : ""} ${settings.animated ? "preview-animated" : ""} ${settings.glow ? "preview-glow" : ""} ${settings.floating ? "preview-float" : ""} ${settings.particles ? "preview-particles-on" : ""} ${settings.grain ? "preview-grain-on" : ""} ${settings.scanlines ? "preview-scanlines-on" : ""} ${settings.textGlow ? "preview-text-glow" : ""}`} style={previewStyle}>
+          <div className={`preview-frame preview-layout-${settings.layout.toLowerCase().replace(/\s+/g, "-")} ${settings.parallax ? "preview-parallax-on" : ""} ${previewParallaxReturning ? "preview-parallax-returning" : ""} ${settings.animated ? "preview-animated" : ""} ${settings.glow ? "preview-glow" : ""} ${settings.floating ? "preview-float" : ""} ${settings.particles ? "preview-particles-on" : ""} ${settings.grain ? "preview-grain-on" : ""} ${settings.scanlines ? "preview-scanlines-on" : ""} ${settings.textGlow ? "preview-text-glow" : ""}`} style={previewStyle}>
             {previewAssets.backgroundVideo && <video key={previewAssets.backgroundVideo} className="preview-media" src={previewAssets.backgroundVideo} autoPlay={active !== "Enter Screen" || previewEntered} muted loop playsInline preload="auto" onLoadedData={event => { const video = event.currentTarget; if (active === "Enter Screen" && !previewEntered) { video.pause(); video.currentTime = 0; } else { void video.play().catch(() => {}); } }} onCanPlay={event => { if (active === "Enter Screen" && !previewEntered) { event.currentTarget.pause(); event.currentTarget.currentTime = 0; } }} />}
             {previewAssets.backgroundImage && <div className="preview-bg" style={{ backgroundImage: `url("${previewAssets.backgroundImage}")`, filter: `blur(${settings.backgroundBlur}px)`, transform: `scale(${Math.max(1, settings.backgroundScale / 100)})`, backgroundPosition: `${settings.backgroundPositionX}% ${settings.backgroundPositionY}%`, backgroundSize: `${settings.backgroundScale}% auto` }} />}
             <div className="preview-overlay" />
