@@ -588,10 +588,10 @@ export default function Dashboard() {
   const previewParallaxPower = settings.parallax && settings.parallaxStrength > 0
     ? Math.pow(Math.min(35, Math.max(0, settings.parallaxStrength)) / 35, 0.72)
     : 0;
-  const previewGlowRadius = Math.max(18, settings.glowIntensity * 1.8);
-  const previewGlowAlpha = Math.min(0.85, Math.max(0.18, settings.glowIntensity / 100));
-  const previewShadow = settings.glow
-    ? `0 0 ${previewGlowRadius}px ${rgbaFromHex(settings.accentColour, previewGlowAlpha)}, 0 0 ${Math.max(28, previewGlowRadius * 2.2)}px ${rgbaFromHex(settings.accentColour, previewGlowAlpha * 0.35)}, 0 28px 90px ${rgbaFromHex("#000000", Math.max(0.2, settings.shadowOpacity / 100))}`
+  const previewGlowRadius = settings.glowIntensity * 1.8;
+  const previewGlowAlpha = Math.min(0.8, Math.max(0, settings.glowIntensity / 100));
+  const previewShadow = settings.glow && settings.glowIntensity > 0
+    ? `0 0 ${previewGlowRadius}px ${rgbaFromHex(settings.accentColour, previewGlowAlpha)}, 0 0 ${previewGlowRadius * 2.2}px ${rgbaFromHex(settings.accentColour, previewGlowAlpha * 0.35)}, 0 28px 90px ${rgbaFromHex("#000000", Math.max(0.2, settings.shadowOpacity / 100))}`
     : `0 28px 90px ${rgbaFromHex("#000000", settings.shadowOpacity / 100)}`;
   const readableTextOpacity = Math.max(85, Math.min(100, Number(settings.textOpacity) || 0));
 
