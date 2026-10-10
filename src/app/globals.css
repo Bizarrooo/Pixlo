@@ -3618,3 +3618,50 @@ html, body, *, *::before, *::after {
 .profile-page .element-glow-description,.profile-page .element-glow-location,.preview-frame .element-glow-description,.preview-frame .element-glow-location{text-shadow:0 0 calc(var(--glow-strength, 18) * .10px) var(--accent),0 0 calc(var(--glow-strength, 18) * .30px) color-mix(in srgb,var(--accent) 88%,transparent),0 0 calc(var(--glow-strength, 18) * .60px) color-mix(in srgb,var(--accent) 60%,transparent)!important;filter:none!important}
 .profile-page .element-glow-socials .social,.preview-frame .element-glow-socials .social-preview-link{filter:drop-shadow(0 0 calc(var(--glow-strength, 18) * .12px) var(--accent)) drop-shadow(0 0 calc(var(--glow-strength, 18) * .32px) color-mix(in srgb,var(--accent) 95%,transparent)) drop-shadow(0 0 calc(var(--glow-strength, 18) * .65px) color-mix(in srgb,var(--accent) 65%,transparent))!important}
 .preview-equipped-badges{display:flex;justify-content:center;align-items:center;gap:9px;margin:8px 0;flex-wrap:wrap}.preview-equipped-badges .pixlo-profile-badge{width:30px;height:30px;min-width:30px;max-width:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;position:relative;background:color-mix(in srgb,var(--badge-colour,#fff) 10%,transparent);border:1px solid color-mix(in srgb,var(--badge-colour,#fff) 58%,transparent)}.preview-equipped-badges .pixlo-badge-icon-tint{width:17px;height:17px;display:inline-block;background:var(--badge-colour,#fff);mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:center;-webkit-mask-position:center;mask-size:contain;-webkit-mask-size:contain}.preview-equipped-badges .pixlo-profile-badge:hover::after{content:attr(title);position:absolute;z-index:60;left:50%;bottom:calc(100% + 7px);transform:translateX(-50%);padding:5px 8px;border-radius:6px;background:#17120f;color:#fff;font-size:11px;white-space:nowrap;pointer-events:none}
+
+
+/* Compact in-page badge tooltip; avoid the browser's native title popup. */
+.pixlo-profile-badge[data-badge-name] { position:relative; }
+.pixlo-profile-badge[data-badge-name]::after {
+  content:attr(data-badge-name); position:absolute; left:50%; bottom:calc(100% + 6px);
+  transform:translate(-50%,3px); z-index:10000; width:max-content; max-width:180px;
+  padding:4px 7px; border:1px solid rgba(255,255,255,.16); border-radius:6px;
+  background:rgba(13,13,17,.96); color:#fff; font-size:10px; font-weight:600;
+  line-height:1.2; white-space:normal; text-align:center; box-shadow:0 4px 14px rgba(0,0,0,.25);
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .12s ease,transform .12s ease,visibility .12s ease;
+}
+.pixlo-profile-badge[data-badge-name]:hover::after,
+.pixlo-profile-badge[data-badge-name]:focus-visible::after { opacity:1; visibility:visible; transform:translate(-50%,0); }
+.profile-page .username { color:#fff!important; }
+.profile-page .profile-name-row h1.element-glow-name,
+.preview-frame .preview-name-row .element-glow-name {
+  background:transparent!important; background-color:transparent!important; background-image:none!important;
+  box-shadow:none!important; border:0!important; border-radius:0!important; padding:0!important;
+  text-shadow:
+    0 0 calc(var(--glow-strength, 18) * .08px) color-mix(in srgb,var(--accent) 95%,transparent),
+    0 0 calc(var(--glow-strength, 18) * .24px) color-mix(in srgb,var(--accent) 78%,transparent),
+    0 0 calc(var(--glow-strength, 18) * .48px) color-mix(in srgb,var(--accent) 50%,transparent)!important;
+}
+.profile-page .profile-name-row h1.element-glow-name::before,
+.profile-page .profile-name-row h1.element-glow-name::after,
+.preview-frame .preview-name-row .element-glow-name::before,
+.preview-frame .preview-name-row .element-glow-name::after { content:none!important; display:none!important; }
+.profile-page .element-glow-description,
+.profile-page .element-glow-location,
+.preview-frame .element-glow-description,
+.preview-frame .element-glow-location {
+  text-shadow:
+    0 0 calc(var(--glow-strength, 18) * .08px) color-mix(in srgb,var(--accent) 90%,transparent),
+    0 0 calc(var(--glow-strength, 18) * .22px) color-mix(in srgb,var(--accent) 72%,transparent),
+    0 0 calc(var(--glow-strength, 18) * .44px) color-mix(in srgb,var(--accent) 48%,transparent)!important;
+}
+.profile-page .element-glow-socials .social,
+.preview-frame .element-glow-socials .social-preview-link {
+  filter:
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .08px) color-mix(in srgb,var(--accent) 90%,transparent))
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .22px) color-mix(in srgb,var(--accent) 70%,transparent))
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .44px) color-mix(in srgb,var(--accent) 45%,transparent))!important;
+}
+.preview-equipped-badges .pixlo-profile-badge { width:30px; height:30px; min-width:30px; padding:0; }
+.preview-equipped-badges .pixlo-profile-badge .pixlo-badge-icon-tint { width:16px; height:16px; }
