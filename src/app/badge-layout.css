@@ -104,10 +104,19 @@
   border-top:0!important;
 }
 
-/* Keep the live preview's bottom badge group anchored while its underline is enabled. */
-.preview-equipped-badges.pixlo-active-badges.pixlo-double-underline{
+/* Keep the live preview's bottom badge group at the same vertical anchor with or without underlines. */
+.preview-equipped-badges.pixlo-active-badges{
+  margin-top:26px!important;
+  margin-bottom:8px!important;
   align-self:center!important;
+  justify-self:center!important;
   flex:0 0 auto!important;
+  transform:none!important;
+}
+.preview-equipped-badges.pixlo-active-badges.pixlo-double-underline{
+  margin-top:26px!important;
+  padding-top:0!important;
+  padding-bottom:16px!important;
   transform:none!important;
 }
 
