@@ -1,5 +1,6 @@
 "use client";
 
+import "./badges.css";
 import { useCallback, useEffect, useState } from "react";
 
 type Badge = { id: string; badge_key: string; name: string; description: string; icon_url: string | null; is_active: boolean };
@@ -140,13 +141,14 @@ export default function BadgeManagementPage() {
           </section>
 
           <section className="badge-admin-panel">
-            <h2>Manually award a badge</h2>
+            <h2>Manage user badges</h2>
+            <p className="badge-admin-muted">Award a badge to a Pixlo username, or revoke a manually awarded badge from them.</p>
             <form className="badge-admin-form" onSubmit={event => { event.preventDefault(); void act({ action: "award_badge", username: awardUsername, badge_id: awardBadgeId }, `Badge awarded to @${awardUsername}.`); }}>
               <label>Pixlo username<input required maxLength={24} value={awardUsername} onChange={event => setAwardUsername(event.target.value)} placeholder="username" /></label>
               <label>Badge<select value={awardBadgeId} onChange={event => setAwardBadgeId(event.target.value)} required>{badges.map(badge => <option key={badge.id} value={badge.id}>{badge.name}</option>)}</select></label>
-              <button disabled={busy || !badges.length} type="submit">Award badge</button>
+              <div className="badge-admin-actions"><button disabled={busy || !badges.length} type="submit">Award badge</button><button className="badge-admin-danger" type="button" disabled={busy || !badges.length || !awardUsername.trim()} onClick={() => { if (window.confirm(`Revoke this manually awarded badge from @${awardUsername.trim()}?`)) void act({ action: "revoke_badge", username: awardUsername, badge_id: awardBadgeId }, `Badge revoked from @${awardUsername.trim()}.`); }}>Revoke badge</button></div>
             </form>
-            <p className="badge-admin-note">Manual awards are separate from Discord-role awards, so unlinking Discord will not remove them.</p>
+            <p className="badge-admin-note">Revoking here removes manual awards only. Discord-role badges are managed by the Discord role mapping and bot.</p>
           </section>
         </>}
       </div>
