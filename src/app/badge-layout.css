@@ -9,3 +9,15 @@
 .profile-avatar-badge-row>.pixlo-side-badges-right .pixlo-profile-badges-list,.preview-avatar-badge-row>.pixlo-side-badges-right .pixlo-profile-badges-list{flex-direction:row!important;justify-content:flex-start!important;}
 .profile-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badge,.preview-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badge{flex:0 0 auto!important;}
 @media(max-width:600px){.profile-avatar-badge-row>.pixlo-side-badges,.preview-avatar-badge-row>.pixlo-side-badges{max-width:calc(50% - var(--avatar-size,120px)/2 - 5px)!important}.profile-avatar-badge-row>.pixlo-side-badges-left,.preview-avatar-badge-row>.pixlo-side-badges-left{right:calc(50% + var(--avatar-size,120px)/2 + 3px)!important}.profile-avatar-badge-row>.pixlo-side-badges-right,.preview-avatar-badge-row>.pixlo-side-badges-right{left:calc(50% + var(--avatar-size,120px)/2 + 3px)!important}}
+
+
+/* Badge glow intensity is shared by the public profile and dashboard preview. */
+.pixlo-badges-glow .pixlo-profile-badge{box-shadow:0 0 calc(12px * var(--badge-glow-intensity,.65)) color-mix(in srgb,var(--badge-colour,#fff) 85%,transparent),0 0 calc(30px * var(--badge-glow-intensity,.65)) color-mix(in srgb,var(--badge-colour,#fff) 60%,transparent)!important;text-shadow:0 0 calc(8px * var(--badge-glow-intensity,.65)) var(--badge-colour,#fff)!important;filter:drop-shadow(0 0 calc(8px * var(--badge-glow-intensity,.65)) color-mix(in srgb,var(--badge-colour,#fff) 80%,transparent))!important}
+.pixlo-badges-glow .pixlo-badge-icon-tint{filter:drop-shadow(0 0 calc(5px * var(--badge-glow-intensity,.65)) var(--badge-colour,#fff)) drop-shadow(0 0 calc(12px * var(--badge-glow-intensity,.65)) var(--badge-colour,#fff))!important}
+.pixlo-double-underline{position:relative!important}
+.pixlo-double-underline::after{content:"";position:absolute;left:50%;top:calc(100% + 7px);transform:translateX(-50%);width:100%;height:5px;pointer-events:none;background:linear-gradient(to bottom,var(--badge-colour,#fff) 0 1.5px,transparent 1.5px 3px,color-mix(in srgb,var(--badge-colour,#fff) 72%,transparent) 3px 4px,transparent 4px);opacity:.9}
+.pixlo-underline-glow::after{filter:drop-shadow(0 0 calc(4px * var(--badge-glow-intensity,.65)) var(--badge-colour,#fff)) drop-shadow(0 0 calc(10px * var(--badge-glow-intensity,.65)) var(--badge-colour,#fff));opacity:calc(.55 + var(--badge-glow-intensity,.65) * .45)}
+.profile-page .pixlo-active-badges{margin-top:28px!important}
+.preview-equipped-badges.pixlo-active-badges{margin-top:26px!important}
+.profile-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline::after,.preview-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline::after{top:calc(100% + 4px);height:5px}
+.profile-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline,.preview-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline{padding-bottom:8px!important}
