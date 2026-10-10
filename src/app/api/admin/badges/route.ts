@@ -98,7 +98,7 @@ export async function POST(request: Request) {
       const username = String(body?.username || "").trim().toLowerCase();
       const badgeId = String(body?.badge_id || "").trim();
       if (!/^[a-z0-9._-]{3,24}$/.test(username) || !badgeId) return json({ error: "Enter a valid Pixlo username and badge." }, 400);
-      const profileResponse = await requestDb(`profiles?select=id,username&username=eq.${encodeURIComponent(username)}&limit=1`, "GET", undefined, "return=representation");
+      const profileResponse = await requestDb(`profiles?select=id,username&username=ilike.${encodeURIComponent(username)}&limit=1`, "GET", undefined, "return=representation");
       const profiles = await profileResponse.json().catch(() => []);
       const profile = Array.isArray(profiles) ? profiles[0] : null;
       if (!profile?.id) return json({ error: `Pixlo user @${username} was not found.` }, 404);
