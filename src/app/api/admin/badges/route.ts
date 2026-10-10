@@ -98,10 +98,19 @@ export async function POST(request: Request) {
       const username = String(body?.username || "").trim().toLowerCase();
       const badgeId = String(body?.badge_id || "").trim();
       if (!/^[a-z0-9._-]{3,24}$/.test(username) || !badgeId) return json({ error: "Enter a valid Pixlo username and badge." }, 400);
-      const profileResponse = await requestDb(`profiles?select=id,username&username=ilike.${encodeURIComponent(username)}&limit=1`, "GET", undefined, "return=representation");
-      const profiles = await profileResponse.json().catch(() => []);
-      const profile = Array.isArray(profiles) ? profiles[0] : null;
-      if (!profile?.id) return json({ error: `Pixlo user @${username} was not found.` }, 404);
+      // Always resolve the Pixlo account by profiles.username, never a Discord username.
+      const profileQuery = new URLSearchParams({ select: "id,username", username: `ilike.${username}`, limit: "2" });
+      const profileResponse = await requestDb(`profiles?${profileQuery.toString()}`, "GET", undefined, "return=representation");
+      const profileBody = await profileResponse.json().catch(() => null);
+      if (!profileResponse.ok) {
+        const detail = profileBody && typeof profileBody === "object" && "message" in profileBody ? String((profileBody as Record<string, unknown>).message) : "";
+        return json({ error: `Could not look up Pixlo usernames in the profiles table (HTTP ${profileResponse.status}).${detail ? ` ${detail.slice(0, 180)}` : " Check the Supabase service-role key and profiles table."}` }, 503);
+      }
+      const profiles = Array.isArray(profileBody) ? profileBody : [];
+      const matches = profiles.filter((row: Row) => String(row.username || "").toLowerCase() === username);
+      if (matches.length > 1) return json({ error: `More than one Pixlo profile matches @${username}. Fix duplicate usernames before awarding badges.` }, 409);
+      const profile = matches[0];
+      if (!profile?.id) return json({ error: `Pixlo username @${username} was not found in the profiles table. This checks Pixlo usernames only, not Discord usernames. Make sure the account has a saved Pixlo profile.` }, 404);
       if (action === "award_badge") {
         const existingResponse = await requestDb(`user_badges?select=id&user_id=eq.${encodeURIComponent(String(profile.id))}&badge_id=eq.${encodeURIComponent(badgeId)}&source=eq.manual&limit=1`, "GET", undefined, "return=representation");
         if (!existingResponse.ok) return json({ error: "Could not check existing badge awards." }, 400);
