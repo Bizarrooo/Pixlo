@@ -31,7 +31,6 @@ export default function BadgeManagementPage() {
       setMappings(data.mappings || []);
       setMapBadgeId((current: string) => current || data.badges?.[0]?.id || "");
       setAwardBadgeId((current: string) => current || data.badges?.[0]?.id || "");
-      setMessage("");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not load badge settings.");
     } finally {
@@ -41,17 +40,22 @@ export default function BadgeManagementPage() {
 
   useEffect(() => { void refresh(); }, [refresh]);
 
-  async function act(payload: Record<string, unknown>, success: string) {
+  async function act(payload: Record<string, unknown>, success: string): Promise<boolean> {
     setBusy(true);
-    setMessage("");
+    setMessage("Saving…");
     try {
-      const response = await fetch("/api/admin/badges", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "The action failed.");
+      const response = await fetch("/api/admin/badges", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), cache: "no-store" });
+      const raw = await response.text();
+      let data: { error?: string } = {};
+      try { data = raw ? JSON.parse(raw) : {}; } catch { throw new Error("Pixlo returned an unexpected response (HTTP " + response.status + "). Try refreshing the page."); }
+      if (!response.ok) throw new Error(data.error || "The action failed (HTTP " + response.status + ").");
       setMessage(success);
       await refresh();
+      setMessage(success);
+      return true;
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "The action failed.");
+      setMessage(error instanceof Error ? error.message : "The action failed. Please try again.");
+      return false;
     } finally {
       setBusy(false);
     }
@@ -77,8 +81,8 @@ export default function BadgeManagementPage() {
       }
       setBusy(false);
     }
-    await act({ action: "create_badge", badge_key: key, name, description, icon_url: finalIconUrl || null }, "Badge created.");
-    setName(""); setKey(""); setDescription(""); setIconUrl(""); setIconFile(null);
+    const created = await act({ action: "create_badge", badge_key: key, name, description, icon_url: finalIconUrl || null }, "Badge created successfully.");
+    if (created) { setName(""); setKey(""); setDescription(""); setIconUrl(""); setIconFile(null); }
   }
 
   return (
