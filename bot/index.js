@@ -11,7 +11,7 @@ for (const name of required) {
 const SUPABASE_URL = process.env.SUPABASE_URL.replace(/\/$/, "");
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const GUILD_ID = process.env.DISCORD_GUILD_ID;
-const INTERVAL_MS = 15 * 60 * 1000;
+const INTERVAL_MS = 60 * 1000;
 let syncing = false;
 let syncAgain = false;
 let scheduledSync = null;
