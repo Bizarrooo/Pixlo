@@ -21,3 +21,8 @@
 .preview-equipped-badges.pixlo-active-badges{margin-top:26px!important}
 .profile-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline::after,.preview-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline::after{top:calc(100% + 4px);height:5px}
 .profile-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline,.preview-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline{padding-bottom:8px!important}
+
+/* Bottom-positioned underline should size to the badge row, not the profile card. */
+.pixlo-active-badges.pixlo-double-underline{width:max-content!important;max-width:100%!important}
+.pixlo-active-badges.pixlo-double-underline .pixlo-profile-badges-list{width:max-content;max-width:100%}
+.pixlo-active-badges.pixlo-double-underline::after{width:100%}
