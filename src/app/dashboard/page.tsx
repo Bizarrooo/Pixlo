@@ -192,7 +192,6 @@ export default function Dashboard() {
   const [dashboardBadges, setDashboardBadges] = useState<DashboardBadge[]>([]);
   const [dashboardBadgesLoading, setDashboardBadgesLoading] = useState(false);
   const [dashboardBadgesError, setDashboardBadgesError] = useState("");
-  const canUseVerifiedBadge = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const [usernameChangeAvailableAt, setUsernameChangeAvailableAt] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -763,7 +762,6 @@ export default function Dashboard() {
             </section>
             <Setting label="Show location" text="Display the location underneath your bio."><Toggle value={settings.showLocation} onChange={v => set("showLocation", v)} /></Setting>
             <Setting label="Online status" text="Show the status dot and online indicator."><Toggle value={settings.showDiscord} onChange={v => set("showDiscord", v)} /></Setting>
-            {canUseVerifiedBadge && <Setting label="Verified badge" text="Show your custom verification badge beside your name."><Toggle value={settings.showVerified} onChange={v => set("showVerified", v)} /></Setting>}
             <Setting label="View counter" text="Show the profile's view count in the footer."><Toggle value={settings.showViews} onChange={v => set("showViews", v)} /></Setting>
           </div>}
 
@@ -1021,7 +1019,7 @@ export default function Dashboard() {
               {previewAssets.banner && settings.bannerHeight > 0 && <img className="preview-banner" src={previewAssets.banner} alt="" style={{ height: settings.bannerHeight, borderRadius: `${settings.borderRadius}px ${settings.borderRadius}px 0 0` }} />}
               <div className="preview-card-inner" style={{ "--preview-content-spacing-setting": `${settings.contentSpacing}px` } as React.CSSProperties}>
                 <div className={`preview-avatar-wrap preview-avatar-decoration-${settings.avatarDecoration}`}><div className="preview-avatar" style={{ borderRadius: `${settings.avatarRadius}%`, borderWidth: settings.avatarBorderWidth, borderColor: settings.avatarBorderColour }}>{previewAvatar ? <img src={previewAvatar} alt="" /> : (settings.displayName || settings.username).slice(0, 1).toUpperCase()}</div>{previewDecoration && <img className="preview-discord-avatar-decoration" src={previewDecoration} alt="" aria-hidden="true" />}{settings.showDiscord && <span className="preview-status-dot" title="Online" />}</div>
-                <div className="preview-name-row"><b className={`${settings.nameGlow ? "element-glow-name " : ""}${animationClass(settings.nameAnimation)}`} style={{ fontFamily: fontFamily(settings.nameFont), fontWeight: settings.nameBold ? 700 : 400, fontStyle: settings.nameItalic ? "italic" : "normal" }}>{settings.displayName || settings.username}</b>{canUseVerifiedBadge && settings.showVerified && <span className="preview-verified-dot">✓</span>}</div>
+                <div className="preview-name-row"><b className={`${settings.nameGlow ? "element-glow-name " : ""}${animationClass(settings.nameAnimation)}`} style={{ fontFamily: fontFamily(settings.nameFont), fontWeight: settings.nameBold ? 700 : 400, fontStyle: settings.nameItalic ? "italic" : "normal" }}>{settings.displayName || settings.username}</b></div>
                 <small className={`preview-username ${animationClass(settings.usernameAnimation)}`} style={{ fontFamily: fontFamily(settings.usernameFont), fontWeight: settings.usernameBold ? 700 : 400, fontStyle: settings.usernameItalic ? "italic" : "normal" }}>@{settings.username || "username"}</small>
                 {settings.description && <p className={`${settings.descriptionGlow ? "element-glow-description " : ""}${animationClass(settings.descriptionAnimation)}`} style={{ fontFamily: fontFamily(settings.descriptionFont), fontWeight: settings.descriptionBold ? 700 : 400, fontStyle: settings.descriptionItalic ? "italic" : "normal" }}>{settings.description}</p>}
                 {settings.showLocation && settings.location && <small className={`preview-location ${settings.locationGlow ? "element-glow-location " : ""}${animationClass(settings.locationAnimation)}`} style={{ fontFamily: fontFamily(settings.locationFont), fontWeight: settings.locationBold ? 700 : 400, fontStyle: settings.locationItalic ? "italic" : "normal" }}>⌖ {settings.location}</small>}
