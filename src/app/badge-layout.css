@@ -30,12 +30,16 @@
 
 /* Final badge decoration layout: two real, centred lines sized to the badge group. */
 .pixlo-double-underline{
-  display:table!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
   position:relative!important;
   width:max-content!important;
   max-width:100%!important;
   box-sizing:border-box!important;
   padding-bottom:16px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
 }
 .pixlo-double-underline::before,
 .pixlo-double-underline::after{
@@ -102,6 +106,14 @@
 .preview-equipped-badges.pixlo-active-badges.pixlo-double-underline{
   border-top:0!important;
 }
+
+/* Keep the live preview's bottom badge group anchored while its underline is enabled. */
+.preview-equipped-badges.pixlo-active-badges.pixlo-double-underline{
+  align-self:center!important;
+  flex:0 0 auto!important;
+  transform:none!important;
+}
+
 
 /* Keep badge glow visibly tied to the intensity slider, including at low values. */
 .pixlo-badges-glow .pixlo-profile-badge{
