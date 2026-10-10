@@ -22,18 +22,21 @@ export default function BadgeManagementPage() {
   const [awardUsername, setAwardUsername] = useState("");
   const [awardBadgeId, setAwardBadgeId] = useState("");
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (): Promise<string | null> => {
     setLoading(true);
     try {
       const response = await fetch("/api/admin/badges", { cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Could not load badge settings.");
-      setBadges(data.badges || []);
-      setMappings(data.mappings || []);
+      setBadges(Array.isArray(data.badges) ? data.badges : []);
+      setMappings(Array.isArray(data.mappings) ? data.mappings : []);
       setMapBadgeId((current: string) => current || data.badges?.[0]?.id || "");
       setAwardBadgeId((current: string) => current || data.badges?.[0]?.id || "");
+      return null;
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not load badge settings.");
+      const errorMessage = error instanceof Error ? error.message : "Could not load badge settings.";
+      setMessage(errorMessage);
+      return errorMessage;
     } finally {
       setLoading(false);
     }
@@ -50,9 +53,12 @@ export default function BadgeManagementPage() {
       let data: { error?: string } = {};
       try { data = raw ? JSON.parse(raw) : {}; } catch { throw new Error("Pixlo returned an unexpected response (HTTP " + response.status + "). Try refreshing the page."); }
       if (!response.ok) throw new Error(data.error || "The action failed (HTTP " + response.status + ").");
-      setMessage(success);
-      await refresh();
-      setMessage(success);
+      const refreshError = await refresh();
+      if (refreshError) {
+        setMessage("The action was saved, but the badge list could not reload: " + refreshError);
+      } else {
+        setMessage(success);
+      }
       return true;
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "The action failed. Please try again.");
