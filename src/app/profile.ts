@@ -153,6 +153,7 @@ export const defaultSettings: ProfileSettings = {
   banner: "",
   backgroundImage: "",
   backgroundVideo: "",
+  backgroundVideoMusicDisabled: false,
   backgroundColour: "#050505",
   accentColour: "#ff4d5f",
   textColour: "#ffffff",
