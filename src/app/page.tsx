@@ -211,25 +211,17 @@ export default function Home() {
             <span className="home-section-kicker">SUPPORT THE PROJECT</span>
             <h2>Help Pixlo keep growing.</h2>
           </div>
-          <p>Pixlo started as a project built from scratch. If you enjoy using it, donations can help support future improvements and running costs.</p>
+          <p>Enjoying Pixlo? Your support helps us improve the platform, build new features, cover running costs, and work towards our own custom domain.</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: "18px", marginTop: "28px" }}>
-          <article className="home-feature-card" style={{ minHeight: "220px" }}>
-            <div className="home-feature-icon"><Icon name="shield" size={21} /></div>
-            <span className="home-feature-number">OPTION 01</span>
-            <h3>Bank transfer</h3>
-            <p>Barclays transfers will be available once a safe receiving method has been arranged. Personal bank details will not be displayed publicly.</p>
-            <span style={{ display: "inline-flex", alignSelf: "flex-start", marginTop: "auto", padding: "7px 11px", borderRadius: "999px", border: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.68)", fontSize: "12px" }}>Setup in progress</span>
-          </article>
-          <article className="home-feature-card" style={{ minHeight: "220px" }}>
-            <div className="home-feature-icon"><Icon name="bolt" size={21} /></div>
-            <span className="home-feature-number">OPTION 02</span>
-            <h3>Pay by card</h3>
-            <p>Secure card donations will be added after a payment account is configured and verified with a parent or guardian where required.</p>
-            <span style={{ display: "inline-flex", alignSelf: "flex-start", marginTop: "auto", padding: "7px 11px", borderRadius: "999px", border: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.68)", fontSize: "12px" }}>Setup in progress</span>
-          </article>
-        </div>
-        <p style={{ marginTop: "18px", color: "rgba(255,255,255,.48)", fontSize: "12px", lineHeight: 1.7 }}>Donations are optional. Please only contribute if you want to, and never share private banking information in public.</p>
+        <article className="home-feature-card" style={{ minHeight: "250px", maxWidth: "760px", margin: "28px auto 0", width: "100%", padding: "clamp(24px, 5vw, 42px)" }}>
+          <div className="home-feature-icon"><Icon name="bolt" size={21} /></div>
+          <span className="home-feature-number">OFFICIAL DONATION LINK</span>
+          <h3>Support Pixlo with PayPal.</h3>
+          <p>Donate securely through PayPal's hosted checkout. You can review the donation and available payment methods there before confirming. Donations are completely optional, and any amount is appreciated.</p>
+          <a href="https://www.paypal.com/donate/?hosted_button_id=4YWKKPCE925QE" target="_blank" rel="noopener noreferrer" className="home-primary-btn" style={{ alignSelf: "flex-start", marginTop: "12px" }}>Donate with PayPal <Icon name="arrow" size={17} /></a>
+          <span style={{ color: "rgba(255,255,255,.42)", fontSize: "12px", marginTop: "8px" }}>Opens PayPal in a new tab.</span>
+        </article>
+        <p style={{ marginTop: "18px", color: "rgba(255,255,255,.48)", fontSize: "12px", lineHeight: 1.7 }}>Please only donate if you want to. Payment processing is handled by PayPal; Pixlo does not collect or store your card details.</p>
       </section>
 
       <section className="home-cta" id="pricing">
@@ -245,7 +237,7 @@ export default function Home() {
       <footer className="home-footer">
         <Link href="/" className="home-brand" aria-label="Pixlo home"><img className="home-brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></Link>
         <span>Build something that feels like you.</span>
-        <div><a href="#features">Features</a><a href="#showcase">Showcase</a><Link href="/dashboard">Dashboard</Link></div>
+        <div><a href="#features">Features</a><a href="#showcase">Showcase</a><a href="#donate">Donate</a><Link href="/dashboard">Dashboard</Link></div>
       </footer>
     </main>
   );
