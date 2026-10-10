@@ -62,7 +62,15 @@ export async function POST(request: Request) {
       if (action === "update_badge" && !body?.id) return json({ error: "Badge ID is required." }, 400);
       const response = await requestDb(path, action === "create_badge" ? "POST" : "PATCH", payload);
       const result = await response.json().catch(() => null);
-      if (!response.ok) return json({ error: "Could not save badge. Make sure the key is unique and the database migration is installed." }, 400);
+      if (!response.ok) {
+        const dbError = result && typeof result === "object" ? result as Record<string, unknown> : {};
+        const code = typeof dbError.code === "string" ? dbError.code : "";
+        if (code === "23505") return json({ error: "That badge key already exists. Choose a different key." }, 400);
+        if (code === "42P01" || code === "PGRST205") return json({ error: "The Pixlo badge tables are missing. Run supabase/migrations/20261010_pixlo_badges.sql in the Supabase SQL Editor, then try again." }, 503);
+        if (code === "42501") return json({ error: "Supabase denied access to the badge tables. Check the service-role key and database grants." }, 503);
+        const detail = typeof dbError.message === "string" ? dbError.message : "";
+        return json({ error: detail ? `Could not save badge: ${detail}` : "Could not save badge. Check the Supabase badge migration and server environment." }, 400);
+      }
       return json({ badge: Array.isArray(result) ? result[0] : result });
     }
 
