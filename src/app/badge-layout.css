@@ -95,3 +95,18 @@
 .preview-avatar-badge-row>.pixlo-side-badges.pixlo-double-underline{
   padding-bottom:16px!important;
 }
+
+
+/* Ensure the old single top border never competes with the requested underline below badges. */
+.profile-page .pixlo-active-badges.pixlo-double-underline,
+.preview-equipped-badges.pixlo-active-badges.pixlo-double-underline{
+  border-top:0!important;
+}
+
+/* Keep badge glow visibly tied to the intensity slider, including at low values. */
+.pixlo-badges-glow .pixlo-profile-badge{
+  outline:1px solid color-mix(in srgb,var(--badge-colour,#fff) calc(var(--badge-glow-intensity,.65) * 45%),transparent)!important;
+}
+.pixlo-badges-glow .pixlo-badge-icon-tint{
+  opacity:1!important;
+}
