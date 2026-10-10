@@ -185,6 +185,7 @@ export default function Dashboard() {
   const [viewToolMessage, setViewToolMessage] = useState("");
   const [viewToolBusy, setViewToolBusy] = useState(false);
   const [savedIdentity, setSavedIdentity] = useState({ username: "", displayName: "" });
+  const [badgesHidden, setBadgesHidden] = useState(false);
   const canUseVerifiedBadge = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const [usernameChangeAvailableAt, setUsernameChangeAvailableAt] = useState<string | null>(null);
@@ -205,6 +206,11 @@ export default function Dashboard() {
       .finally(() => { if (!cancelled) setLeaderboardLoading(false); });
     return () => { cancelled = true; };
   }, [active, settingsReady, settings.username]);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/profile/badges-visibility", { cache: "no-store" }).then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || "Unable to load badge visibility."); return data; }).then(data => { if (!cancelled) setBadgesHidden(Boolean(data.hidden)); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [previewAssets, setPreviewAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", enterScreenBackgroundImage: "", enterScreenBackgroundVideo: "", musicCover: "", customLinkIcons: {} as Record<string, string> });
   const [draftTrack, setDraftTrack] = useState<{ title: string; artist: string; audio: string; cover: string }>({ title: "", artist: "", audio: "", cover: "" });
@@ -874,6 +880,7 @@ export default function Dashboard() {
             <Range label="Parallax intensity" value={settings.parallaxStrength} min={0} max={35} suffix="%" onChange={v => set("parallaxStrength", v)} />
             <Setting label="Background particles" text="Add soft floating particles behind the profile."><Toggle value={settings.particles} onChange={v => set("particles", v)} /></Setting>
             <Setting label="Film grain" text="Add a subtle texture overlay for a less flat background."><Toggle value={settings.grain} onChange={v => set("grain", v)} /></Setting>
+            <Setting label="Show earned badges on your profile" text="Hide your badges from other people without removing your earned badges."><Toggle value={!badgesHidden} onChange={async value => { const previous = badgesHidden; setBadgesHidden(!value); try { const response = await fetch("/api/profile/badges-visibility", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hidden: !value }) }); if (!response.ok) setBadgesHidden(previous); } catch { setBadgesHidden(previous); } }} /></Setting>
             <Setting label="Scanlines" text="Add a retro display texture across the page."><Toggle value={settings.scanlines} onChange={v => set("scanlines", v)} /></Setting>
           </div>}
 
