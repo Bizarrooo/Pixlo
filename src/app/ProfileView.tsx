@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { defaultSettings, loadSettings, loadSettingsForUsername, saveSettingsToStorage, type MusicTrack, type ProfileFont, type ProfileSettings } from "./profile";
+import { defaultSettings, loadSettings, loadSettingsForUsername, normaliseProfileSettings, saveSettingsToStorage, type MusicTrack, type ProfileFont, type ProfileSettings } from "./profile";
 import { loadAsset, loadAssetMedia } from "./assetStore";
 
 const socialLabels: Record<string, string> = { discord: "Discord", youtube: "YouTube", roblox: "Roblox", github: "GitHub", twitch: "Twitch", instagram: "Instagram" };
@@ -116,7 +116,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       .then(async data => {
         const remote = data?.profile?.settings;
         if (cancelled || !remote || typeof remote !== "object" || Object.keys(remote).length === 0) return;
-        const current = { ...defaultSettings, ...(remote as Partial<ProfileSettings>), username: data.profile.username || username, displayName: data.profile.displayName || data.profile.username || username } as ProfileSettings;
+        const current = normaliseProfileSettings(remote, { username: data.profile.username || username, displayName: data.profile.displayName || data.profile.username || username });
         setSettings(previous => ({ ...current, views: Math.max(Number(current.views) || 0, Number(previous.views) || 0) }));
         setTrackIndex(Math.max(0, current.musicTracks.findIndex(track => track.id === current.activeMusicId)));
         const selectedTrack = current.musicTracks.find(track => track.id === current.activeMusicId) || current.musicTracks[0];
