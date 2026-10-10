@@ -718,11 +718,19 @@ export default function Dashboard() {
               </div>
             </section> : <>
               <p className="hint">Your earned Pixlo badges appear here. Badges are linked to your Discord membership and eligible server roles.</p>
-              {dashboardBadgesLoading ? <div className="empty-state">Loading your badges…</div> : dashboardBadgesError ? <div className="discord-error-notice">{dashboardBadgesError}</div> : dashboardBadges.length === 0 ? <div className="empty-state">You haven't earned any badges yet. Keep an eye on the official Pixlo Discord server for roles and rewards.</div> : <div className="badge-admin-list">
-                {dashboardBadges.map(badge => <article className="badge-admin-item" key={badge.id}>
-                  <div className="badge-admin-icon">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
-                  <div className="badge-admin-info"><strong>{badge.name}</strong>{badge.description && <p>{badge.description}</p>}</div>
-                </article>)}
+              <p className="hint">Switch badges on to equip them. Drag using the three-line handle to choose their order. Changes apply when you save.</p>
+              <Setting label="Badge position" text="Show equipped badges below your username or in an Active Badges section at the bottom."><select value={settings.badgePosition} onChange={e => { set("badgePosition", e.target.value as "username" | "bottom"); setSaved(false); }}><option value="username">Below username</option><option value="bottom">Active Badges at bottom</option></select></Setting>
+              <div className="colour-grid"><Colour label="Badge colour" value={settings.badgeColour} onChange={v => { set("badgeColour", v); setSaved(false); }} /><Setting label="Badge glow" text="Add a stronger coloured glow to equipped badges."><Toggle value={settings.badgeGlow} onChange={v => { set("badgeGlow", v); setSaved(false); }} /></Setting></div>
+              {dashboardBadgesLoading ? <div className="empty-state">Loading your badges…</div> : dashboardBadgesError ? <div className="discord-error-notice">{dashboardBadgesError}</div> : dashboardBadges.length === 0 ? <div className="empty-state">You haven't earned any badges yet. Keep an eye on the official Pixlo Discord server for roles and rewards.</div> : <div className="active-links-list pixlo-badge-editor-list">
+                {[...dashboardBadges].sort((a,b) => { const order = settings.activeBadgeOrder || []; const ai = order.indexOf(a.id), bi = order.indexOf(b.id); return (ai < 0 ? 9999 : ai) - (bi < 0 ? 9999 : bi); }).map(badge => {
+                  const equipped = settings.activeBadgeIds.includes(badge.id);
+                  return <div className="active-link-row" key={badge.id} draggable onDragStart={event => { event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", badge.id); event.currentTarget.classList.add("dragging"); }} onDragEnd={event => event.currentTarget.classList.remove("dragging")} onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); const from = event.dataTransfer.getData("text/plain"); if (!from || from === badge.id) return; setSettings(current => { const valid = dashboardBadges.map(item => item.id); const order = [...(current.activeBadgeOrder || []).filter(id => valid.includes(id)), ...valid.filter(id => !(current.activeBadgeOrder || []).includes(id))]; const a = order.indexOf(from), b = order.indexOf(badge.id); if (a < 0 || b < 0) return current; const next = [...order]; const [moved] = next.splice(a, 1); next.splice(b, 0, moved); return { ...current, activeBadgeOrder: next }; }); setSaved(false); }}>
+                    <span className="active-link-handle" title="Drag to reorder" aria-hidden="true"><i /><i /><i /></span>
+                    <div className="badge-admin-icon">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
+                    <div className="active-link-info"><b>{badge.name}</b><span>{badge.description || "Pixlo badge"}</span></div>
+                    <Toggle value={equipped} onChange={v => { setSettings(current => ({ ...current, activeBadgeIds: v ? [...current.activeBadgeIds, badge.id] : current.activeBadgeIds.filter(id => id !== badge.id) })); setSaved(false); }} />
+                  </div>;
+                })}
               </div>}
             </>}
           </div>}
