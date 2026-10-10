@@ -88,7 +88,8 @@ export type ProfileSettings = {
   activeLinkOrder: string[];
   activeBadgeIds: string[];
   activeBadgeOrder: string[];
-  badgePosition: "username" | "bottom";
+  badgePosition: "left" | "right" | "bottom";
+  badgeStyle: "default" | "icon";
   badgeColour: string;
   badgeGlow: boolean;
   musicTracks: MusicTrack[];
@@ -221,7 +222,8 @@ export const defaultSettings: ProfileSettings = {
   activeLinkOrder: [],
   activeBadgeIds: [],
   activeBadgeOrder: [],
-  badgePosition: "username",
+  badgePosition: "left",
+  badgeStyle: "default",
   badgeColour: "#ffffff",
   badgeGlow: true,
   musicTracks: [],
@@ -332,7 +334,8 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     activeLinkOrder: Array.isArray(parsed.activeLinkOrder) ? parsed.activeLinkOrder.filter((item: any) => typeof item === "string") : [],
     activeBadgeIds: Array.isArray(parsed.activeBadgeIds) ? parsed.activeBadgeIds.filter((item: any) => typeof item === "string") : [],
     activeBadgeOrder: Array.isArray(parsed.activeBadgeOrder) ? parsed.activeBadgeOrder.filter((item: any) => typeof item === "string") : [],
-    badgePosition: parsed.badgePosition === "bottom" ? "bottom" : "username",
+    badgePosition: ["left", "right", "bottom"].includes(parsed.badgePosition) ? parsed.badgePosition : defaultSettings.badgePosition,
+    badgeStyle: parsed.badgeStyle === "icon" ? "icon" : "default",
     badgeColour: typeof parsed.badgeColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.badgeColour) ? parsed.badgeColour : defaultSettings.badgeColour,
     badgeGlow: typeof parsed.badgeGlow === "boolean" ? parsed.badgeGlow : defaultSettings.badgeGlow,
     avatarDecoration: ["none", "halo", "orbit", "flame"].includes(parsed.avatarDecoration) ? parsed.avatarDecoration : defaultSettings.avatarDecoration,
