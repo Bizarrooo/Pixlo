@@ -289,17 +289,25 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
   const normalizedUsername = (identity.username ?? (typeof parsed.username === "string" ? parsed.username : defaultSettings.username)).trim().toLowerCase();
   const normalizedDisplayName = (identity.displayName ?? (typeof parsed.displayName === "string" ? parsed.displayName : defaultSettings.displayName)).trim();
   const backgroundVideoMusicDisabled = typeof parsed.backgroundVideoMusicDisabled === "boolean" ? parsed.backgroundVideoMusicDisabled : false;
-  let musicTracks: MusicTrack[] = Array.isArray(parsed.musicTracks) ? parsed.musicTracks : [];
+  let musicTracks: MusicTrack[] = Array.isArray(parsed.musicTracks) ? parsed.musicTracks.filter(track => track && typeof track === "object") : [];
   const backgroundVideo = typeof parsed.backgroundVideo === "string" ? parsed.backgroundVideo : "";
-  if (backgroundVideo && !backgroundVideoMusicDisabled && !musicTracks.some(track => track?.source === "background-video")) {
-    musicTracks = [...musicTracks, { id: "imported-background-video", title: "Imported Music", artist: "Background video", audio: backgroundVideo, cover: "", source: "background-video" }];
+  const importedIndex = musicTracks.findIndex(track => track.source === "background-video" || (track.title === "Imported Music" && track.artist === "Background video"));
+  if (backgroundVideo && !backgroundVideoMusicDisabled) {
+    if (importedIndex >= 0) {
+      musicTracks = musicTracks.map((track, index) => index === importedIndex ? { ...track, title: "Imported Music", artist: "Background video", audio: backgroundVideo, source: "background-video" } : track);
+    } else {
+      musicTracks = [...musicTracks, { id: "imported-background-video", title: "Imported Music", artist: "Background video", audio: backgroundVideo, cover: "", source: "background-video" }];
+    }
   }
+  const activeMusicId = typeof parsed.activeMusicId === "string" ? parsed.activeMusicId : "";
+  const resolvedActiveMusicId = musicTracks.some(track => track.id === activeMusicId) ? activeMusicId : musicTracks[0]?.id || "";
   return {
     ...defaultSettings,
     ...parsed,
     backgroundVideoMusicDisabled,
     backgroundVideo,
     musicTracks,
+    activeMusicId: resolvedActiveMusicId,
     username: normalizedUsername || defaultSettings.username,
     displayName: normalizedDisplayName || normalizedUsername || defaultSettings.displayName,
     // Older saved settings inherited the old enabled-by-default value. Treat those as
@@ -345,6 +353,10 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
      musicAutoplay: typeof parsed.musicAutoplay === "boolean" ? parsed.musicAutoplay : defaultSettings.musicAutoplay,
     showMusicPlayer: typeof parsed.showMusicPlayer === "boolean" ? parsed.showMusicPlayer : defaultSettings.showMusicPlayer,
   };
+}
+
+export function normaliseProfileSettings(value: unknown, identity: ProfileIdentity = {}): ProfileSettings {
+  return normaliseSettings(value, identity);
 }
 
 function parseStoredSettings(key: string): ProfileSettings | null {
