@@ -84,6 +84,7 @@ async function syncBadges() {
     const mappings = Array.isArray(roleMappings) ? roleMappings : [];
     const linkedProfiles = Array.isArray(profiles) ? profiles : [];
     const awards = Array.isArray(currentAwards) ? currentAwards : [];
+    console.log(`[badge-sync] loaded ${mappings.length} role-to-badge mappings and ${linkedProfiles.length} Pixlo profiles linked to Discord; server member cache has ${guild.members.cache.size} members`);
     const mappingKeys = new Set(mappings.map(item => `${item.discord_role_id}:${item.badge_id}`));
     const profileById = new Map(linkedProfiles.map(profile => [profile.id, profile]));
     const desired = new Set();
@@ -141,7 +142,13 @@ async function syncBadges() {
 }
 
 client.once("ready", async () => {
-  console.log(`Pixlo badge worker logged in as ${client.user.tag}`);
+  console.log(`[discord] Logged in as ${client.user.tag} (bot ID: ${client.user.id})`);
+  try {
+    const guild = await client.guilds.fetch(GUILD_ID);
+    console.log(`[discord] Connected to configured server: ${guild.name} (${guild.id})`);
+  } catch (error) {
+    console.error(`[discord] Cannot access configured server ${GUILD_ID}:`, error instanceof Error ? error.message : error);
+  }
   await syncBadges();
   setInterval(() => void syncBadges(), INTERVAL_MS);
 });
