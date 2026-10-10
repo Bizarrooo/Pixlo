@@ -58,14 +58,19 @@ create policy "Anyone can read active badges"
   to anon, authenticated
   using (is_active = true);
 
--- Badge awards can be displayed on public profiles. Writes are reserved for
--- trusted server-side code using the Supabase service-role key.
-grant select on public.user_badges to anon, authenticated;
-drop policy if exists "Anyone can read badge awards" on public.user_badges;
-create policy "Anyone can read badge awards"
-  on public.user_badges for select
-  to anon, authenticated
-  using (true);
+-- Keep award source, role IDs, and awarder IDs private. The public view exposes
+-- only the fields needed to render badges and respects the user's hide setting.
+revoke all on public.user_badges from anon, authenticated;
+drop view if exists public.public_badge_awards;
+create view public.public_badge_awards
+with (security_invoker = false)
+as
+select ub.user_id, ub.badge_id, ub.awarded_at
+from public.user_badges ub
+join public.badges b on b.id = ub.badge_id and b.is_active = true
+join public.profiles p on p.id = ub.user_id and p.badges_hidden = false;
+
+grant select on public.public_badge_awards to anon, authenticated;
 
 -- Role mappings are private to trusted server-side code.
 revoke all on public.discord_role_badges from anon, authenticated;
