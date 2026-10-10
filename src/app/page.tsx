@@ -90,6 +90,7 @@ export default function Home() {
             <a href="#showcase">Showcase</a>
             <a href="#why-pixlo">Why Pixlo</a>
             <a href="#pricing">Pricing</a>
+            <a href="#donate">Donate</a>
           </div>
 
           <div className="home-nav-actions">
@@ -202,6 +203,33 @@ export default function Home() {
           <ProfileMockup variant="alt" />
           <div className="showcase-label"><span>Pixlo</span><b>your space on the web.</b></div>
         </div>
+      </section>
+
+      <section id="donate" className="home-section" style={{ paddingTop: "72px", paddingBottom: "72px" }}>
+        <div className="home-section-heading">
+          <div>
+            <span className="home-section-kicker">SUPPORT THE PROJECT</span>
+            <h2>Help Pixlo keep growing.</h2>
+          </div>
+          <p>Pixlo started as a project built from scratch. If you enjoy using it, donations can help support future improvements and running costs.</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: "18px", marginTop: "28px" }}>
+          <article className="home-feature-card" style={{ minHeight: "220px" }}>
+            <div className="home-feature-icon"><Icon name="shield" size={21} /></div>
+            <span className="home-feature-number">OPTION 01</span>
+            <h3>Bank transfer</h3>
+            <p>Barclays transfers will be available once a safe receiving method has been arranged. Personal bank details will not be displayed publicly.</p>
+            <span style={{ display: "inline-flex", alignSelf: "flex-start", marginTop: "auto", padding: "7px 11px", borderRadius: "999px", border: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.68)", fontSize: "12px" }}>Setup in progress</span>
+          </article>
+          <article className="home-feature-card" style={{ minHeight: "220px" }}>
+            <div className="home-feature-icon"><Icon name="bolt" size={21} /></div>
+            <span className="home-feature-number">OPTION 02</span>
+            <h3>Pay by card</h3>
+            <p>Secure card donations will be added after a payment account is configured and verified with a parent or guardian where required.</p>
+            <span style={{ display: "inline-flex", alignSelf: "flex-start", marginTop: "auto", padding: "7px 11px", borderRadius: "999px", border: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.68)", fontSize: "12px" }}>Setup in progress</span>
+          </article>
+        </div>
+        <p style={{ marginTop: "18px", color: "rgba(255,255,255,.48)", fontSize: "12px", lineHeight: 1.7 }}>Donations are optional. Please only contribute if you want to, and never share private banking information in public.</p>
       </section>
 
       <section className="home-cta" id="pricing">
