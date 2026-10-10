@@ -3514,3 +3514,51 @@ html, body, *, *::before, *::after {
 .preview-frame.preview-parallax-returning .preview-card > .preview-banner {
   transition: translate 680ms cubic-bezier(.22,.75,.15,1) !important;
 }
+
+
+/* Pixlo badge management */
+.badge-admin-page { min-height:100vh; background:#08080b; color:#f7f7fa; padding:42px 18px 72px; }
+.badge-admin-shell { max-width:900px; margin:0 auto; }
+.badge-admin-back { display:inline-flex; color:#aaaab7; font-size:13px; margin-bottom:24px; }
+.badge-admin-back:hover { color:#fff; }
+.badge-admin-heading { margin-bottom:26px; }
+.badge-admin-eyebrow { color:#9c8cff; font-size:10px; font-weight:800; letter-spacing:.2em; }
+.badge-admin-heading h1 { margin:8px 0; font-size:clamp(30px,5vw,44px); letter-spacing:-.05em; }
+.badge-admin-heading p,.badge-admin-muted { color:#9696a5; font-size:13px; line-height:1.6; }
+.badge-admin-message { padding:12px 14px; border:1px solid #333340; border-radius:12px; background:#15151b; color:#e3e3eb; font-size:13px; margin:0 0 18px; overflow-wrap:anywhere; }
+.badge-admin-panel { padding:22px; border:1px solid #25252e; border-radius:17px; background:#101015; margin:16px 0; }
+.badge-admin-panel h2 { display:flex; align-items:center; gap:10px; font-size:17px; margin:0 0 18px; }
+.badge-admin-panel h2 span { color:#a3a3b1; font-size:12px; font-weight:500; }
+.badge-admin-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px; }
+.badge-admin-form label { display:grid; gap:7px; color:#c9c9d4; font-size:12px; }
+.badge-admin-form input,.badge-admin-form select { min-width:0; width:100%; color:#f7f7fa; background:#09090d; border:1px solid #30303a; border-radius:9px; padding:11px 12px; outline:none; font-size:13px; }
+.badge-admin-form input:focus,.badge-admin-form select:focus { border-color:#8e7cff; }
+.badge-admin-form button { grid-column:1/-1; border:0; border-radius:9px; padding:11px 14px; background:#f4f2ff; color:#14121d; font-size:13px; font-weight:800; cursor:pointer; }
+.badge-admin-form button:disabled,.badge-admin-item button:disabled { opacity:.5; cursor:not-allowed; }
+.badge-admin-note { color:#777786; font-size:11px; line-height:1.6; margin:12px 0 0; }
+.badge-admin-list { display:grid; gap:9px; margin-top:12px; }
+.badge-admin-item { display:flex; align-items:center; gap:12px; padding:12px; border:1px solid #292932; border-radius:12px; background:#0b0b0f; min-width:0; }
+.badge-admin-icon { flex:none; width:38px; height:38px; display:grid; place-items:center; border-radius:10px; background:#1a1826; color:#c6baff; font-size:21px; overflow:hidden; }
+.badge-admin-icon img { width:100%; height:100%; object-fit:cover; }
+.badge-admin-info { display:grid; gap:4px; min-width:0; flex:1; }
+.badge-admin-info strong { font-size:13px; }
+.badge-admin-info small { color:#858594; font-size:11px; overflow-wrap:anywhere; }
+.badge-admin-info p { margin:0; color:#aaaab7; font-size:11px; }
+.badge-admin-item button { flex:none; border:1px solid #34343e; border-radius:8px; padding:8px 10px; color:#e8e8f0; background:#19191f; font-size:11px; cursor:pointer; }
+.badge-admin-item .badge-admin-danger { color:#ffaaa9; }
+.pixlo-name-badge { width:18px; height:18px; flex:none; display:inline-grid; place-items:center; overflow:hidden; border-radius:5px; background:rgba(255,255,255,.09); color:var(--accent); vertical-align:middle; }
+.pixlo-name-badge img { display:block; width:100%; height:100%; object-fit:contain; }
+.pixlo-name-badge-fallback { font-size:13px; }
+.pixlo-profile-badges { width:100%; max-width:540px; margin-top:3px; display:grid; gap:9px; }
+.pixlo-profile-badges-heading { color:color-mix(in srgb,var(--text) 43%,transparent); font-size:9px; font-weight:800; letter-spacing:.17em; }
+.pixlo-profile-badges-list { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:8px; }
+.pixlo-profile-badge { display:inline-flex; align-items:center; gap:6px; max-width:100%; padding:6px 9px; border:1px solid color-mix(in srgb,var(--text) 12%,transparent); border-radius:999px; background:rgba(0,0,0,.18); color:var(--text-colour); font-size:10px; line-height:1; }
+.pixlo-profile-badge img { width:17px; height:17px; object-fit:contain; border-radius:4px; }
+@media (max-width:600px) {
+  .badge-admin-page { padding:26px 12px 52px; }
+  .badge-admin-panel { padding:16px; }
+  .badge-admin-form { grid-template-columns:minmax(0,1fr); }
+  .badge-admin-form button { grid-column:auto; }
+  .badge-admin-item { align-items:flex-start; flex-wrap:wrap; }
+  .badge-admin-item button { margin-left:auto; }
+}
