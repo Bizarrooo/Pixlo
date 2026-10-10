@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
     const uploadUrl = `${url}/storage/v1/object/upload/sign/pixlo-assets/${encodedPath}?token=${encodeURIComponent(signData.token)}`;
     const publicUrl = `${url}/storage/v1/object/public/pixlo-assets/${encodedPath}`;
-    return NextResponse.json({ uploadUrl, publicUrl });
+    return NextResponse.json({ uploadUrl, publicUrl, uploadAuthorization: `Bearer ${accessToken}`, uploadApiKey: key });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Unable to prepare this upload." }, { status: 500 });
   }
