@@ -396,8 +396,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
               const video = event.currentTarget;
               if (!entered) { video.pause(); video.currentTime = 0; return; }
               video.volume = 1;
-              video.muted = Boolean(activeTrack);
-              void video.play().catch(() => { if (!activeTrack) video.muted = true; void video.play().catch(() => {}); });
+              video.muted = Boolean(activeTrack) || settings.backgroundVideoMusicDisabled;
+              void video.play().catch(() => { if (!activeTrack && !settings.backgroundVideoMusicDisabled) video.muted = true; void video.play().catch(() => {}); });
             }}
           />
         )}
