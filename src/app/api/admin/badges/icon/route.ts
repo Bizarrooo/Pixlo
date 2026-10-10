@@ -36,15 +36,23 @@ export async function POST(request: Request) {
   const headers = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
   const bucketUrl = `${supabaseUrl}/storage/v1/bucket`;
   const check = await fetch(`${bucketUrl}/badge-icons`, { headers, cache: "no-store" });
-  if (check.status === 404) {
-    const create = await fetch(bucketUrl, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ id: "badge-icons", name: "badge-icons", public: true, file_size_limit: MAX_FILE_SIZE, allowed_mime_types: Object.keys(ALLOWED_TYPES) }), cache: "no-store" });
+  const checkBody = await check.text().catch(() => "");
+  const checkDetails = (() => { try { return JSON.parse(checkBody); } catch { return null; } })();
+  const bucketMissing = check.status === 404 || (check.status === 400 && (checkDetails?.code === "NoSuchBucket" || checkDetails?.message === "Bucket not found"));
+
+  if (bucketMissing) {
+    const create = await fetch(bucketUrl, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ id: "badge-icons", name: "badge-icons", public: true, file_size_limit: MAX_FILE_SIZE, allowed_mime_types: Object.keys(ALLOWED_TYPES) }),
+      cache: "no-store",
+    });
     if (!create.ok && create.status !== 409) {
       const detail = (await create.text().catch(() => "")).slice(0, 240);
       return NextResponse.json({ error: "Could not create the badge icon storage bucket (HTTP " + create.status + "). " + detail }, { status: 503 });
     }
   } else if (!check.ok) {
-    const detail = (await check.text().catch(() => "")).slice(0, 240);
-    return NextResponse.json({ error: "Could not access badge icon storage (HTTP " + check.status + "). " + detail }, { status: 503 });
+    return NextResponse.json({ error: "Could not access badge icon storage (HTTP " + check.status + "). " + checkBody.slice(0, 240) }, { status: 503 });
   }
 
   const objectPath = `${randomUUID()}.${extension}`;
