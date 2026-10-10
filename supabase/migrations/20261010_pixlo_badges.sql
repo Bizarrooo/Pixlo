@@ -75,7 +75,7 @@ grant select on public.public_badge_awards to anon, authenticated;
 -- Role mappings are private to trusted server-side code.
 revoke all on public.discord_role_badges from anon, authenticated;
 grant all on public.discord_role_badges to service_role;
-grant insert, update, delete on public.badges to service_role;
-grant insert, update, delete on public.user_badges to service_role;
+grant select, insert, update, delete on public.badges to service_role;
+grant select, insert, update, delete on public.user_badges to service_role;
 
 notify pgrst, 'reload schema';
