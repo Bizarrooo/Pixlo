@@ -3562,3 +3562,7 @@ html, body, *, *::before, *::after {
   .badge-admin-item { align-items:flex-start; flex-wrap:wrap; }
   .badge-admin-item button { margin-left:auto; }
 }
+
+.badge-admin-dashboard-link { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border:1px solid #34313f; border-radius:12px; background:#17151e; color:#e6ddff; font-size:13px; font-weight:700; margin-top:12px; }
+.badge-admin-dashboard-link span { font-size:18px; }
+.badge-admin-dashboard-link:hover { border-color:#8272bb; background:#1c1926; }
