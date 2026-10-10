@@ -38,9 +38,13 @@ export async function POST(request: Request) {
   const check = await fetch(`${bucketUrl}/badge-icons`, { headers, cache: "no-store" });
   if (check.status === 404) {
     const create = await fetch(bucketUrl, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ id: "badge-icons", name: "badge-icons", public: true, file_size_limit: MAX_FILE_SIZE, allowed_mime_types: Object.keys(ALLOWED_TYPES) }), cache: "no-store" });
-    if (!create.ok && create.status !== 409) return NextResponse.json({ error: "Could not create the badge icon storage bucket." }, { status: 503 });
+    if (!create.ok && create.status !== 409) {
+      const detail = (await create.text().catch(() => "")).slice(0, 240);
+      return NextResponse.json({ error: "Could not create the badge icon storage bucket (HTTP " + create.status + "). " + detail }, { status: 503 });
+    }
   } else if (!check.ok) {
-    return NextResponse.json({ error: "Could not access badge icon storage." }, { status: 503 });
+    const detail = (await check.text().catch(() => "")).slice(0, 240);
+    return NextResponse.json({ error: "Could not access badge icon storage (HTTP " + check.status + "). " + detail }, { status: 503 });
   }
 
   const objectPath = `${randomUUID()}.${extension}`;
@@ -50,6 +54,9 @@ export async function POST(request: Request) {
     body: await file.arrayBuffer(),
     cache: "no-store",
   });
-  if (!upload.ok) return NextResponse.json({ error: "The icon upload failed. Check Supabase Storage settings." }, { status: 503 });
+  if (!upload.ok) {
+    const detail = (await upload.text().catch(() => "")).slice(0, 240);
+    return NextResponse.json({ error: "The icon upload failed (HTTP " + upload.status + "). " + detail }, { status: 503 });
+  }
   return NextResponse.json({ url: `${supabaseUrl}/storage/v1/object/public/badge-icons/${objectPath}` });
 }
