@@ -3593,3 +3593,20 @@ html, body, *, *::before, *::after {
 
 .pixlo-badge-icon-tint{display:inline-block;flex:none;width:17px;height:17px;background:var(--badge-colour,#fff);mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-position:center;-webkit-mask-position:center;mask-size:contain;-webkit-mask-size:contain;filter:drop-shadow(0 0 3px var(--badge-colour,#fff))}
 .pixlo-name-badge .pixlo-badge-icon-tint{width:18px;height:18px}
+
+
+/* Badge icon-only display and stable editor row sizing. */
+.profile-page .pixlo-profile-badge{width:34px;height:34px;min-width:34px;max-width:34px;padding:0;justify-content:center;border-radius:50%;position:relative;overflow:visible}
+.profile-page .pixlo-profile-badge .pixlo-badge-icon-tint{width:19px;height:19px}
+.profile-page .pixlo-profile-badge:hover::after{content:attr(title);position:absolute;z-index:50;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%);padding:6px 9px;border-radius:7px;background:rgba(18,14,12,.96);color:#fff;font-size:11px;line-height:1.2;white-space:nowrap;box-shadow:0 5px 20px rgba(0,0,0,.35);pointer-events:none}
+.profile-page .pixlo-profile-badges-list{gap:10px}
+.profile-page .profile-name-row h1{background:transparent!important;box-shadow:none!important;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.profile-page .element-glow-name{background:transparent!important;box-shadow:none!important}
+.profile-page .profile-name-row h1.element-glow-name{text-shadow:0 0 2px var(--accent),0 0 6px var(--accent),0 0 14px color-mix(in srgb,var(--accent) 85%,transparent),0 0 26px color-mix(in srgb,var(--accent) 55%,transparent)!important;filter:none!important}
+.profile-page .element-glow-description,.profile-page .element-glow-location{text-shadow:0 0 2px var(--accent),0 0 7px var(--accent),0 0 16px color-mix(in srgb,var(--accent) 80%,transparent)!important;filter:none!important}
+.profile-page .element-glow-socials .social{filter:drop-shadow(0 0 3px var(--accent)) drop-shadow(0 0 9px var(--accent)) drop-shadow(0 0 19px color-mix(in srgb,var(--accent) 70%,transparent))!important}
+.dashboard .pixlo-badge-editor-list .active-link-row{grid-template-columns:30px 34px minmax(0,1fr) 42px!important;min-height:66px!important;gap:12px!important;overflow:hidden}
+.dashboard .pixlo-badge-editor-list .pixlo-badge-editor-info{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;min-width:0;width:100%;gap:4px;text-align:left}
+.dashboard .pixlo-badge-editor-list .pixlo-badge-editor-info b{display:block;width:100%;font-size:13px;line-height:1.25;color:#211a15;white-space:normal;overflow-wrap:anywhere;overflow:visible;text-overflow:clip}
+.dashboard .pixlo-badge-editor-list .pixlo-badge-editor-info span{display:block;width:100%;font-size:11px;line-height:1.3;white-space:normal;overflow-wrap:anywhere;color:rgba(62,48,38,.68)}
+.dashboard .pixlo-badge-editor-list .badge-admin-icon{width:34px;height:34px;flex:none}
