@@ -216,12 +216,12 @@ export default function Home() {
         <article className="home-feature-card" style={{ minHeight: "250px", maxWidth: "760px", margin: "28px auto 0", width: "100%", padding: "clamp(24px, 5vw, 42px)" }}>
           <div className="home-feature-icon"><Icon name="bolt" size={21} /></div>
           <span className="home-feature-number">OFFICIAL DONATION LINK</span>
-          <h3>Support Pixlo with PayPal.</h3>
-          <p>Donate securely through PayPal's hosted checkout. You can review the donation and available payment methods there before confirming. Donations are completely optional, and any amount is appreciated.</p>
-          <a href="https://www.paypal.com/donate/?hosted_button_id=4YWKKPCE925QE" target="_blank" rel="noopener noreferrer" className="home-primary-btn" style={{ alignSelf: "flex-start", marginTop: "12px" }}>Donate with PayPal <Icon name="arrow" size={17} /></a>
-          <span style={{ color: "rgba(255,255,255,.42)", fontSize: "12px", marginTop: "8px" }}>Opens PayPal in a new tab.</span>
+          <h3>Support Pixlo with Stripe.</h3>
+          <p>Support Pixlo securely through Stripe's hosted checkout. Choose the amount you want to contribute. Donations are completely optional, and every contribution helps us improve the platform.</p>
+          <a href="https://buy.stripe.com/7sYaEY7DJbSigko0Nj9EI00" target="_blank" rel="noopener noreferrer" className="home-primary-btn" style={{ alignSelf: "flex-start", marginTop: "12px" }}>Donate with Stripe <Icon name="arrow" size={17} /></a>
+          <span style={{ color: "rgba(255,255,255,.42)", fontSize: "12px", marginTop: "8px" }}>Opens Stripe in a new tab.</span>
         </article>
-        <p style={{ marginTop: "18px", color: "rgba(255,255,255,.48)", fontSize: "12px", lineHeight: 1.7 }}>Please only donate if you want to. Payment processing is handled by PayPal; Pixlo does not collect or store your card details.</p>
+        <p style={{ marginTop: "18px", color: "rgba(255,255,255,.48)", fontSize: "12px", lineHeight: 1.7 }}>Please only donate if you want to. Payment processing is handled by Stripe; Pixlo does not collect or store your card details.</p>
       </section>
 
       <section className="home-cta" id="pricing">
