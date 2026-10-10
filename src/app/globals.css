@@ -3729,3 +3729,15 @@ html, body, *, *::before, *::after {
   background:none!important;
   box-shadow:none!important;
 }
+
+
+/* Badge placement options: beside the avatar or below the complete profile. */
+.profile-avatar-badge-row,.preview-avatar-badge-row{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;}
+.profile-avatar-badge-row .pixlo-side-badges,.preview-avatar-badge-row .pixlo-side-badges{width:auto;max-width:120px;min-width:0;margin:0;flex:0 1 auto;}
+.profile-avatar-badge-row .pixlo-side-badges .pixlo-profile-badges-list,.preview-avatar-badge-row .pixlo-side-badges .pixlo-profile-badges-list{flex-direction:column;flex-wrap:nowrap;gap:6px;}
+.profile-avatar-badge-row .pixlo-side-badges .pixlo-profile-badge,.preview-avatar-badge-row .pixlo-side-badges .pixlo-profile-badge{max-width:100%;}
+.profile-avatar-badge-row .avatar-wrap,.preview-avatar-badge-row .preview-avatar-wrap{flex:none;}
+.pixlo-badges-icon-only .pixlo-profile-badge{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;min-width:0!important;min-height:0!important;}
+.pixlo-badges-icon-only .pixlo-badge-icon-tint{width:24px;height:24px;display:block;background:var(--badge-colour,#fff);mask-size:contain;-webkit-mask-size:contain;mask-position:center;-webkit-mask-position:center;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;}
+.pixlo-badges-icon-only .pixlo-profile-badge img{width:24px;height:24px;border-radius:0;}
+@media(max-width:600px){.profile-avatar-badge-row,.preview-avatar-badge-row{gap:6px}.profile-avatar-badge-row .pixlo-side-badges,.preview-avatar-badge-row .pixlo-side-badges{max-width:76px}.profile-avatar-badge-row .pixlo-side-badges .pixlo-profile-badge,.preview-avatar-badge-row .pixlo-side-badges .pixlo-profile-badge{padding:4px 6px}}
