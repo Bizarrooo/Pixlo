@@ -898,6 +898,7 @@ export default function Dashboard() {
               </div>
               {viewToolMessage && <p className="view-admin-message" role="status">{viewToolMessage}</p>}
             </div>}
+            {canManageOwnViews && <a className="badge-admin-dashboard-link" href="/dashboard/badges">Manage Pixlo badges <span>→</span></a>}
           </div>}
           {active === "Stats" && <div className="form-stack stats-page">
             <SectionIntro number="12" title="Your stats" text="Your Pixlo profile performance, all in one place." />
