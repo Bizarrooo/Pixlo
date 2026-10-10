@@ -636,13 +636,13 @@ export default function Dashboard() {
       const importedTrack = current.musicTracks.find(track => track.source === "background-video");
       if (!url) {
         const musicTracks = current.musicTracks.filter(track => track.source !== "background-video");
-        return { ...current, backgroundVideo: "", musicTracks, activeMusicId: importedTrack && current.activeMusicId === importedTrack.id ? musicTracks[0]?.id || "" : current.activeMusicId };
+        return { ...current, backgroundVideo: "", backgroundVideoMusicDisabled: false, musicTracks, activeMusicId: importedTrack && current.activeMusicId === importedTrack.id ? musicTracks[0]?.id || "" : current.activeMusicId };
       }
       if (importedTrack) {
-        return { ...current, backgroundVideo: url, musicTracks: current.musicTracks.map(track => track.source === "background-video" ? { ...track, audio: url } : track), activeMusicId: importedTrack.id };
+        return { ...current, backgroundVideo: url, backgroundVideoMusicDisabled: false, musicTracks: current.musicTracks.map(track => track.source === "background-video" ? { ...track, audio: url } : track), activeMusicId: importedTrack.id };
       }
       const track: MusicTrack = { id: crypto.randomUUID(), title: "Imported Music", artist: "Background video", audio: url, cover: "", source: "background-video" };
-      return { ...current, backgroundVideo: url, musicTracks: [...current.musicTracks, track], activeMusicId: track.id };
+      return { ...current, backgroundVideo: url, backgroundVideoMusicDisabled: false, musicTracks: [...current.musicTracks, track], activeMusicId: track.id };
     });
   };
 
@@ -651,7 +651,7 @@ export default function Dashboard() {
     if (track.cover) await deleteAsset(track.cover);
     setSettings(s => {
       const tracks = s.musicTracks.filter(t => t.id !== track.id);
-      return { ...s, musicTracks: tracks, activeMusicId: s.activeMusicId === track.id ? tracks[0]?.id || "" : s.activeMusicId };
+      return { ...s, backgroundVideoMusicDisabled: track.source === "background-video" ? true : s.backgroundVideoMusicDisabled, musicTracks: tracks, activeMusicId: s.activeMusicId === track.id ? tracks[0]?.id || "" : s.activeMusicId };
     });
   };
 
