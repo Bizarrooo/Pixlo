@@ -1,0 +1,16 @@
+{
+  "name": "pixlo-discord-badge-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Syncs Discord server roles to Pixlo profile badges.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "discord.js": "^14.22.1"
+  }
+}
