@@ -47,7 +47,6 @@ export async function POST(request: Request) {
   const { url } = supabaseConfig();
   const body = await request.json().catch(() => null) as Row | null;
   const action = body?.action;
-  const headers = adminHeaders(serviceKey, { Prefer: "return=representation" });
   const json = (data: unknown, status = 200) => NextResponse.json(data, { status });
   const requestDb = async (path: string, method: string, data?: unknown, prefer = "return=representation") => fetch(`${url}/rest/v1/${path}`, { method, headers: adminHeaders(serviceKey, { Prefer: prefer }), ...(data === undefined ? {} : { body: JSON.stringify(data) }), cache: "no-store" });
 
