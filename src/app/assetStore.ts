@@ -14,14 +14,28 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 export async function saveAsset(file: File): Promise<string> {
-  const form = new FormData();
-  form.append("file", file);
-  const response = await fetch("/api/assets", { method: "POST", credentials: "include", body: form });
+  const response = await fetch("/api/assets", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: file.name, type: file.type || "application/octet-stream", size: file.size }),
+  });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok || typeof data.url !== "string") {
-    throw new Error(data.error || "The file could not be uploaded to cloud storage.");
+  if (!response.ok || typeof data.uploadUrl !== "string" || typeof data.publicUrl !== "string") {
+    throw new Error(data.error || "Pixlo could not prepare this cloud upload.");
   }
-  return data.url;
+
+  const uploadResponse = await fetch(data.uploadUrl, {
+    method: "POST",
+    headers: { "Content-Type": file.type || "application/octet-stream", "x-upsert": "false" },
+    body: file,
+  });
+  if (!uploadResponse.ok) {
+    const detail = await uploadResponse.json().catch(() => ({}));
+    const message = typeof detail.message === "string" ? detail.message : typeof detail.error === "string" ? detail.error : "";
+    throw new Error(message || `Cloud upload failed (${uploadResponse.status}). Please try again or use a smaller file.`);
+  }
+  return data.publicUrl;
 }
 
 export async function migrateAssetToCloud(value: string): Promise<string> {
