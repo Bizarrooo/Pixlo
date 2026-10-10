@@ -21,13 +21,13 @@ export async function saveAsset(file: File): Promise<string> {
     body: JSON.stringify({ name: file.name, type: file.type || "application/octet-stream", size: file.size }),
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok || typeof data.uploadUrl !== "string" || typeof data.publicUrl !== "string") {
+  if (!response.ok || typeof data.uploadUrl !== "string" || typeof data.publicUrl !== "string" || typeof data.uploadAuthorization !== "string" || typeof data.uploadApiKey !== "string") {
     throw new Error(data.error || "Pixlo could not prepare this cloud upload.");
   }
 
   const uploadResponse = await fetch(data.uploadUrl, {
     method: "POST",
-    headers: { "Content-Type": file.type || "application/octet-stream", "x-upsert": "false" },
+    headers: { Authorization: data.uploadAuthorization, apikey: data.uploadApiKey, "Content-Type": file.type || "application/octet-stream", "x-upsert": "false" },
     body: file,
   });
   if (!uploadResponse.ok) {
