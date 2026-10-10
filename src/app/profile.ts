@@ -92,6 +92,9 @@ export type ProfileSettings = {
   badgeStyle: "default" | "icon";
   badgeColour: string;
   badgeGlow: boolean;
+  badgeGlowIntensity: number;
+  badgeUnderline: boolean;
+  badgeUnderlineGlow: boolean;
   musicTracks: MusicTrack[];
   activeMusicId: string;
   musicAutoplay: boolean;
@@ -226,6 +229,9 @@ export const defaultSettings: ProfileSettings = {
   badgeStyle: "default",
   badgeColour: "#ffffff",
   badgeGlow: true,
+  badgeGlowIntensity: 65,
+  badgeUnderline: true,
+  badgeUnderlineGlow: false,
   musicTracks: [],
   activeMusicId: "",
   musicAutoplay: true,
@@ -338,6 +344,9 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     badgeStyle: parsed.badgeStyle === "icon" ? "icon" : "default",
     badgeColour: typeof parsed.badgeColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.badgeColour) ? parsed.badgeColour : defaultSettings.badgeColour,
     badgeGlow: typeof parsed.badgeGlow === "boolean" ? parsed.badgeGlow : defaultSettings.badgeGlow,
+    badgeGlowIntensity: typeof parsed.badgeGlowIntensity === "number" && Number.isFinite(parsed.badgeGlowIntensity) ? Math.min(100, Math.max(0, parsed.badgeGlowIntensity)) : defaultSettings.badgeGlowIntensity,
+    badgeUnderline: typeof parsed.badgeUnderline === "boolean" ? parsed.badgeUnderline : defaultSettings.badgeUnderline,
+    badgeUnderlineGlow: typeof parsed.badgeUnderlineGlow === "boolean" ? parsed.badgeUnderlineGlow : defaultSettings.badgeUnderlineGlow,
     avatarDecoration: ["none", "halo", "orbit", "flame"].includes(parsed.avatarDecoration) ? parsed.avatarDecoration : defaultSettings.avatarDecoration,
     discordAvatarUrl: typeof parsed.discordAvatarUrl === "string" ? parsed.discordAvatarUrl : "",
     discordAvatarDecorationUrl: typeof parsed.discordAvatarDecorationUrl === "string" ? parsed.discordAvatarDecorationUrl : "",
