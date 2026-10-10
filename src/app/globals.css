@@ -3566,3 +3566,19 @@ html, body, *, *::before, *::after {
 .badge-admin-dashboard-link { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border:1px solid #34313f; border-radius:12px; background:#17151e; color:#e6ddff; font-size:13px; font-weight:700; margin-top:12px; }
 .badge-admin-dashboard-link span { font-size:18px; }
 .badge-admin-dashboard-link:hover { border-color:#8272bb; background:#1c1926; }
+
+
+/* High-contrast leaderboard: keep the pastel page background, but give rows a solid readable surface. */
+.stats-page .leaderboard-heading h3{color:#17151d!important;text-shadow:none!important}
+.stats-page .leaderboard-heading>div>span,.stats-page .leaderboard-heading p,.stats-page .stats-footnote{color:#514957!important}
+.stats-page .leaderboard-heading button,.stats-page .leaderboard-load{background:#24202b!important;border:1px solid #24202b!important;color:#fff!important;font-weight:700!important;box-shadow:0 3px 10px rgba(30,20,35,.14)!important}
+.stats-page .leaderboard-row{background:rgba(255,255,255,.94)!important;border:1px solid rgba(55,40,65,.16)!important;box-shadow:0 3px 12px rgba(48,28,52,.07)!important}
+.stats-page .leaderboard-person b,.stats-page .leaderboard-row>strong{color:#211b27!important;text-shadow:none!important}
+.stats-page .leaderboard-person small,.stats-page .leaderboard-row>strong small{color:#625767!important}
+.stats-page .leaderboard-rank{background:#eee8f1!important;color:#34283a!important}
+.stats-page .leaderboard-rank-1{background:linear-gradient(100deg,#fff3c9,#fff)!important;border-color:#d5a12d!important}
+.stats-page .leaderboard-rank-2{background:linear-gradient(100deg,#edf2f8,#fff)!important;border-color:#9eacbf!important}
+.stats-page .leaderboard-rank-3{background:linear-gradient(100deg,#fff0e5,#fff)!important;border-color:#c17b4d!important}
+.stats-page .leaderboard-you{background:linear-gradient(100deg,#d9fff0,#fff)!important;border:1px solid #35bd8b!important;outline:1px solid rgba(53,189,139,.35)!important}
+.stats-page .leaderboard-you .leaderboard-person b,.stats-page .leaderboard-you>strong{color:#123b2c!important}
+.stats-page .leaderboard-ellipsis,.stats-page .leaderboard-empty{color:#514957!important}
