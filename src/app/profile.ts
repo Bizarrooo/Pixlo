@@ -13,6 +13,7 @@ export type MusicTrack = {
   artist: string;
   audio: string;
   cover: string;
+  source?: "background-video";
 };
 
 export type ProfileSettings = {
