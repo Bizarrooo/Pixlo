@@ -57,6 +57,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const [entering, setEntering] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [assets, setAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", musicCover: "", musicAudio: "", musicMediaType: "", customLinkIcons: {} as Record<string, string> });
+  const [profileBadges, setProfileBadges] = useState<Array<{ id: string; name: string; icon_url: string | null; description: string }>>([]);
   const [trackIndex, setTrackIndex] = useState(0);
   const [musicVideoFallback, setMusicVideoFallback] = useState(false);
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
@@ -114,6 +115,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         return await response.json().catch(() => null);
       })
       .then(async data => {
+        if (!cancelled) setProfileBadges(Array.isArray(data?.profile?.badges) ? data.profile.badges : []);
         const remote = data?.profile?.settings;
         if (cancelled || !remote || typeof remote !== "object" || Object.keys(remote).length === 0) return;
         const current = normaliseProfileSettings(remote, { username: data.profile.username || username, displayName: data.profile.displayName || data.profile.username || username });
@@ -443,8 +445,10 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             <div className="profile-name-row">
               <h1 className={`${settings.nameGlow ? "element-glow-name " : ""}${animationClass(settings.nameAnimation)}`} style={{ fontFamily: fontFamily(settings.nameFont), fontWeight: settings.nameBold ? 700 : 400, fontStyle: settings.nameItalic ? "italic" : "normal" }}>{settings.displayName || settings.username}</h1>
               {settings.username.toLowerCase() === "qasim" && settings.showVerified && <span className="verified-dot">✓</span>}
+              {profileBadges.map(badge => badge.icon_url ? <span className="pixlo-name-badge" key={badge.id} title={badge.name}><img src={badge.icon_url} alt={badge.name} /></span> : <span className="pixlo-name-badge pixlo-name-badge-fallback" key={badge.id} title={badge.name}>✦</span>)}
             </div>
-            <div className={`username ${animationClass(settings.usernameAnimation)}`} style={{ fontFamily: fontFamily(settings.usernameFont), fontWeight: settings.usernameBold ? 700 : 400, fontStyle: settings.usernameItalic ? "italic" : "normal", opacity: 1 }}>@{settings.username}</div>
+            {profileBadges.length > 0 && <section className="pixlo-profile-badges" aria-label="Badges"><div className="pixlo-profile-badges-heading">BADGES</div><div className="pixlo-profile-badges-list">{profileBadges.map(badge => <div className="pixlo-profile-badge" key={badge.id} title={badge.description || badge.name}>{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}<span>{badge.name}</span></div>)}</div></section>}
+            <div className={`username ${animationClass(settings.usernameAnimation)}` style={{ fontFamily: fontFamily(settings.usernameFont), fontWeight: settings.usernameBold ? 700 : 400, fontStyle: settings.usernameItalic ? "italic" : "normal", opacity: 1 }}>@{settings.username}</div>
             {settings.description && <p className={`description ${settings.descriptionGlow ? "element-glow-description " : ""}${animationClass(settings.descriptionAnimation)}`} style={{ fontFamily: fontFamily(settings.descriptionFont), fontWeight: settings.descriptionBold ? 700 : 400, fontStyle: settings.descriptionItalic ? "italic" : "normal" }}>{settings.description}</p>}
             {settings.showLocation && settings.location && <div className={`location ${settings.locationGlow ? "element-glow-location " : ""}${animationClass(settings.locationAnimation)}`} style={{ fontFamily: fontFamily(settings.locationFont), fontWeight: settings.locationBold ? 700 : 400, fontStyle: settings.locationItalic ? "italic" : "normal", opacity: 1 }}><span>⌖</span>{settings.location}</div>}
 
