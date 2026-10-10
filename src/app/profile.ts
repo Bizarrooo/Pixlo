@@ -93,6 +93,7 @@ export type ProfileSettings = {
   badgeColour: string;
   badgeGlow: boolean;
   badgeGlowIntensity: number;
+  badgeScale: number;
   badgeUnderline: boolean;
   badgeUnderlineGlow: boolean;
   musicTracks: MusicTrack[];
@@ -230,6 +231,7 @@ export const defaultSettings: ProfileSettings = {
   badgeColour: "#ffffff",
   badgeGlow: true,
   badgeGlowIntensity: 65,
+  badgeScale: 100,
   badgeUnderline: true,
   badgeUnderlineGlow: false,
   musicTracks: [],
@@ -345,6 +347,7 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     badgeColour: typeof parsed.badgeColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.badgeColour) ? parsed.badgeColour : defaultSettings.badgeColour,
     badgeGlow: typeof parsed.badgeGlow === "boolean" ? parsed.badgeGlow : defaultSettings.badgeGlow,
     badgeGlowIntensity: typeof parsed.badgeGlowIntensity === "number" && Number.isFinite(parsed.badgeGlowIntensity) ? Math.min(100, Math.max(0, parsed.badgeGlowIntensity)) : defaultSettings.badgeGlowIntensity,
+    badgeScale: typeof parsed.badgeScale === "number" && Number.isFinite(parsed.badgeScale) ? Math.min(150, Math.max(50, Math.round(parsed.badgeScale))) : defaultSettings.badgeScale,
     badgeUnderline: typeof parsed.badgeUnderline === "boolean" ? parsed.badgeUnderline : defaultSettings.badgeUnderline,
     badgeUnderlineGlow: typeof parsed.badgeUnderlineGlow === "boolean" ? parsed.badgeUnderlineGlow : defaultSettings.badgeUnderlineGlow,
     avatarDecoration: ["none", "halo", "orbit", "flame"].includes(parsed.avatarDecoration) ? parsed.avatarDecoration : defaultSettings.avatarDecoration,
