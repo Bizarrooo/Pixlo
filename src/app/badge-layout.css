@@ -30,9 +30,6 @@
 
 /* Final badge decoration layout: two real, centred lines sized to the badge group. */
 .pixlo-double-underline{
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:center!important;
   position:relative!important;
   width:max-content!important;
   max-width:100%!important;
