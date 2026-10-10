@@ -3493,3 +3493,24 @@ html, body, *, *::before, *::after {
     transition: none !important;
   }
 }
+
+
+/* Ease the parallax back to its resting position instead of snapping on pointer leave. */
+.profile-page.parallax-on.parallax-returning .profile-card {
+  transition: transform 680ms cubic-bezier(.22,.75,.15,1), box-shadow 240ms ease !important;
+}
+.profile-page.parallax-on.parallax-returning .background-image,
+.profile-page.parallax-on.parallax-returning .background-media,
+.profile-page.parallax-on.parallax-returning .ambient-one,
+.profile-page.parallax-on.parallax-returning .ambient-two {
+  transition: transform 680ms cubic-bezier(.22,.75,.15,1) !important;
+}
+.preview-frame.preview-parallax-returning .preview-card,
+.preview-frame.preview-parallax-returning .preview-bg,
+.preview-frame.preview-parallax-returning .preview-media {
+  transition: transform 680ms cubic-bezier(.22,.75,.15,1), translate 680ms cubic-bezier(.22,.75,.15,1), filter 300ms ease !important;
+}
+.preview-frame.preview-parallax-returning .preview-card-inner > *,
+.preview-frame.preview-parallax-returning .preview-card > .preview-banner {
+  transition: translate 680ms cubic-bezier(.22,.75,.15,1) !important;
+}
