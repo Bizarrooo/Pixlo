@@ -15,6 +15,7 @@ export default function BadgeManagementPage() {
   const [key, setKey] = useState("");
   const [description, setDescription] = useState("");
   const [iconUrl, setIconUrl] = useState("");
+  const [iconFile, setIconFile] = useState<File | null>(null);
   const [roleId, setRoleId] = useState("");
   const [mapBadgeId, setMapBadgeId] = useState("");
   const [awardUsername, setAwardUsername] = useState("");
@@ -58,8 +59,26 @@ export default function BadgeManagementPage() {
 
   async function createBadge(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await act({ action: "create_badge", badge_key: key, name, description, icon_url: iconUrl || null }, "Badge created.");
-    setName(""); setKey(""); setDescription(""); setIconUrl("");
+    let finalIconUrl = iconUrl.trim();
+    if (iconFile) {
+      setBusy(true);
+      setMessage("");
+      try {
+        const form = new FormData();
+        form.append("file", iconFile);
+        const upload = await fetch("/api/admin/badges/icon", { method: "POST", body: form });
+        const uploadData = await upload.json();
+        if (!upload.ok) throw new Error(uploadData.error || "Could not upload badge icon.");
+        finalIconUrl = uploadData.url;
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Could not upload badge icon.");
+        setBusy(false);
+        return;
+      }
+      setBusy(false);
+    }
+    await act({ action: "create_badge", badge_key: key, name, description, icon_url: finalIconUrl || null }, "Badge created.");
+    setName(""); setKey(""); setDescription(""); setIconUrl(""); setIconFile(null);
   }
 
   return (
@@ -79,10 +98,11 @@ export default function BadgeManagementPage() {
               <label>Badge name<input required maxLength={48} value={name} onChange={event => setName(event.target.value)} placeholder="Early Supporter" /></label>
               <label>Badge key<input required maxLength={48} value={key} onChange={event => setKey(event.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "-"))} placeholder="early-supporter" /></label>
               <label>Description<input maxLength={240} value={description} onChange={event => setDescription(event.target.value)} placeholder="Supported Pixlo early on" /></label>
-              <label>Icon image URL<input type="url" value={iconUrl} onChange={event => setIconUrl(event.target.value)} placeholder="https://…" /></label>
+              <label>Upload icon (PNG, JPG, WebP, GIF; max 2 MB)<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={event => setIconFile(event.target.files?.[0] || null)} /></label>
+              <label>Or use an icon image URL<input type="url" value={iconUrl} onChange={event => setIconUrl(event.target.value)} placeholder="https://…" /></label>
               <button disabled={busy} type="submit">Create badge</button>
             </form>
-            <p className="badge-admin-note">Use a direct HTTPS image URL for now. Custom file uploads can be added next.</p>
+            <p className="badge-admin-note">Uploaded icons are stored in the Pixlo Supabase Storage bucket and served as public badge images.</p>
           </section>
 
           <section className="badge-admin-panel">
