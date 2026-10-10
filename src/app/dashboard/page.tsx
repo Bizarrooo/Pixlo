@@ -11,6 +11,7 @@ const sections = [
   ["Background", "Image, video & backdrop", "04"],
   ["Profile", "Avatar, banner & card", "05"],
   ["Socials", "Links & icon layout", "06"],
+  ["Badges", "Discord rewards & profile badges", "13"],
   ["Music", "Tracks, covers & player", "07"],
   ["Effects", "Motion, glow & atmosphere", "08"],
   ["Layout", "Structure & alignment", "09"],
@@ -18,6 +19,8 @@ const sections = [
   ["Enter Screen", "Intro & click-to-enter", "11"],
   ["Stats", "Views & profile activity", "12"],
 ] as const;
+
+type DashboardBadge = { id: string; name: string; description: string; icon_url: string | null };
 
 const socials: [SocialKey, string][] = [
   ["discord", "Discord"], ["youtube", "YouTube"], ["roblox", "Roblox"], ["github", "GitHub"], ["twitch", "Twitch"], ["instagram", "Instagram"],
@@ -186,6 +189,9 @@ export default function Dashboard() {
   const [viewToolBusy, setViewToolBusy] = useState(false);
   const [savedIdentity, setSavedIdentity] = useState({ username: "", displayName: "" });
   const [badgesHidden, setBadgesHidden] = useState(false);
+  const [dashboardBadges, setDashboardBadges] = useState<DashboardBadge[]>([]);
+  const [dashboardBadgesLoading, setDashboardBadgesLoading] = useState(false);
+  const [dashboardBadgesError, setDashboardBadgesError] = useState("");
   const canUseVerifiedBadge = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const [usernameChangeAvailableAt, setUsernameChangeAvailableAt] = useState<string | null>(null);
@@ -211,6 +217,23 @@ export default function Dashboard() {
     fetch("/api/profile/badges-visibility", { cache: "no-store" }).then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || "Unable to load badge visibility."); return data; }).then(data => { if (!cancelled) setBadgesHidden(Boolean(data.hidden)); }).catch(() => {});
     return () => { cancelled = true; };
   }, []);
+  useEffect(() => {
+    if (active !== "Badges" || !settingsReady || !discordUser) return;
+    let cancelled = false;
+    setDashboardBadgesLoading(true);
+    setDashboardBadgesError("");
+    fetch(`/api/public-profile/${encodeURIComponent(settings.username)}`, { cache: "no-store" })
+      .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.profile) throw new Error(data.error || "Could not load your badges.");
+        return data.profile.badges as DashboardBadge[] | undefined;
+      })
+      .then(badges => { if (!cancelled) setDashboardBadges(Array.isArray(badges) ? badges : []); })
+      .catch(error => { if (!cancelled) setDashboardBadgesError(error instanceof Error ? error.message : "Could not load your badges."); })
+      .finally(() => { if (!cancelled) setDashboardBadgesLoading(false); });
+    return () => { cancelled = true; };
+  }, [active, settingsReady, settings.username, discordUser]);
+
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [previewAssets, setPreviewAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", enterScreenBackgroundImage: "", enterScreenBackgroundVideo: "", musicCover: "", customLinkIcons: {} as Record<string, string> });
   const [draftTrack, setDraftTrack] = useState<{ title: string; artist: string; audio: string; cover: string }>({ title: "", artist: "", audio: "", cover: "" });
@@ -677,6 +700,32 @@ export default function Dashboard() {
 
       <div className="editor-grid">
         <section className="editor">
+          {active === "Badges" && <div className="form-stack">
+            <SectionIntro title="Your Pixlo badges" />
+            {!discordUser ? <section className="discord-connect-card" style={{ padding: 24, borderRadius: 18 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+                <div className="discord-connect-icon"><SocialIcon name="discord" /></div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ margin: "0 0 8px", fontSize: 20 }}>Badges are locked</h3>
+                  <p style={{ margin: "0 0 18px", lineHeight: 1.65, opacity: 0.82 }}>Unlock this section once you link Discord and join the official Pixlo Discord server.</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                    <a className="connect-button" href="https://discord.gg/Bkz4P9gVy7" target="_blank" rel="noreferrer">Join official server ↗</a>
+                    <a className="connect-button discord-connect-action" href="/api/auth/discord">Link Discord <span aria-hidden="true">↗</span></a>
+                  </div>
+                  <p style={{ margin: "14px 0 0", fontSize: 12, opacity: 0.65 }}>Join the server first, then link your Discord account to unlock your badges.</p>
+                </div>
+              </div>
+            </section> : <>
+              <p className="hint">Your earned Pixlo badges appear here. Badges are linked to your Discord membership and eligible server roles.</p>
+              {dashboardBadgesLoading ? <div className="empty-state">Loading your badges…</div> : dashboardBadgesError ? <div className="discord-error-notice">{dashboardBadgesError}</div> : dashboardBadges.length === 0 ? <div className="empty-state">You haven't earned any badges yet. Keep an eye on the official Pixlo Discord server for roles and rewards.</div> : <div className="badge-admin-list">
+                {dashboardBadges.map(badge => <article className="badge-admin-item" key={badge.id}>
+                  <div className="badge-admin-icon">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
+                  <div className="badge-admin-info"><strong>{badge.name}</strong>{badge.description && <p>{badge.description}</p>}</div>
+                </article>)}
+              </div>}
+            </>}
+          </div>}
+
           {active === "General" && <div className="form-stack">
             <SectionIntro number="01" title="Identity, presence and first impression" text="Control exactly what visitors see before they explore anything else." />
             <Field label="Username" hint={usernameLockHint}><input value={settings.username} disabled={usernameLocked} maxLength={24} autoCapitalize="none" autoCorrect="off" onChange={e => set("username", e.target.value.replace(/[^a-zA-Z0-9._-]/g, "").toLowerCase().slice(0, 24))} /></Field>
