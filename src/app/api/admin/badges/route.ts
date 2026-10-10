@@ -95,8 +95,13 @@ export async function POST(request: Request) {
       const profile = Array.isArray(profiles) ? profiles[0] : null;
       if (!profile?.id) return json({ error: `Pixlo user @${username} was not found.` }, 404);
       if (action === "award_badge") {
-        const response = await requestDb("user_badges", "POST", { user_id: profile.id, badge_id: badgeId, source: "manual" }, "resolution=ignore-duplicates,return=representation");
-        if (!response.ok) return json({ error: "Could not award badge. Check that the badge exists." }, 400);
+        const existingResponse = await requestDb(`user_badges?select=id&user_id=eq.${encodeURIComponent(String(profile.id))}&badge_id=eq.${encodeURIComponent(badgeId)}&source=eq.manual&limit=1`, "GET", undefined, "return=representation");
+        if (!existingResponse.ok) return json({ error: "Could not check existing badge awards." }, 400);
+        const existingAwards = await existingResponse.json().catch(() => []);
+        if (!Array.isArray(existingAwards) || existingAwards.length === 0) {
+          const response = await requestDb("user_badges", "POST", { user_id: profile.id, badge_id: badgeId, source: "manual" }, "return=representation");
+          if (!response.ok) return json({ error: "Could not award badge. Check that the badge exists." }, 400);
+        }
       } else {
         const response = await requestDb(`user_badges?user_id=eq.${encodeURIComponent(String(profile.id))}&badge_id=eq.${encodeURIComponent(badgeId)}&source=eq.manual`, "DELETE", undefined, "return=minimal");
         if (!response.ok) return json({ error: "Could not revoke badge." }, 400);
