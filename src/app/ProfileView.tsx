@@ -265,10 +265,10 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const textOpacity = `${readableTextOpacity}%`;
   const cardBg = rgbaFromHex(settings.backgroundColour, settings.profileOpacity / 100);
   const border = rgbaFromHex("ffffff", settings.borderOpacity / 100);
-  const glowRadius = Math.max(18, settings.glowIntensity * 1.8);
-  const glowAlpha = Math.min(0.85, Math.max(0.18, settings.glowIntensity / 100));
-  const shadow = settings.glow
-    ? `0 0 ${glowRadius}px ${rgbaFromHex(settings.accentColour, glowAlpha)}, 0 0 ${Math.max(28, glowRadius * 2.2)}px ${rgbaFromHex(settings.accentColour, glowAlpha * 0.35)}, 0 28px 90px ${rgbaFromHex("000000", Math.max(0.2, settings.shadowOpacity / 100))}`
+  const glowRadius = settings.glowIntensity * 1.8;
+  const glowAlpha = Math.min(0.8, Math.max(0, settings.glowIntensity / 100));
+  const shadow = settings.glow && settings.glowIntensity > 0
+    ? `0 0 ${glowRadius}px ${rgbaFromHex(settings.accentColour, glowAlpha)}, 0 0 ${glowRadius * 2.2}px ${rgbaFromHex(settings.accentColour, glowAlpha * 0.35)}, 0 28px 90px ${rgbaFromHex("000000", Math.max(0.2, settings.shadowOpacity / 100))}`
     : `0 28px 90px ${rgbaFromHex("000000", settings.shadowOpacity / 100)}`;
   const font = fontFamily(settings.customFont);
   const position = `${settings.backgroundPositionX}% ${settings.backgroundPositionY}%`;
