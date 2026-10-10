@@ -617,6 +617,21 @@ export default function Dashboard() {
     setDraftTrack({ title: "", artist: "", audio: "", cover: "" });
   };
 
+  const handleBackgroundVideoChange = (url: string) => {
+    setSettings(current => {
+      const importedTrack = current.musicTracks.find(track => track.source === "background-video");
+      if (!url) {
+        const musicTracks = current.musicTracks.filter(track => track.source !== "background-video");
+        return { ...current, backgroundVideo: "", musicTracks, activeMusicId: importedTrack && current.activeMusicId === importedTrack.id ? musicTracks[0]?.id || "" : current.activeMusicId };
+      }
+      if (importedTrack) {
+        return { ...current, backgroundVideo: url, musicTracks: current.musicTracks.map(track => track.source === "background-video" ? { ...track, audio: url } : track), activeMusicId: importedTrack.id };
+      }
+      const track: MusicTrack = { id: crypto.randomUUID(), title: "Imported Music", artist: "Background video", audio: url, cover: "", source: "background-video" };
+      return { ...current, backgroundVideo: url, musicTracks: [...current.musicTracks, track], activeMusicId: track.id };
+    });
+  };
+
   const removeTrack = async (track: MusicTrack) => {
     await deleteAsset(track.audio);
     if (track.cover) await deleteAsset(track.cover);
@@ -733,8 +748,8 @@ export default function Dashboard() {
           {active === "Background" && <div className="form-stack">
             <SectionIntro number="04" title="Build the backdrop" text="Layer colour, images, video, blur and atmosphere independently." />
             <FileUpload label="Background image" value={settings.backgroundImage} accept="image/*" type="image" onChange={v => set("backgroundImage", v)} note="JPG / PNG / WebP · up to 25MB" />
-            <FileUpload label="Background video" value={settings.backgroundVideo} accept="video/*" type="video" onChange={v => set("backgroundVideo", v)} />
-            <p className="hint">Video audio stays inside the video. Browsers may start it muted until the visitor interacts with the page; no sound is removed from the file.</p>
+            <FileUpload label="Background video" value={settings.backgroundVideo} accept="video/*,.mp4,.webm,.m4v,.mov" type="video" onChange={handleBackgroundVideoChange} />
+            <p className="hint">The video soundtrack is added to Music as “Imported Music”. Choose another track to override it, or remove Imported Music from the library. Visitors may need to interact with the page before audio can start.</p>
             <Range label="Background blur" value={settings.backgroundBlur} min={0} max={30} suffix="px" onChange={v => set("backgroundBlur", v)} />
             <Range label="Background darkness" value={settings.backgroundOverlay} min={0} max={90} suffix="%" onChange={v => set("backgroundOverlay", v)} />
             <Range label="Background scale" value={settings.backgroundScale} min={100} max={160} suffix="%" onChange={v => set("backgroundScale", v)} />
