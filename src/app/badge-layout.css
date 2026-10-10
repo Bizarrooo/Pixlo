@@ -110,3 +110,20 @@
 .pixlo-badges-glow .pixlo-badge-icon-tint{
   opacity:1!important;
 }
+
+
+/* Keep bottom-positioned badges centred identically in the editor preview and public profile. */
+.profile-page .pixlo-active-badges,
+.preview-equipped-badges.pixlo-active-badges{
+  margin-left:auto!important;
+  margin-right:auto!important;
+  align-self:center!important;
+  justify-self:center!important;
+  left:auto!important;
+  right:auto!important;
+}
+
+/* Scale the complete badge group as one unit, including the double underline. */
+.pixlo-profile-badges{
+  zoom:var(--badge-scale,1);
+}
