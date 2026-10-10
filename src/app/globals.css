@@ -3741,3 +3741,17 @@ html, body, *, *::before, *::after {
 .pixlo-badges-icon-only .pixlo-badge-icon-tint{width:24px;height:24px;display:block;background:var(--badge-colour,#fff);mask-size:contain;-webkit-mask-size:contain;mask-position:center;-webkit-mask-position:center;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;}
 .pixlo-badges-icon-only .pixlo-profile-badge img{width:24px;height:24px;border-radius:0;}
 @media(max-width:600px){.profile-avatar-badge-row,.preview-avatar-badge-row{gap:6px}.profile-avatar-badge-row .pixlo-side-badges,.preview-avatar-badge-row .pixlo-side-badges{max-width:76px}.profile-avatar-badge-row .pixlo-side-badges .pixlo-profile-badge,.preview-avatar-badge-row .pixlo-side-badges .pixlo-profile-badge{padding:4px 6px}}
+
+
+/* Correct badge layout: avatar stays centered; side badges are horizontal rows. */
+.profile-avatar-badge-row,.preview-avatar-badge-row{position:relative;display:flex;align-items:center;justify-content:center;gap:0;width:100%;isolation:isolate;}
+.profile-avatar-badge-row>.avatar-wrap,.preview-avatar-badge-row>.preview-avatar-wrap{position:relative;left:auto;right:auto;flex:0 0 auto;margin-inline:auto;z-index:1;}
+.profile-avatar-badge-row>.pixlo-side-badges,.preview-avatar-badge-row>.pixlo-side-badges{position:absolute;top:50%;transform:translateY(-50%);width:auto;max-width:calc(50% - 48px);min-width:0;margin:0;z-index:2;}
+.profile-avatar-badge-row>.pixlo-side-badges-left,.preview-avatar-badge-row>.pixlo-side-badges-left{left:0;}
+.profile-avatar-badge-row>.pixlo-side-badges-right,.preview-avatar-badge-row>.pixlo-side-badges-right{right:0;}
+.profile-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badges-list,.preview-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badges-list{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:center;gap:5px;}
+.profile-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badge,.preview-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badge{flex:0 0 auto;}
+.pixlo-badges-icon-only .pixlo-profile-badge{display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0!important;min-width:0!important;min-height:0!important;}
+.pixlo-badges-icon-only .pixlo-badge-icon-tint{width:24px!important;height:24px!important;display:block!important;background:var(--badge-colour,#fff)!important;mask-size:contain!important;-webkit-mask-size:contain!important;mask-position:center!important;-webkit-mask-position:center!important;mask-repeat:no-repeat!important;-webkit-mask-repeat:no-repeat!important;}
+.pixlo-badges-icon-only .pixlo-profile-badge img{width:24px!important;height:24px!important;object-fit:contain!important;border-radius:0!important;}
+@media(max-width:600px){.profile-avatar-badge-row>.pixlo-side-badges,.preview-avatar-badge-row>.pixlo-side-badges{max-width:calc(50% - 36px)}.profile-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badges-list,.preview-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badges-list{gap:3px}.pixlo-badges-icon-only .pixlo-badge-icon-tint,.pixlo-badges-icon-only .pixlo-profile-badge img{width:20px!important;height:20px!important}}
