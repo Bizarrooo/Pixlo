@@ -444,7 +444,6 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
             <div className="profile-name-row">
               <h1 className={`${settings.nameGlow ? "element-glow-name " : ""}${animationClass(settings.nameAnimation)}`} style={{ fontFamily: fontFamily(settings.nameFont), fontWeight: settings.nameBold ? 700 : 400, fontStyle: settings.nameItalic ? "italic" : "normal" }}>{settings.displayName || settings.username}</h1>
-              {settings.username.toLowerCase() === "qasim" && settings.showVerified && <span className="verified-dot">✓</span>}
               {profileBadges.map(badge => badge.icon_url ? <span className="pixlo-name-badge" key={badge.id} title={badge.name}><img src={badge.icon_url} alt={badge.name} /></span> : <span className="pixlo-name-badge pixlo-name-badge-fallback" key={badge.id} title={badge.name}>✦</span>)}
             </div>
             {profileBadges.length > 0 && <section className="pixlo-profile-badges" aria-label="Badges"><div className="pixlo-profile-badges-heading">BADGES</div><div className="pixlo-profile-badges-list">{profileBadges.map(badge => <div className="pixlo-profile-badge" key={badge.id} title={badge.description || badge.name}>{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}<span>{badge.name}</span></div>)}</div></section>}
