@@ -190,6 +190,7 @@ export default function Dashboard() {
   const [savedIdentity, setSavedIdentity] = useState({ username: "", displayName: "" });
   const [badgesHidden, setBadgesHidden] = useState(false);
   const [dashboardBadges, setDashboardBadges] = useState<DashboardBadge[]>([]);
+  const [previewBadges, setPreviewBadges] = useState<DashboardBadge[]>([]);
   const [dashboardBadgesLoading, setDashboardBadgesLoading] = useState(false);
   const [dashboardBadgesError, setDashboardBadgesError] = useState("");
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
@@ -239,6 +240,15 @@ export default function Dashboard() {
       .finally(() => { if (!cancelled) setDashboardBadgesLoading(false); });
     return () => { cancelled = true; };
   }, [active, settingsReady, settings.username, discordUser]);
+  useEffect(() => {
+    if (!settingsReady || !settings.username) { setPreviewBadges([]); return; }
+    let cancelled = false;
+    fetch(`/api/public-profile/${encodeURIComponent(settings.username)}`, { cache: "no-store" })
+      .then(response => response.ok ? response.json() : null)
+      .then(data => { if (!cancelled) setPreviewBadges(Array.isArray(data?.profile?.badges) ? data.profile.badges : []); })
+      .catch(() => { if (!cancelled) setPreviewBadges([]); });
+    return () => { cancelled = true; };
+  }, [settingsReady, settings.username]);
   const [discordLoading, setDiscordLoading] = useState(true);
   const [discordNotice, setDiscordNotice] = useState<"connected" | "error" | "already-linked" | "not-member" | "cancelled" | null>(null);
   const [discordDetail, setDiscordDetail] = useState("");
@@ -1028,6 +1038,7 @@ export default function Dashboard() {
               <div className="preview-card-inner" style={{ "--preview-content-spacing-setting": `${settings.contentSpacing}px` } as React.CSSProperties}>
                 <div className={`preview-avatar-wrap preview-avatar-decoration-${settings.avatarDecoration}`}><div className="preview-avatar" style={{ borderRadius: `${settings.avatarRadius}%`, borderWidth: settings.avatarBorderWidth, borderColor: settings.avatarBorderColour }}>{previewAvatar ? <img src={previewAvatar} alt="" /> : (settings.displayName || settings.username).slice(0, 1).toUpperCase()}</div>{previewDecoration && <img className="preview-discord-avatar-decoration" src={previewDecoration} alt="" aria-hidden="true" />}{settings.showDiscord && <span className="preview-status-dot" title="Online" />}</div>
                 <div className="preview-name-row"><b className={`${settings.nameGlow ? "element-glow-name " : ""}${animationClass(settings.nameAnimation)}`} style={{ fontFamily: fontFamily(settings.nameFont), fontWeight: settings.nameBold ? 700 : 400, fontStyle: settings.nameItalic ? "italic" : "normal" }}>{settings.displayName || settings.username}</b></div>
+                {settings.badgePosition === "username" && previewBadges.some(badge => settings.activeBadgeIds.includes(badge.id)) && <div className="pixlo-profile-badges preview-equipped-badges" style={{ "--badge-colour": settings.badgeColour } as React.CSSProperties}>{previewBadges.filter(badge => settings.activeBadgeIds.includes(badge.id)).sort((a,b) => settings.activeBadgeOrder.indexOf(a.id)-settings.activeBadgeOrder.indexOf(b.id)).map(badge => <span className="pixlo-profile-badge" key={badge.id} title={badge.name} aria-label={badge.name}>{badge.icon_url ? <span className="pixlo-badge-icon-tint" style={{ maskImage: `url("${badge.icon_url}")`, WebkitMaskImage: `url("${badge.icon_url}")` } as React.CSSProperties} /> : <span>✦</span>}</span>)}</div>}
                 <small className={`preview-username ${animationClass(settings.usernameAnimation)}`} style={{ fontFamily: fontFamily(settings.usernameFont), fontWeight: settings.usernameBold ? 700 : 400, fontStyle: settings.usernameItalic ? "italic" : "normal" }}>@{settings.username || "username"}</small>
                 {settings.description && <p className={`${settings.descriptionGlow ? "element-glow-description " : ""}${animationClass(settings.descriptionAnimation)}`} style={{ fontFamily: fontFamily(settings.descriptionFont), fontWeight: settings.descriptionBold ? 700 : 400, fontStyle: settings.descriptionItalic ? "italic" : "normal" }}>{settings.description}</p>}
                 {settings.showLocation && settings.location && <small className={`preview-location ${settings.locationGlow ? "element-glow-location " : ""}${animationClass(settings.locationAnimation)}`} style={{ fontFamily: fontFamily(settings.locationFont), fontWeight: settings.locationBold ? 700 : 400, fontStyle: settings.locationItalic ? "italic" : "normal" }}>⌖ {settings.location}</small>}
@@ -1043,6 +1054,7 @@ export default function Dashboard() {
                 })}</div>
 
                 {settings.showMusicPlayer && settings.musicPlayerPosition === "bottom" && activeTrack && <div className="preview-music"><div className="preview-music-art">{previewAssets.musicCover ? <img src={previewAssets.musicCover} alt="" /> : <i>♫</i>}</div><span>{activeTrack.title}<small>{activeTrack.artist}</small></span><i className="preview-music-play">▶</i></div>}
+                {settings.badgePosition === "bottom" && previewBadges.some(badge => settings.activeBadgeIds.includes(badge.id)) && <section className="pixlo-profile-badges pixlo-active-badges preview-equipped-badges" style={{ "--badge-colour": settings.badgeColour } as React.CSSProperties}><div className="pixlo-profile-badges-heading">ACTIVE BADGES</div><div className="pixlo-profile-badges-list">{previewBadges.filter(badge => settings.activeBadgeIds.includes(badge.id)).sort((a,b) => settings.activeBadgeOrder.indexOf(a.id)-settings.activeBadgeOrder.indexOf(b.id)).map(badge => <span className="pixlo-profile-badge" key={badge.id} title={badge.name} aria-label={badge.name}>{badge.icon_url ? <span className="pixlo-badge-icon-tint" style={{ maskImage: `url("${badge.icon_url}")`, WebkitMaskImage: `url("${badge.icon_url}")` } as React.CSSProperties} /> : <span>✦</span>}</span>)}</div></section>}
                 {settings.showFooter && <div className="preview-profile-footer"><span><i className="preview-online-dot" /> Online</span>{settings.showViews && <span>{settings.views || 0} views</span>}</div>}
               </div>
             </div>
