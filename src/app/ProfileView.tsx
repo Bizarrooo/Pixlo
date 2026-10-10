@@ -202,11 +202,11 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
       if (video && video.paused) {
         video.volume = 1;
-        video.muted = Boolean(activeTrack);
+        video.muted = Boolean(activeTrack) || settings.backgroundVideoMusicDisabled;
         try {
           await video.play();
         } catch {
-          if (!activeTrack) video.muted = true;
+          if (!activeTrack && !settings.backgroundVideoMusicDisabled) video.muted = true;
           await video.play().catch(() => {});
         }
       }
@@ -388,7 +388,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             className="background-media"
             src={assets.backgroundVideo}
             autoPlay={entered}
-            muted={Boolean(activeTrack)}
+            muted={Boolean(activeTrack) || settings.backgroundVideoMusicDisabled}
             loop
             playsInline
             preload="auto"
