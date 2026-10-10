@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { accountSettingsStorageKey, defaultSettings, loadSettingsForAccount, saveSettingsToStorage, type CustomLink, type MusicTrack, type ProfileFont, type ProfileSettings, type SocialKey, type TextAnimation } from "../profile";
+import { accountSettingsStorageKey, defaultSettings, loadSettingsForAccount, normaliseProfileSettings, saveSettingsToStorage, type CustomLink, type MusicTrack, type ProfileFont, type ProfileSettings, type SocialKey, type TextAnimation } from "../profile";
 import { deleteAsset, loadAsset, migrateAssetToCloud, saveAsset } from "../assetStore";
 
 const sections = [
@@ -247,7 +247,7 @@ export default function Dashboard() {
         const localSettings = loadSettingsForAccount(authUser.id, { username, displayName });
         const cloudSettings = accountData.profile.settings && typeof accountData.profile.settings === "object" ? accountData.profile.settings as Partial<ProfileSettings> : {};
         const cloudHasSettings = Object.keys(cloudSettings).length > 0;
-        let loaded = cloudHasSettings ? { ...localSettings, ...cloudSettings, username, displayName } as ProfileSettings : localSettings;
+        let loaded = normaliseProfileSettings(cloudHasSettings ? { ...localSettings, ...cloudSettings, username, displayName } : localSettings, { username, displayName });
         const migrate = async (value: string) => {
           if (!value.startsWith("idb:")) return value;
           try { return await migrateAssetToCloud(value) || value; } catch { return value; }
