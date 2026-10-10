@@ -13,6 +13,8 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const GUILD_ID = process.env.DISCORD_GUILD_ID;
 const INTERVAL_MS = 15 * 60 * 1000;
 let syncing = false;
+let syncAgain = false;
+let scheduledSync = null;
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
@@ -66,7 +68,7 @@ async function getAllDiscordAwards() {
 }
 
 async function syncBadges() {
-  if (syncing) return;
+  if (syncing) { syncAgain = true; return; }
   syncing = true;
   const started = Date.now();
   try {
@@ -131,6 +133,10 @@ async function syncBadges() {
     console.error("[badge-sync] failed:", error instanceof Error ? error.message : error);
   } finally {
     syncing = false;
+    if (syncAgain) {
+      syncAgain = false;
+      void syncBadges();
+    }
   }
 }
 
@@ -140,5 +146,27 @@ client.once("ready", async () => {
   setInterval(() => void syncBadges(), INTERVAL_MS);
 });
 
-client.on("guildMemberUpdate", () => { /* Periodic reconciliation remains the source of truth. */ });
-client.login(process.env.DISCORD_BOT_TOKEN);
+function scheduleSync() {
+  if (scheduledSync) clearTimeout(scheduledSync);
+  scheduledSync = setTimeout(() => {
+    scheduledSync = null;
+    void syncBadges();
+  }, 3000);
+}
+
+client.on("guildMemberUpdate", (oldMember, newMember) => {
+  if (oldMember.roles.cache.size !== newMember.roles.cache.size ||
+      oldMember.roles.cache.some(role => !newMember.roles.cache.has(role.id))) {
+    scheduleSync();
+  }
+});
+client.on("guildMemberAdd", scheduleSync);
+client.on("guildMemberRemove", scheduleSync);
+
+client.on("error", error => console.error("[discord] client error:", error.message));
+process.on("unhandledRejection", error => console.error("[worker] unhandled rejection:", error));
+
+client.login(process.env.DISCORD_BOT_TOKEN).catch(error => {
+  console.error("[discord] login failed:", error.message);
+  process.exit(1);
+});
