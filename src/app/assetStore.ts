@@ -26,7 +26,7 @@ export async function saveAsset(file: File): Promise<string> {
   }
 
   const uploadResponse = await fetch(data.uploadUrl, {
-    method: "POST",
+    method: "PUT",
     headers: { Authorization: data.uploadAuthorization, apikey: data.uploadApiKey, "Content-Type": file.type || "application/octet-stream", "x-upsert": "false" },
     body: file,
   });
