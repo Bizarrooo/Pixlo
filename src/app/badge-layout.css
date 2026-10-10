@@ -69,11 +69,11 @@
   opacity:1!important;
 }
 .pixlo-badges-glow .pixlo-profile-badge{
-  box-shadow:0 0 calc(8px + 14px * var(--badge-glow-intensity, .65)) color-mix(in srgb,var(--badge-colour,#fff) 88%,transparent),0 0 calc(14px + 24px * var(--badge-glow-intensity, .65)) color-mix(in srgb,var(--badge-colour,#fff) 62%,transparent)!important;
-  filter:drop-shadow(0 0 calc(3px + 7px * var(--badge-glow-intensity, .65)) color-mix(in srgb,var(--badge-colour,#fff) 90%,transparent))!important;
+  box-shadow:0 0 calc(12px * var(--badge-glow-intensity, .65)) color-mix(in srgb,var(--badge-colour,#fff) 88%,transparent),0 0 calc(30px * var(--badge-glow-intensity, .65)) color-mix(in srgb,var(--badge-colour,#fff) 62%,transparent)!important;
+  filter:drop-shadow(0 0 calc(8px * var(--badge-glow-intensity, .65)) color-mix(in srgb,var(--badge-colour,#fff) 90%,transparent))!important;
 }
 .pixlo-badges-glow .pixlo-badge-icon-tint{
-  filter:drop-shadow(0 0 calc(4px + 7px * var(--badge-glow-intensity, .65)) var(--badge-colour,#fff)) drop-shadow(0 0 calc(8px + 12px * var(--badge-glow-intensity, .65)) var(--badge-colour,#fff))!important;
+  filter:drop-shadow(0 0 calc(5px * var(--badge-glow-intensity, .65)) var(--badge-colour,#fff)) drop-shadow(0 0 calc(12px * var(--badge-glow-intensity, .65)) var(--badge-colour,#fff))!important;
 }
 .profile-page .pixlo-active-badges.pixlo-double-underline,
 .preview-equipped-badges.pixlo-active-badges.pixlo-double-underline{
