@@ -15,8 +15,9 @@ Set these in the worker host (not in browser/client-side variables):
 
 1. Create a bot application in the Discord Developer Portal and add the bot to the Pixlo server.
 2. Enable the **Server Members Intent** under Bot → Privileged Gateway Intents. The worker needs this to reconcile members and roles.
-3. Give the bot only the server permissions it needs to view the guild and its members. It does not need permission to manage roles.
-4. Keep the bot token and Supabase secret only in the worker host's environment variables.
+3. Give the bot **View Channel**, **Send Messages**, **Embed Links**, and **Read Message History** in the two announcement channels. Also grant **View Audit Log** if you want the embeds to identify the moderator who awarded or removed a role; without it, the actor is shown as **Unknown / System**. The bot does not need permission to manage roles.
+4. The worker posts orange embed announcements only when a role change corresponds to a role mapped to a Pixlo badge in `discord_role_badges`. Awards go to channel `1558891440891891712`; revocations go to channel `1558891471963168778`. Routine reconciliation, unrelated roles, and manual Pixlo badges do not generate announcements.
+5. Keep the bot token and Supabase secret only in the worker host's environment variables.
 
 ## Run locally
 
