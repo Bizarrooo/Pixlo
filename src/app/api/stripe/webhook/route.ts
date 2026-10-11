@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { serverEnv } from "../../../../lib/server-env";
 import { supabaseConfig } from "../../../../lib/supabase-config";
+import { ensurePremiumBadge } from "../../../../lib/premium-badge";
 
 export const runtime = "nodejs";
 
@@ -75,6 +76,13 @@ export async function POST(request: Request) {
     const detail = await response.text().catch(() => "");
     console.error("Could not save Pixlo Premium entitlement:", response.status, detail.slice(0, 300));
     return NextResponse.json({ error: "Could not record Premium purchase." }, { status: 500 });
+  }
+
+  try {
+    await ensurePremiumBadge(userId);
+  } catch (error) {
+    console.error("Could not award Pixlo Premium badge:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Could not award Premium badge." }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
