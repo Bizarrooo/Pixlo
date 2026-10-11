@@ -908,7 +908,7 @@ export default function Dashboard() {
             <div className="preset-slots">
               {[1,2,3,4,5].map(slot => {
                 const preset = presets.find(item => item.slot_number === slot);
-                const previewUsername = String(preset?.settings?.username || settings.username || "");
+                const previewUsername = String(settings.username || preset?.settings?.username || "");
                 return <article className={`preset-slot-card ${preset ? "has-preset" : "is-empty"}`} key={slot}>
                   <div className="preset-slot-top"><div><span className="preset-slot-number">SAVE SLOT 0{slot}</span><h3>{preset?.name || "Empty save slot"}</h3></div><span className={`preset-slot-state ${preset ? "saved-state" : ""}`}>{preset ? "SAVED" : "EMPTY"}</span></div>
                   <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`My preset ${slot}`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} /></label>
