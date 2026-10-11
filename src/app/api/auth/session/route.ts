@@ -58,7 +58,13 @@ export async function GET(request: Request) {
   try {
     if (access) {
       const user = await getUser(access);
-      if (user) return NextResponse.json({ user });
+      if (user) {
+        const response = NextResponse.json({ user });
+        if (refresh && typeof user?.id === "string" && /^[0-9a-f-]{36}$/i.test(user.id)) {
+          response.cookies.set(`pixlo_saved_refresh_${user.id}`, decodeURIComponent(refresh), { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 30, path: "/" });
+        }
+        return response;
+      }
     }
 
     if (refresh) {
@@ -68,6 +74,9 @@ export async function GET(request: Request) {
         if (user) {
           const response = NextResponse.json({ user });
           setAuthCookies(response, refreshed.access_token, refreshed.refresh_token, Number(refreshed.expires_in) || 3600);
+          if (typeof user?.id === "string" && /^[0-9a-f-]{36}$/i.test(user.id) && typeof refreshed.refresh_token === "string") {
+            response.cookies.set(`pixlo_saved_refresh_${user.id}`, refreshed.refresh_token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 30, path: "/" });
+          }
           return response;
         }
       }
