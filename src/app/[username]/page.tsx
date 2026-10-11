@@ -1,11 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { usePathname } from "next/navigation";
-import ProfileView from "../../ProfileView";
-
-export default function UsernameProfile() {
-  const pathname = usePathname();
-  const parts = pathname.split("/").filter(Boolean);
-  const username = parts[1] || "";
-  return <ProfileView forcedUsername={username} />;
+export default async function LegacyUsernameProfile({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params;
+  redirect(`/user/${encodeURIComponent(username)}`);
 }
