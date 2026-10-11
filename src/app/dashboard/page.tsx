@@ -304,6 +304,10 @@ export default function Dashboard() {
           Promise.all(loaded.customLinks.map(async link => ({ ...link, icon: await migrate(link.icon) }))),
         ]);
         loaded = { ...loaded, avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
+        // Reconcile an already-paid Premium entitlement on dashboard entry as well as in the Stripe webhook.
+        // This repairs badges for purchases completed before Premium badge support was deployed.
+        void fetch("/api/premium/status", { cache: "no-store", credentials: "include" }).catch(() => {});
+
         const linkedDiscord = accountData.user?.discordId ? accountData.user : null;
         if (accountData.discordUnlinkedForMembership) {
           setDiscordNotice("not-member");
@@ -703,6 +707,31 @@ export default function Dashboard() {
       return { ...s, backgroundVideoMusicDisabled: track.source === "background-video" ? true : s.backgroundVideoMusicDisabled, musicTracks: tracks, activeMusicId: s.activeMusicId === track.id ? tracks[0]?.id || "" : s.activeMusicId };
     });
   };
+
+  if (discordLoading || !settingsReady) {
+    return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#09090d", color: "#fff", fontFamily: "Inter, system-ui, sans-serif", padding: 24 }}>
+      <div style={{ textAlign: "center" }}><div style={{ width: 38, height: 38, margin: "0 auto 18px", border: "3px solid rgba(255,255,255,.16)", borderTopColor: "#ffb45f", borderRadius: "50%", animation: "pixlo-spin 0.8s linear infinite" }} /><h1 style={{ margin: 0, fontSize: 22 }}>Loading your Pixlo dashboard…</h1><p style={{ color: "rgba(255,255,255,.65)" }}>Checking your account and Discord connection.</p></div>
+      <style>{`@keyframes pixlo-spin { to { transform: rotate(360deg); } }`}</style>
+    </main>;
+  }
+
+  if (!discordUser) {
+    return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "radial-gradient(ellipse at top, rgba(255,155,74,.14), transparent 55%), #09090d", color: "#fff", fontFamily: "Inter, system-ui, sans-serif" }}>
+      <section style={{ width: "min(100%, 520px)", padding: "clamp(24px, 5vw, 42px)", borderRadius: 24, border: "1px solid rgba(255,255,255,.12)", background: "rgba(19,19,25,.92)", boxShadow: "0 28px 100px rgba(0,0,0,.45)", textAlign: "center" }}>
+        <div style={{ width: 64, height: 64, margin: "0 auto 22px", display: "grid", placeItems: "center", borderRadius: 20, background: "rgba(88,101,242,.16)", color: "#9da8ff" }}><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.54 5.12a16.9 16.9 0 0 0-3.98-1.25l-.52 1.06a15.4 15.4 0 0 0-6.08 0L8.44 3.87a16.9 16.9 0 0 0-3.98 1.25C1.94 8.86 1.24 12.5 1.59 16.08a16.98 16.98 0 0 0 5.05 2.55l1.22-1.67c-.68-.25-1.33-.56-1.94-.94l.48-.37a12.35 12.35 0 0 0 11.2 0l.49.37c-.61.38-1.26.69-1.94.94l1.22 1.67a16.98 16.98 0 0 0 5.05-2.55c.41-4.15-.7-7.76-2.88-10.96ZM8.4 14.1c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Zm7.2 0c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Z"/></svg></div>
+        <p style={{ margin: "0 0 10px", color: "#ffbd79", fontSize: 12, fontWeight: 800, letterSpacing: ".16em", textTransform: "uppercase" }}>One quick setup step</p>
+        <h1 style={{ margin: "0 0 12px", fontSize: "clamp(26px, 5vw, 34px)", letterSpacing: "-.04em" }}>Link Discord to use Pixlo</h1>
+        <p style={{ margin: "0 auto 24px", maxWidth: 390, color: "rgba(255,255,255,.72)", lineHeight: 1.7 }}>To use your dashboard, first join the official Pixlo Discord server and connect your Discord account. This also unlocks your Discord-linked badges and rewards.</p>
+        {discordNotice === "not-member" && <p role="alert" style={{ margin: "0 0 18px", padding: 12, borderRadius: 12, background: "rgba(255,170,70,.1)", color: "#ffd09b", lineHeight: 1.55 }}>{discordDetail || "Join the official Pixlo Discord server first, then link your account."}</p>}
+        {(discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked") && <p role="alert" style={{ margin: "0 0 18px", padding: 12, borderRadius: 12, background: "rgba(255,80,80,.1)", color: "#ffb0b0", lineHeight: 1.55 }}>{discordDetail || (discordNotice === "cancelled" ? "Discord linking was cancelled. Link Discord to continue." : discordNotice === "already-linked" ? "That Discord account is already linked to another Pixlo account. Use the correct Discord account to continue." : "Discord could not be linked. Please try again.")}</p>}
+        <div style={{ display: "grid", gap: 12 }}>
+          <a href="https://discord.gg/Bkz4P9gVy7" target="_blank" rel="noreferrer" style={{ display: "block", padding: "14px 18px", borderRadius: 12, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.13)", color: "#fff", textDecoration: "none", fontWeight: 700 }}>1. Join the official Pixlo server ↗</a>
+          <a href="/api/auth/discord" style={{ display: "block", padding: "14px 18px", borderRadius: 12, background: "linear-gradient(100deg,#ff9c4a,#ff6c52)", color: "#17110d", textDecoration: "none", fontWeight: 800 }}>2. Link Discord to continue ↗</a>
+        </div>
+        <p style={{ margin: "18px 0 0", color: "rgba(255,255,255,.45)", fontSize: 12 }}>Your dashboard stays locked until Discord is linked and server membership is confirmed.</p>
+      </section>
+    </main>;
+  }
 
   return <>
   {showUsernameConfirm && <div role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowUsernameConfirm(false); }} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}>
