@@ -74,7 +74,7 @@ async function getAllPremiumEntitlements() {
   const pageSize = 1000;
   while (true) {
     const liveMode = process.env.PIXLO_PREMIUM_LIVEMODE === "true";
-    const page = await db(`pixlo_premium_entitlements?select=user_id,status,livemode&status=eq.active&livemode=eq.${liveMode}&order=user_id.asc&limit=${pageSize}&offset=${offset}`);
+    const page = await db(`pixlo_premium_entitlements?select=user_id,status,livemode,price_paid,currency,purchased_at,updated_at&status=eq.active&livemode=eq.${liveMode}&order=user_id.asc&limit=${pageSize}&offset=${offset}`);
     if (!Array.isArray(page) || page.length === 0) break;
     entitlements.push(...page);
     if (page.length < pageSize) break;
@@ -84,7 +84,7 @@ async function getAllPremiumEntitlements() {
 }
 
 async function syncPremiumRole(guild, profiles, entitlements) {
-  const configuredRoleId = process.env.DISCORD_PREMIUM_ROLE_ID;
+  const configuredRoleId = process.env.DISCORD_PREMIUM_ROLE_ID || "1558112636044836946";
   const role = (configuredRoleId && guild.roles.cache.get(configuredRoleId)) ||
     guild.roles.cache.find(item => item.name.trim().toLowerCase() === "premium") ||
     guild.roles.cache.find(item => item.name.trim().toLowerCase() === "pixlo premium") ||
@@ -95,18 +95,47 @@ async function syncPremiumRole(guild, profiles, entitlements) {
   }
 
   const profileByDiscordId = new Map(profiles.filter(profile => profile.discord_id).map(profile => [String(profile.discord_id), profile]));
-  const activeUserIds = new Set(entitlements.filter(item => item.status === "active").map(item => String(item.user_id)));
+  const activeEntitlementByUserId = new Map(entitlements.filter(item => item.status === "active").map(item => [String(item.user_id), item]));
   let added = 0;
   let removed = 0;
   for (const member of guild.members.cache.values()) {
     if (member.user.bot) continue;
     const profile = profileByDiscordId.get(String(member.id));
-    const shouldHaveRole = Boolean(profile && activeUserIds.has(String(profile.id)));
+    const entitlement = profile ? activeEntitlementByUserId.get(String(profile.id)) : null;
+    const shouldHaveRole = Boolean(entitlement);
     const alreadyHasRole = member.roles.cache.has(role.id);
     try {
       if (shouldHaveRole && !alreadyHasRole) {
         await member.roles.add(role.id, "Pixlo Premium lifetime entitlement is active");
         added += 1;
+        try {
+          const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
+          if (channel && channel.isTextBased() && typeof channel.send === "function") {
+            const purchasedAt = entitlement.purchased_at || entitlement.updated_at || new Date().toISOString();
+            const purchasedDate = new Date(purchasedAt);
+            const validDate = !Number.isNaN(purchasedDate.getTime());
+            const amount = Number(entitlement.price_paid);
+            const currency = String(entitlement.currency || "gbp").toUpperCase();
+            const amountText = Number.isFinite(amount)
+              ? new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(amount / 100)
+              : "Amount unavailable";
+            const embed = new EmbedBuilder()
+              .setColor(EMBED_ORANGE)
+              .setTitle("💎 Pixlo Premium Successfully Purchased!")
+              .setDescription(`🎉 <@${member.id}> has successfully purchased **Pixlo Premium — Lifetime**. Their Premium role has been activated!`)
+              .addFields(
+                { name: "👤 Member", value: `<@${member.id}>`, inline: true },
+                { name: "💳 Amount Spent", value: amountText, inline: true },
+                { name: "📅 Purchase Date", value: validDate ? purchasedDate.toLocaleDateString("en-GB", { timeZone: "Europe/London" }) : "Unavailable", inline: true },
+                { name: "🕒 Purchase Time", value: validDate ? purchasedDate.toLocaleTimeString("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit", timeZoneName: "short" }) : "Unavailable", inline: true },
+              )
+              .setFooter({ text: "Pixlo • Premium purchase confirmation" })
+              .setTimestamp(validDate ? purchasedDate : new Date());
+            await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+          }
+        } catch (error) {
+          console.error(`[premium-role] purchase announcement failed for Discord user ${member.id}:`, error instanceof Error ? error.message : error);
+        }
       } else if (!shouldHaveRole && alreadyHasRole) {
         await member.roles.remove(role.id, "Pixlo Premium lifetime entitlement is not active or account is not linked");
         removed += 1;
