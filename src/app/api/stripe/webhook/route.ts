@@ -38,6 +38,8 @@ export async function POST(request: Request) {
 
   const session = event?.data?.object;
   if (session?.mode !== "payment" || session?.payment_status !== "paid") return NextResponse.json({ received: true });
+  const configuredLiveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
+  if (Boolean(session?.livemode) !== configuredLiveMode) return NextResponse.json({ received: true });
   if (session?.metadata?.product !== "pixlo_premium_lifetime") return NextResponse.json({ received: true });
 
   const userId = session?.metadata?.user_id || session?.client_reference_id;
@@ -68,6 +70,7 @@ export async function POST(request: Request) {
       status: "active",
       price_paid: amountTotal,
       currency,
+      livemode: Boolean(session.livemode),
       updated_at: new Date().toISOString(),
     }),
     cache: "no-store",
