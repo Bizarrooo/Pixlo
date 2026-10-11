@@ -205,32 +205,26 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   useEffect(() => {
     if (!ready || !settings.musicAutoplay || manualPauseRef.current) return;
 
-    const startMedia = async () => {
-      const video = videoRef.current;
+    const startMedia = () => {
       const audio = audioRef.current;
+      const video = videoRef.current;
+
+      // Start audio immediately during the user's tap gesture. Awaiting video.play()
+      // first can lose iOS Safari's user-activation permission for audio playback.
+      if (audio && activeTrack && audio.paused && !manualPauseRef.current) {
+        audio.volume = 1;
+        audio.muted = false;
+        audio.loop = settings.musicLoop;
+        void audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+      }
 
       if (video && video.paused) {
         video.volume = 1;
         video.muted = Boolean(activeTrack) || settings.backgroundVideoMusicDisabled;
-        try {
-          await video.play();
-        } catch {
+        void video.play().catch(() => {
           if (!activeTrack && !settings.backgroundVideoMusicDisabled) video.muted = true;
-          await video.play().catch(() => {});
-        }
-      }
-
-      if (audio && activeTrack && audio.paused && !manualPauseRef.current) {
-        audio.volume = 1;
-        audio.loop = settings.musicLoop;
-        try {
-          audio.muted = false;
-          await audio.play();
-          setPlaying(true);
-        } catch {
-          audio.muted = true;
-          await audio.play().then(() => setPlaying(true)).catch(() => {});
-        }
+          void video.play().catch(() => {});
+        });
       }
     };
 
@@ -342,7 +336,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       manualPauseRef.current = false;
       audio.muted = false;
       audio.volume = 1;
-      try { await audio.play(); setPlaying(true); } catch {}
+      try { await audio.play(); setPlaying(true); } catch { setPlaying(false); }
     } else {
       manualPauseRef.current = true;
       audio.pause();
