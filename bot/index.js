@@ -14,7 +14,7 @@ const GUILD_ID = process.env.DISCORD_GUILD_ID;
 const AWARD_CHANNEL_ID = "1558891440891891712";
 const REVOCATION_CHANNEL_ID = "1558891471963168778";
 const EMBED_ORANGE = 0xFFD580;
-const INTERVAL_MS = 60 * 1000;
+const INTERVAL_MS = 5 * 60 * 1000;
 const pendingRoleChanges = new Map();
 let syncing = false;
 let syncAgain = false;
@@ -121,10 +121,11 @@ async function announceRoleChange(guild, profile, roleId, action) {
     .setTimestamp();
 
   // Discord rejects duplicate IDs in allowedMentions.users when the member also performed the action.
-  const allowedUserIds = [...new Set([member.id, actor?.id].filter(Boolean).map(String))];
+  // Embed mentions are rendered as clickable mentions without notifying users.
+  // Avoid explicit users arrays: Discord can reject duplicate IDs when member and actor are the same.
   await channel.send({
     embeds: [embed],
-    allowedMentions: { users: allowedUserIds, roles: [], parse: [] },
+    allowedMentions: { parse: [], users: [], roles: [] },
   });
   console.log(`[announcements] sent ${action} embed for role ${roleId} to member ${member.id}`);
 }
@@ -134,8 +135,7 @@ async function syncBadges() {
   syncing = true;
   const started = Date.now();
   try {
-    const guild = await client.guilds.fetch(GUILD_ID);
-    await guild.members.fetch();
+    const guild = client.guilds.cache.get(GUILD_ID) || await client.guilds.fetch(GUILD_ID);
 
     const [roleMappings, profiles, currentAwards] = await Promise.all([
       db("discord_role_badges?select=discord_role_id,badge_id"),
@@ -240,6 +240,9 @@ client.once("ready", async () => {
   console.log(`[discord] Logged in as ${client.user.tag} (bot ID: ${client.user.id})`);
   try {
     const guild = await client.guilds.fetch(GUILD_ID);
+    // Fetch members once at startup. Reconciliation reuses the cache instead of
+    // repeatedly issuing Discord opcode 8 requests and hitting rate limits.
+    await guild.members.fetch();
     console.log(`[discord] Connected to configured server: ${guild.name} (${guild.id})`);
   } catch (error) {
     console.error(`[discord] Cannot access configured server ${GUILD_ID}:`, error instanceof Error ? error.message : error);
@@ -253,7 +256,7 @@ function scheduleSync() {
   scheduledSync = setTimeout(() => {
     scheduledSync = null;
     void syncBadges();
-  }, 3000);
+  }, 750);
 }
 
 client.on("guildMemberUpdate", (oldMember, newMember) => {
