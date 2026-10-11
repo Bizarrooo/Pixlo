@@ -3821,3 +3821,83 @@ html, body, *, *::before, *::after {
   background-clip:text;
   color:transparent!important;
 }
+
+
+/* Presets dashboard: use the whole workspace and fit all five slots on one desktop screen. */
+@media (min-width: 1101px) {
+  .dashboard:has(.presets-page) .editor-grid {
+    display:block!important;
+    height:calc(100dvh - 82px)!important;
+    min-height:0!important;
+    max-height:calc(100dvh - 82px)!important;
+    overflow:hidden!important;
+    padding:12px 20px 14px!important;
+  }
+  .dashboard:has(.presets-page) .editor {
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:100%!important;
+    overflow:hidden!important;
+    padding:8px 12px!important;
+    border-right:0!important;
+  }
+  .dashboard:has(.presets-page) .presets-page {
+    width:100%!important;
+    max-width:none!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:100%!important;
+    margin:0!important;
+    grid-template-rows:auto auto minmax(0,1fr)!important;
+    gap:8px!important;
+    overflow:hidden!important;
+  }
+  .dashboard:has(.presets-page) .presets-heading .section-intro { padding-bottom:0!important; }
+  .dashboard:has(.presets-page) .presets-heading .section-intro h2 { font-size:18px!important; }
+  .dashboard:has(.presets-page) .presets-heading .section-intro p { margin-top:3px!important; }
+  .dashboard:has(.presets-page) .presets-tip { padding:8px 12px!important; font-size:11px!important; line-height:1.4!important; }
+  .dashboard:has(.presets-page) .preset-status { padding:7px 10px!important; font-size:11px!important; }
+  .dashboard:has(.presets-page) .preset-slots {
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-rows:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+    min-height:0!important;
+    height:100%!important;
+    overflow:hidden!important;
+  }
+  .dashboard:has(.presets-page) .preset-slot-card {
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:0!important;
+    height:100%!important;
+    padding:10px!important;
+    border-radius:12px!important;
+    overflow:hidden!important;
+  }
+  .dashboard:has(.presets-page) .preset-slot-top { margin-bottom:6px!important; gap:6px!important; }
+  .dashboard:has(.presets-page) .preset-slot-top h3 { margin-top:3px!important; font-size:14px!important; }
+  .dashboard:has(.presets-page) .preset-slot-number { font-size:9px!important; }
+  .dashboard:has(.presets-page) .preset-name-label { gap:4px!important; margin-bottom:6px!important; font-size:10px!important; }
+  .dashboard:has(.presets-page) .preset-name-label input { padding:7px 9px!important; font-size:11px!important; }
+  .dashboard:has(.presets-page) .preset-real-preview {
+    flex:1 1 auto!important;
+    min-height:70px!important;
+    height:auto!important;
+    border-radius:8px!important;
+  }
+  .dashboard:has(.presets-page) .preset-updated { min-height:0!important; margin:5px 0!important; font-size:9px!important; }
+  .dashboard:has(.presets-page) .preset-slot-actions { gap:6px!important; margin-top:7px!important; }
+  .dashboard:has(.presets-page) .preset-slot-actions button { min-height:30px!important; padding:6px 8px!important; font-size:10px!important; }
+}
+@media (min-width: 701px) and (max-width: 1100px) {
+  .dashboard:has(.presets-page) .editor-grid { height:auto!important; max-height:none!important; overflow:visible!important; }
+  .dashboard:has(.presets-page) .editor { overflow:visible!important; }
+  .dashboard:has(.presets-page) .presets-page { max-width:none!important; }
+  .dashboard:has(.presets-page) .preset-slots { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+  .dashboard:has(.presets-page) .preset-real-preview { height:190px!important; }
+}
+@media (max-width: 700px) {
+  .dashboard:has(.presets-page) .preset-slots { grid-template-columns:minmax(0,1fr)!important; }
+  .dashboard:has(.presets-page) .preset-real-preview { height:190px!important; flex:none!important; }
+}
