@@ -3812,3 +3812,12 @@ html, body, *, *::before, *::after {
 .dashboard .presets-lock-card .presets-premium-mark img { filter:brightness(0) saturate(100%) invert(68%) sepia(31%) saturate(1177%) hue-rotate(219deg) brightness(103%) contrast(101%); }
 .dashboard .presets-unlock-button { background:linear-gradient(100deg,#f0443e,#ff742f)!important; color:#fff!important; }
 @media(max-width:900px){.dashboard .preset-slots{grid-template-columns:minmax(0,1fr)}}
+
+/* Gradient typography is consistent across the Premium presets section. */
+.dashboard .presets-heading .section-intro h2,
+.dashboard .presets-page .preset-slot-top h3 {
+  background:linear-gradient(100deg,#ff493d 0%,#ff8b32 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent!important;
+}
