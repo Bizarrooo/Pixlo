@@ -3755,3 +3755,11 @@ html, body, *, *::before, *::after {
 .pixlo-badges-icon-only .pixlo-badge-icon-tint{width:24px!important;height:24px!important;display:block!important;background:var(--badge-colour,#fff)!important;mask-size:contain!important;-webkit-mask-size:contain!important;mask-position:center!important;-webkit-mask-position:center!important;mask-repeat:no-repeat!important;-webkit-mask-repeat:no-repeat!important;}
 .pixlo-badges-icon-only .pixlo-profile-badge img{width:24px!important;height:24px!important;object-fit:contain!important;border-radius:0!important;}
 @media(max-width:600px){.profile-avatar-badge-row>.pixlo-side-badges,.preview-avatar-badge-row>.pixlo-side-badges{max-width:calc(50% - 36px)}.profile-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badges-list,.preview-avatar-badge-row>.pixlo-side-badges .pixlo-profile-badges-list{gap:3px}.pixlo-badges-icon-only .pixlo-badge-icon-tint,.pixlo-badges-icon-only .pixlo-profile-badge img{width:20px!important;height:20px!important}}
+
+.badge-refresh-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 12px;padding:0 0 8px;border-bottom:1px solid rgba(255,255,255,.08)}
+.badge-refresh-row span{font-size:12px;color:#aaaab7;font-weight:600}
+.badge-refresh-row button{border:1px solid #34343e;border-radius:8px;padding:7px 11px;color:#f1f1f6;background:#19191f;font-size:11px;cursor:pointer}
+.badge-refresh-row button:disabled{opacity:.55;cursor:wait}
+.profile-page .profile-name-row{gap:3px!important}
+.profile-page .profile-name-row h1{flex:0 1 auto;min-width:0;width:auto!important}
+.profile-page .profile-name-row .pixlo-name-badge{width:17px;height:17px;min-width:17px;margin:0;padding:0;border:0;border-radius:0;flex:0 0 17px}
