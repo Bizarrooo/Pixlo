@@ -159,10 +159,6 @@ export default function HomeAccountNav() {
 
   async function switchToAccount(account: SavedPixloAccount) {
     setSwitchError("");
-    if (!account.userId) {
-      window.location.assign(`/login?next=%2Fdashboard&email=${encodeURIComponent(account.email)}`);
-      return;
-    }
     setSwitchingEmail(account.email);
     try {
       const response = await fetch("/api/auth/switch-account", {
@@ -170,7 +166,7 @@ export default function HomeAccountNav() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         cache: "no-store",
-        body: JSON.stringify({ userId: account.userId }),
+        body: JSON.stringify({ userId: account.userId, email: account.email }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -182,7 +178,10 @@ export default function HomeAccountNav() {
       // redirects to login when either the auth session or Pixlo profile is missing.
       const sessionResponse = await fetch("/api/auth/session", { credentials: "include", cache: "no-store" });
       const sessionData = await sessionResponse.json().catch(() => ({}));
-      if (!sessionResponse.ok || sessionData.user?.id !== account.userId) {
+      const switchedToExpectedAccount = account.userId
+        ? sessionData.user?.id === account.userId
+        : String(sessionData.user?.email || "").trim().toLowerCase() === account.email.toLowerCase();
+      if (!sessionResponse.ok || !switchedToExpectedAccount) {
         setSwitchError("The account session did not activate. Please try switching again; you have not been sent to the login page.");
         return;
       }
