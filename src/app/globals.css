@@ -3901,3 +3901,5 @@ html, body, *, *::before, *::after {
   .dashboard:has(.presets-page) .preset-slots { grid-template-columns:minmax(0,1fr)!important; }
   .dashboard:has(.presets-page) .preset-real-preview { height:190px!important; flex:none!important; }
 }
+
+/* Trigger fresh Vercel production build for the preset viewport-fit fix. */
