@@ -12,6 +12,7 @@ const sections = [
   ["Profile", "Avatar, banner & card", "05"],
   ["Socials", "Links & icon layout", "06"],
   ["Badges", "Discord rewards & profile badges", "13"],
+  ["Presets", "Premium saved profile slots", "14"],
   ["Music", "Tracks, covers & player", "07"],
   ["Effects", "Motion, glow & atmosphere", "08"],
   ["Layout", "Structure & alignment", "09"],
@@ -197,6 +198,11 @@ export default function Dashboard() {
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const [usernameChangeAvailableAt, setUsernameChangeAvailableAt] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [presetsPremium, setPresetsPremium] = useState(false);
+  const [presetsPremiumReady, setPresetsPremiumReady] = useState(false);
+  const [presets, setPresets] = useState<{ slot_number: number; name: string; settings: Partial<ProfileSettings>; updated_at: string }[]>([]);
+  const [presetBusy, setPresetBusy] = useState<number | null>(null);
+  const [presetMessage, setPresetMessage] = useState("");
   const [profileCopied, setProfileCopied] = useState(false);
   const [viewLeaderboard, setViewLeaderboard] = useState<{ leaderboard: { username: string; displayName: string; views: number; rank: number }[]; viewer: { username: string; displayName: string; views: number; rank: number } | null; totalProfiles: number } | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
@@ -224,6 +230,28 @@ export default function Dashboard() {
   const [previewAssets, setPreviewAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", enterScreenBackgroundImage: "", enterScreenBackgroundVideo: "", musicCover: "", customLinkIcons: {} as Record<string, string> });
   const [draftTrack, setDraftTrack] = useState<{ title: string; artist: string; audio: string; cover: string }>({ title: "", artist: "", audio: "", cover: "" });
   const [discordUser, setDiscordUser] = useState<{ id?: string; username?: string; discordId?: string; discordUsername?: string; discordDisplayName?: string; discordAvatar?: string; discordAvatarDecoration?: string; useDiscordAvatar?: boolean; useDiscordDecoration?: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!settingsReady) return;
+    let cancelled = false;
+    fetch("/api/presets", { cache: "no-store", credentials: "include" })
+      .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Could not load presets.");
+        return data;
+      })
+      .then(data => {
+        if (cancelled) return;
+        setPresetsPremium(Boolean(data.premium));
+        setPresets(Array.isArray(data.slots) ? data.slots : []);
+        setPresetMessage("");
+      })
+      .catch(error => {
+        if (!cancelled) setPresetMessage(error instanceof Error ? error.message : "Could not load presets.");
+      })
+      .finally(() => { if (!cancelled) setPresetsPremiumReady(true); });
+    return () => { cancelled = true; };
+  }, [settingsReady]);
 
   useEffect(() => {
     if (active !== "Badges" || !settingsReady || !discordUser) return;
@@ -404,6 +432,42 @@ export default function Dashboard() {
   }, [settingsReady, settings.avatar, settings.banner, settings.backgroundImage, settings.backgroundVideo, settings.enterScreenBackgroundImage, settings.enterScreenBackgroundVideo, settings.customLinks, settings.musicTracks, settings.activeMusicId]);
 
   const set = <K extends keyof ProfileSettings>(key: K, value: ProfileSettings[K]) => { setSettings(s => ({ ...s, [key]: value })); setSaved(false); };
+  const savePresetSlot = async (slot: number) => {
+    setPresetBusy(slot); setPresetMessage("");
+    try {
+      const existing = presets.find(item => item.slot_number === slot);
+      const response = await fetch("/api/presets", {
+        method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slot, name: existing?.name || `Preset ${slot}`, settings }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Could not save this preset.");
+      setPresets(current => [...current.filter(item => item.slot_number !== slot), data.slot].sort((a,b) => a.slot_number - b.slot_number));
+      setPresetMessage(`Preset slot ${slot} saved successfully.`);
+    } catch (error) { setPresetMessage(error instanceof Error ? error.message : "Could not save this preset."); }
+    finally { setPresetBusy(null); }
+  };
+
+  const loadPresetSlot = (preset: { slot_number: number; name: string; settings: Partial<ProfileSettings> }) => {
+    const next = normaliseProfileSettings({ ...preset.settings, username: settings.username, displayName: preset.settings.displayName ?? settings.displayName }, { username: settings.username, displayName: settings.displayName });
+    setSettings(next);
+    setSaved(false);
+    setPresetMessage(`Loaded “${preset.name || `Preset ${preset.slot_number}`}”. Your dashboard will sync the restored settings to your profile.`);
+    setPreviewEntered(false); setPreviewEntering(false);
+  };
+
+  const deletePresetSlot = async (slot: number) => {
+    setPresetBusy(slot); setPresetMessage("");
+    try {
+      const response = await fetch("/api/presets?slot=" + slot, { method: "DELETE", credentials: "include", cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Could not clear this preset.");
+      setPresets(current => current.filter(item => item.slot_number !== slot));
+      setPresetMessage(`Preset slot ${slot} cleared.`);
+    } catch (error) { setPresetMessage(error instanceof Error ? error.message : "Could not clear this preset."); }
+    finally { setPresetBusy(null); }
+  };
+
 
   const adjustOwnViews = async (action: "add" | "remove") => {
     const amount = Number(viewToolAmount);
@@ -760,6 +824,44 @@ export default function Dashboard() {
   }
 
   return <>
+  <style jsx global>{`
+    .presets-premium-mark{display:inline-grid;place-items:center;flex:0 0 auto;width:22px;height:22px;margin-left:auto;border-radius:7px;color:#c4a7ff;background:rgba(139,92,246,.12);border:1px solid rgba(167,139,250,.23);font-size:14px;line-height:1;text-shadow:0 0 8px rgba(167,139,250,.72);box-shadow:0 0 10px rgba(139,92,246,.12);animation:presetMarkGlow 3.4s ease-in-out infinite}
+    .presets-premium-mark-large{width:36px;height:36px;font-size:21px;border-radius:11px}
+    @keyframes presetMarkGlow{0%,100%{text-shadow:0 0 5px rgba(167,139,250,.48);box-shadow:0 0 7px rgba(139,92,246,.09)}50%{text-shadow:0 0 11px rgba(167,139,250,.8);box-shadow:0 0 13px rgba(139,92,246,.18)}}
+    .presets-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    .presets-tip{padding:13px 15px;border:1px solid rgba(167,139,250,.16);background:rgba(139,92,246,.055);border-radius:12px;color:rgba(255,255,255,.7);font-size:12px;line-height:1.65}
+    .preset-status{padding:12px 14px;border-radius:11px;border:1px solid rgba(167,139,250,.2);background:rgba(139,92,246,.08);color:#e1d4ff;font-size:13px}
+    .preset-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .preset-slot-card{min-width:0;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:linear-gradient(145deg,rgba(27,26,36,.94),rgba(15,15,21,.98));box-shadow:0 12px 30px rgba(0,0,0,.12);transition:border-color .22s ease,transform .22s ease}
+    .preset-slot-card:hover{border-color:rgba(167,139,250,.28);transform:translateY(-2px)}
+    .preset-slot-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .preset-slot-number{font-size:10px;letter-spacing:.15em;color:#bba0ff;font-weight:800}
+    .preset-slot-top h3{margin:4px 0 0;font-size:15px;color:#f5f1ff;overflow-wrap:anywhere}
+    .preset-slot-state{font-size:9px;letter-spacing:.1em;font-weight:800;color:rgba(255,255,255,.4);padding:5px 7px;border:1px solid rgba(255,255,255,.09);border-radius:7px}
+    .preset-slot-state.saved-state{color:#c4b5fd;border-color:rgba(167,139,250,.2);background:rgba(139,92,246,.08)}
+    .preset-mini-preview{position:relative;isolation:isolate;overflow:hidden;display:grid;place-items:center;min-height:190px;border-radius:12px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--preset-accent) 23%,transparent),transparent 65%),linear-gradient(140deg,var(--preset-bg),#09090e 80%);border:1px solid rgba(255,255,255,.07)}
+    .preset-mini-glow{position:absolute;width:110px;height:110px;border-radius:50%;background:var(--preset-accent);filter:blur(54px);opacity:.22;animation:presetPreviewDrift 5s ease-in-out infinite alternate}
+    .preset-mini-card{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:min(78%,220px);padding:13px 14px;border:1px solid rgba(255,255,255,.15);border-radius:13px;background:rgba(18,17,25,.62);backdrop-filter:blur(10px);box-shadow:0 8px 28px rgba(0,0,0,.25);color:#fff;text-align:center;animation:presetCardFloat 4.8s ease-in-out infinite}
+    .preset-mini-avatar{display:grid;place-items:center;width:34px;height:34px;margin-bottom:7px;border-radius:50%;border:1px solid color-mix(in srgb,var(--preset-accent) 75%,white);background:color-mix(in srgb,var(--preset-accent) 18%,#17151e);box-shadow:0 0 15px color-mix(in srgb,var(--preset-accent) 28%,transparent);font-size:13px;font-weight:800}
+    .preset-mini-card b{max-width:100%;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .preset-mini-card small{margin-top:2px;color:rgba(255,255,255,.53);font-size:9px}
+    .preset-mini-card p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:7px 0;font-size:9px;line-height:1.45;color:rgba(255,255,255,.72)}
+    .preset-mini-links{display:flex;gap:6px;margin-top:2px}.preset-mini-links i{width:15px;height:15px;border-radius:5px;background:color-mix(in srgb,var(--preset-accent) 23%,rgba(255,255,255,.05));border:1px solid color-mix(in srgb,var(--preset-accent) 35%,transparent)}
+    .preset-mini-live{position:absolute;right:9px;bottom:8px;display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.48);font-size:8px;font-weight:800;letter-spacing:.1em}.preset-mini-live i{width:5px;height:5px;border-radius:50%;background:#a78bfa;box-shadow:0 0 8px #a78bfa}
+    .preset-updated{min-height:17px;margin:10px 0 12px;color:rgba(255,255,255,.45);font-size:10px}
+    .preset-slot-actions{display:flex;flex-wrap:wrap;gap:7px}.preset-slot-actions button{border-radius:8px;padding:8px 10px;font:inherit;font-size:11px;font-weight:750;cursor:pointer;transition:filter .2s ease,opacity .2s ease}.preset-slot-actions button:disabled{opacity:.5;cursor:wait}
+    .preset-save-button{flex:1;border:1px solid rgba(167,139,250,.22);background:rgba(139,92,246,.15);color:#e5d9ff}.preset-load-button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff}.preset-clear-button{border:1px solid rgba(255,120,120,.15);background:rgba(255,90,90,.06);color:#ffb2b2}
+    @keyframes presetPreviewDrift{from{transform:translate(-20px,-8px) scale(.92)}to{transform:translate(22px,10px) scale(1.12)}}
+    @keyframes presetCardFloat{0%,100%{transform:translateY(0) rotate(-.3deg)}50%{transform:translateY(-4px) rotate(.3deg)}}
+    .presets-lock-overlay{position:absolute;z-index:60;inset:0;display:grid;place-items:center;padding:clamp(18px,4vw,44px);border-radius:22px;background:rgba(5,5,9,.78);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+    .presets-lock-card{width:min(100%,420px);padding:clamp(24px,4vw,38px);text-align:center;border:1px solid rgba(167,139,250,.22);border-radius:22px;background:linear-gradient(145deg,rgba(27,23,39,.97),rgba(13,13,19,.98));box-shadow:0 25px 80px rgba(0,0,0,.42),0 0 35px rgba(139,92,246,.07);color:#fff}
+    .presets-premium-mark-lock{width:52px;height:52px;margin:0 auto 18px;border-radius:16px;font-size:28px}
+    .presets-lock-eyebrow{margin:0 0 8px;color:#c4b5fd;font-size:10px;font-weight:850;letter-spacing:.2em}
+    .presets-lock-card h2{margin:0 0 10px;font-size:clamp(24px,3vw,32px);letter-spacing:-.04em}
+    .presets-lock-card>p:not(.presets-lock-eyebrow){margin:0 auto 22px;max-width:330px;color:rgba(255,255,255,.66);font-size:13px;line-height:1.75}
+    .presets-unlock-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 17px;border-radius:10px;background:linear-gradient(110deg,#8b5cf6,#a78bfa);color:#100b1b;text-decoration:none;font-size:13px;font-weight:850;box-shadow:0 6px 22px rgba(139,92,246,.18)}
+    @media(max-width:760px){.preset-slots{grid-template-columns:1fr}.presets-lock-overlay{border-radius:16px}.preset-mini-preview{min-height:170px}}
+  `}</style>
   {showUsernameConfirm && <div role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowUsernameConfirm(false); }} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}>
     <section role="dialog" aria-modal="true" aria-labelledby="username-confirm-title" style={{ width: "min(100%, 440px)", padding: 26, borderRadius: 20, border: "1px solid rgba(255,255,255,0.14)", background: "#15151b", color: "#fff", boxShadow: "0 24px 80px rgba(0,0,0,0.45)" }}>
       <h2 id="username-confirm-title" style={{ margin: "0 0 12px", fontSize: 22 }}>Confirm username change</h2>
@@ -774,7 +876,7 @@ export default function Dashboard() {
     <main className="dashboard">
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Profile customization</small></div>
-      <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b></button>)}</nav>
+      <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b>{name === "Presets" && <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">✦</span>}</button>)}</nav>
       <div className="sidebar-bottom"><button type="button" className="reset-button" style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }} onClick={reset}>Reset to default</button></div>
     </aside>
 
@@ -785,8 +887,48 @@ export default function Dashboard() {
         <div className="header-actions"><a className="view-button view-button-primary" href={profileUrl} target="_blank" rel="noreferrer">View live profile ↗</a><button type="button" className="save-button" onClick={save}>{saved ? "✓ Saved" : "Save changes"}</button></div>
       </header>
 
-      <div className="editor-grid">
+      <div className="editor-grid" style={{ position: "relative" }}>
         <section className="editor">
+          {active === "Presets" && <div className="form-stack presets-page">
+            <div className="presets-heading">
+              <div><SectionIntro title="Your Premium presets" /><p className="hint">Save up to five complete snapshots of your profile customisation and switch between them whenever you want.</p></div>
+              <span className="presets-premium-mark presets-premium-mark-large" aria-label="Premium exclusive" title="Premium exclusive">✦</span>
+            </div>
+            <div className="presets-tip">Each slot stores your current settings, layout, colours, effects, text, links, music and other profile customisation values. Saving a preset does not publish it until your restored settings sync.</div>
+            {presetMessage && <div className="preset-status" role="status">{presetMessage}</div>}
+            {presetsPremiumReady && presets.length === 0 && !presetMessage && <p className="hint">No presets saved yet. Your five slots are ready whenever you are.</p>}
+            <div className="preset-slots">
+              {[1,2,3,4,5].map(slot => {
+                const preset = presets.find(item => item.slot_number === slot);
+                const snap = preset?.settings;
+                const snapName = String(snap?.displayName || snap?.username || "Your profile");
+                const snapBio = String(snap?.description || "Your bio will appear here");
+                const bg = String(snap?.backgroundColour || snap?.backgroundColor || "#17131f");
+                const accent = String(snap?.accentColour || snap?.socialIconColour || "#a78bfa");
+                return <article className={`preset-slot-card ${preset ? "has-preset" : "is-empty"}`} key={slot}>
+                  <div className="preset-slot-top"><div><span className="preset-slot-number">SLOT 0{slot}</span><h3>{preset?.name || `Preset slot ${slot}`}</h3></div><span className={`preset-slot-state ${preset ? "saved-state" : ""}`}>{preset ? "SAVED" : "EMPTY"}</span></div>
+                  <div className="preset-mini-preview" style={{ "--preset-accent": accent, "--preset-bg": bg } as React.CSSProperties}>
+                    <div className="preset-mini-glow" />
+                    <div className="preset-mini-card">
+                      <div className="preset-mini-avatar">{snapName.slice(0,1).toUpperCase()}</div>
+                      <b>{preset ? snapName : "Your profile"}</b>
+                      <small>@{preset ? String(snap?.username || "username") : "username"}</small>
+                      <p>{preset ? snapBio : "A preview will appear when you save a preset."}</p>
+                      <div className="preset-mini-links"><i /><i /><i /></div>
+                    </div>
+                    <span className="preset-mini-live"><i /> PREVIEW</span>
+                  </div>
+                  {preset ? <p className="preset-updated">Last saved {new Date(preset.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</p> : <p className="preset-updated">This slot is empty.</p>}
+                  <div className="preset-slot-actions">
+                    {preset && <button type="button" className="preset-load-button" disabled={presetBusy !== null} onClick={() => loadPresetSlot(preset)}>Load preset</button>}
+                    <button type="button" className="preset-save-button" disabled={presetBusy !== null || !settingsReady} onClick={() => void savePresetSlot(slot)}>{presetBusy === slot ? "Saving…" : preset ? "Overwrite slot" : "Save current settings"}</button>
+                    {preset && <button type="button" className="preset-clear-button" disabled={presetBusy !== null} onClick={() => void deletePresetSlot(slot)} aria-label={`Clear preset slot ${slot}`}>Clear</button>}
+                  </div>
+                </article>;
+              })}
+            </div>
+          </div>}
+
           {active === "Badges" && <div className="form-stack">
             <SectionIntro title="Your Pixlo badges" />
             {!discordUser ? <section className="discord-connect-card" style={{ padding: 24, borderRadius: 18 }}>
@@ -1152,6 +1294,15 @@ export default function Dashboard() {
           </div>
           </>}
         </aside>
+        {active === "Presets" && presetsPremiumReady && !presetsPremium && <div className="presets-lock-overlay" role="region" aria-label="Premium presets locked">
+          <div className="presets-lock-card">
+            <span className="presets-premium-mark presets-premium-mark-lock" aria-hidden="true">✦</span>
+            <p className="presets-lock-eyebrow">PIXLO PREMIUM</p>
+            <h2>This section is locked</h2>
+            <p>Presets are an exclusive Premium feature. Unlock all five save slots, animated previews and instant profile switching.</p>
+            <a href="/premium" className="presets-unlock-button">Explore Premium <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>}
       </div>
     </div>
   </main>
