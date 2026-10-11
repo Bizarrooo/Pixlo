@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { authHeaders, supabaseConfig } from "../../../../lib/supabase-config";
-import { isReservedPixloUsername } from "../../../../lib/username-rules";
 
 export const runtime = "nodejs";
 
@@ -45,9 +44,6 @@ export async function POST(request: Request) {
     }
     if (!/^[a-z0-9._-]{3,24}$/.test(username)) {
       return NextResponse.json({ error: "Username must be 3–24 characters using lowercase letters, numbers, dots, underscores or hyphens." }, { status: 400 });
-    }
-    if (isReservedPixloUsername(username)) {
-      return NextResponse.json({ error: "That username is reserved for Pixlo pages. Please choose another username." }, { status: 400 });
     }
 
     const { url, key } = supabaseConfig();
