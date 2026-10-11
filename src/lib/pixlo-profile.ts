@@ -1,5 +1,4 @@
 import { authHeaders, supabaseConfig } from "./supabase-config";
-import { isReservedPixloUsername } from "./username-rules";
 
 export type PixloProfile = {
   id: string;
@@ -167,9 +166,6 @@ export async function updatePixloIdentity(
   const displayName = input.displayName.trim().slice(0, 48) || username;
   if (!/^[a-z0-9._-]{3,24}$/.test(username)) {
     throw new Error("Username must be 3–24 characters using lowercase letters, numbers, dots, underscores or hyphens.");
-  }
-  if (isReservedPixloUsername(username)) {
-    throw new Error("That username is reserved for Pixlo pages. Please choose another username.");
   }
 
   const changedUsername = username !== current.username.toLowerCase();
