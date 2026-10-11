@@ -73,7 +73,8 @@ async function getAllPremiumEntitlements() {
   let offset = 0;
   const pageSize = 1000;
   while (true) {
-    const page = await db(`pixlo_premium_entitlements?select=user_id,status&status=eq.active&order=user_id.asc&limit=${pageSize}&offset=${offset}`);
+    const liveMode = process.env.PIXLO_PREMIUM_LIVEMODE === "true";
+    const page = await db(`pixlo_premium_entitlements?select=user_id,status,livemode&status=eq.active&livemode=eq.${liveMode}&order=user_id.asc&limit=${pageSize}&offset=${offset}`);
     if (!Array.isArray(page) || page.length === 0) break;
     entitlements.push(...page);
     if (page.length < pageSize) break;
