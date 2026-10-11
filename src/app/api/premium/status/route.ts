@@ -29,7 +29,11 @@ export async function GET(request: Request) {
     `${url}/rest/v1/pixlo_premium_entitlements?select=status,purchased_at,price_paid,currency&user_id=eq.${encodeURIComponent(user.id)}&limit=1`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
   );
-  if (!entitlementResponse.ok) return NextResponse.json({ error: "Could not check Premium status. Make sure the Premium database migration has been applied." }, { status: 503 });
+  if (!entitlementResponse.ok) {
+    const diagnostic = await entitlementResponse.text().catch(() => "Could not read Supabase response body");
+    console.error("[premium/status] Supabase entitlement query failed", { status: entitlementResponse.status, body: diagnostic.slice(0, 1200) });
+    return NextResponse.json({ error: "Could not check Premium status. Check the server logs for the Supabase error." }, { status: 503 });
+  }
   const rows = await entitlementResponse.json().catch(() => []);
   const entitlement = Array.isArray(rows) ? rows[0] : null;
   const premium = entitlement?.status === "active";
