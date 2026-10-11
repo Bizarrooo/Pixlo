@@ -161,7 +161,7 @@ export async function PATCH(request: Request) {
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : "Unable to save your Pixlo profile.";
-        const status = /already taken/i.test(message) ? 409 : /24 hours|3 days|locked until/i.test(message) ? 403 : /username must/i.test(message) ? 400 : 500;
+        const status = /already taken/i.test(message) ? 409 : /24 hours|3 days|locked until/i.test(message) ? 403 : /username must|username is reserved/i.test(message) ? 400 : 500;
         return NextResponse.json({ ok: false, error: message }, { status });
       }
     }
