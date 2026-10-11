@@ -900,7 +900,6 @@ export default function Dashboard() {
           {active === "Presets" && <div className="form-stack presets-page">
             <div className="presets-heading">
               <div><SectionIntro title="Premium presets" /><p className="hint">Five save slots for your complete Pixlo profile. Save it once, then equip it whenever you want.</p></div>
-              {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark presets-premium-mark-large" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}
             </div>
             <div className="presets-tip">Each preset saves the complete profile settings snapshot, including text, layout, colours, effects, images, video, music, links, badge placement and enter-screen settings.</div>
             {presetMessage && <div className="preset-status" role="status">{presetMessage}</div>}
@@ -910,13 +909,12 @@ export default function Dashboard() {
                 const preset = presets.find(item => item.slot_number === slot);
                 const previewUsername = String(settings.username || preset?.settings?.username || "");
                 return <article className={`preset-slot-card ${preset ? "has-preset" : "is-empty"}`} key={slot}>
-                  <div className="preset-slot-top"><div><span className="preset-slot-number">SAVE SLOT 0{slot}</span><h3>{preset?.name || "Empty save slot"}</h3></div><span className={`preset-slot-state ${preset ? "saved-state" : ""}`}>{preset ? "SAVED" : "EMPTY"}</span></div>
-                  <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`My preset ${slot}`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} /></label>
+                  <div className="preset-slot-top"><div><span className="preset-slot-number">SLOT 0{slot}</span><h3>{preset?.name || `Preset ${slot}`}</h3></div>{preset && <span className="preset-slot-state saved-state">SAVED</span>}</div>
+                  <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`Name this preset`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} /></label>
                   <div className="preset-real-preview">
-                    {preset && previewUsername ? <iframe title={`Exact Pixlo profile preview for ${preset.name || `slot ${slot}`}`} src={`/${encodeURIComponent(previewUsername)}?presetPreview=${slot}&embedded=1`} loading="lazy" /> : <div className="preset-empty-preview"><span className="preset-empty-mark">P</span><b>Nothing saved here yet</b><span>Save your current profile to preview it here.</span></div>}
-                    <span className="preset-preview-tag"><i /> {preset ? "LIVE PROFILE PREVIEW" : "EMPTY SLOT"}</span>
+                    {preset && previewUsername ? <iframe title={`Pixlo profile preview for ${preset.name || `slot ${slot}`}`} src={`/${encodeURIComponent(previewUsername)}?presetPreview=${slot}&embedded=1`} loading="lazy" /> : <div className="preset-empty-preview" aria-label="Empty preset slot" />}
                   </div>
-                  {preset ? <p className="preset-updated">Last saved {new Date(preset.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</p> : <p className="preset-updated">This slot is empty.</p>}
+                  {preset && <p className="preset-updated">Last saved {new Date(preset.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</p>}
                   <div className="preset-slot-actions">
                     {preset && <button type="button" className="preset-overwrite-button" disabled={presetBusy !== null} onClick={() => { if (window.confirm(`Are you sure you want to overwrite “${preset.name || `Preset ${slot}`}” with your current settings?`)) void savePresetSlot(slot); }}>{presetBusy === slot ? "Saving…" : "Overwrite"}</button>}
                     {preset && <button type="button" className="preset-equip-button" disabled={presetBusy !== null} onClick={() => { if (window.confirm(`Are you sure you want to equip “${preset.name || `Preset ${slot}`}”? This will replace your current dashboard customisation.`)) loadPresetSlot(preset); }}>Equip preset</button>}

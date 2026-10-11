@@ -3769,3 +3769,46 @@ html, body, *, *::before, *::after {
 
 .home-account-switch-error { margin: 0 0 8px; padding: 9px 10px; border: 1px solid rgba(255,110,110,.25); border-radius: 8px; background: rgba(255,75,75,.08); color: #ffb4b4; font-size: 12px; line-height: 1.45; }
 .home-saved-account:disabled { opacity: .65; cursor: wait; }
+
+
+/* Premium presets — match Pixlo's dark dashboard with its red/orange gradient, while Premium itself stays purple. */
+.dashboard .sidebar nav button { display:flex; align-items:center; }
+.dashboard .sidebar nav button>b { flex:1 1 auto; min-width:0; text-align:left; }
+.dashboard .presets-premium-mark { margin-left:auto!important; margin-right:1px; flex:0 0 19px; width:19px; height:19px; display:inline-flex; align-items:center; justify-content:center; color:#c084fc!important; filter:drop-shadow(0 0 5px rgba(168,85,247,.62)); }
+.dashboard .presets-premium-mark img { display:block; width:100%; height:100%; object-fit:contain; filter:brightness(0) saturate(100%) invert(68%) sepia(31%) saturate(1177%) hue-rotate(219deg) brightness(103%) contrast(101%); }
+.dashboard .presets-premium-mark svg { width:100%; height:100%; fill:#c084fc; stroke:#e9d5ff; stroke-width:.6; }
+.dashboard .presets-heading { display:block; }
+.dashboard .presets-heading .section-intro h2,
+.dashboard .presets-heading h2 { color:#fff; }
+.dashboard .presets-page .hint,
+.dashboard .presets-page .presets-tip { color:#b7a9a6!important; }
+.dashboard .presets-tip { padding:12px 14px; border:1px solid rgba(255,96,54,.2); border-radius:10px; background:linear-gradient(110deg,rgba(255,65,54,.09),rgba(255,139,46,.07)); font-size:12px; line-height:1.65; }
+.dashboard .preset-slots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.dashboard .preset-slot-card { min-width:0; padding:14px; border:1px solid rgba(255,91,49,.28); border-radius:13px; background:linear-gradient(145deg,rgba(255,67,56,.105) 0%,rgba(255,132,42,.065) 48%,rgba(16,13,15,.96) 100%); box-shadow:inset 0 1px rgba(255,255,255,.035),0 8px 24px rgba(0,0,0,.18); transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease; }
+.dashboard .preset-slot-card:hover { transform:translateY(-2px); border-color:rgba(255,117,58,.48); box-shadow:inset 0 1px rgba(255,255,255,.05),0 12px 30px rgba(255,70,45,.07); }
+.dashboard .preset-slot-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.dashboard .preset-slot-number { color:#ff9a61!important; font:700 10px/1.2 ui-monospace,monospace; letter-spacing:.13em; }
+.dashboard .preset-slot-top h3 { margin:5px 0 0; color:#fff; font-size:16px; font-weight:700; letter-spacing:-.025em; overflow-wrap:anywhere; }
+.dashboard .preset-slot-state { color:#ffb06b; font:700 9px ui-monospace,monospace; letter-spacing:.1em; }
+.dashboard .preset-name-label { display:grid; gap:6px; margin-bottom:11px; color:#e7d8d3; font-size:11px; font-weight:650; }
+.dashboard .preset-name-label input { width:100%; min-width:0; padding:10px 11px; border:1px solid rgba(255,255,255,.11); border-radius:8px; outline:none; background:rgba(5,5,7,.74); color:#fff; font-size:12px; }
+.dashboard .preset-name-label input:focus { border-color:rgba(255,115,58,.7); box-shadow:0 0 0 2px rgba(255,88,48,.09); }
+.dashboard .preset-name-label input::placeholder { color:#706461; }
+.dashboard .preset-real-preview { position:relative; width:100%; height:230px; overflow:hidden; border:1px solid rgba(255,255,255,.09); border-radius:9px; background:linear-gradient(135deg,#151014,#21100e 52%,#0b0b0d); }
+.dashboard .preset-real-preview iframe { display:block; width:100%; height:100%; border:0; background:#050507; }
+.dashboard .preset-empty-preview { width:100%; height:100%; background:radial-gradient(ellipse at 15% 100%,rgba(255,69,48,.15),transparent 55%),radial-gradient(ellipse at 95% 0%,rgba(255,143,49,.11),transparent 50%),#09090b; }
+.dashboard .preset-updated { margin:9px 0 0; color:#988984; font-size:10px; line-height:1.4; }
+.dashboard .preset-slot-actions { display:flex; align-items:center; gap:8px; margin-top:12px; }
+.dashboard .preset-slot-actions button { min-height:35px; padding:8px 11px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; transition:filter .15s ease,transform .15s ease; }
+.dashboard .preset-slot-actions button:hover:not(:disabled) { filter:brightness(1.12); transform:translateY(-1px); }
+.dashboard .preset-slot-actions button:disabled { opacity:.55; cursor:wait; }
+.dashboard .preset-overwrite-button { flex:0 0 auto; border:1px solid rgba(255,125,70,.34); background:rgba(255,91,49,.07); color:#ffb18c; }
+.dashboard .preset-equip-button { flex:1 1 auto; border:1px solid rgba(255,113,53,.45); background:linear-gradient(100deg,#f0443e 0%,#ff742f 100%); color:#fff; box-shadow:0 4px 13px rgba(255,73,47,.17); }
+.dashboard .preset-clear-button { flex:0 0 auto; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.035); color:#d8c9c5; }
+.dashboard .presets-lock-overlay { background:rgba(0,0,0,.78)!important; backdrop-filter:blur(5px); }
+.dashboard .presets-lock-card { border:1px solid rgba(255,96,54,.3)!important; background:linear-gradient(145deg,rgba(255,67,56,.12),rgba(255,132,42,.06) 55%,rgba(9,9,11,.97))!important; }
+.dashboard .presets-lock-card h2 { background:linear-gradient(95deg,#ff493d 0%,#ff8b32 100%); -webkit-background-clip:text; background-clip:text; color:transparent!important; }
+.dashboard .presets-lock-card .presets-premium-mark { color:#c084fc!important; filter:drop-shadow(0 0 7px rgba(168,85,247,.62)); }
+.dashboard .presets-lock-card .presets-premium-mark img { filter:brightness(0) saturate(100%) invert(68%) sepia(31%) saturate(1177%) hue-rotate(219deg) brightness(103%) contrast(101%); }
+.dashboard .presets-unlock-button { background:linear-gradient(100deg,#f0443e,#ff742f)!important; color:#fff!important; }
+@media(max-width:900px){.dashboard .preset-slots{grid-template-columns:minmax(0,1fr)}}
