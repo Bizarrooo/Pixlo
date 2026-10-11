@@ -171,9 +171,9 @@ export async function updatePixloIdentity(
   const changedUsername = username !== current.username.toLowerCase();
   const lastChanged = current.username_changed_at || current.created_at;
   if (changedUsername && lastChanged) {
-    const availableAt = new Date(new Date(lastChanged).getTime() + 3 * 24 * 60 * 60 * 1000);
+    const availableAt = new Date(new Date(lastChanged).getTime() + 24 * 60 * 60 * 1000);
     if (Date.now() < availableAt.getTime()) {
-      throw new Error(`Username changes are locked until ${availableAt.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}. You can change your username once every 3 days.`);
+      throw new Error(`Username changes are locked until ${availableAt.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}. You can change your username once every 24 hours.`);
     }
   }
 
@@ -194,7 +194,7 @@ export async function updatePixloIdentity(
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
     if (response.status === 409 || detail.includes("23505")) throw new Error("That username is already taken. Please choose another one.");
-    if (detail.toLowerCase().includes("username_change_cooldown")) throw new Error("Username changes are locked for 3 days after account creation or your most recent username change.");
+    if (detail.toLowerCase().includes("username_change_cooldown")) throw new Error("Username changes are locked for 24 hours after account creation or your most recent username change.");
     if (detail.toLowerCase().includes("username_changed_at") || detail.toLowerCase().includes("column")) throw new Error("Run the latest supabase/schema.sql in Supabase before saving account identity changes.");
     throw new Error(`Unable to save your Pixlo profile (${response.status}). ${detail.slice(0, 220)}`);
   }
@@ -208,7 +208,7 @@ export async function updatePixloIdentity(
 export function profileToDashboardUser(profile: PixloProfile) {
   const lastUsernameChange = profile.username_changed_at || profile.created_at || null;
   const usernameChangeAvailableAt = lastUsernameChange
-    ? new Date(new Date(lastUsernameChange).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString()
+    ? new Date(new Date(lastUsernameChange).getTime() + 24 * 60 * 60 * 1000).toISOString()
     : null;
   return {
     id: profile.id,
