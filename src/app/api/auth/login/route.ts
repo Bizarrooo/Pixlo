@@ -45,6 +45,9 @@ export async function POST(request: Request) {
     });
     result.cookies.set("pixlo_access_token", data.access_token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: Math.max(60, Number(data.expires_in) || 3600), path: "/" });
     result.cookies.set("pixlo_refresh_token", data.refresh_token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 30, path: "/" });
+    if (authUser?.id && /^[0-9a-f-]{36}$/i.test(authUser.id) && typeof data.refresh_token === "string") {
+      result.cookies.set(`pixlo_saved_refresh_${authUser.id}`, data.refresh_token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 30, path: "/" });
+    }
     return result;
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Unable to sign you in." }, { status: 500 });
