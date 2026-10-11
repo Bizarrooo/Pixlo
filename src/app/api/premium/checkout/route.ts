@@ -31,7 +31,11 @@ export async function POST(request: Request) {
     `${supabaseUrl}/rest/v1/pixlo_premium_entitlements?select=status&user_id=eq.${encodeURIComponent(user.id)}&limit=1`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
   );
-  if (!existing.ok) return NextResponse.json({ error: "Premium storage is not ready. The database migration may still need to be applied." }, { status: 503 });
+  if (!existing.ok) {
+    const diagnostic = await existing.text().catch(() => "Could not read Supabase response body");
+    console.error("[premium/checkout] Supabase entitlement query failed", { status: existing.status, body: diagnostic.slice(0, 1200) });
+    return NextResponse.json({ error: "Premium storage is not ready. Check the server logs for the Supabase error." }, { status: 503 });
+  }
   const entitlements = await existing.json().catch(() => []);
   if (Array.isArray(entitlements) && entitlements.some((entry: { status?: string }) => entry.status === "active")) {
     return NextResponse.json({ error: "This Pixlo account already owns lifetime Premium." }, { status: 409 });
