@@ -123,7 +123,15 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       })
       .then(async data => {
         if (!cancelled) setProfileBadges(Array.isArray(data?.profile?.badges) ? data.profile.badges : []);
-        const remote = data?.profile?.settings;
+        const previewSlot = new URLSearchParams(window.location.search).get("presetPreview");
+        let remote = data?.profile?.settings;
+        if (previewSlot && /^[1-5]$/.test(previewSlot)) {
+          try {
+            const presetResponse = await fetch(`/api/presets?preview=${previewSlot}`, { cache: "no-store", credentials: "include" });
+            const presetData = await presetResponse.json().catch(() => ({}));
+            if (presetResponse.ok && presetData?.slot?.settings) remote = presetData.slot.settings;
+          } catch {}
+        }
         if (cancelled || !remote || typeof remote !== "object" || Object.keys(remote).length === 0) return;
         const current = normaliseProfileSettings(remote, { username: data.profile.username || username, displayName: data.profile.displayName || data.profile.username || username });
         setSettings(previous => ({ ...current, views: Math.max(Number(current.views) || 0, Number(previous.views) || 0) }));
@@ -151,7 +159,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   useEffect(() => {
     const username = (forcedUsername || "").trim().toLowerCase();
-    if (!username) return;
+    if (!username || new URLSearchParams(window.location.search).has("presetPreview")) return;
     let visitorId = "";
     try {
       visitorId = localStorage.getItem("pixlo-visitor-id") || "";

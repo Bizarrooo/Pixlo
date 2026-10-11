@@ -202,6 +202,7 @@ export default function Dashboard() {
   const [presetsPremiumReady, setPresetsPremiumReady] = useState(false);
   const [presets, setPresets] = useState<{ slot_number: number; name: string; settings: Partial<ProfileSettings>; updated_at: string }[]>([]);
   const [presetBusy, setPresetBusy] = useState<number | null>(null);
+  const [presetNames, setPresetNames] = useState<Record<number, string>>({});
   const [presetMessage, setPresetMessage] = useState("");
   const [profileCopied, setProfileCopied] = useState(false);
   const [viewLeaderboard, setViewLeaderboard] = useState<{ leaderboard: { username: string; displayName: string; views: number; rank: number }[]; viewer: { username: string; displayName: string; views: number; rank: number } | null; totalProfiles: number } | null>(null);
@@ -244,6 +245,7 @@ export default function Dashboard() {
         if (cancelled) return;
         setPresetsPremium(Boolean(data.premium));
         setPresets(Array.isArray(data.slots) ? data.slots : []);
+        setPresetNames(Object.fromEntries((Array.isArray(data.slots) ? data.slots : []).map((slot: { slot_number: number; name: string }) => [slot.slot_number, slot.name])));
         setPresetMessage("");
       })
       .catch(error => {
@@ -438,7 +440,7 @@ export default function Dashboard() {
       const existing = presets.find(item => item.slot_number === slot);
       const response = await fetch("/api/presets", {
         method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slot, name: existing?.name || `Preset ${slot}`, settings }),
+        body: JSON.stringify({ slot, name: (presetNames[slot] || existing?.name || `Preset ${slot}`).trim() || `Preset ${slot}`, settings }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Could not save this preset.");
@@ -451,8 +453,9 @@ export default function Dashboard() {
   const loadPresetSlot = (preset: { slot_number: number; name: string; settings: Partial<ProfileSettings> }) => {
     const next = normaliseProfileSettings({ ...preset.settings, username: settings.username, displayName: preset.settings.displayName ?? settings.displayName }, { username: settings.username, displayName: settings.displayName });
     setSettings(next);
+    if (profileUserId) saveSettingsToStorage(next, accountSettingsStorageKey(profileUserId));
     setSaved(false);
-    setPresetMessage(`Loaded “${preset.name || `Preset ${preset.slot_number}`}”. Your dashboard will sync the restored settings to your profile.`);
+    setPresetMessage(`Equipped “${preset.name || `Preset ${preset.slot_number}`}”. Your restored settings are now active in the dashboard preview. Use Save Changes to sync your account identity if needed.`);
     setPreviewEntered(false); setPreviewEntering(false);
   };
 
@@ -825,42 +828,47 @@ export default function Dashboard() {
 
   return <>
   <style jsx global>{`
-    .presets-premium-mark{display:inline-grid;place-items:center;flex:0 0 auto;width:22px;height:22px;margin-left:auto;border-radius:7px;color:#c4a7ff;background:rgba(139,92,246,.12);border:1px solid rgba(167,139,250,.23);font-size:14px;line-height:1;text-shadow:0 0 8px rgba(167,139,250,.72);box-shadow:0 0 10px rgba(139,92,246,.12);animation:presetMarkGlow 3.4s ease-in-out infinite}
-    .presets-premium-mark-large{width:36px;height:36px;font-size:21px;border-radius:11px}
-    @keyframes presetMarkGlow{0%,100%{text-shadow:0 0 5px rgba(167,139,250,.48);box-shadow:0 0 7px rgba(139,92,246,.09)}50%{text-shadow:0 0 11px rgba(167,139,250,.8);box-shadow:0 0 13px rgba(139,92,246,.18)}}
+    .presets-premium-mark{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:22px;height:22px;margin-left:auto;border-radius:7px;color:#ffb45f;background:rgba(255,111,72,.10);border:1px solid rgba(255,151,83,.24);filter:drop-shadow(0 0 5px rgba(255,112,70,.22));}
+    .presets-premium-mark img{width:75%;height:75%;object-fit:contain;filter:brightness(0) saturate(100%) invert(72%) sepia(56%) saturate(950%) hue-rotate(326deg) brightness(102%) drop-shadow(0 0 4px rgba(255,126,72,.3))}
+    .presets-premium-mark svg{width:75%;height:75%;fill:currentColor}
+    .presets-premium-mark-large{width:34px;height:34px;border-radius:10px}
     .presets-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-    .presets-tip{padding:13px 15px;border:1px solid rgba(167,139,250,.16);background:rgba(139,92,246,.055);border-radius:12px;color:rgba(255,255,255,.7);font-size:12px;line-height:1.65}
-    .preset-status{padding:12px 14px;border-radius:11px;border:1px solid rgba(167,139,250,.2);background:rgba(139,92,246,.08);color:#e1d4ff;font-size:13px}
-    .preset-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .preset-slot-card{min-width:0;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:linear-gradient(145deg,rgba(27,26,36,.94),rgba(15,15,21,.98));box-shadow:0 12px 30px rgba(0,0,0,.12);transition:border-color .22s ease,transform .22s ease}
-    .preset-slot-card:hover{border-color:rgba(167,139,250,.28);transform:translateY(-2px)}
-    .preset-slot-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
-    .preset-slot-number{font-size:10px;letter-spacing:.15em;color:#bba0ff;font-weight:800}
-    .preset-slot-top h3{margin:4px 0 0;font-size:15px;color:#f5f1ff;overflow-wrap:anywhere}
-    .preset-slot-state{font-size:9px;letter-spacing:.1em;font-weight:800;color:rgba(255,255,255,.4);padding:5px 7px;border:1px solid rgba(255,255,255,.09);border-radius:7px}
-    .preset-slot-state.saved-state{color:#c4b5fd;border-color:rgba(167,139,250,.2);background:rgba(139,92,246,.08)}
-    .preset-mini-preview{position:relative;isolation:isolate;overflow:hidden;display:grid;place-items:center;min-height:190px;border-radius:12px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--preset-accent) 23%,transparent),transparent 65%),linear-gradient(140deg,var(--preset-bg),#09090e 80%);border:1px solid rgba(255,255,255,.07)}
-    .preset-mini-glow{position:absolute;width:110px;height:110px;border-radius:50%;background:var(--preset-accent);filter:blur(54px);opacity:.22;animation:presetPreviewDrift 5s ease-in-out infinite alternate}
-    .preset-mini-card{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:min(78%,220px);padding:13px 14px;border:1px solid rgba(255,255,255,.15);border-radius:13px;background:rgba(18,17,25,.62);backdrop-filter:blur(10px);box-shadow:0 8px 28px rgba(0,0,0,.25);color:#fff;text-align:center;animation:presetCardFloat 4.8s ease-in-out infinite}
-    .preset-mini-avatar{display:grid;place-items:center;width:34px;height:34px;margin-bottom:7px;border-radius:50%;border:1px solid color-mix(in srgb,var(--preset-accent) 75%,white);background:color-mix(in srgb,var(--preset-accent) 18%,#17151e);box-shadow:0 0 15px color-mix(in srgb,var(--preset-accent) 28%,transparent);font-size:13px;font-weight:800}
-    .preset-mini-card b{max-width:100%;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .preset-mini-card small{margin-top:2px;color:rgba(255,255,255,.53);font-size:9px}
-    .preset-mini-card p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:7px 0;font-size:9px;line-height:1.45;color:rgba(255,255,255,.72)}
-    .preset-mini-links{display:flex;gap:6px;margin-top:2px}.preset-mini-links i{width:15px;height:15px;border-radius:5px;background:color-mix(in srgb,var(--preset-accent) 23%,rgba(255,255,255,.05));border:1px solid color-mix(in srgb,var(--preset-accent) 35%,transparent)}
-    .preset-mini-live{position:absolute;right:9px;bottom:8px;display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.48);font-size:8px;font-weight:800;letter-spacing:.1em}.preset-mini-live i{width:5px;height:5px;border-radius:50%;background:#a78bfa;box-shadow:0 0 8px #a78bfa}
-    .preset-updated{min-height:17px;margin:10px 0 12px;color:rgba(255,255,255,.45);font-size:10px}
-    .preset-slot-actions{display:flex;flex-wrap:wrap;gap:7px}.preset-slot-actions button{border-radius:8px;padding:8px 10px;font:inherit;font-size:11px;font-weight:750;cursor:pointer;transition:filter .2s ease,opacity .2s ease}.preset-slot-actions button:disabled{opacity:.5;cursor:wait}
-    .preset-save-button{flex:1;border:1px solid rgba(167,139,250,.22);background:rgba(139,92,246,.15);color:#e5d9ff}.preset-load-button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff}.preset-clear-button{border:1px solid rgba(255,120,120,.15);background:rgba(255,90,90,.06);color:#ffb2b2}
-    @keyframes presetPreviewDrift{from{transform:translate(-20px,-8px) scale(.92)}to{transform:translate(22px,10px) scale(1.12)}}
-    @keyframes presetCardFloat{0%,100%{transform:translateY(0) rotate(-.3deg)}50%{transform:translateY(-4px) rotate(.3deg)}}
+    .presets-tip{padding:13px 15px;border:1px solid rgba(255,143,83,.16);background:rgba(255,111,72,.055);border-radius:12px;color:rgba(255,255,255,.72);font-size:12px;line-height:1.65}
+    .preset-status{padding:12px 14px;border-radius:11px;border:1px solid rgba(255,143,83,.2);background:rgba(255,111,72,.08);color:#ffd0ad;font-size:13px}
+    .preset-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .preset-slot-card{min-width:0;padding:16px;border:1px solid rgba(255,255,255,.09);border-radius:17px;background:linear-gradient(145deg,rgba(30,23,24,.98),rgba(15,15,19,.98));box-shadow:0 14px 34px rgba(0,0,0,.2);transition:border-color .22s ease,transform .22s ease}
+    .preset-slot-card:hover{border-color:rgba(255,139,78,.3);transform:translateY(-2px)}
+    .preset-slot-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}
+    .preset-slot-number{font-size:10px;letter-spacing:.15em;color:#ffad70;font-weight:800}
+    .preset-slot-top h3{margin:5px 0 0;font-size:15px;color:#fff;overflow-wrap:anywhere}
+    .preset-slot-state{font-size:9px;letter-spacing:.1em;font-weight:800;color:rgba(255,255,255,.42);padding:5px 7px;border:1px solid rgba(255,255,255,.09);border-radius:7px}
+    .preset-slot-state.saved-state{color:#ffc092;border-color:rgba(255,143,83,.2);background:rgba(255,111,72,.08)}
+    .preset-name-label{display:grid;gap:7px;margin-bottom:12px;color:rgba(255,255,255,.68);font-size:11px;font-weight:700}
+    .preset-name-label input{width:100%;min-width:0;padding:10px 11px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:rgba(5,5,8,.52);color:#fff;font:inherit;font-size:12px;outline:none}
+    .preset-name-label input:focus{border-color:rgba(255,143,83,.55);box-shadow:0 0 0 3px rgba(255,111,72,.08)}
+    .preset-real-preview{position:relative;isolation:isolate;overflow:hidden;height:310px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:#070709}
+    .preset-real-preview iframe{display:block;width:100%;height:100%;border:0;background:#070709}
+    .preset-empty-preview{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;text-align:center;background:radial-gradient(ellipse at top,rgba(255,111,72,.12),transparent 65%),#09090d;color:rgba(255,255,255,.5)}
+    .preset-empty-mark{display:grid;place-items:center;width:38px;height:38px;margin-bottom:4px;border-radius:11px;background:linear-gradient(125deg,#ff9c4a,#ff624f);color:#1a0f0b;font-weight:900;font-size:18px;box-shadow:0 5px 20px rgba(255,100,72,.16)}
+    .preset-empty-preview b{font-size:12px;color:rgba(255,255,255,.8)}.preset-empty-preview span:last-child{font-size:10px;line-height:1.5}
+    .preset-preview-tag{position:absolute;left:9px;top:9px;display:flex;align-items:center;gap:6px;padding:5px 7px;border:1px solid rgba(255,255,255,.13);border-radius:7px;background:rgba(5,5,8,.72);backdrop-filter:blur(8px);color:rgba(255,255,255,.68);font-size:8px;font-weight:800;letter-spacing:.08em}
+    .preset-preview-tag i{width:5px;height:5px;border-radius:50%;background:#ff9b55;box-shadow:0 0 8px rgba(255,145,77,.7)}
+    .preset-updated{min-height:16px;margin:10px 0 12px;color:rgba(255,255,255,.45);font-size:10px}
+    .preset-slot-actions{display:flex;align-items:stretch;gap:8px}
+    .preset-slot-actions button{border-radius:9px;padding:9px 11px;font:inherit;font-size:11px;font-weight:750;cursor:pointer;transition:filter .2s ease,opacity .2s ease;white-space:nowrap}
+    .preset-slot-actions button:disabled{opacity:.5;cursor:wait}
+    .preset-overwrite-button{flex:0 0 auto;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.055);color:rgba(255,255,255,.82)}
+    .preset-equip-button{flex:1;border:0;background:linear-gradient(105deg,#ff9c4a,#ff654f);color:#1b100c;box-shadow:0 5px 16px rgba(255,100,72,.14)}
+    .preset-clear-button{flex:0 0 auto;border:1px solid rgba(255,104,104,.18);background:rgba(255,75,75,.055);color:#ffb1a9}
+    .preset-save-new-button{width:100%}
     .presets-lock-overlay{position:absolute;z-index:60;inset:0;display:grid;place-items:center;padding:clamp(18px,4vw,44px);border-radius:22px;background:rgba(5,5,9,.78);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
-    .presets-lock-card{width:min(100%,420px);padding:clamp(24px,4vw,38px);text-align:center;border:1px solid rgba(167,139,250,.22);border-radius:22px;background:linear-gradient(145deg,rgba(27,23,39,.97),rgba(13,13,19,.98));box-shadow:0 25px 80px rgba(0,0,0,.42),0 0 35px rgba(139,92,246,.07);color:#fff}
-    .presets-premium-mark-lock{width:52px;height:52px;margin:0 auto 18px;border-radius:16px;font-size:28px}
-    .presets-lock-eyebrow{margin:0 0 8px;color:#c4b5fd;font-size:10px;font-weight:850;letter-spacing:.2em}
+    .presets-lock-card{width:min(100%,420px);padding:clamp(24px,4vw,38px);text-align:center;border:1px solid rgba(255,143,83,.22);border-radius:22px;background:linear-gradient(145deg,rgba(34,25,24,.98),rgba(13,13,17,.98));box-shadow:0 25px 80px rgba(0,0,0,.42),0 0 35px rgba(255,100,72,.07);color:#fff}
+    .presets-premium-mark-lock{width:52px;height:52px;margin:0 auto 18px;border-radius:16px}
+    .presets-lock-eyebrow{margin:0 0 8px;color:#ffb782;font-size:10px;font-weight:850;letter-spacing:.2em}
     .presets-lock-card h2{margin:0 0 10px;font-size:clamp(24px,3vw,32px);letter-spacing:-.04em}
     .presets-lock-card>p:not(.presets-lock-eyebrow){margin:0 auto 22px;max-width:330px;color:rgba(255,255,255,.66);font-size:13px;line-height:1.75}
-    .presets-unlock-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 17px;border-radius:10px;background:linear-gradient(110deg,#8b5cf6,#a78bfa);color:#100b1b;text-decoration:none;font-size:13px;font-weight:850;box-shadow:0 6px 22px rgba(139,92,246,.18)}
-    @media(max-width:760px){.preset-slots{grid-template-columns:1fr}.presets-lock-overlay{border-radius:16px}.preset-mini-preview{min-height:170px}}
+    .presets-unlock-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 17px;border-radius:10px;background:linear-gradient(110deg,#ff9c4a,#ff654f);color:#1b100c;text-decoration:none;font-size:13px;font-weight:850;box-shadow:0 6px 22px rgba(255,100,72,.18)}
+    @media(max-width:760px){.preset-slots{grid-template-columns:1fr}.presets-lock-overlay{border-radius:16px}.preset-real-preview{height:290px}.preset-slot-actions button{padding:9px 8px;font-size:10px}}
   `}</style>
   {showUsernameConfirm && <div role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowUsernameConfirm(false); }} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}>
     <section role="dialog" aria-modal="true" aria-labelledby="username-confirm-title" style={{ width: "min(100%, 440px)", padding: 26, borderRadius: 20, border: "1px solid rgba(255,255,255,0.14)", background: "#15151b", color: "#fff", boxShadow: "0 24px 80px rgba(0,0,0,0.45)" }}>
@@ -876,7 +884,7 @@ export default function Dashboard() {
     <main className="dashboard">
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Profile customization</small></div>
-      <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b>{name === "Presets" && <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">✦</span>}</button>)}</nav>
+      <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b>{name === "Presets" && {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 14.8 8l5.8.9-4.2 4.1 1 5.8-5.4-2.8-5.4 2.8 1-5.8-4.2-4.1L9.2 8 12 2.8Z" /></svg>}</span>; })()}}</button>)}</nav>
       <div className="sidebar-bottom"><button type="button" className="reset-button" style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }} onClick={reset}>Reset to default</button></div>
     </aside>
 
@@ -891,38 +899,29 @@ export default function Dashboard() {
         <section className="editor">
           {active === "Presets" && <div className="form-stack presets-page">
             <div className="presets-heading">
-              <div><SectionIntro title="Your Premium presets" /><p className="hint">Save up to five complete snapshots of your profile customisation and switch between them whenever you want.</p></div>
-              <span className="presets-premium-mark presets-premium-mark-large" aria-label="Premium exclusive" title="Premium exclusive">✦</span>
+              <div><SectionIntro title="Premium presets" /><p className="hint">Five save slots for your complete Pixlo profile. Save it once, then equip it whenever you want.</p></div>
+              {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark presets-premium-mark-large" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 14.8 8l5.8.9-4.2 4.1 1 5.8-5.4-2.8-5.4 2.8 1-5.8-4.2-4.1L9.2 8 12 2.8Z" /></svg>}</span>; })()}
             </div>
-            <div className="presets-tip">Each slot stores your current settings, layout, colours, effects, text, links, music and other profile customisation values. Saving a preset does not publish it until your restored settings sync.</div>
+            <div className="presets-tip">Each preset saves the complete profile settings snapshot, including text, layout, colours, effects, images, video, music, links, badge placement and enter-screen settings.</div>
             {presetMessage && <div className="preset-status" role="status">{presetMessage}</div>}
-            {presetsPremiumReady && presets.length === 0 && !presetMessage && <p className="hint">No presets saved yet. Your five slots are ready whenever you are.</p>}
+            {presetsPremiumReady && presets.length === 0 && !presetMessage && <p className="hint">No presets saved yet. Your five slots are empty and ready to use.</p>}
             <div className="preset-slots">
               {[1,2,3,4,5].map(slot => {
                 const preset = presets.find(item => item.slot_number === slot);
-                const snap = preset?.settings;
-                const snapName = String(snap?.displayName || snap?.username || "Your profile");
-                const snapBio = String(snap?.description || "Your bio will appear here");
-                const bg = String(snap?.backgroundColour || "#17131f");
-                const accent = String(snap?.accentColour || snap?.socialIconColour || "#a78bfa");
+                const previewUsername = String(preset?.settings?.username || settings.username || "");
                 return <article className={`preset-slot-card ${preset ? "has-preset" : "is-empty"}`} key={slot}>
-                  <div className="preset-slot-top"><div><span className="preset-slot-number">SLOT 0{slot}</span><h3>{preset?.name || `Preset slot ${slot}`}</h3></div><span className={`preset-slot-state ${preset ? "saved-state" : ""}`}>{preset ? "SAVED" : "EMPTY"}</span></div>
-                  <div className="preset-mini-preview" style={{ "--preset-accent": accent, "--preset-bg": bg } as React.CSSProperties}>
-                    <div className="preset-mini-glow" />
-                    <div className="preset-mini-card">
-                      <div className="preset-mini-avatar">{snapName.slice(0,1).toUpperCase()}</div>
-                      <b>{preset ? snapName : "Your profile"}</b>
-                      <small>@{preset ? String(snap?.username || "username") : "username"}</small>
-                      <p>{preset ? snapBio : "A preview will appear when you save a preset."}</p>
-                      <div className="preset-mini-links"><i /><i /><i /></div>
-                    </div>
-                    <span className="preset-mini-live"><i /> PREVIEW</span>
+                  <div className="preset-slot-top"><div><span className="preset-slot-number">SAVE SLOT 0{slot}</span><h3>{preset?.name || "Empty save slot"}</h3></div><span className={`preset-slot-state ${preset ? "saved-state" : ""}`}>{preset ? "SAVED" : "EMPTY"}</span></div>
+                  <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`My preset ${slot}`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} /></label>
+                  <div className="preset-real-preview">
+                    {preset && previewUsername ? <iframe title={`Exact Pixlo profile preview for ${preset.name || `slot ${slot}`}`} src={`/${encodeURIComponent(previewUsername)}?presetPreview=${slot}&embedded=1`} loading="lazy" /> : <div className="preset-empty-preview"><span className="preset-empty-mark">P</span><b>Nothing saved here yet</b><span>Save your current profile to preview it here.</span></div>}
+                    <span className="preset-preview-tag"><i /> {preset ? "LIVE PROFILE PREVIEW" : "EMPTY SLOT"}</span>
                   </div>
                   {preset ? <p className="preset-updated">Last saved {new Date(preset.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</p> : <p className="preset-updated">This slot is empty.</p>}
                   <div className="preset-slot-actions">
-                    {preset && <button type="button" className="preset-load-button" disabled={presetBusy !== null} onClick={() => loadPresetSlot(preset)}>Load preset</button>}
-                    <button type="button" className="preset-save-button" disabled={presetBusy !== null || !settingsReady} onClick={() => void savePresetSlot(slot)}>{presetBusy === slot ? "Saving…" : preset ? "Overwrite slot" : "Save current settings"}</button>
-                    {preset && <button type="button" className="preset-clear-button" disabled={presetBusy !== null} onClick={() => void deletePresetSlot(slot)} aria-label={`Clear preset slot ${slot}`}>Clear</button>}
+                    {preset && <button type="button" className="preset-overwrite-button" disabled={presetBusy !== null} onClick={() => { if (window.confirm(`Are you sure you want to overwrite “${preset.name || `Preset ${slot}`}” with your current settings?`)) void savePresetSlot(slot); }}>{presetBusy === slot ? "Saving…" : "Overwrite"}</button>}
+                    {preset && <button type="button" className="preset-equip-button" disabled={presetBusy !== null} onClick={() => { if (window.confirm(`Are you sure you want to equip “${preset.name || `Preset ${slot}`}”? This will replace your current dashboard customisation.`)) loadPresetSlot(preset); }}>Equip preset</button>}
+                    {!preset && <button type="button" className="preset-equip-button preset-save-new-button" disabled={presetBusy !== null || !settingsReady} onClick={() => void savePresetSlot(slot)}>{presetBusy === slot ? "Saving…" : "Save current settings"}</button>}
+                    {preset && <button type="button" className="preset-clear-button" disabled={presetBusy !== null} onClick={() => { if (window.confirm(`Are you sure you want to clear “${preset.name || `Preset ${slot}`}”? This cannot be undone.`)) void deletePresetSlot(slot); }}>Clear</button>}
                   </div>
                 </article>;
               })}
@@ -1296,7 +1295,7 @@ export default function Dashboard() {
         </aside>
         {active === "Presets" && presetsPremiumReady && !presetsPremium && !presetMessage && <div className="presets-lock-overlay" role="region" aria-label="Premium presets locked">
           <div className="presets-lock-card">
-            <span className="presets-premium-mark presets-premium-mark-lock" aria-hidden="true">✦</span>
+            {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark presets-premium-mark-lock" aria-hidden="true">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 14.8 8l5.8.9-4.2 4.1 1 5.8-5.4-2.8-5.4 2.8 1-5.8-4.2-4.1L9.2 8 12 2.8Z" /></svg>}</span>; })()}
             <p className="presets-lock-eyebrow">PIXLO PREMIUM</p>
             <h2>This section is locked</h2>
             <p>Presets are an exclusive Premium feature. Unlock all five save slots, animated previews and instant profile switching.</p>

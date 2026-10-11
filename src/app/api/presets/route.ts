@@ -49,6 +49,16 @@ export async function GET(request: Request) {
   const ctx = await context(request);
   if ("response" in ctx) return ctx.response;
   if (!ctx.premium) return NextResponse.json({ premium: false, slots: [] }, { headers: { "Cache-Control": "no-store" } });
+  const previewSlot = Number(new URL(request.url).searchParams.get("preview"));
+  if (Number.isInteger(previewSlot) && previewSlot >= 1 && previewSlot <= 5) {
+    const previewResponse = await fetch(
+      `${ctx.url}/rest/v1/pixlo_profile_presets?select=slot_number,name,settings,updated_at&user_id=eq.${encodeURIComponent(ctx.user.id)}&slot_number=eq.${previewSlot}&limit=1`,
+      { headers: { apikey: ctx.serviceKey, Authorization: `Bearer ${ctx.serviceKey}` }, cache: "no-store" },
+    );
+    if (!previewResponse.ok) return NextResponse.json({ error: "Could not load this preset preview." }, { status: 503 });
+    const previewRows = await previewResponse.json().catch(() => []);
+    return NextResponse.json({ premium: true, slot: Array.isArray(previewRows) ? previewRows[0] || null : null }, { headers: { "Cache-Control": "no-store" } });
+  }
   const response = await fetch(
     `${ctx.url}/rest/v1/pixlo_profile_presets?select=slot_number,name,settings,updated_at&user_id=eq.${encodeURIComponent(ctx.user.id)}&order=slot_number.asc`,
     { headers: { apikey: ctx.serviceKey, Authorization: `Bearer ${ctx.serviceKey}` }, cache: "no-store" },
