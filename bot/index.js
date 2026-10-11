@@ -13,6 +13,7 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const GUILD_ID = process.env.DISCORD_GUILD_ID;
 const AWARD_CHANNEL_ID = "1558891440891891712";
 const REVOCATION_CHANNEL_ID = "1558891471963168778";
+const BADGE_INFO_CHANNEL_ID = "1558891359572852946";
 const EMBED_ORANGE = 0xFFD580;
 const INTERVAL_MS = 5 * 60 * 1000;
 const pendingRoleChanges = new Map();
@@ -67,6 +68,56 @@ async function getAllDiscordAwards() {
   return awards;
 }
 
+const BADGE_EMOJI_BY_KEYWORD = [
+  { match: /recruit/i, emoji: "White_Recruiter_Badge" },
+  { match: /booster/i, emoji: "White_Server_Booster_Badge" },
+  { match: /donor/i, emoji: "White_Donor_Badge" },
+  { match: /bug/i, emoji: "White_Bug_Hunter_Badge" },
+  { match: /premium/i, emoji: "White_Premium_Badge" },
+  { match: /verif/i, emoji: "White_Verification_Badge" },
+];
+
+function getBadgeEmoji(guild, roleName) {
+  const entry = BADGE_EMOJI_BY_KEYWORD.find(item => item.match.test(roleName || ""));
+  return entry ? guild.emojis.cache.find(emoji => emoji.name === entry.emoji) || null : null;
+}
+
+async function postBadgeInfo(guild) {
+  const channel = await guild.channels.fetch(BADGE_INFO_CHANNEL_ID).catch(() => null);
+  if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
+    console.error("[badge-info] Missing or inaccessible info channel " + BADGE_INFO_CHANNEL_ID);
+    return;
+  }
+  try {
+    const recent = await channel.messages.fetch({ limit: 50 });
+    if (recent.some(message => message.author.id === client.user.id && message.embeds.some(embed => embed.title === "Pixlo Badges — Requirements & How to Earn Them"))) {
+      console.log("[badge-info] requirements embed already exists; skipping duplicate");
+      return;
+    }
+  } catch (error) {
+    console.warn("[badge-info] Could not check for an existing requirements embed:", error instanceof Error ? error.message : error);
+  }
+
+  const descriptions = [
+    { name: ":White_Recruiter_Badge:  __Recruiter:__", value: "Successfully invite **10 or more people** into the official Pixlo Discord server." },
+    { name: ":White_Bug_Hunter_Badge:  __Bug Hunter:__", value: "Report **2 or more valid bugs** affecting Pixlo. Each report must be reviewed and confirmed as a valid bug." },
+    { name: ":White_Server_Booster_Badge:  __Server Booster:__", value: "Boost the official Pixlo Discord server at least once and **maintain your boost permanently** to keep this badge." },
+    { name: ":White_Donor_Badge:  __Donor:__", value: "Support Pixlo with a donation of **£5 or more**." },
+    { name: ":White_Premium_Badge:  __Premium:__", value: "Purchase a **Pixlo Premium** subscription. **Coming soon.**" },
+    { name: ":White_Verification_Badge:  __Verified:__", value: "Be a content creator with **5,000+ YouTube subscribers** or **10,000+ TikTok followers**, **or receive direct approval from Bizarro**." },
+  ];
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_ORANGE)
+    .setTitle("Pixlo Badges — Requirements & How to Earn Them")
+    .setDescription("Pixlo badges recognise members who contribute to the community, support the project, and reach specific milestones. Review the requirements below to learn how each badge is earned.")
+    .addFields(descriptions)
+    .addFields({ name: "__Please Note:__", value: "The Pixlo team may verify eligibility before awarding a badge. Badge requirements must continue to be met where applicable." })
+    .setFooter({ text: "Pixlo • Badge requirements" })
+    .setTimestamp();
+  await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+  console.log("[badge-info] posted badge requirements embed to " + BADGE_INFO_CHANNEL_ID);
+}
+
 function roleChangeKey(discordId, roleId, action) {
   return `${discordId}:${roleId}:${action}`;
 }
@@ -106,6 +157,7 @@ async function announceRoleChange(guild, profile, roleId, action) {
   const actor = await findRoleChangeActor(guild, member.id, roleId, action);
   const actorText = actor ? `<@${actor.id}>` : "Unknown / System";
   const isAward = action === "award";
+  const badgeEmoji = getBadgeEmoji(guild, roleName);
   const embed = new EmbedBuilder()
     .setColor(EMBED_ORANGE)
     .setTitle(isAward ? "🏆 Badge Awarded!" : "🚫 Badge Revoked")
@@ -119,6 +171,7 @@ async function announceRoleChange(guild, profile, roleId, action) {
     )
     .setFooter({ text: "Pixlo • Keep earning, keep flexing." })
     .setTimestamp();
+  if (badgeEmoji) embed.setThumbnail(badgeEmoji.imageURL({ extension: "png", size: 256 }));
 
   // Discord rejects duplicate IDs in allowedMentions.users when the member also performed the action.
   // Embed mentions are rendered as clickable mentions without notifying users.
@@ -247,6 +300,7 @@ client.once("ready", async () => {
   } catch (error) {
     console.error(`[discord] Cannot access configured server ${GUILD_ID}:`, error instanceof Error ? error.message : error);
   }
+  await postBadgeInfo(guild);
   await syncBadges();
   setInterval(() => void syncBadges(), INTERVAL_MS);
 });
