@@ -74,6 +74,7 @@ export type ProfileSettings = {
   showDiscord: boolean;
   showVerified: boolean;
   showVerifiedBadgeNextToUsername: boolean;
+  verifiedBadgeColour: string;
   showViews: boolean;
   showFooter: boolean;
   socialPills: boolean;
@@ -213,6 +214,7 @@ export const defaultSettings: ProfileSettings = {
   showDiscord: true,
   showVerified: true,
   showVerifiedBadgeNextToUsername: false,
+  verifiedBadgeColour: "#3b82f6",
   showViews: true,
   showFooter: true,
   socialPills: true,
@@ -343,6 +345,7 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     customLinks: Array.isArray(parsed.customLinks) ? parsed.customLinks.filter((item: any) => item && typeof item.id === "string" && typeof item.url === "string" && typeof item.icon === "string") : [],
     activeLinkOrder: Array.isArray(parsed.activeLinkOrder) ? parsed.activeLinkOrder.filter((item: any) => typeof item === "string") : [],
     showVerifiedBadgeNextToUsername: typeof parsed.showVerifiedBadgeNextToUsername === "boolean" ? parsed.showVerifiedBadgeNextToUsername : defaultSettings.showVerifiedBadgeNextToUsername,
+    verifiedBadgeColour: typeof parsed.verifiedBadgeColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.verifiedBadgeColour) ? parsed.verifiedBadgeColour : defaultSettings.verifiedBadgeColour,
     activeBadgeIds: Array.isArray(parsed.activeBadgeIds) ? parsed.activeBadgeIds.filter((item: any) => typeof item === "string") : [],
     activeBadgeOrder: Array.isArray(parsed.activeBadgeOrder) ? parsed.activeBadgeOrder.filter((item: any) => typeof item === "string") : [],
     badgePosition: ["left", "right", "bottom"].includes(parsed.badgePosition) ? parsed.badgePosition : defaultSettings.badgePosition,
