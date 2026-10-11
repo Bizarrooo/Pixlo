@@ -160,7 +160,7 @@ export default function HomeAccountNav() {
   async function switchToAccount(account: SavedPixloAccount) {
     setSwitchError("");
     if (!account.userId) {
-      setSwitchError("This saved account needs to be signed in once on this device before quick switching can work.");
+      window.location.assign(`/login?next=%2Fdashboard&email=${encodeURIComponent(account.email)}`);
       return;
     }
     setSwitchingEmail(account.email);
