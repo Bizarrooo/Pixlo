@@ -903,7 +903,7 @@ export default function Dashboard() {
                 const snap = preset?.settings;
                 const snapName = String(snap?.displayName || snap?.username || "Your profile");
                 const snapBio = String(snap?.description || "Your bio will appear here");
-                const bg = String(snap?.backgroundColour || snap?.backgroundColor || "#17131f");
+                const bg = String(snap?.backgroundColour || "#17131f");
                 const accent = String(snap?.accentColour || snap?.socialIconColour || "#a78bfa");
                 return <article className={`preset-slot-card ${preset ? "has-preset" : "is-empty"}`} key={slot}>
                   <div className="preset-slot-top"><div><span className="preset-slot-number">SLOT 0{slot}</span><h3>{preset?.name || `Preset slot ${slot}`}</h3></div><span className={`preset-slot-state ${preset ? "saved-state" : ""}`}>{preset ? "SAVED" : "EMPTY"}</span></div>
@@ -1294,7 +1294,7 @@ export default function Dashboard() {
           </div>
           </>}
         </aside>
-        {active === "Presets" && presetsPremiumReady && !presetsPremium && <div className="presets-lock-overlay" role="region" aria-label="Premium presets locked">
+        {active === "Presets" && presetsPremiumReady && !presetsPremium && !presetMessage && <div className="presets-lock-overlay" role="region" aria-label="Premium presets locked">
           <div className="presets-lock-card">
             <span className="presets-premium-mark presets-premium-mark-lock" aria-hidden="true">✦</span>
             <p className="presets-lock-eyebrow">PIXLO PREMIUM</p>
