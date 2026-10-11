@@ -188,6 +188,7 @@ export default function Dashboard() {
   const [viewToolMessage, setViewToolMessage] = useState("");
   const [viewToolBusy, setViewToolBusy] = useState(false);
   const [savedIdentity, setSavedIdentity] = useState({ username: "", displayName: "" });
+  const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
   const [badgesHidden, setBadgesHidden] = useState(false);
   const [dashboardBadges, setDashboardBadges] = useState<DashboardBadge[]>([]);
   const [previewBadges, setPreviewBadges] = useState<DashboardBadge[]>([]);
@@ -532,7 +533,7 @@ export default function Dashboard() {
     const order = Array.isArray(settings.activeLinkOrder) ? settings.activeLinkOrder : [];
     return [...order.filter(key => validKeys.includes(key)), ...validKeys.filter(key => !order.includes(key))];
   }, [settings]);
-  const save = async () => {
+  const performSave = async () => {
     if (!profileUserId) return;
     setSaved(false);
     try {
@@ -559,6 +560,13 @@ export default function Dashboard() {
       window.alert("Couldn't save your account identity. Check your connection and try again.");
     }
   };
+  const save = async () => {
+    if (settings.username.trim().toLowerCase() !== savedIdentity.username.trim().toLowerCase()) {
+      setShowUsernameConfirm(true);
+      return;
+    }
+    await performSave();
+  };
   const reset = () => {
     if (!confirm("Reset profile settings? Your username, display name and views will be kept.")) return;
     const identity = { username: savedIdentity.username || settings.username, displayName: savedIdentity.displayName || settings.displayName, views: settings.views };
@@ -569,8 +577,8 @@ export default function Dashboard() {
   };
   const usernameLocked = Boolean(usernameChangeAvailableAt && Date.now() < new Date(usernameChangeAvailableAt).getTime());
   const usernameLockHint = usernameLocked && usernameChangeAvailableAt
-    ? `Username locked until ${new Date(usernameChangeAvailableAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}. You can change it once every 3 days.`
-    : "Usernames can be changed once every 3 days. Changing it updates your profile URL.";
+    ? `Username locked until ${new Date(usernameChangeAvailableAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}. You can change it once every 24 hours.`
+    : "Usernames can be changed once every 24 hours. Changing it updates your profile URL.";
   const profileUrl = `https://pixlo1.vercel.app/${settings.username || "username"}`;
   const copyProfileUrl = async () => {
     try {
@@ -696,7 +704,19 @@ export default function Dashboard() {
     });
   };
 
-  return <main className="dashboard">
+  return <>
+  {showUsernameConfirm && <div role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowUsernameConfirm(false); }} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}>
+    <section role="dialog" aria-modal="true" aria-labelledby="username-confirm-title" style={{ width: "min(100%, 440px)", padding: 26, borderRadius: 20, border: "1px solid rgba(255,255,255,0.14)", background: "#15151b", color: "#fff", boxShadow: "0 24px 80px rgba(0,0,0,0.45)" }}>
+      <h2 id="username-confirm-title" style={{ margin: "0 0 12px", fontSize: 22 }}>Confirm username change</h2>
+      <p style={{ margin: "0 0 10px", lineHeight: 1.6, color: "rgba(255,255,255,0.82)" }}>You’re changing your username to <strong>@{settings.username}</strong>.</p>
+      <p style={{ margin: "0 0 22px", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>You cannot change your username again for 24 hours after saving. Your Pixlo profile URL will also change.</p>
+      <div style={{ display: "flex", justifyContent: "flex-end", flexWrap: "wrap", gap: 10 }}>
+        <button type="button" onClick={() => { setShowUsernameConfirm(false); setSettings(current => ({ ...current, username: savedIdentity.username })); }} style={{ padding: "11px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.06)", color: "white", font: "inherit", cursor: "pointer" }}>Cancel</button>
+        <button type="button" onClick={() => { setShowUsernameConfirm(false); void performSave(); }} style={{ padding: "11px 16px", borderRadius: 10, border: 0, background: "#8b5cf6", color: "white", font: "inherit", fontWeight: 700, cursor: "pointer" }}>Save username</button>
+      </div>
+    </section>
+  </div>}
+    <main className="dashboard">
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Profile customization</small></div>
       <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b></button>)}</nav>
@@ -1078,5 +1098,6 @@ export default function Dashboard() {
         </aside>
       </div>
     </div>
-  </main>;
+  </main>
+  </>;
 }
