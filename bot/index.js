@@ -13,7 +13,7 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const GUILD_ID = process.env.DISCORD_GUILD_ID;
 const AWARD_CHANNEL_ID = "1558891440891891712";
 const REVOCATION_CHANNEL_ID = "1558891471963168778";
-const EMBED_ORANGE = 0xF59E0B;
+const EMBED_ORANGE = 0xFFD580;
 const INTERVAL_MS = 60 * 1000;
 const pendingRoleChanges = new Map();
 let syncing = false;
@@ -174,16 +174,6 @@ async function syncBadges() {
 
     for (const award of removals) {
       await db(`user_badges?id=eq.${encodeURIComponent(award.id)}&source=eq.discord_role`, { method: "DELETE", headers: { Prefer: "return=minimal" } });
-      const profile = profileById.get(award.user_id);
-      const key = profile?.discord_id ? roleChangeKey(String(profile.discord_id), String(award.source_role_id), "revoke") : null;
-      if (profile && key && pendingRoleChanges.has(key)) {
-        try {
-          await announceRoleChange(guild, profile, award.source_role_id, "revoke");
-        } catch (error) {
-          console.error("[announcements] revoke message failed:", error instanceof Error ? error.message : error);
-        }
-        pendingRoleChanges.delete(key);
-      }
     }
 
     const removedIds = new Set(removals.map(remove => remove.id));
@@ -201,17 +191,36 @@ async function syncBadges() {
       });
     }
 
-    for (const award of inserts) {
-      const profile = profileById.get(award.user_id);
-      const key = profile?.discord_id ? roleChangeKey(String(profile.discord_id), String(award.source_role_id), "award") : null;
-      if (profile && key && pendingRoleChanges.has(key)) {
-        try {
-          await announceRoleChange(guild, profile, award.source_role_id, "award");
-        } catch (error) {
-          console.error("[announcements] award message failed:", error instanceof Error ? error.message : error);
-        }
+    // Announce actual role-change events only after the reconciliation succeeds.
+    // This also handles a role that was already reflected in Supabase before this sync.
+    const profileByDiscordId = new Map(linkedProfiles.map(profile => [String(profile.discord_id || ""), profile]));
+    for (const [key, timestamp] of [...pendingRoleChanges.entries()]) {
+      if (Date.now() - timestamp > 60_000) {
         pendingRoleChanges.delete(key);
+        continue;
       }
+      const [discordId, roleId, action] = key.split(":");
+      if (!mappings.some(mapping => String(mapping.discord_role_id) === roleId)) {
+        pendingRoleChanges.delete(key);
+        continue;
+      }
+      const profile = profileByDiscordId.get(discordId);
+      if (!profile) {
+        pendingRoleChanges.delete(key);
+        continue;
+      }
+      const member = guild.members.cache.get(discordId);
+      const roleStillPresent = Boolean(member?.roles.cache.has(roleId));
+      if ((action === "award" && !roleStillPresent) || (action === "revoke" && roleStillPresent)) {
+        pendingRoleChanges.delete(key);
+        continue;
+      }
+      try {
+        await announceRoleChange(guild, profile, roleId, action);
+      } catch (error) {
+        console.error(`[announcements] ${action} message failed:`, error instanceof Error ? error.message : error);
+      }
+      pendingRoleChanges.delete(key);
     }
 
     console.log(`[badge-sync] done: ${linkedMemberCount} linked guild members, ${inserts.length} awards added, ${removals.length} awards removed in ${Date.now() - started}ms`);
@@ -249,13 +258,17 @@ function scheduleSync() {
 client.on("guildMemberUpdate", (oldMember, newMember) => {
   const added = newMember.roles.cache.filter(role => !oldMember.roles.cache.has(role.id));
   const removed = oldMember.roles.cache.filter(role => !newMember.roles.cache.has(role.id));
-  for (const role of added.values()) {
-    pendingRoleChanges.set(roleChangeKey(newMember.id, role.id, "award"), Date.now());
+  if (added.size || removed.size) {
+    for (const role of added.values()) {
+      pendingRoleChanges.set(roleChangeKey(newMember.id, role.id, "award"), Date.now());
+      console.log(`[discord] role added: ${role.name} (${role.id}) on member ${newMember.id}`);
+    }
+    for (const role of removed.values()) {
+      pendingRoleChanges.set(roleChangeKey(newMember.id, role.id, "revoke"), Date.now());
+      console.log(`[discord] role removed: ${role.name} (${role.id}) on member ${newMember.id}`);
+    }
+    scheduleSync();
   }
-  for (const role of removed.values()) {
-    pendingRoleChanges.set(roleChangeKey(newMember.id, role.id, "revoke"), Date.now());
-  }
-  if (added.size || removed.size) scheduleSync();
 });
 
 setInterval(() => {
