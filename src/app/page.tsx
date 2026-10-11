@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import HomeAccountNav from "./HomeAccountNav";
 
 function Icon({ name, size = 20 }: { name: "spark" | "arrow" | "play" | "palette" | "music" | "link" | "bolt" | "shield" | "chevron" | "discord" | "youtube" | "github" | "roblox" | "twitch" | "instagram"; size?: number }) {
@@ -42,7 +45,12 @@ function MiniSocials() {
   );
 }
 
+function VerifiedIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" className="home-verified-icon"><path fill="currentColor" d="M12 1.5 14.7 3l3.1-.1 1.4 2.8 2.6 1.7-.5 3.1 1 3-2.2 2.2-.8 3-3 .8-2.2 2.2-3-1-3.1.5-1.7-2.6-2.8-1.4.1-3.1-1.5-2.7 1.5-2.7-.1-3.1 2.8-1.4 1.7-2.6 3.1.5Z" /><path d="m7.6 12.2 2.8 2.8 6.1-6.1" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+
 function ProfileMockup({ variant = "main" }: { variant?: "main" | "alt" }) {
+  const [demoPlaying, setDemoPlaying] = useState(false);
   return (
     <div className={`home-profile-mock ${variant === "alt" ? "home-profile-mock-alt" : ""}`}>
       <div className="home-profile-glow" />
@@ -54,7 +62,7 @@ function ProfileMockup({ variant = "main" }: { variant?: "main" | "alt" }) {
         <div className="home-profile-avatar">{variant === "alt" ? "P" : "B"}</div>
         <div className="home-profile-title">
           <strong>{variant === "alt" ? "Pixlo" : "Bizarro"}</strong>
-          <span className="home-verified">✓</span>
+          <span className="home-verified"><VerifiedIcon /></span>
         </div>
         <span className="home-profile-handle">@{variant === "alt" ? "pixlo" : "bizarro"}</span>
         <p>{variant === "alt" ? "Your profile. Your identity. Your space." : "building cool things on the internet ✦"}</p>
@@ -64,7 +72,7 @@ function ProfileMockup({ variant = "main" }: { variant?: "main" | "alt" }) {
         <div className="home-profile-music">
           <div className="home-music-art"><Icon name="music" size={15} /></div>
           <div><b>now playing</b><span>your favourite track</span></div>
-          <span className="home-music-play"><Icon name="play" size={11} /></span>
+          <button type="button" className="home-music-play" aria-label={demoPlaying ? "Pause music preview control" : "Play music preview control"} aria-pressed={demoPlaying} onClick={() => setDemoPlaying(value => !value)}>{demoPlaying ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM15 5h4v14h-4z" fill="currentColor" /></svg> : <Icon name="play" size={14} />}</button>
         </div>
       </div>
     </div>
