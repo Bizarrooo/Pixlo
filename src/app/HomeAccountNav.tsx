@@ -92,7 +92,7 @@ export default function HomeAccountNav() {
         if (!active) return;
 
         if (!durableAvatar) clearSavedPixloAccountAvatar(email);
-        const remembered = rememberPixloAccount({ email, username, displayName, avatar: durableAvatar || undefined });
+        const remembered = rememberPixloAccount({ email, username, userId: String(user.id || ""), displayName, avatar: durableAvatar || undefined });
         if (active) {
           setCurrentAccount(remembered.find(item => item.email === email) || { email, username });
           setSavedAccounts(remembered);
@@ -158,9 +158,24 @@ export default function HomeAccountNav() {
   async function switchToAccount(account: SavedPixloAccount) {
     setMenuOpen(false);
     setSwapOpen(false);
+    if (!account.userId) {
+      window.location.assign(`/login?email=${encodeURIComponent(account.email)}&next=%2Fdashboard`);
+      return;
+    }
     try {
-      await fetch("/api/auth/logout", { method: "POST", credentials: "include", cache: "no-store" });
-    } finally {
+      const response = await fetch("/api/auth/switch-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        cache: "no-store",
+        body: JSON.stringify({ userId: account.userId }),
+      });
+      if (!response.ok) {
+        window.location.assign(`/login?email=${encodeURIComponent(account.email)}&next=%2Fdashboard`);
+        return;
+      }
+      window.location.assign("/dashboard");
+    } catch {
       window.location.assign(`/login?email=${encodeURIComponent(account.email)}&next=%2Fdashboard`);
     }
   }
@@ -247,7 +262,7 @@ export default function HomeAccountNav() {
             <span aria-hidden="true">＋</span>
             <span>{savedAccounts.length < maxAccounts ? "Sign into another account" : "Sign into a different account"}</span>
           </button>
-          <p className="home-account-security-note">Up to {maxAccounts} accounts are saved on this device. For security, you’ll confirm the password when switching.</p>
+          <p className="home-account-security-note">Up to {maxAccounts} accounts can stay signed in on this device. Switch between saved accounts without entering your password again.</p>
         </div>}
         <div className="home-account-dropdown-divider" />
         <button type="button" role="menuitem" className="home-account-menu-item home-account-logout" onClick={logout} disabled={loggingOut}>
