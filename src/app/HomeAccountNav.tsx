@@ -177,6 +177,22 @@ export default function HomeAccountNav() {
         setSwitchError(data.error || "Could not switch accounts. Please try again.");
         return;
       }
+
+      // Verify the new cookies are usable before navigating. The dashboard itself
+      // redirects to login when either the auth session or Pixlo profile is missing.
+      const sessionResponse = await fetch("/api/auth/session", { credentials: "include", cache: "no-store" });
+      const sessionData = await sessionResponse.json().catch(() => ({}));
+      if (!sessionResponse.ok || sessionData.user?.id !== account.userId) {
+        setSwitchError("The account session did not activate. Please try switching again; you have not been sent to the login page.");
+        return;
+      }
+      const accountResponse = await fetch("/api/account", { credentials: "include", cache: "no-store" });
+      const accountData = await accountResponse.json().catch(() => ({}));
+      if (!accountResponse.ok || !accountData.profile) {
+        setSwitchError("You are signed into that account, but Pixlo could not load its profile. Refresh the page and try again.");
+        return;
+      }
+
       setMenuOpen(false);
       setSwapOpen(false);
       window.location.assign("/dashboard");
