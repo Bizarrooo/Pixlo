@@ -39,7 +39,8 @@ export async function POST(request: Request) {
 
   const configuredPrice = Number(serverEnv("PIXLO_PREMIUM_PRICE_GBP_PENCE") || "399");
   const priceInPence = Number.isInteger(configuredPrice) && configuredPrice >= 50 && configuredPrice <= 1000000 ? configuredPrice : 399;
-  const origin = (serverEnv("NEXT_PUBLIC_SITE_URL") || "https://pixlo1.vercel.app").replace(/\\/$/, "");
+  const configuredOrigin = serverEnv("NEXT_PUBLIC_SITE_URL") || "https://pixlo1.vercel.app";
+  const origin = configuredOrigin.endsWith("/") ? configuredOrigin.slice(0, -1) : configuredOrigin;
   const form = new URLSearchParams();
   form.set("mode", "payment");
   form.set("success_url", `${origin}/premium?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
