@@ -1885,7 +1885,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 .home-profile-title { display: flex; align-items: center; gap: 6px; margin-top: 13px; }
 .home-profile-title strong { font-size: 21px; letter-spacing: -.05em; }
-.home-verified { width: 16px; height: 16px; display: grid; place-items: center; border-radius: 50%; background: #1d9bf0; font-size: 9px; font-weight: 900; }
+.home-verified { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 16px; color: #1d9bf0; }
+.home-verified-icon { display: block; width: 100%; height: 100%; }
 .home-profile-handle { margin-top: 4px; color: #766d6d; font-size: 9px; }
 .home-profile-body p { max-width: 250px; margin: 11px 0 9px; color: #aaa0a0; font-size: 10px; line-height: 1.55; }
 .home-mini-socials { display: flex; align-items: center; gap: 14px; margin: 5px 0 15px; color: #ff9b6c; font-size: 17px; }
@@ -1903,7 +1904,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .home-profile-music b, .home-profile-music span { display: block; }
 .home-profile-music b { color: #ddd4d4; font-size: 8px; }
 .home-profile-music div:nth-child(2) span { margin-top: 3px; color: #766e6e; font-size: 7px; }
-.home-music-play { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.08); color: #ff9b6a; }
+.home-music-play { width: 25px; height: 25px; padding: 0; border: 0; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; border-radius: 50%; background: rgba(255,255,255,.08); color: #ff9b6a; cursor: pointer; appearance: none; }
+.home-music-play svg { display: block; width: 14px; height: 14px; }
 
 .home-floating-chip {
   position: absolute; z-index: 5; display: flex; align-items: center; gap: 9px; min-width: 160px; padding: 10px;
@@ -2055,6 +2057,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .home-link-stack span:hover { color: #fff; border-color: rgba(255,137,92,.35); background: rgba(255,100,68,.08); }
 .home-link-stack svg { width: 19px; height: 19px; }
 .home-music-play { width: 30px; height: 30px; background: linear-gradient(135deg,#ff9b65,#ef4b48); color: #fff; box-shadow: 0 7px 18px rgba(240,69,66,.24); transition: transform .18s ease, box-shadow .18s ease; }
+.home-music-play:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .home-music-play:hover { transform: scale(1.08); box-shadow: 0 9px 22px rgba(240,69,66,.34); }
 .home-music-art { position: relative; overflow: hidden; background: linear-gradient(135deg,#ffad75,#f04445 55%,#711f28); }
 .home-music-art:before { content:""; position:absolute; inset:5px; border:1px solid rgba(255,255,255,.2); border-radius:6px; transform:rotate(-12deg); }
@@ -3763,3 +3766,6 @@ html, body, *, *::before, *::after {
 .profile-page .profile-name-row{gap:3px!important}
 .profile-page .profile-name-row h1{flex:0 1 auto;min-width:0;width:auto!important}
 .profile-page .profile-name-row .pixlo-name-badge{width:17px;height:17px;min-width:17px;margin:0;padding:0;border:0;border-radius:0;flex:0 0 17px}
+
+.home-account-switch-error { margin: 0 0 8px; padding: 9px 10px; border: 1px solid rgba(255,110,110,.25); border-radius: 8px; background: rgba(255,75,75,.08); color: #ffb4b4; font-size: 12px; line-height: 1.45; }
+.home-saved-account:disabled { opacity: .65; cursor: wait; }
