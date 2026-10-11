@@ -30,6 +30,8 @@ export default function HomeAccountNav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [swapOpen, setSwapOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [switchError, setSwitchError] = useState("");
+  const [switchingEmail, setSwitchingEmail] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -156,12 +158,12 @@ export default function HomeAccountNav() {
   }, [menuOpen]);
 
   async function switchToAccount(account: SavedPixloAccount) {
-    setMenuOpen(false);
-    setSwapOpen(false);
+    setSwitchError("");
     if (!account.userId) {
-      window.location.assign(`/login?email=${encodeURIComponent(account.email)}&next=%2Fdashboard`);
+      setSwitchError("This saved account needs to be signed in once on this device before quick switching can work.");
       return;
     }
+    setSwitchingEmail(account.email);
     try {
       const response = await fetch("/api/auth/switch-account", {
         method: "POST",
@@ -170,13 +172,18 @@ export default function HomeAccountNav() {
         cache: "no-store",
         body: JSON.stringify({ userId: account.userId }),
       });
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        window.location.assign(`/login?email=${encodeURIComponent(account.email)}&next=%2Fdashboard`);
+        setSwitchError(data.error || "Could not switch accounts. Please try again.");
         return;
       }
+      setMenuOpen(false);
+      setSwapOpen(false);
       window.location.assign("/dashboard");
     } catch {
-      window.location.assign(`/login?email=${encodeURIComponent(account.email)}&next=%2Fdashboard`);
+      setSwitchError("Could not switch accounts right now. Please try again.");
+    } finally {
+      setSwitchingEmail("");
     }
   }
 
@@ -241,6 +248,7 @@ export default function HomeAccountNav() {
           <span className={`home-account-menu-chevron ${swapOpen ? "open" : ""}`} aria-hidden="true">⌄</span>
         </button>
         {swapOpen && <div className="home-saved-accounts" aria-label="Saved accounts">
+          {switchError && <p className="home-account-switch-error" role="alert">{switchError}</p>}
           {savedAccounts.map(account => {
             const isCurrent = account.email.toLowerCase() === activeEmail;
             const label = account.displayName || account.username || account.email.split("@")[0];
@@ -251,10 +259,10 @@ export default function HomeAccountNav() {
                 <span className="home-saved-account-status">Current</span>
               </div>
             ) : (
-              <button key={account.email} type="button" className="home-saved-account" role="menuitem" onClick={() => void switchToAccount(account)}>
+              <button key={account.email} type="button" className="home-saved-account" role="menuitem" disabled={Boolean(switchingEmail)} onClick={() => void switchToAccount(account)}>
                 {account.avatar ? <img src={account.avatar} alt="" /> : <span className="home-saved-account-fallback">{label.slice(0, 1).toUpperCase()}</span>}
                 <span className="home-saved-account-copy"><b>{label}</b><small>{account.email}</small></span>
-                <span className="home-saved-account-status">Switch</span>
+                <span className="home-saved-account-status">{switchingEmail === account.email ? "Switching…" : "Switch"}</span>
               </button>
             );
           })}
