@@ -3,7 +3,6 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { isReservedPixloUsername } from "../../lib/username-rules";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -31,10 +30,6 @@ export default function SignupPage() {
     }
     if (!/^[a-z0-9._-]+$/.test(normalizedUsername)) {
       setError("Use only lowercase letters, numbers, dots, underscores or hyphens in your username.");
-      return;
-    }
-    if (isReservedPixloUsername(normalizedUsername)) {
-      setError("That username is reserved for Pixlo pages. Please choose another username.");
       return;
     }
     if (password !== confirm) {
