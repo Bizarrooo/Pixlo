@@ -33,8 +33,10 @@ export async function POST(request: Request) {
   );
   if (!existing.ok) {
     const diagnostic = await existing.text().catch(() => "Could not read Supabase response body");
+    let parsed: { code?: string; message?: string; details?: string; hint?: string } = {};
+    try { parsed = JSON.parse(diagnostic); } catch {}
     console.error("[premium/checkout] Supabase entitlement query failed", { status: existing.status, body: diagnostic.slice(0, 1200) });
-    return NextResponse.json({ error: "Premium storage is not ready. Check the server logs for the Supabase error." }, { status: 503 });
+    return NextResponse.json({ error: "Premium storage is not ready.", diagnostic: { status: existing.status, code: parsed.code || null, message: parsed.message || diagnostic.slice(0, 300), details: parsed.details || null, hint: parsed.hint || null } }, { status: 503 });
   }
   const entitlements = await existing.json().catch(() => []);
   if (Array.isArray(entitlements) && entitlements.some((entry: { status?: string }) => entry.status === "active")) {
