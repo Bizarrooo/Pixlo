@@ -884,7 +884,7 @@ export default function Dashboard() {
     <main className="dashboard">
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Profile customization</small></div>
-      <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b>{name === "Presets" && {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 14.8 8l5.8.9-4.2 4.1 1 5.8-5.4-2.8-5.4 2.8 1-5.8-4.2-4.1L9.2 8 12 2.8Z" /></svg>}</span>; })()}}</button>)}</nav>
+      <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b>{name === "Presets" && (() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}</button>)}</nav>
       <div className="sidebar-bottom"><button type="button" className="reset-button" style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }} onClick={reset}>Reset to default</button></div>
     </aside>
 
@@ -900,7 +900,7 @@ export default function Dashboard() {
           {active === "Presets" && <div className="form-stack presets-page">
             <div className="presets-heading">
               <div><SectionIntro title="Premium presets" /><p className="hint">Five save slots for your complete Pixlo profile. Save it once, then equip it whenever you want.</p></div>
-              {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark presets-premium-mark-large" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 14.8 8l5.8.9-4.2 4.1 1 5.8-5.4-2.8-5.4 2.8 1-5.8-4.2-4.1L9.2 8 12 2.8Z" /></svg>}</span>; })()}
+              {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark presets-premium-mark-large" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}
             </div>
             <div className="presets-tip">Each preset saves the complete profile settings snapshot, including text, layout, colours, effects, images, video, music, links, badge placement and enter-screen settings.</div>
             {presetMessage && <div className="preset-status" role="status">{presetMessage}</div>}
