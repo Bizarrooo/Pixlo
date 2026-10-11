@@ -53,6 +53,7 @@ function rgbaFromHex(hex: string, alpha: number) {
 export default function ProfileView({ forcedUsername }: { forcedUsername?: string }) {
   const [settings, setSettings] = useState<ProfileSettings>(defaultSettings);
   const [ready, setReady] = useState(false);
+  const [profileStatus, setProfileStatus] = useState<"loading" | "found" | "missing" | "error">("loading");
   const [entered, setEntered] = useState(false);
   const [entering, setEntering] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -107,12 +108,18 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   useEffect(() => {
     const username = (forcedUsername || "").trim().toLowerCase();
-    if (!username) return;
+    setProfileStatus("loading");
+    if (!username) { setProfileStatus("missing"); return; }
     let cancelled = false;
     fetch(`/api/public-profile/${encodeURIComponent(username)}`, { cache: "no-store" })
       .then(async response => {
-        if (!response.ok) return null;
-        return await response.json().catch(() => null);
+        if (!response.ok) {
+          if (!cancelled) setProfileStatus(response.status === 404 ? "missing" : "error");
+          return null;
+        }
+        const data = await response.json().catch(() => null);
+        if (!cancelled) setProfileStatus(data?.profile ? "found" : "error");
+        return data;
       })
       .then(async data => {
         if (!cancelled) setProfileBadges(Array.isArray(data?.profile?.badges) ? data.profile.badges : []);
@@ -138,7 +145,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         const musicAudio = entries[5] as { url: string; type: string };
         setAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, musicCover: entries[4] as string, musicAudio: musicAudio.url, musicMediaType: musicAudio.type, customLinkIcons });
       })
-      .catch(() => {});
+      .catch(() => { if (!cancelled) setProfileStatus("error"); });
     return () => { cancelled = true; };
   }, [forcedUsername]);
 
@@ -259,7 +266,9 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     return [...order.filter(key => validKeys.includes(key)), ...validKeys.filter(key => !order.includes(key))];
   }, [settings]);
 
-  if (!ready) return <main className="profile-loading"><div className="loader" /></main>;
+  if (!ready || profileStatus === "loading") return <main className="profile-loading"><div className="loader" /></main>;
+  if (profileStatus === "missing") return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "#09090d", color: "#f5f5f7", fontFamily: "var(--font-geist-sans), Inter, sans-serif" }}><section style={{ width: "min(100%, 420px)", padding: "36px 28px", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 22, background: "rgba(255,255,255,0.045)", textAlign: "center", boxShadow: "0 24px 80px rgba(0,0,0,0.35)" }}><div style={{ width: 52, height: 52, margin: "0 auto 18px", display: "grid", placeItems: "center", borderRadius: 16, background: "rgba(255,255,255,0.08)", fontSize: 25 }}>?</div><h1 style={{ margin: "0 0 10px", fontSize: 25, fontWeight: 750, letterSpacing: "-0.04em" }}>Account doesn’t exist</h1><p style={{ margin: 0, color: "rgba(245,245,247,0.68)", lineHeight: 1.6 }}>We couldn’t find a Pixlo account for <strong style={{ color: "#f5f5f7" }}>@{forcedUsername}</strong>.</p><a href="/" style={{ display: "inline-flex", marginTop: 24, padding: "11px 18px", borderRadius: 12, background: "#f5f5f7", color: "#111116", fontWeight: 700, textDecoration: "none" }}>Back to Pixlo</a></section></main>;
+  if (profileStatus === "error") return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "#09090d", color: "#f5f5f7", fontFamily: "var(--font-geist-sans), Inter, sans-serif" }}><section style={{ width: "min(100%, 420px)", padding: "32px 26px", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 22, background: "rgba(255,255,255,0.045)", textAlign: "center" }}><h1 style={{ margin: "0 0 10px", fontSize: 23, fontWeight: 750 }}>Profile unavailable</h1><p style={{ margin: 0, color: "rgba(245,245,247,0.68)", lineHeight: 1.6 }}>We couldn’t load this account right now. Please try again in a moment.</p><button type="button" onClick={() => window.location.reload()} style={{ marginTop: 22, padding: "11px 18px", border: 0, borderRadius: 12, background: "#f5f5f7", color: "#111116", fontWeight: 700, cursor: "pointer" }}>Try again</button></section></main>;
 
   const readableTextOpacity = Math.max(85, Math.min(100, Number(settings.textOpacity) || 0));
   const textOpacity = `${readableTextOpacity}%`;
