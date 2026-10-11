@@ -235,10 +235,13 @@ export default function Home() {
       <section className="home-cta" id="pricing">
         <div className="home-cta-glow" />
         <div className="home-cta-inner">
-          <span className="home-section-kicker">READY WHEN YOU ARE</span>
-          <h2>Your corner of the internet<br /><em>starts here.</em></h2>
-          <p>Create your Pixlo, customise it until it feels right, then share one simple link everywhere.</p>
-          <Link href="/dashboard" className="home-primary-btn">Create your Pixlo <Icon name="arrow" size={17} /></Link>
+          <span className="home-section-kicker">PIXLO PREMIUM BETA</span>
+          <h2>More room to make it<br /><em>your own.</em></h2>
+          <p>Get lifetime Pixlo Premium for £3.99 during beta. Pay once, with no subscription — and keep your access even if the price increases later.</p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+            <Link href="/premium" className="home-primary-btn">Get Premium for £3.99 <Icon name="arrow" size={17} /></Link>
+            <Link href="/dashboard" className="home-secondary-btn">Create your Pixlo</Link>
+          </div>
         </div>
       </section>
 
