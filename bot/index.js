@@ -291,8 +291,9 @@ async function syncBadges() {
 
 client.once("ready", async () => {
   console.log(`[discord] Logged in as ${client.user.tag} (bot ID: ${client.user.id})`);
+  let guild;
   try {
-    const guild = await client.guilds.fetch(GUILD_ID);
+    guild = await client.guilds.fetch(GUILD_ID);
     // Fetch members once at startup. Reconciliation reuses the cache instead of
     // repeatedly issuing Discord opcode 8 requests and hitting rate limits.
     await guild.members.fetch();
@@ -300,7 +301,19 @@ client.once("ready", async () => {
   } catch (error) {
     console.error(`[discord] Cannot access configured server ${GUILD_ID}:`, error instanceof Error ? error.message : error);
   }
-  await postBadgeInfo(guild);
+
+  // The guild variable must live outside the try block so it remains available here.
+  // Do not attempt channel announcements or sync if the configured server could not be fetched.
+  if (!guild) {
+    console.error("[discord] Startup stopped: configured server is unavailable; badge announcement was not posted.");
+    return;
+  }
+
+  try {
+    await postBadgeInfo(guild);
+  } catch (error) {
+    console.error("[badge-info] Failed to post requirements embed:", error instanceof Error ? error.message : error);
+  }
   await syncBadges();
   setInterval(() => void syncBadges(), INTERVAL_MS);
 });
