@@ -26,8 +26,9 @@ export async function GET(request: Request) {
 
   const serviceKey = serverEnv("SUPABASE_SERVICE_ROLE_KEY");
   if (!serviceKey) return NextResponse.json({ error: "Premium storage is not configured." }, { status: 503 });
+  const liveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
   const entitlementResponse = await fetch(
-    `${url}/rest/v1/pixlo_premium_entitlements?select=status,purchased_at,price_paid,currency&user_id=eq.${encodeURIComponent(user.id)}&limit=1`,
+    `${url}/rest/v1/pixlo_premium_entitlements?select=status,purchased_at,price_paid,currency,livemode&user_id=eq.${encodeURIComponent(user.id)}&livemode=eq.${liveMode}&limit=1`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
   );
   if (!entitlementResponse.ok) {
