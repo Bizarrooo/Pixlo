@@ -304,10 +304,6 @@ export default function Dashboard() {
           Promise.all(loaded.customLinks.map(async link => ({ ...link, icon: await migrate(link.icon) }))),
         ]);
         loaded = { ...loaded, avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
-        // Reconcile an already-paid Premium entitlement on dashboard entry as well as in the Stripe webhook.
-        // This repairs badges for purchases completed before Premium badge support was deployed.
-        void fetch("/api/premium/status", { cache: "no-store", credentials: "include" }).catch(() => {});
-
         const linkedDiscord = accountData.user?.discordId ? accountData.user : null;
         if (accountData.discordUnlinkedForMembership) {
           setDiscordNotice("not-member");
@@ -440,6 +436,36 @@ export default function Dashboard() {
       setViewToolBusy(false);
     }
   };
+  useEffect(() => {
+    if (!settingsReady || !profileUserId || !settings.username) return;
+    let cancelled = false;
+    const reconcilePremiumBadge = async () => {
+      try {
+        const statusResponse = await fetch("/api/premium/status", { cache: "no-store", credentials: "include" });
+        const status = await statusResponse.json().catch(() => ({}));
+        if (!statusResponse.ok || !status.premium || cancelled) return;
+        const badgesResponse = await fetch(`/api/public-profile/${encodeURIComponent(settings.username)}?premium-refresh=${Date.now()}`, { cache: "no-store" });
+        const badgesData = await badgesResponse.json().catch(() => ({}));
+        if (cancelled || !badgesResponse.ok) return;
+        const premiumBadge = (Array.isArray(badgesData?.profile?.badges) ? badgesData.profile.badges : [])
+          .find((badge: DashboardBadge) => badge.name.trim().toLowerCase() === "premium");
+        if (!premiumBadge) return;
+        setSettings(current => {
+          if (current.activeBadgeIds.includes(premiumBadge.id)) return current;
+          return {
+            ...current,
+            activeBadgeIds: [...current.activeBadgeIds, premiumBadge.id],
+            activeBadgeOrder: current.activeBadgeOrder.includes(premiumBadge.id) ? current.activeBadgeOrder : [...current.activeBadgeOrder, premiumBadge.id],
+          };
+        });
+      } catch {
+        // Premium badge reconciliation should never block normal dashboard use.
+      }
+    };
+    void reconcilePremiumBadge();
+    return () => { cancelled = true; };
+  }, [settingsReady, profileUserId, settings.username]);
+
   useEffect(() => {
     if (!profileUserId) return;
     let active = true;
