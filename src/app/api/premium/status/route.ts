@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { serverEnv } from "../../../../lib/server-env";
 import { supabaseConfig } from "../../../../lib/supabase-config";
+import { ensurePremiumBadge } from "../../../../lib/premium-badge";
 
 export const runtime = "nodejs";
 
@@ -39,6 +40,10 @@ export async function GET(request: Request) {
   const rows = await entitlementResponse.json().catch(() => []);
   const entitlement = Array.isArray(rows) ? rows[0] : null;
   const premium = entitlement?.status === "active";
+  if (premium) {
+    try { await ensurePremiumBadge(user.id); }
+    catch (error) { console.error("[premium/status] Premium badge reconciliation failed:", error instanceof Error ? error.message : error); }
+  }
   return NextResponse.json({ authenticated: true, premium, entitlement: premium ? {
     purchasedAt: entitlement.purchased_at,
     pricePaid: entitlement.price_paid,
