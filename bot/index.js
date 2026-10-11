@@ -120,7 +120,8 @@ async function announceRoleChange(guild, profile, roleId, action) {
     .setFooter({ text: "Pixlo • Keep earning, keep flexing." })
     .setTimestamp();
 
-  const allowedUserIds = [member.id, actor?.id].filter(Boolean);
+  // Discord rejects duplicate IDs in allowedMentions.users when the member also performed the action.
+  const allowedUserIds = [...new Set([member.id, actor?.id].filter(Boolean).map(String))];
   await channel.send({
     embeds: [embed],
     allowedMentions: { users: allowedUserIds, roles: [], parse: [] },
