@@ -1,6 +1,7 @@
 export type SavedPixloAccount = {
   email: string;
   username: string;
+  userId?: string;
   displayName?: string;
   /** Only durable public URLs are stored here; no passwords or auth tokens. */
   avatar?: string;
@@ -21,13 +22,14 @@ function normaliseAccount(value: unknown): SavedPixloAccount | null {
   const username = typeof item.username === "string" && item.username.trim()
     ? item.username.trim().slice(0, 32)
     : email.split("@")[0];
+  const userId = typeof item.userId === "string" && /^[0-9a-f-]{36}$/i.test(item.userId) ? item.userId : undefined;
   const displayName = typeof item.displayName === "string" && item.displayName.trim()
     ? item.displayName.trim().slice(0, 48)
     : undefined;
   const avatar = typeof item.avatar === "string" && /^https?:\/\//i.test(item.avatar)
     ? item.avatar.slice(0, 2048)
     : undefined;
-  return { email, username, ...(displayName ? { displayName } : {}), ...(avatar ? { avatar } : {}) };
+  return { email, username, ...(userId ? { userId } : {}), ...(displayName ? { displayName } : {}), ...(avatar ? { avatar } : {}) };
 }
 
 export function readSavedPixloAccounts(): SavedPixloAccount[] {
@@ -62,6 +64,7 @@ export function rememberPixloAccount(input: SavedPixloAccount): SavedPixloAccoun
     const merged: SavedPixloAccount = {
       ...existing,
       ...account,
+      userId: account.userId || existing?.userId,
       displayName: account.displayName || existing?.displayName,
       avatar: account.avatar || existing?.avatar,
     };
@@ -82,7 +85,7 @@ export function clearSavedPixloAccountAvatar(email: string): SavedPixloAccount[]
   if (!isBrowser()) return [];
   try {
     const normalizedEmail = email.trim().toLowerCase();
-    const next = readSavedPixloAccounts().map(item => item.email === normalizedEmail ? { email: item.email, username: item.username, ...(item.displayName ? { displayName: item.displayName } : {}) } : item);
+    const next = readSavedPixloAccounts().map(item => item.email === normalizedEmail ? { email: item.email, username: item.username, ...(item.userId ? { userId: item.userId } : {}), ...(item.displayName ? { displayName: item.displayName } : {}) } : item);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     return next;
   } catch {
