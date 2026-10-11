@@ -83,14 +83,64 @@ async function getAllPremiumEntitlements() {
   return entitlements;
 }
 
+async function announcePremiumPurchase(guild, member, entitlement) {
+  const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
+  if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
+    console.error("[premium-role] Missing or inaccessible Premium purchase announcement channel " + AWARD_CHANNEL_ID);
+    return;
+  }
+
+  // Avoid duplicate purchase confirmations during periodic reconciliation/restarts.
+  try {
+    const recent = await channel.messages.fetch({ limit: 100 });
+    const alreadyAnnounced = recent.some(message =>
+      message.author.id === client.user.id &&
+      message.embeds.some(embed =>
+        embed.title === "💎 Pixlo Premium Successfully Purchased!" &&
+        (embed.fields || []).some(field =>
+          field.name === "👤 Member" && field.value.includes(member.id)
+        )
+      )
+    );
+    if (alreadyAnnounced) return;
+  } catch (error) {
+    console.warn("[premium-role] Could not check existing purchase announcements:", error instanceof Error ? error.message : error);
+  }
+
+  const purchasedAt = entitlement.purchased_at || entitlement.updated_at || new Date().toISOString();
+  const purchasedDate = new Date(purchasedAt);
+  const validDate = !Number.isNaN(purchasedDate.getTime());
+  const amount = Number(entitlement.price_paid);
+  const currency = String(entitlement.currency || "gbp").toUpperCase();
+  const amountText = Number.isFinite(amount)
+    ? new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(amount / 100)
+    : "Amount unavailable";
+
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_ORANGE)
+    .setTitle("💎 Pixlo Premium Successfully Purchased!")
+    .setDescription(`🎉 <@${member.id}> has successfully purchased **Pixlo Premium — Lifetime**.`)
+    .addFields(
+      { name: "👤 Member", value: `<@${member.id}>`, inline: true },
+      { name: "💳 Amount Spent", value: amountText, inline: true },
+      { name: "📅 Purchase Date", value: validDate ? purchasedDate.toLocaleDateString("en-GB", { timeZone: "Europe/London" }) : "Unavailable", inline: true },
+      { name: "🕒 Purchase Time", value: validDate ? purchasedDate.toLocaleTimeString("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit", timeZoneName: "short" }) : "Unavailable", inline: true },
+    )
+    .setFooter({ text: "Pixlo • Premium purchase confirmation" })
+    .setTimestamp(validDate ? purchasedDate : new Date());
+
+  await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+  console.log(`[premium-role] posted purchase confirmation for Discord user ${member.id}`);
+}
+
 async function syncPremiumRole(guild, profiles, entitlements) {
   const configuredRoleId = process.env.DISCORD_PREMIUM_ROLE_ID || "1558112636044836946";
-  const role = (configuredRoleId && guild.roles.cache.get(configuredRoleId)) ||
+  const role = guild.roles.cache.get(configuredRoleId) ||
     guild.roles.cache.find(item => item.name.trim().toLowerCase() === "premium") ||
     guild.roles.cache.find(item => item.name.trim().toLowerCase() === "pixlo premium") ||
     guild.roles.cache.find(item => /premium/i.test(item.name));
   if (!role) {
-    console.error("[premium-role] No Premium role found. Create a dedicated Premium role or set DISCORD_PREMIUM_ROLE_ID in the bot service.");
+    console.error("[premium-role] No Premium role found. Check DISCORD_PREMIUM_ROLE_ID and the bot's role access.");
     return;
   }
 
@@ -108,40 +158,15 @@ async function syncPremiumRole(guild, profiles, entitlements) {
       if (shouldHaveRole && !alreadyHasRole) {
         await member.roles.add(role.id, "Pixlo Premium lifetime entitlement is active");
         added += 1;
-        try {
-          const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
-          if (channel && channel.isTextBased() && typeof channel.send === "function") {
-            const purchasedAt = entitlement.purchased_at || entitlement.updated_at || new Date().toISOString();
-            const purchasedDate = new Date(purchasedAt);
-            const validDate = !Number.isNaN(purchasedDate.getTime());
-            const amount = Number(entitlement.price_paid);
-            const currency = String(entitlement.currency || "gbp").toUpperCase();
-            const amountText = Number.isFinite(amount)
-              ? new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(amount / 100)
-              : "Amount unavailable";
-            const embed = new EmbedBuilder()
-              .setColor(EMBED_ORANGE)
-              .setTitle("💎 Pixlo Premium Successfully Purchased!")
-              .setDescription(`🎉 <@${member.id}> has successfully purchased **Pixlo Premium — Lifetime**. Their Premium role has been activated!`)
-              .addFields(
-                { name: "👤 Member", value: `<@${member.id}>`, inline: true },
-                { name: "💳 Amount Spent", value: amountText, inline: true },
-                { name: "📅 Purchase Date", value: validDate ? purchasedDate.toLocaleDateString("en-GB", { timeZone: "Europe/London" }) : "Unavailable", inline: true },
-                { name: "🕒 Purchase Time", value: validDate ? purchasedDate.toLocaleTimeString("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit", timeZoneName: "short" }) : "Unavailable", inline: true },
-              )
-              .setFooter({ text: "Pixlo • Premium purchase confirmation" })
-              .setTimestamp(validDate ? purchasedDate : new Date());
-            await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
-          }
-        } catch (error) {
-          console.error(`[premium-role] purchase announcement failed for Discord user ${member.id}:`, error instanceof Error ? error.message : error);
-        }
       } else if (!shouldHaveRole && alreadyHasRole) {
         await member.roles.remove(role.id, "Pixlo Premium lifetime entitlement is not active or account is not linked");
         removed += 1;
       }
+      if (shouldHaveRole) {
+        await announcePremiumPurchase(guild, member, entitlement);
+      }
     } catch (error) {
-      console.error(`[premium-role] Could not reconcile Premium role for Discord user ${member.id}:`, error instanceof Error ? error.message : error);
+      console.error(`[premium-role] Could not reconcile Premium role or purchase announcement for Discord user ${member.id}:`, error instanceof Error ? error.message : error);
     }
   }
   if (added || removed) console.log(`[premium-role] role "${role.name}" synced: ${added} added, ${removed} removed`);
@@ -352,6 +377,11 @@ async function syncBadges() {
         continue;
       }
       const [discordId, roleId, action] = key.split(":");
+      const premiumRoleId = process.env.DISCORD_PREMIUM_ROLE_ID || "1558112636044836946";
+      if (roleId === premiumRoleId) {
+        pendingRoleChanges.delete(key);
+        continue;
+      }
       if (!mappings.some(mapping => String(mapping.discord_role_id) === roleId)) {
         pendingRoleChanges.delete(key);
         continue;
