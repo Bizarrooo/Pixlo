@@ -68,6 +68,55 @@ async function getAllDiscordAwards() {
   return awards;
 }
 
+async function getAllPremiumEntitlements() {
+  const entitlements = [];
+  let offset = 0;
+  const pageSize = 1000;
+  while (true) {
+    const page = await db(`pixlo_premium_entitlements?select=user_id,status&status=eq.active&order=user_id.asc&limit=${pageSize}&offset=${offset}`);
+    if (!Array.isArray(page) || page.length === 0) break;
+    entitlements.push(...page);
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+  return entitlements;
+}
+
+async function syncPremiumRole(guild, profiles, entitlements) {
+  const configuredRoleId = process.env.DISCORD_PREMIUM_ROLE_ID;
+  const role = (configuredRoleId && guild.roles.cache.get(configuredRoleId)) ||
+    guild.roles.cache.find(item => item.name.trim().toLowerCase() === "premium") ||
+    guild.roles.cache.find(item => item.name.trim().toLowerCase() === "pixlo premium") ||
+    guild.roles.cache.find(item => /premium/i.test(item.name));
+  if (!role) {
+    console.error("[premium-role] No Premium role found. Create a dedicated Premium role or set DISCORD_PREMIUM_ROLE_ID in the bot service.");
+    return;
+  }
+
+  const profileByDiscordId = new Map(profiles.filter(profile => profile.discord_id).map(profile => [String(profile.discord_id), profile]));
+  const activeUserIds = new Set(entitlements.filter(item => item.status === "active").map(item => String(item.user_id)));
+  let added = 0;
+  let removed = 0;
+  for (const member of guild.members.cache.values()) {
+    if (member.user.bot) continue;
+    const profile = profileByDiscordId.get(String(member.id));
+    const shouldHaveRole = Boolean(profile && activeUserIds.has(String(profile.id)));
+    const alreadyHasRole = member.roles.cache.has(role.id);
+    try {
+      if (shouldHaveRole && !alreadyHasRole) {
+        await member.roles.add(role.id, "Pixlo Premium lifetime entitlement is active");
+        added += 1;
+      } else if (!shouldHaveRole && alreadyHasRole) {
+        await member.roles.remove(role.id, "Pixlo Premium lifetime entitlement is not active or account is not linked");
+        removed += 1;
+      }
+    } catch (error) {
+      console.error(`[premium-role] Could not reconcile Premium role for Discord user ${member.id}:`, error instanceof Error ? error.message : error);
+    }
+  }
+  if (added || removed) console.log(`[premium-role] role "${role.name}" synced: ${added} added, ${removed} removed`);
+}
+
 const BADGE_EMOJI_BY_KEYWORD = [
   { match: /recruit/i, emoji: "White_Recruiter_Badge" },
   { match: /booster/i, emoji: "White_Server_Booster_Badge" },
@@ -212,6 +261,13 @@ async function syncBadges() {
     const linkedProfiles = Array.isArray(profiles) ? profiles : [];
     const awards = Array.isArray(currentAwards) ? currentAwards : [];
     console.log(`[badge-sync] loaded ${mappings.length} role-to-badge mappings and ${linkedProfiles.length} Pixlo profiles linked to Discord; server member cache has ${guild.members.cache.size} members`);
+
+    try {
+      const premiumEntitlements = await getAllPremiumEntitlements();
+      await syncPremiumRole(guild, linkedProfiles, premiumEntitlements);
+    } catch (error) {
+      console.error("[premium-role] entitlement sync failed:", error instanceof Error ? error.message : error);
+    }
     const mappingKeys = new Set(mappings.map(item => `${item.discord_role_id}:${item.badge_id}`));
     const profileById = new Map(linkedProfiles.map(profile => [profile.id, profile]));
     const desired = new Set();
