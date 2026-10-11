@@ -2697,7 +2697,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   position:absolute !important;
   left:50% !important; top:50% !important; right:auto !important; bottom:auto !important;
   inset:50% auto auto 50% !important;
-  width:72% !important; height:72% !important;
+  width:86% !important; height:86% !important;
   min-width:0 !important; min-height:0 !important; max-width:none !important; max-height:none !important;
   margin:0 !important; padding:0 !important; border:0 !important; border-radius:50% !important;
   object-fit:cover !important; object-position:center !important;
