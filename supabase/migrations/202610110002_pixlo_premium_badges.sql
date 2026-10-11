@@ -1,6 +1,9 @@
 -- Premium purchase awards are separate from manual and Discord-role awards.
 -- Run this migration in the Supabase SQL Editor before relying on Premium badge grants.
 
+alter table public.pixlo_premium_entitlements
+  add column if not exists livemode boolean not null default false;
+
 alter table public.user_badges
   drop constraint if exists user_badges_source_check;
 
