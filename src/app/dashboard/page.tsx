@@ -579,7 +579,7 @@ export default function Dashboard() {
   const usernameLockHint = usernameLocked && usernameChangeAvailableAt
     ? `Username locked until ${new Date(usernameChangeAvailableAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}. You can change it once every 24 hours.`
     : "Usernames can be changed once every 24 hours. Changing it updates your profile URL.";
-  const profileUrl = `https://pixlo1.vercel.app/user/${settings.username || "username"}`;
+  const profileUrl = settingsReady && settings.username.trim() ? `https://pixlo1.vercel.app/user/${encodeURIComponent(settings.username.trim().toLowerCase())}` : "/dashboard";
   const copyProfileUrl = async () => {
     try {
       await navigator.clipboard.writeText(profileUrl);
