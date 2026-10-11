@@ -37,6 +37,7 @@ function LoginContent() {
       rememberPixloAccount({
         email: savedEmail,
         username,
+        userId: String(user.id || ""),
         displayName: user.user_metadata?.display_name || user.user_metadata?.full_name,
       });
 
