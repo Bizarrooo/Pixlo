@@ -1,10 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import ProfileView from "../ProfileView";
+import ProfileView from "../../ProfileView";
 
 export default function UsernameProfile() {
   const pathname = usePathname();
-  const username = pathname.split("/").filter(Boolean)[0] || "";
+  const parts = pathname.split("/").filter(Boolean);
+  const username = parts[1] || "";
   return <ProfileView forcedUsername={username} />;
 }
