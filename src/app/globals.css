@@ -4076,7 +4076,7 @@ body:has(.preset-preview-mode) { margin:0!important; }
 .preview-card.gradient-text-on .preview-description,
 .preview-card.gradient-text-on .preview-location,
 .preview-card.gradient-text-on .preview-card-inner > p {
-  background-image: var(--gradient-text, linear-gradient(110deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
+  background-image: var(--gradient-text, linear-gradient(90deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
   background-size: 200% 100% !important;
   background-position: 0% 50%;
   background-clip: text !important;
@@ -4128,7 +4128,7 @@ body:has(.preset-preview-mode) { margin:0!important; }
 /* Animate only the masked badge glyph, never its pill/container. */
 .profile-page.gradient-badges-on .pixlo-badge-icon-tint,
 .preview-card.gradient-badges-on .pixlo-badge-icon-tint {
-  background-image: var(--gradient-badges, linear-gradient(110deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
+  background-image: var(--gradient-badges, linear-gradient(90deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
   background-size: 200% 100% !important;
   background-position: 0% 50%;
   animation: pixlo-premium-gradient-flow 6s linear infinite !important;
@@ -4136,7 +4136,7 @@ body:has(.preset-preview-mode) { margin:0!important; }
 }
 .profile-page.gradient-badges-on .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint),
 .preview-card.gradient-badges-on .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint) {
-  background-image: var(--gradient-badges, linear-gradient(110deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
+  background-image: var(--gradient-badges, linear-gradient(90deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
   background-size: 200% 100% !important;
   background-clip: text !important;
   -webkit-background-clip: text !important;
