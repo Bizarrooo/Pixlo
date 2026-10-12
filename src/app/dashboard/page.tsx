@@ -452,24 +452,23 @@ export default function Dashboard() {
 
   const savePresetName = async (slot: number) => {
     const existing = presets.find(item => item.slot_number === slot);
-    if (!existing) return;
-    const name = (presetNames[slot] ?? existing.name ?? `Preset ${slot}`).trim().slice(0, 40) || `Preset ${slot}`;
-    if (name === existing.name) return;
+    const name = (presetNames[slot] ?? existing?.name ?? `Preset ${slot}`).trim().slice(0, 40) || `Preset ${slot}`;
+    if (existing && name === existing.name) return;
     setPresetBusy(slot);
     setPresetMessage("");
     try {
       const response = await fetch("/api/presets", {
         method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slot, name, settings: existing.settings }),
+        body: JSON.stringify({ slot, name, settings: existing?.settings || settings }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Could not save this preset name.");
-      setPresets(current => current.map(item => item.slot_number === slot ? data.slot : item));
+      setPresets(current => [...current.filter(item => item.slot_number !== slot), data.slot].sort((a,b) => a.slot_number - b.slot_number));
       setPresetNames(current => ({ ...current, [slot]: data.slot?.name || name }));
-      setPresetMessage(`Preset slot ${slot} renamed successfully.`);
+      setPresetMessage(existing ? `Preset slot ${slot} renamed successfully.` : `Preset slot ${slot} named and saved successfully.`);
     } catch (error) {
       setPresetMessage(error instanceof Error ? error.message : "Could not save this preset name.");
-      setPresetNames(current => ({ ...current, [slot]: existing.name }));
+      setPresetNames(current => ({ ...current, [slot]: existing?.name || "" }));
     } finally {
       setPresetBusy(null);
     }
@@ -972,7 +971,7 @@ export default function Dashboard() {
                 const previewUsername = String(settings.username || preset?.settings?.username || "");
                 return <article className={`preset-slot-card ${preset ? "has-preset" : "is-empty"}`} key={slot}>
                   <div className="preset-slot-top"><div><span className="preset-slot-number">SLOT {String(slot).padStart(2, "0")}</span><h3>{preset?.name || `Preset ${slot}`}</h3></div>{preset && <span className="preset-slot-state saved-state">SAVED</span>}</div>
-                  <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`Name this preset`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} onBlur={() => { if (preset) void savePresetName(slot); }} /></label>
+                  <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`Name this preset`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} onBlur={() => void savePresetName(slot)} /></label>
                   <div className="preset-real-preview">
                     {preset && previewUsername ? <iframe key={`${slot}-${presetPreviewResetKey}`} title={`Pixlo profile preview for ${preset.name || `slot ${slot}`}`} src={`/${encodeURIComponent(previewUsername)}?presetPreview=${slot}&embedded=1`} loading="lazy" /> : <div className="preset-empty-preview" aria-label="Empty preset slot" />}
                   </div>
