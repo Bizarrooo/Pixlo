@@ -3886,11 +3886,11 @@ html, body, *, *::before, *::after {
     height:auto!important;
     border-radius:8px!important;
   }
-  /* Compact the embedded profile viewport so more of each saved design is visible at once. */
+  /* Render a full desktop-sized profile, then shrink the whole page uniformly inside the preview. */
   .dashboard:has(.presets-page) .preset-real-preview iframe {
-    width:153.85%!important;
-    height:153.85%!important;
-    transform:scale(.65)!important;
+    width:500%!important;
+    height:500%!important;
+    transform:scale(.2)!important;
     transform-origin:top left!important;
   }
   .dashboard:has(.presets-page) .preset-updated { min-height:0!important; margin:5px 0!important; font-size:9px!important; }
