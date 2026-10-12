@@ -923,7 +923,7 @@ export default function Dashboard() {
       .dashboard:has(.presets-page) .preset-slot-card{min-width:0!important;min-height:0!important;height:auto!important;max-height:none!important;padding:16px!important;overflow:hidden!important}
       .dashboard:has(.presets-page) .preset-real-preview{height:450px!important;min-height:0!important;flex:none!important;aspect-ratio:auto!important}
       /* Give the embedded profile a larger virtual viewport, then fit it inside the unchanged preview frame. */
-      .dashboard:has(.presets-page) .preset-real-preview iframe{width:166.667%!important;height:166.667%!important;transform:scale(.60)!important;transform-origin:top left!important;overflow:hidden!important}
+      .dashboard:has(.presets-page) .preset-real-preview iframe{width:147.059%!important;height:147.059%!important;transform:scale(.68)!important;transform-origin:top left!important;overflow:hidden!important}
     }
   `}</style>
   {showUsernameConfirm && <div role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowUsernameConfirm(false); }} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}>
