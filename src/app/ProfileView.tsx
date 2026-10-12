@@ -400,6 +400,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   return (
     <main className={`profile-page ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
+      <svg className="pixlo-gradient-defs" aria-hidden="true" width="0" height="0" style={{position:"absolute",width:0,height:0,overflow:"hidden"}}><defs><linearGradient id="pixlo-social-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor={settings.gradientSocialsColours[0]} /><stop offset="50%" stopColor={settings.gradientSocialsColours[1]} /><stop offset="100%" stopColor={settings.gradientSocialsColours[2]} /></linearGradient></defs></svg>
       <div className="background-media-layer" aria-hidden="true">
         {assets.backgroundImage && <div className="background-image" style={{ backgroundImage: `url("${assets.backgroundImage}")` }} />}
         {assets.backgroundVideo && (
