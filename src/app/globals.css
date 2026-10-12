@@ -4140,7 +4140,7 @@ body:has(.preset-preview-mode) { margin:0!important; }
 }
 @keyframes pixlo-premium-gradient-flow {
   from { background-position: 0% 50%; }
-  to { background-position: 200% 50%; }
+  to { background-position: 100% 50%; }
 }
 @media (prefers-reduced-motion: reduce) {
   .profile-page.gradient-text-on *, .profile-page.gradient-socials-on *, .profile-page.gradient-badges-on *,
