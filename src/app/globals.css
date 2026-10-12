@@ -3916,4 +3916,57 @@ html, body, *, *::before, *::after {
   .dashboard:has(.presets-page) .preset-real-preview { height:190px!important; flex:none!important; }
 }
 
+/* Final desktop fit: the Presets dashboard and all five cards stay inside the viewport. */
+@media (min-width: 1101px) {
+  .dashboard:has(.presets-page) {
+    height:100dvh!important;
+    min-height:0!important;
+    max-height:100dvh!important;
+    overflow:hidden!important;
+  }
+  .dashboard:has(.presets-page) .editor-grid {
+    height:calc(100dvh - 64px)!important;
+    min-height:0!important;
+    max-height:calc(100dvh - 64px)!important;
+    overflow:hidden!important;
+    padding:6px 14px 8px!important;
+  }
+  .dashboard:has(.presets-page) .editor {
+    padding:4px 8px!important;
+  }
+  .dashboard:has(.presets-page) .presets-page {
+    height:100%!important;
+    min-height:0!important;
+    max-height:100%!important;
+    grid-template-rows:auto auto minmax(0,1fr)!important;
+    gap:6px!important;
+    overflow:hidden!important;
+  }
+  .dashboard:has(.presets-page) .presets-tip,
+  .dashboard:has(.presets-page) .preset-status {
+    padding:5px 9px!important;
+  }
+  .dashboard:has(.presets-page) .preset-slots {
+    height:100%!important;
+    min-height:0!important;
+    grid-template-rows:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+    overflow:hidden!important;
+  }
+  .dashboard:has(.presets-page) .preset-slot-card {
+    min-height:0!important;
+    padding:7px!important;
+    overflow:hidden!important;
+  }
+  .dashboard:has(.presets-page) .preset-real-preview {
+    min-height:0!important;
+  }
+  .dashboard:has(.presets-page) .preset-updated {
+    margin:3px 0!important;
+  }
+  .dashboard:has(.presets-page) .preset-slot-actions {
+    margin-top:4px!important;
+  }
+}
+
 /* Trigger fresh Vercel production build for the preset viewport-fit fix. */
