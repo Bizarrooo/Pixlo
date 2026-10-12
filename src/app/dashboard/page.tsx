@@ -893,9 +893,9 @@ export default function Dashboard() {
       .dashboard:has(.presets-page) .presets-heading{margin:0!important}
       .dashboard:has(.presets-page) .presets-heading .hint{margin:4px 0!important;font-size:11px!important}
       .dashboard:has(.presets-page) .presets-tip,.dashboard:has(.presets-page) .preset-status{padding:6px 10px!important;font-size:11px!important;line-height:1.4!important}
-      .dashboard:has(.presets-page) .preset-slots{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important;gap:8px!important;height:100%!important;min-height:0!important;overflow:hidden!important}
-      .dashboard:has(.presets-page) .preset-slot-card{display:flex!important;flex-direction:column!important;min-width:0!important;min-height:0!important;height:100%!important;padding:8px!important;border-radius:12px!important;overflow:hidden!important}
-      .dashboard:has(.presets-page) .preset-slot-card:nth-child(5){grid-column:2 / span 2!important;width:50%!important;justify-self:center!important}
+      .dashboard:has(.presets-page) .preset-slots{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,245px))!important;align-content:start!important;gap:8px!important;height:auto!important;min-height:0!important;overflow:hidden!important}
+      .dashboard:has(.presets-page) .preset-slot-card{display:flex!important;flex-direction:column!important;min-width:0!important;min-height:0!important;height:245px!important;max-height:245px!important;padding:8px!important;border-radius:12px!important;overflow:hidden!important}
+      .dashboard:has(.presets-page) .preset-slot-card:nth-child(5){grid-column:2 / span 2!important;width:50%!important;height:245px!important;max-height:245px!important;justify-self:center!important}
       .dashboard:has(.presets-page) .preset-slot-top{margin-bottom:5px!important;gap:6px!important}
       .dashboard:has(.presets-page) .preset-slot-top h3{font-size:16px!important;margin-top:3px!important}
       .dashboard:has(.presets-page) .preset-slot-number,.dashboard:has(.presets-page) .preset-slot-state{font-size:11px!important}
