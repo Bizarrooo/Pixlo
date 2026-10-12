@@ -4111,7 +4111,7 @@ body:has(.preset-preview-mode) { margin:0!important; }
   fill: url(#pixlo-social-gradient) !important;
   stroke: url(#pixlo-social-gradient) !important;
   color: inherit !important;
-  filter: none !important;
+  /* The animation's filter must not be overridden by filter:none. */
   animation: pixlo-premium-icon-hue 8s linear infinite !important;
 }
 .profile-page.gradient-socials-on .social svg path,
