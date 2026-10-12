@@ -450,6 +450,31 @@ export default function Dashboard() {
     finally { setPresetBusy(null); }
   };
 
+  const savePresetName = async (slot: number) => {
+    const existing = presets.find(item => item.slot_number === slot);
+    if (!existing) return;
+    const name = (presetNames[slot] ?? existing.name ?? `Preset ${slot}`).trim().slice(0, 40) || `Preset ${slot}`;
+    if (name === existing.name) return;
+    setPresetBusy(slot);
+    setPresetMessage("");
+    try {
+      const response = await fetch("/api/presets", {
+        method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slot, name, settings: existing.settings }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Could not save this preset name.");
+      setPresets(current => current.map(item => item.slot_number === slot ? data.slot : item));
+      setPresetNames(current => ({ ...current, [slot]: data.slot?.name || name }));
+      setPresetMessage(`Preset slot ${slot} renamed successfully.`);
+    } catch (error) {
+      setPresetMessage(error instanceof Error ? error.message : "Could not save this preset name.");
+      setPresetNames(current => ({ ...current, [slot]: existing.name }));
+    } finally {
+      setPresetBusy(null);
+    }
+  };
+
   const loadPresetSlot = (preset: { slot_number: number; name: string; settings: Partial<ProfileSettings> }) => {
     const next = normaliseProfileSettings({ ...preset.settings, username: settings.username, displayName: preset.settings.displayName ?? settings.displayName }, { username: settings.username, displayName: settings.displayName });
     setSettings(next);
@@ -857,7 +882,6 @@ export default function Dashboard() {
     .preset-slot-actions{display:flex;align-items:stretch;gap:8px}
     .preset-slot-actions button{border-radius:9px;padding:9px 11px;font:inherit;font-size:11px;font-weight:750;cursor:pointer;transition:filter .2s ease,opacity .2s ease;white-space:nowrap}
     .preset-slot-actions button:disabled{opacity:.5;cursor:wait}
-    .preset-overwrite-button{flex:0 0 auto;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.055);color:rgba(255,255,255,.82)}
     .preset-equip-button{flex:1;border:0;background:linear-gradient(105deg,#ff9c4a,#ff654f);color:#1b100c;box-shadow:0 5px 16px rgba(255,100,72,.14)}
     .preset-clear-button{flex:0 0 auto;border:1px solid rgba(255,104,104,.18);background:rgba(255,75,75,.055);color:#ffb1a9}
     .preset-save-new-button{width:100%}
@@ -938,24 +962,23 @@ export default function Dashboard() {
         <section className="editor">
           {active === "Presets" && <div className="form-stack presets-page">
             <div className="presets-heading">
-              <div><SectionIntro title="Premium presets" /><p className="hint">Five save slots for your complete Pixlo profile. Save it once, then equip it whenever you want.</p></div>
+              <div><SectionIntro title="Premium presets" /><p className="hint">Eight save slots for your complete Pixlo profile. Save it once, then equip it whenever you want.</p></div>
             </div>
             <div className="presets-tip">Each preset saves the complete profile settings snapshot, including text, layout, colours, effects, images, video, music, links, badge placement and enter-screen settings.</div>
             {presetMessage && <div className="preset-status" role="status">{presetMessage}</div>}
-            {presetsPremiumReady && presets.length === 0 && !presetMessage && <p className="hint">No presets saved yet. Your five slots are empty and ready to use.</p>}
+            {presetsPremiumReady && presets.length === 0 && !presetMessage && <p className="hint">No presets saved yet. Your eight slots are empty and ready to use.</p>}
             <div className="preset-slots">
-              {[1,2,3,4,5].map(slot => {
+              {[1,2,3,4,5,6,7,8].map(slot => {
                 const preset = presets.find(item => item.slot_number === slot);
                 const previewUsername = String(settings.username || preset?.settings?.username || "");
                 return <article className={`preset-slot-card ${preset ? "has-preset" : "is-empty"}`} key={slot}>
-                  <div className="preset-slot-top"><div><span className="preset-slot-number">SLOT 0{slot}</span><h3>{preset?.name || `Preset ${slot}`}</h3></div>{preset && <span className="preset-slot-state saved-state">SAVED</span>}</div>
-                  <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`Name this preset`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} /></label>
+                  <div className="preset-slot-top"><div><span className="preset-slot-number">SLOT {String(slot).padStart(2, "0")}</span><h3>{preset?.name || `Preset ${slot}`}</h3></div>{preset && <span className="preset-slot-state saved-state">SAVED</span>}</div>
+                  <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`Name this preset`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} onBlur={() => { if (preset) void savePresetName(slot); }} /></label>
                   <div className="preset-real-preview">
                     {preset && previewUsername ? <iframe key={`${slot}-${presetPreviewResetKey}`} title={`Pixlo profile preview for ${preset.name || `slot ${slot}`}`} src={`/${encodeURIComponent(previewUsername)}?presetPreview=${slot}&embedded=1`} loading="lazy" /> : <div className="preset-empty-preview" aria-label="Empty preset slot" />}
                   </div>
                   {preset && <p className="preset-updated">Last saved {new Date(preset.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</p>}
                   <div className="preset-slot-actions">
-                    {preset && <button type="button" className="preset-overwrite-button" disabled={presetBusy !== null} onClick={() => { if (window.confirm(`Are you sure you want to overwrite “${preset.name || `Preset ${slot}`}” with your current settings?`)) void savePresetSlot(slot); }}>{presetBusy === slot ? "Saving…" : "Overwrite"}</button>}
                     {preset && <button type="button" className="preset-equip-button" disabled={presetBusy !== null} onClick={() => { if (window.confirm(`Are you sure you want to equip “${preset.name || `Preset ${slot}`}”? This will replace your current dashboard customisation.`)) loadPresetSlot(preset); }}>Equip preset</button>}
                     {!preset && <button type="button" className="preset-equip-button preset-save-new-button" disabled={presetBusy !== null || !settingsReady} onClick={() => void savePresetSlot(slot)}>{presetBusy === slot ? "Saving…" : "Save current settings"}</button>}
                     {preset && <button type="button" className="preset-clear-button" disabled={presetBusy !== null} onClick={() => { if (window.confirm(`Are you sure you want to clear “${preset.name || `Preset ${slot}`}”? This cannot be undone.`)) void deletePresetSlot(slot); }}>Clear</button>}
@@ -1335,7 +1358,7 @@ export default function Dashboard() {
             {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark presets-premium-mark-lock" aria-hidden="true">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 14.8 8l5.8.9-4.2 4.1 1 5.8-5.4-2.8-5.4 2.8 1-5.8-4.2-4.1L9.2 8 12 2.8Z" /></svg>}</span>; })()}
             <p className="presets-lock-eyebrow">PIXLO PREMIUM</p>
             <h2>This section is locked</h2>
-            <p>Presets are an exclusive Premium feature. Unlock all five save slots, animated previews and instant profile switching.</p>
+            <p>Presets are an exclusive Premium feature. Unlock all eight save slots, animated previews and instant profile switching.</p>
             <a href="/premium" className="presets-unlock-button">Explore Premium <span aria-hidden="true">↗</span></a>
           </div>
         </div>}
