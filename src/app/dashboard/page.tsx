@@ -176,6 +176,7 @@ export default function Dashboard() {
   const [settingsReady, setSettingsReady] = useState(false);
   const [previewReady, setPreviewReady] = useState(false);
   const [previewEntered, setPreviewEntered] = useState(false);
+  const [presetPreviewResetKey, setPresetPreviewResetKey] = useState(0);
   const [previewEntering, setPreviewEntering] = useState(false);
   const [previewPointer, setPreviewPointer] = useState({ x: 0, y: 0 });
   const [previewParallaxReturning, setPreviewParallaxReturning] = useState(false);
@@ -894,7 +895,7 @@ export default function Dashboard() {
       </div>
     </section>
   </div>}
-    <main className="dashboard">
+    <main className="dashboard" onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Profile customization</small></div>
       <nav className="dashboard-sidebar-nav">
@@ -934,7 +935,7 @@ export default function Dashboard() {
                   <div className="preset-slot-top"><div><span className="preset-slot-number">SLOT 0{slot}</span><h3>{preset?.name || `Preset ${slot}`}</h3></div>{preset && <span className="preset-slot-state saved-state">SAVED</span>}</div>
                   <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`Name this preset`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} /></label>
                   <div className="preset-real-preview">
-                    {preset && previewUsername ? <iframe title={`Pixlo profile preview for ${preset.name || `slot ${slot}`}`} src={`/${encodeURIComponent(previewUsername)}?presetPreview=${slot}&embedded=1`} loading="lazy" /> : <div className="preset-empty-preview" aria-label="Empty preset slot" />}
+                    {preset && previewUsername ? <iframe key={`${slot}-${presetPreviewResetKey}`} title={`Pixlo profile preview for ${preset.name || `slot ${slot}`}`} src={`/${encodeURIComponent(previewUsername)}?presetPreview=${slot}&embedded=1`} loading="lazy" /> : <div className="preset-empty-preview" aria-label="Empty preset slot" />}
                   </div>
                   {preset && <p className="preset-updated">Last saved {new Date(preset.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</p>}
                   <div className="preset-slot-actions">
