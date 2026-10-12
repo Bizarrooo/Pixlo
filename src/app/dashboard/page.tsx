@@ -917,9 +917,9 @@ export default function Dashboard() {
       .dashboard:has(.presets-page) .presets-heading .hint{margin:6px 0!important}
       .dashboard:has(.presets-page) .preset-slots{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:auto auto!important;align-content:start!important;gap:12px!important;height:auto!important;min-height:0!important;overflow:visible!important}
       .dashboard:has(.presets-page) .preset-slot-card{min-width:0!important;min-height:0!important;height:auto!important;max-height:none!important;padding:16px!important;overflow:hidden!important}
-      .dashboard:has(.presets-page) .preset-real-preview{height:310px!important;min-height:0!important;flex:none!important;aspect-ratio:auto!important}
+      .dashboard:has(.presets-page) .preset-real-preview{height:450px!important;min-height:0!important;flex:none!important;aspect-ratio:auto!important}
       /* Give the embedded profile a larger virtual viewport, then fit it inside the unchanged preview frame. */
-      .dashboard:has(.presets-page) .preset-real-preview iframe{width:125%!important;height:125%!important;transform:scale(.8)!important;transform-origin:top left!important}
+      .dashboard:has(.presets-page) .preset-real-preview iframe{width:200%!important;height:200%!important;transform:scale(.5)!important;transform-origin:top left!important;overflow:hidden!important}
     }
   `}</style>
   {showUsernameConfirm && <div role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowUsernameConfirm(false); }} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}>
@@ -960,13 +960,13 @@ export default function Dashboard() {
         <section className="editor">
           {active === "Presets" && <div className="form-stack presets-page">
             <div className="presets-heading">
-              <div><SectionIntro title="Premium presets" /><p className="hint">Eight save slots for your complete Pixlo profile. Save it once, then equip it whenever you want.</p></div>
+              <div><SectionIntro title="Premium presets" /><p className="hint">Four taller preset slots for your complete Pixlo profile. Save it once, then equip it whenever you want.</p></div>
             </div>
             <div className="presets-tip">Each preset saves the complete profile settings snapshot, including text, layout, colours, effects, images, video, music, links, badge placement and enter-screen settings.</div>
             {presetMessage && <div className="preset-status" role="status">{presetMessage}</div>}
-            {presetsPremiumReady && presets.length === 0 && !presetMessage && <p className="hint">No presets saved yet. Your eight slots are empty and ready to use.</p>}
+            {presetsPremiumReady && presets.length === 0 && !presetMessage && <p className="hint">No presets saved yet. Your four slots are empty and ready to use.</p>}
             <div className="preset-slots">
-              {[1,2,3,4,5,6,7,8].map(slot => {
+              {[1,2,3,4].map(slot => {
                 const preset = presets.find(item => item.slot_number === slot);
                 const previewUsername = String(settings.username || preset?.settings?.username || "");
                 return <article className={`preset-slot-card ${preset ? "has-preset" : "is-empty"}`} key={slot}>
@@ -1356,7 +1356,7 @@ export default function Dashboard() {
             {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark presets-premium-mark-lock" aria-hidden="true">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 14.8 8l5.8.9-4.2 4.1 1 5.8-5.4-2.8-5.4 2.8 1-5.8-4.2-4.1L9.2 8 12 2.8Z" /></svg>}</span>; })()}
             <p className="presets-lock-eyebrow">PIXLO PREMIUM</p>
             <h2>This section is locked</h2>
-            <p>Presets are an exclusive Premium feature. Unlock all eight save slots, animated previews and instant profile switching.</p>
+            <p>Presets are an exclusive Premium feature. Unlock all four save slots, taller previews and instant profile switching.</p>
             <a href="/premium" className="presets-unlock-button">Explore Premium <span aria-hidden="true">↗</span></a>
           </div>
         </div>}
