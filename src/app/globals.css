@@ -3859,9 +3859,9 @@ html, body, *, *::before, *::after {
   .dashboard:has(.presets-page) .presets-tip { padding:8px 12px!important; font-size:11px!important; line-height:1.4!important; }
   .dashboard:has(.presets-page) .preset-status { padding:7px 10px!important; font-size:11px!important; }
   .dashboard:has(.presets-page) .preset-slots {
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    grid-template-rows:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    grid-template-rows:minmax(0,1fr)!important;
+    gap:9px!important;
     min-height:0!important;
     height:100%!important;
     overflow:hidden!important;
@@ -3882,9 +3882,16 @@ html, body, *, *::before, *::after {
   .dashboard:has(.presets-page) .preset-name-label input { padding:7px 9px!important; font-size:11px!important; }
   .dashboard:has(.presets-page) .preset-real-preview {
     flex:1 1 auto!important;
-    min-height:70px!important;
+    min-height:0!important;
     height:auto!important;
     border-radius:8px!important;
+  }
+  /* Compact the embedded profile viewport so more of each saved design is visible at once. */
+  .dashboard:has(.presets-page) .preset-real-preview iframe {
+    width:153.85%!important;
+    height:153.85%!important;
+    transform:scale(.65)!important;
+    transform-origin:top left!important;
   }
   .dashboard:has(.presets-page) .preset-updated { min-height:0!important; margin:5px 0!important; font-size:9px!important; }
   .dashboard:has(.presets-page) .preset-slot-actions { gap:6px!important; margin-top:7px!important; }
@@ -3894,7 +3901,8 @@ html, body, *, *::before, *::after {
   .dashboard:has(.presets-page) .editor-grid { height:auto!important; max-height:none!important; overflow:visible!important; }
   .dashboard:has(.presets-page) .editor { overflow:visible!important; }
   .dashboard:has(.presets-page) .presets-page { max-width:none!important; }
-  .dashboard:has(.presets-page) .preset-slots { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+  .dashboard:has(.presets-page) .preset-slots { grid-template-columns:repeat(2,minmax(0,1fr))!important; grid-template-rows:none!important; }
+  .dashboard:has(.presets-page) .preset-real-preview iframe { width:100%!important; height:100%!important; transform:none!important; }
   .dashboard:has(.presets-page) .preset-real-preview { height:190px!important; }
 }
 @media (max-width: 700px) {
