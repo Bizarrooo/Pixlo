@@ -883,29 +883,20 @@ export default function Dashboard() {
     .presets-lock-card>p:not(.presets-lock-eyebrow){margin:0 auto 22px;max-width:330px;color:rgba(255,255,255,.66);font-size:13px;line-height:1.75}
     .presets-unlock-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 17px;border-radius:10px;background:linear-gradient(110deg,#ff9c4a,#ff654f);color:#1b100c;text-decoration:none;font-size:13px;font-weight:850;box-shadow:0 6px 22px rgba(255,100,72,.18)}
     @media(max-width:760px){.preset-slots{grid-template-columns:1fr}.presets-lock-overlay{border-radius:16px}.preset-real-preview{height:290px}.preset-slot-actions button{padding:9px 8px;font-size:10px}}
-    /* Desktop-only compact layout for the Premium Presets page. Keep these rules beside the page markup so they are definitely loaded. */
+    /* Uniformly scale the entire Premium Presets workspace; do not squash the slot cards. */
     @media(min-width:1101px){
       .dashboard:has(.presets-page){height:100dvh!important;min-height:0!important;max-height:100dvh!important;overflow:hidden!important}
       .dashboard:has(.presets-page) .dashboard-main{min-height:0!important;height:100dvh!important;overflow:hidden!important}
-      .dashboard:has(.presets-page) .editor-grid{display:block!important;height:calc(100dvh - 64px)!important;max-height:calc(100dvh - 64px)!important;min-height:0!important;overflow:hidden!important;padding:4px 10px!important}
+      .dashboard:has(.presets-page) .editor-grid{display:block!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;overflow:hidden!important;padding:4px 10px!important}
       .dashboard:has(.presets-page) .editor{height:100%!important;max-height:100%!important;min-height:0!important;overflow:hidden!important;padding:4px 8px!important}
-      .dashboard:has(.presets-page) .presets-page{zoom:.72!important;width:138.889%!important;height:138.889%!important;max-width:none!important;max-height:none!important;min-height:0!important;margin:0!important;overflow:hidden!important;grid-template-rows:auto auto minmax(0,1fr)!important;gap:5px!important}
+      .dashboard:has(.presets-page) .presets-page{zoom:1!important;transform:scale(.72)!important;transform-origin:top left!important;width:138.889%!important;height:138.889%!important;max-width:none!important;max-height:none!important;min-height:0!important;margin:0!important;overflow:visible!important;grid-template-rows:auto auto auto!important;gap:12px!important}
       .dashboard:has(.presets-page) .presets-heading{margin:0!important}
-      .dashboard:has(.presets-page) .presets-heading .hint{margin:4px 0!important;font-size:11px!important}
-      .dashboard:has(.presets-page) .presets-tip,.dashboard:has(.presets-page) .preset-status{padding:6px 10px!important;font-size:11px!important;line-height:1.4!important}
-      .dashboard:has(.presets-page) .preset-slots{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,245px))!important;align-content:start!important;gap:8px!important;height:auto!important;min-height:0!important;overflow:hidden!important}
-      .dashboard:has(.presets-page) .preset-slot-card{display:flex!important;flex-direction:column!important;min-width:0!important;min-height:0!important;height:245px!important;max-height:245px!important;padding:8px!important;border-radius:12px!important;overflow:hidden!important}
-      .dashboard:has(.presets-page) .preset-slot-card:nth-child(5){grid-column:2 / span 2!important;width:50%!important;height:245px!important;max-height:245px!important;justify-self:center!important}
-      .dashboard:has(.presets-page) .preset-slot-top{margin-bottom:5px!important;gap:6px!important}
-      .dashboard:has(.presets-page) .preset-slot-top h3{font-size:16px!important;margin-top:3px!important}
-      .dashboard:has(.presets-page) .preset-slot-number,.dashboard:has(.presets-page) .preset-slot-state{font-size:11px!important}
-      .dashboard:has(.presets-page) .preset-name-label{gap:4px!important;margin-bottom:5px!important;font-size:12px!important}
-      .dashboard:has(.presets-page) .preset-name-label input{padding:7px 9px!important;font-size:13px!important}
-      .dashboard:has(.presets-page) .preset-real-preview{flex:1 1 auto!important;min-height:0!important;height:auto!important;aspect-ratio:16/9!important}
-      .dashboard:has(.presets-page) .preset-real-preview iframe{width:138.89%!important;height:138.89%!important;transform:scale(.72)!important;transform-origin:top left!important}
-      .dashboard:has(.presets-page) .preset-updated{min-height:0!important;margin:3px 0!important;font-size:10px!important}
-      .dashboard:has(.presets-page) .preset-slot-actions{gap:5px!important;margin-top:4px!important}
-      .dashboard:has(.presets-page) .preset-slot-actions button{min-height:29px!important;padding:6px 7px!important;font-size:10px!important}
+      .dashboard:has(.presets-page) .presets-heading .hint{margin:6px 0!important}
+      .dashboard:has(.presets-page) .preset-slots{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:auto auto!important;align-content:start!important;gap:12px!important;height:auto!important;min-height:0!important;overflow:visible!important}
+      .dashboard:has(.presets-page) .preset-slot-card{min-width:0!important;min-height:0!important;height:auto!important;max-height:none!important;padding:16px!important;overflow:hidden!important}
+      .dashboard:has(.presets-page) .preset-slot-card:nth-child(5){grid-column:2 / span 2!important;width:50%!important;height:auto!important;max-height:none!important;justify-self:center!important}
+      .dashboard:has(.presets-page) .preset-real-preview{height:310px!important;min-height:0!important;flex:none!important;aspect-ratio:auto!important}
+      .dashboard:has(.presets-page) .preset-real-preview iframe{width:100%!important;height:100%!important;transform:none!important}
     }
   `}</style>
   {showUsernameConfirm && <div role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowUsernameConfirm(false); }} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}>
