@@ -4197,3 +4197,42 @@ body:has(.preset-preview-mode) { margin:0!important; }
 .dashboard .sidebar nav button.premium-gradient-nav-button.active b { color:#f3e8ff !important; }
 .dashboard .sidebar nav button.premium-gradient-nav-button.active .nav-dot { background:#c084fc !important; box-shadow:0 0 11px rgba(192,132,252,.8) !important; }
 .dashboard .sidebar nav button.premium-gradient-nav-button:hover:not(.active) { background:rgba(168,85,247,.09) !important; border-color:rgba(192,132,252,.2) !important; }
+
+
+/* Keep both Premium destinations on the exact same purple active/hover treatment. */
+.dashboard .sidebar nav button.premium-presets-nav-button,
+.dashboard .sidebar nav button.premium-gradient-nav-button { color:#d8b4fe !important; }
+.dashboard .sidebar nav button.premium-presets-nav-button b,
+.dashboard .sidebar nav button.premium-gradient-nav-button b { color:#d8b4fe !important; }
+.dashboard .sidebar nav button.premium-presets-nav-button .nav-dot,
+.dashboard .sidebar nav button.premium-gradient-nav-button .nav-dot { background:#a855f7 !important; box-shadow:0 0 9px rgba(168,85,247,.55) !important; }
+.dashboard .sidebar nav button.premium-presets-nav-button.active,
+.dashboard .sidebar nav button.premium-gradient-nav-button.active { color:#f3e8ff !important; background:linear-gradient(110deg,rgba(168,85,247,.24),rgba(139,92,246,.14)) !important; border-color:rgba(192,132,252,.42) !important; box-shadow:inset 0 0 0 1px rgba(192,132,252,.07),0 5px 18px rgba(124,58,237,.12) !important; }
+.dashboard .sidebar nav button.premium-presets-nav-button.active b,
+.dashboard .sidebar nav button.premium-gradient-nav-button.active b { color:#f3e8ff !important; }
+.dashboard .sidebar nav button.premium-presets-nav-button.active .nav-dot,
+.dashboard .sidebar nav button.premium-gradient-nav-button.active .nav-dot { background:#c084fc !important; box-shadow:0 0 11px rgba(192,132,252,.8) !important; }
+.dashboard .sidebar nav button.premium-presets-nav-button:hover:not(.active),
+.dashboard .sidebar nav button.premium-gradient-nav-button:hover:not(.active) { background:rgba(168,85,247,.09) !important; border-color:rgba(192,132,252,.2) !important; }
+
+/* A genuinely seamless badge gradient: identical colour AND direction at each loop boundary. */
+.profile-page.gradient-badges-on .pixlo-badge-icon-tint,
+.preview-card.gradient-badges-on .pixlo-badge-icon-tint,
+.profile-page.gradient-badges-on .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint),
+.preview-card.gradient-badges-on .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint) {
+  background-image:linear-gradient(90deg,
+    var(--gradient-badge-1,#ff4d5f) 0%,
+    var(--gradient-badge-2,#a855f7) 16.666%,
+    var(--gradient-badge-3,#3b82f6) 33.333%,
+    var(--gradient-badge-1,#ff4d5f) 50%,
+    var(--gradient-badge-2,#a855f7) 66.666%,
+    var(--gradient-badge-3,#3b82f6) 83.333%,
+    var(--gradient-badge-1,#ff4d5f) 100%) !important;
+  background-size:200% 100% !important;
+  background-position:0% 50%;
+  animation:pixlo-badge-gradient-seamless 6s linear infinite !important;
+}
+@keyframes pixlo-badge-gradient-seamless {
+  from { background-position:0% 50%; }
+  to { background-position:100% 50%; }
+}
