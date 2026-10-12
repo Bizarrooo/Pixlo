@@ -296,6 +296,9 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     "--background": settings.backgroundColour,
     "--accent": settings.accentColour,
     "--text": settings.textColour,
+    "--gradient-text": `linear-gradient(110deg, ${settings.gradientTextColours.join(", ")}, ${settings.gradientTextColours[0]})`,
+    "--gradient-socials": `linear-gradient(110deg, ${settings.gradientSocialsColours.join(", ")}, ${settings.gradientSocialsColours[0]})`,
+    "--gradient-badges": `linear-gradient(110deg, ${settings.gradientBadgesColours.join(", ")}, ${settings.gradientBadgesColours[0]})`,
     "--text-opacity": textOpacity,
     "--text-opacity-number": readableTextOpacity / 100,
     "--element-glow": `${Math.max(2, settings.glowIntensity * 0.35)}px`,
@@ -396,7 +399,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   };
 
   return (
-    <main className={`profile-page ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
+    <main className={`profile-page ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
       <div className="background-media-layer" aria-hidden="true">
         {assets.backgroundImage && <div className="background-image" style={{ backgroundImage: `url("${assets.backgroundImage}")` }} />}
         {assets.backgroundVideo && (
