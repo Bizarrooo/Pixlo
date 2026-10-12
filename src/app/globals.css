@@ -3859,12 +3859,17 @@ html, body, *, *::before, *::after {
   .dashboard:has(.presets-page) .presets-tip { padding:8px 12px!important; font-size:11px!important; line-height:1.4!important; }
   .dashboard:has(.presets-page) .preset-status { padding:7px 10px!important; font-size:11px!important; }
   .dashboard:has(.presets-page) .preset-slots {
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
     grid-template-rows:repeat(2,minmax(0,1fr))!important;
     gap:9px!important;
     min-height:0!important;
     height:100%!important;
     overflow:hidden!important;
+  }
+  .dashboard:has(.presets-page) .preset-slot-card:nth-child(5) {
+    grid-column:2 / span 2!important;
+    width:50%!important;
+    justify-self:center!important;
   }
   .dashboard:has(.presets-page) .preset-slot-card {
     display:flex!important;
@@ -3887,11 +3892,11 @@ html, body, *, *::before, *::after {
     aspect-ratio:16 / 9!important;
     border-radius:8px!important;
   }
-  /* Render a full desktop-sized profile, then shrink the whole page uniformly inside the preview. */
+  /* Keep a near-normal profile viewport and scale it as one piece, so its card, text and badges remain readable. */
   .dashboard:has(.presets-page) .preset-real-preview iframe {
-    width:500%!important;
-    height:500%!important;
-    transform:scale(.2)!important;
+    width:153.85%!important;
+    height:153.85%!important;
+    transform:scale(.65)!important;
     transform-origin:top left!important;
   }
   .dashboard:has(.presets-page) .preset-updated { min-height:0!important; margin:5px 0!important; font-size:9px!important; }
