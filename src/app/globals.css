@@ -4160,3 +4160,29 @@ body:has(.preset-preview-mode) { margin:0!important; }
     animation-duration: 12s !important;
   }
 }
+
+
+/* Pixlo interaction polish: keep content non-selectable like a native app. */
+.profile-page, .profile-page *, .dashboard .preview-frame, .dashboard .preview-frame *, .dashboard button, .dashboard label, .dashboard .setting, .dashboard .section-intro, .dashboard .dash-header {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+.profile-page input, .profile-page textarea, .profile-page [contenteditable="true"], .dashboard input, .dashboard textarea, .dashboard select, .dashboard [contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+/* Restore name animations independently of gradient-text styling. */
+.profile-page.gradient-text-on .profile-name-row h1,
+.preview-card.gradient-text-on .preview-name-row b {
+  animation-name: inherit;
+  animation-duration: inherit;
+  animation-timing-function: inherit;
+  animation-iteration-count: inherit;
+}
+/* Touch devices use drag-follow parallax without text selection; preserve normal vertical page scrolling. */
+@media (hover: none) and (pointer: coarse) {
+  .profile-page.parallax-on .profile-card { touch-action: pan-y !important; }
+  .profile-page.parallax-on .profile-inner, .profile-page.parallax-on .profile-inner * { -webkit-user-select:none !important; user-select:none !important; }
+}
