@@ -3969,4 +3969,46 @@ html, body, *, *::before, *::after {
   }
 }
 
+/* Scale the entire Premium Presets workspace as one page on desktop, not individual pieces. */
+@media (min-width: 1101px) {
+  .dashboard:has(.presets-page) .editor-grid {
+    display:block!important;
+    height:calc(100dvh - 64px)!important;
+    max-height:calc(100dvh - 64px)!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    padding:4px 10px!important;
+  }
+  .dashboard:has(.presets-page) .editor {
+    height:100%!important;
+    max-height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  .dashboard:has(.presets-page) .presets-page {
+    zoom:.78!important;
+    width:128.205%!important;
+    height:128.205%!important;
+    max-width:none!important;
+    max-height:none!important;
+    min-height:0!important;
+    margin:0!important;
+    overflow:hidden!important;
+    grid-template-rows:auto auto minmax(0,1fr)!important;
+    gap:6px!important;
+  }
+  .dashboard:has(.presets-page) .preset-slots {
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    grid-template-rows:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    height:100%!important;
+    min-height:0!important;
+  }
+  .dashboard:has(.presets-page) .preset-slot-card:nth-child(5) {
+    grid-column:2 / span 2!important;
+    width:50%!important;
+    justify-self:center!important;
+  }
+}
+
 /* Trigger fresh Vercel production build for the preset viewport-fit fix. */
