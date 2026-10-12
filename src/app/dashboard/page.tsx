@@ -12,11 +12,10 @@ const sections = [
   ["Profile", "Avatar, banner & card", "05"],
   ["Socials", "Links & icon layout", "06"],
   ["Badges", "Discord rewards & profile badges", "13"],
-  ["Presets", "Premium saved profile slots", "14"],
   ["Music", "Tracks, covers & player", "07"],
   ["Effects", "Motion, glow & atmosphere", "08"],
   ["Layout", "Structure & alignment", "09"],
-  ["Advanced", "Fine controls", "10"],
+  ["Admin", "Pixlo owner controls", "10"],
   ["Enter Screen", "Intro & click-to-enter", "11"],
   ["Stats", "Views & profile activity", "12"],
 ] as const;
@@ -861,7 +860,21 @@ export default function Dashboard() {
     .preset-equip-button{flex:1;border:0;background:linear-gradient(105deg,#ff9c4a,#ff654f);color:#1b100c;box-shadow:0 5px 16px rgba(255,100,72,.14)}
     .preset-clear-button{flex:0 0 auto;border:1px solid rgba(255,104,104,.18);background:rgba(255,75,75,.055);color:#ffb1a9}
     .preset-save-new-button{width:100%}
-    .presets-lock-overlay{position:absolute;z-index:60;inset:0;display:grid;place-items:center;padding:clamp(18px,4vw,44px);border-radius:22px;background:rgba(5,5,9,.78);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+    .dashboard-sidebar-nav{display:flex;flex-direction:column;gap:5px}
+    .premium-nav-group{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)}
+    .premium-nav-heading{display:flex;align-items:center;gap:9px;padding:0 10px 9px;color:#c4a4ff;font-size:9px;font-weight:900;letter-spacing:.22em}
+    .premium-nav-heading span{height:1px;flex:1;background:linear-gradient(90deg,rgba(168,85,247,.4),transparent)}
+    .premium-nav-heading span:first-child{background:linear-gradient(90deg,transparent,rgba(168,85,247,.4))}
+    .premium-nav-group .premium-nav-button{border:1px solid rgba(168,85,247,.24);background:linear-gradient(100deg,rgba(112,50,180,.14),rgba(255,255,255,.018));box-shadow:inset 0 0 18px rgba(168,85,247,.035)}
+    .premium-nav-group .premium-nav-button.active{border-color:rgba(192,132,252,.48);background:linear-gradient(100deg,rgba(139,92,246,.24),rgba(255,255,255,.04));box-shadow:0 0 18px rgba(139,92,246,.1)}
+    .premium-nav-group .premium-nav-button b{color:#e5d5ff}
+    .admin-nav-button{position:relative!important;display:flex!important;align-items:center!important;gap:10px!important;margin:12px 0 2px!important;padding:11px 12px!important;border:1px solid rgba(255,90,90,.55)!important;border-radius:12px!important;background:linear-gradient(105deg,rgba(127,29,29,.35),rgba(30,10,14,.92))!important;box-shadow:0 0 0 1px rgba(255,75,75,.08),0 5px 22px rgba(220,38,38,.12)!important;color:#fff!important}
+    .admin-nav-button b{color:#fff!important;font-size:11px!important;letter-spacing:.16em!important}
+    .admin-nav-button .admin-nav-icon{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#ffb36b,#ff5353);color:#27100e;font-size:14px;font-weight:900}
+    .admin-nav-owner{margin-left:auto;padding:3px 5px;border:1px solid rgba(255,126,126,.25);border-radius:5px;color:#ffb0aa;font-size:8px;font-weight:900;letter-spacing:.12em}
+    .admin-nav-button.active{border-color:rgba(255,140,120,.9)!important;background:linear-gradient(105deg,rgba(153,27,27,.55),rgba(50,10,18,.98))!important;box-shadow:0 0 24px rgba(239,68,68,.18)!important}
+    @media(max-width:760px){.premium-nav-group{margin-top:10px}.admin-nav-button{margin-top:8px!important}}
+      .presets-lock-overlay{position:absolute;z-index:60;inset:0;display:grid;place-items:center;padding:clamp(18px,4vw,44px);border-radius:22px;background:rgba(5,5,9,.78);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
     .presets-lock-card{width:min(100%,420px);padding:clamp(24px,4vw,38px);text-align:center;border:1px solid rgba(255,143,83,.22);border-radius:22px;background:linear-gradient(145deg,rgba(34,25,24,.98),rgba(13,13,17,.98));box-shadow:0 25px 80px rgba(0,0,0,.42),0 0 35px rgba(255,100,72,.07);color:#fff}
     .presets-premium-mark-lock{width:52px;height:52px;margin:0 auto 18px;border-radius:16px}
     .presets-lock-eyebrow{margin:0 0 8px;color:#ffb782;font-size:10px;font-weight:850;letter-spacing:.2em}
@@ -884,7 +897,16 @@ export default function Dashboard() {
     <main className="dashboard">
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Profile customization</small></div>
-      <nav>{sections.map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b>{name === "Presets" && (() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}</button>)}</nav>
+      <nav className="dashboard-sidebar-nav">
+        {sections.filter(([name]) => name !== "Admin").map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b></button>)}
+        {profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f" && <button type="button" key="Admin" className={`admin-nav-button ${active === "Admin" ? "active" : ""}`} onClick={() => { setActive("Admin"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="admin-nav-icon" aria-hidden="true">✦</span><b>ADMIN</b><span className="admin-nav-owner">OWNER</span></button>}
+        <div className="premium-nav-group">
+          <div className="premium-nav-heading"><span />PREMIUM<span /></div>
+          <button type="button" className={active === "Presets" ? "active premium-nav-button" : "premium-nav-button"} onClick={() => { setActive("Presets"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}>
+            <span className="nav-dot" /><b>Presets</b>{(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}
+          </button>
+        </div>
+      </nav>
       <div className="sidebar-bottom"><button type="button" className="reset-button" style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }} onClick={reset}>Reset to default</button></div>
     </aside>
 
@@ -1178,13 +1200,12 @@ export default function Dashboard() {
             <Setting label="Left aligned profile" text="Move the main content from centered to editorial left alignment."><Toggle value={settings.alignment === "left"} onChange={v => set("alignment", v ? "left" : "center")} /></Setting>
           </div>}
 
-          {active === "Advanced" && <div className="form-stack">
-            <SectionIntro number="10" title="Fine controls" text="These are the controls you only touch when you want to obsess over the final 5%." />
-            <Field label="Custom cursor image URL" hint="Optional"><input value={settings.customCursor} onChange={e => set("customCursor", e.target.value)} placeholder="https://..." /></Field>
-            <Setting label="Keep the browser-native cursor" text="Leave this enabled by clearing the custom cursor URL."><span className="info-pill">AUTO</span></Setting>
-            <div className="info-card"><div><b>Unique views</b><span>Counts a visitor once per profile per browser/device, with totals stored on the server.</span></div><span className="info-pill">SERVER</span></div>
-            {canManageOwnViews && <div className="view-admin-tool">
-              <div><b>Owner view controls</b><p>Only available on your account. Adjust the view total for your own profile.</p></div>
+          {active === "Admin" && profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f" && <div className="form-stack admin-hub-page">
+            <SectionIntro title="Pixlo Admin" />
+            <p className="hint">Owner-only controls for managing Pixlo. This button is hidden from every other account.</p>
+            <a className="badge-admin-dashboard-link" href="/dashboard/badges">Manage Pixlo badges <span>→</span></a>
+            <div className="view-admin-tool">
+              <div><b>Profile view controls</b><p>Adjust the view total for a Pixlo profile.</p></div>
               <Field label="Target username" hint="Enter any Pixlo username, or leave blank to use your own profile."><input value={viewToolUsername} onChange={e => setViewToolUsername(e.target.value)} placeholder={settings.username || "username"} autoComplete="off" /></Field>
               <Field label="Number of views"><input type="number" min={1} max={1000000} step={1} inputMode="numeric" value={viewToolAmount} onChange={e => setViewToolAmount(e.target.value)} /></Field>
               <div className="view-admin-actions">
@@ -1192,8 +1213,9 @@ export default function Dashboard() {
                 <button type="button" disabled={viewToolBusy} onClick={() => void adjustOwnViews("remove")}>Remove views</button>
               </div>
               {viewToolMessage && <p className="view-admin-message" role="status">{viewToolMessage}</p>}
-            </div>}
-            {canManageOwnViews && <a className="badge-admin-dashboard-link" href="/dashboard/badges">Manage Pixlo badges <span>→</span></a>}
+            </div>
+            <Field label="Custom cursor image URL" hint="Optional"><input value={settings.customCursor} onChange={e => set("customCursor", e.target.value)} placeholder="https://..." /></Field>
+            <Setting label="Keep the browser-native cursor" text="Leave this enabled by clearing the custom cursor URL."><span className="info-pill">AUTO</span></Setting>
           </div>}
           {active === "Stats" && <div className="form-stack stats-page">
             <SectionIntro number="12" title="Your stats" text="Your Pixlo profile performance, all in one place." />
