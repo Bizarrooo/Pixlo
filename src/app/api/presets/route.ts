@@ -50,7 +50,7 @@ export async function GET(request: Request) {
   if ("response" in ctx) return ctx.response;
   if (!ctx.premium) return NextResponse.json({ premium: false, slots: [] }, { headers: { "Cache-Control": "no-store" } });
   const previewSlot = Number(new URL(request.url).searchParams.get("preview"));
-  if (Number.isInteger(previewSlot) && previewSlot >= 1 && previewSlot <= 5) {
+  if (Number.isInteger(previewSlot) && previewSlot >= 1 && previewSlot <= 8) {
     const previewResponse = await fetch(
       `${ctx.url}/rest/v1/pixlo_profile_presets?select=slot_number,name,settings,updated_at&user_id=eq.${encodeURIComponent(ctx.user.id)}&slot_number=eq.${previewSlot}&limit=1`,
       { headers: { apikey: ctx.serviceKey, Authorization: `Bearer ${ctx.serviceKey}` }, cache: "no-store" },
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
   if (!ctx.premium) return NextResponse.json({ error: "Pixlo Premium is required to save presets." }, { status: 403 });
   const body = await request.json().catch(() => ({})) as Record<string, unknown>;
   const slot = Number(body.slot);
-  if (!Number.isInteger(slot) || slot < 1 || slot > 5) return NextResponse.json({ error: "Choose a preset slot from 1 to 5." }, { status: 400 });
+  if (!Number.isInteger(slot) || slot < 1 || slot > 5) return NextResponse.json({ error: "Choose a preset slot from 1 to 8." }, { status: 400 });
   if (!body.settings || typeof body.settings !== "object" || Array.isArray(body.settings)) return NextResponse.json({ error: "Preset settings are missing." }, { status: 400 });
   const settings = body.settings as Record<string, unknown>;
   const serialized = JSON.stringify(settings);
