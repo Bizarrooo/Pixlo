@@ -4186,3 +4186,14 @@ body:has(.preset-preview-mode) { margin:0!important; }
   .profile-page.parallax-on .profile-card { touch-action: pan-y !important; }
   .profile-page.parallax-on .profile-inner, .profile-page.parallax-on .profile-inner * { -webkit-user-select:none !important; user-select:none !important; }
 }
+
+
+/* Gradients is a Premium-only destination: reuse the real Premium badge icon and exact purple treatment. */
+.dashboard .sidebar nav button.premium-gradient-nav-button { color:#d8b4fe !important; }
+.dashboard .sidebar nav button.premium-gradient-nav-button b { color:#d8b4fe !important; }
+.dashboard .sidebar nav button.premium-gradient-nav-button .nav-dot { background:#a855f7 !important; box-shadow:0 0 9px rgba(168,85,247,.55) !important; }
+.dashboard .sidebar nav button.premium-gradient-nav-button .presets-premium-mark { color:#c084fc !important; }
+.dashboard .sidebar nav button.premium-gradient-nav-button.active { color:#f3e8ff !important; background:linear-gradient(110deg,rgba(168,85,247,.24),rgba(139,92,246,.14)) !important; border-color:rgba(192,132,252,.42) !important; box-shadow:inset 0 0 0 1px rgba(192,132,252,.07),0 5px 18px rgba(124,58,237,.12) !important; }
+.dashboard .sidebar nav button.premium-gradient-nav-button.active b { color:#f3e8ff !important; }
+.dashboard .sidebar nav button.premium-gradient-nav-button.active .nav-dot { background:#c084fc !important; box-shadow:0 0 11px rgba(192,132,252,.8) !important; }
+.dashboard .sidebar nav button.premium-gradient-nav-button:hover:not(.active) { background:rgba(168,85,247,.09) !important; border-color:rgba(192,132,252,.2) !important; }
