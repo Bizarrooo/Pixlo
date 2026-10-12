@@ -4034,3 +4034,29 @@ html, body, *, *::before, *::after {
 .preset-preview-mode .social { transform:scale(1.08); transform-origin:center; }
 .preset-preview-mode .pixlo-profile-badge { transform:scale(1.1); transform-origin:center; }
 .preset-preview-mode .profile-inner { gap:calc(var(--profile-content-gap, 12px) * 1.04); }
+
+
+/* Preset preview is a fixed viewport: the profile must fit inside it, never create iframe scrollbars. */
+html:has(.preset-preview-mode), body:has(.preset-preview-mode) { width:100%!important; height:100%!important; min-height:0!important; overflow:hidden!important; }
+body:has(.preset-preview-mode) { margin:0!important; }
+.preset-preview-mode.profile-wrap {
+  width:100%!important;
+  height:100vh!important;
+  min-height:0!important;
+  max-height:100vh!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  padding:8px!important;
+  display:grid!important;
+  place-items:center!important;
+}
+.preset-preview-mode .profile-card {
+  width:min(var(--card-width),100%)!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  transform:scale(.78)!important;
+  transform-origin:center center!important;
+}
+.preset-preview-mode .profile-inner { gap:calc(var(--spacing,18px) * .72)!important; }
+.preset-preview-mode .profile-banner { max-height:22vh!important; }
+.preset-preview-mode .profile-footer { margin-top:0!important; }
