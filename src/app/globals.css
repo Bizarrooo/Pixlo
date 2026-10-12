@@ -3986,9 +3986,9 @@ html, body, *, *::before, *::after {
     overflow:hidden!important;
   }
   .dashboard:has(.presets-page) .presets-page {
-    zoom:.78!important;
-    width:128.205%!important;
-    height:128.205%!important;
+    zoom:.70!important;
+    width:142.858%!important;
+    height:142.858%!important;
     max-width:none!important;
     max-height:none!important;
     min-height:0!important;
@@ -4003,6 +4003,18 @@ html, body, *, *::before, *::after {
     gap:8px!important;
     height:100%!important;
     min-height:0!important;
+  }
+  /* Slightly boost the profile preview and its labels to offset the smaller overall layout. */
+  .dashboard:has(.presets-page) .preset-slot-top h3 { font-size:16px!important; }
+  .dashboard:has(.presets-page) .preset-slot-number,
+  .dashboard:has(.presets-page) .preset-slot-state { font-size:11px!important; }
+  .dashboard:has(.presets-page) .preset-name-label { font-size:12px!important; }
+  .dashboard:has(.presets-page) .preset-name-label input { font-size:13px!important; padding:8px 10px!important; }
+  .dashboard:has(.presets-page) .preset-real-preview iframe {
+    width:138.89%!important;
+    height:138.89%!important;
+    transform:scale(.72)!important;
+    transform-origin:top left!important;
   }
   .dashboard:has(.presets-page) .preset-slot-card:nth-child(5) {
     grid-column:2 / span 2!important;
