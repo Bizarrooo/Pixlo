@@ -4215,24 +4215,32 @@ body:has(.preset-preview-mode) { margin:0!important; }
 .dashboard .sidebar nav button.premium-presets-nav-button:hover:not(.active),
 .dashboard .sidebar nav button.premium-gradient-nav-button:hover:not(.active) { background:rgba(168,85,247,.09) !important; border-color:rgba(192,132,252,.2) !important; }
 
-/* A genuinely seamless badge gradient: identical colour AND direction at each loop boundary. */
+/* Use the exact saved gradient variable for both live profiles and the dashboard preview.
+   The previous override referenced --gradient-badge-1/2/3, which were missing from the preview,
+   so the preview fell back to red/purple/blue instead of the user's chosen colours. */
 .profile-page.gradient-badges-on .pixlo-badge-icon-tint,
-.preview-card.gradient-badges-on .pixlo-badge-icon-tint,
-.profile-page.gradient-badges-on .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint),
-.preview-card.gradient-badges-on .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint) {
-  background-image:linear-gradient(90deg,
-    var(--gradient-badge-1,#ff4d5f) 0%,
-    var(--gradient-badge-2,#a855f7) 16.666%,
-    var(--gradient-badge-3,#3b82f6) 33.333%,
-    var(--gradient-badge-1,#ff4d5f) 50%,
-    var(--gradient-badge-2,#a855f7) 66.666%,
-    var(--gradient-badge-3,#3b82f6) 83.333%,
-    var(--gradient-badge-1,#ff4d5f) 100%) !important;
+.preview-card.gradient-badges-on .pixlo-badge-icon-tint {
+  background-image:var(--gradient-badges,linear-gradient(90deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
   background-size:200% 100% !important;
   background-position:0% 50%;
+  animation:pixlo-badge-gradient-seamless 6s linear infinite !important;
+  filter:none !important;
+}
+.profile-page.gradient-badges-on .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint),
+.preview-card.gradient-badges-on .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint) {
+  background-image:var(--gradient-badges,linear-gradient(90deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
+  background-size:200% 100% !important;
+  background-position:0% 50%;
+  background-clip:text !important;
+  -webkit-background-clip:text !important;
+  color:transparent !important;
+  -webkit-text-fill-color:transparent !important;
+  text-shadow:none !important;
   animation:pixlo-badge-gradient-seamless 6s linear infinite !important;
 }
 @keyframes pixlo-badge-gradient-seamless {
   from { background-position:0% 50%; }
+  to { background-position:100% 50%; }
+}
   to { background-position:100% 50%; }
 }
