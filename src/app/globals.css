@@ -4062,3 +4062,64 @@ body:has(.preset-preview-mode) { margin:0!important; }
 .preset-preview-mode .profile-inner { gap:calc(var(--spacing,18px) * .72)!important; }
 .preset-preview-mode .profile-banner { max-height:22vh!important; }
 .preset-preview-mode .profile-footer { margin-top:0!important; }
+
+
+/* Pixlo Premium animated gradients: shared by the dashboard live preview and public profile. */
+.profile-page.gradient-text-on .profile-name-row h1,
+.profile-page.gradient-text-on .profile-username,
+.profile-page.gradient-text-on .profile-description,
+.profile-page.gradient-text-on .profile-location,
+.profile-page.gradient-text-on .profile-card h1,
+.profile-page.gradient-text-on .profile-card p,
+.preview-card.gradient-text-on .preview-name-row b,
+.preview-card.gradient-text-on .preview-username,
+.preview-card.gradient-text-on .preview-description,
+.preview-card.gradient-text-on .preview-location,
+.preview-card.gradient-text-on .preview-card-inner > p {
+  background-image: var(--gradient-text, linear-gradient(110deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
+  background-size: 260% 100% !important;
+  background-position: 0% 50%;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: pixlo-premium-gradient-flow 5s ease-in-out infinite alternate !important;
+}
+.profile-page.gradient-socials-on .social,
+.profile-page.gradient-socials-on .social span,
+.profile-page.gradient-socials-on .social svg,
+.profile-page.gradient-socials-on .custom-social-icon,
+.preview-card.gradient-socials-on .social-preview-link,
+.preview-card.gradient-socials-on .social-preview-link svg,
+.preview-card.gradient-socials-on .custom-link-preview {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  background-image: var(--gradient-socials, linear-gradient(110deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
+  background-size: 260% 100% !important;
+  background-position: 0% 50%;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  animation: pixlo-premium-gradient-flow 5s ease-in-out infinite alternate !important;
+}
+.profile-page.gradient-socials-on .social svg,
+.preview-card.gradient-socials-on .social-preview-link svg { fill: currentColor !important; }
+.profile-page.gradient-badges-on .pixlo-profile-badge,
+.profile-page.gradient-badges-on .pixlo-badge-icon-tint,
+.profile-page.gradient-badges-on .pixlo-name-badge,
+.preview-card.gradient-badges-on .pixlo-profile-badge,
+.preview-card.gradient-badges-on .pixlo-badge-icon-tint,
+.preview-card.gradient-badges-on .pixlo-name-badge {
+  background: var(--gradient-badges, linear-gradient(110deg,#ff4d5f,#a855f7,#3b82f6,#ff4d5f)) !important;
+  background-size: 260% 100% !important;
+  animation: pixlo-premium-gradient-flow 5s ease-in-out infinite alternate !important;
+}
+@keyframes pixlo-premium-gradient-flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-page.gradient-text-on *, .profile-page.gradient-socials-on *, .profile-page.gradient-badges-on *,
+  .preview-card.gradient-text-on *, .preview-card.gradient-socials-on *, .preview-card.gradient-badges-on * {
+    animation-duration: 12s !important;
+  }
+}
