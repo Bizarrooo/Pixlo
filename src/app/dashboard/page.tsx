@@ -479,7 +479,7 @@ export default function Dashboard() {
     setSettings(next);
     if (profileUserId) saveSettingsToStorage(next, accountSettingsStorageKey(profileUserId));
     setSaved(false);
-    setPresetMessage(`Equipped “${preset.name || `Preset ${preset.slot_number}`}”. Your restored settings are now active in the dashboard preview. Use Save Changes to sync your account identity if needed.`);
+    setPresetMessage(`Equipped “${preset.name || `Preset ${preset.slot_number}`}” — preview updated.`);
     setPreviewEntered(false); setPreviewEntering(false);
   };
 
@@ -858,7 +858,7 @@ export default function Dashboard() {
     .presets-premium-mark-large{width:34px;height:34px;border-radius:10px}
     .presets-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
     .presets-tip{padding:13px 15px;border:1px solid rgba(255,143,83,.16);background:rgba(255,111,72,.055);border-radius:12px;color:rgba(255,255,255,.72);font-size:12px;line-height:1.65}
-    .preset-status{display:inline-flex;align-items:center;width:fit-content;max-width:100%;padding:6px 10px;margin:0;border-radius:8px;border:1px solid #e5e7eb;background:#fff;color:#242424;font-size:11px;font-weight:650;line-height:1.35;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .preset-status{display:inline-flex!important;align-items:center;align-self:flex-start!important;justify-self:start!important;flex:0 0 auto!important;width:max-content!important;max-width:min(420px,100%)!important;height:auto!important;min-height:0!important;box-sizing:border-box!important;padding:6px 10px!important;margin:0!important;border-radius:8px;border:1px solid #e5e7eb;background:#fff;color:#242424;font-size:11px;font-weight:650;line-height:1.35;white-space:normal;box-shadow:0 2px 8px rgba(0,0,0,.06)}
     .preset-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
     .preset-slot-card{min-width:0;padding:16px;border:1px solid rgba(255,255,255,.09);border-radius:17px;background:linear-gradient(145deg,rgba(30,23,24,.98),rgba(15,15,19,.98));box-shadow:0 14px 34px rgba(0,0,0,.2);transition:border-color .22s ease,transform .22s ease}
     .preset-slot-card:hover{border-color:rgba(255,139,78,.3);transform:translateY(-2px)}
@@ -913,7 +913,7 @@ export default function Dashboard() {
       .dashboard:has(.presets-page) .editor-grid{display:block!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;overflow:hidden!important;padding:4px 10px!important}
       .dashboard:has(.presets-page) .editor-grid{vertical-align:top!important;align-content:start!important;justify-content:start!important;padding-top:0!important}
       .dashboard:has(.presets-page) .editor{display:block!important;align-self:start!important;margin-top:0!important;padding-top:0!important}
-      .dashboard:has(.presets-page) .presets-page{position:relative!important;top:0!important;align-self:start!important;margin-top:0!important}
+      .dashboard:has(.presets-page) .presets-page{position:relative!important;top:0!important;align-self:start!important;align-items:start!important;align-content:start!important;justify-content:start!important;margin:0!important;padding-top:0!important;display:flex!important;flex-direction:column!important;gap:12px!important}.dashboard:has(.presets-page) .presets-heading,.dashboard:has(.presets-page) .preset-status,.dashboard:has(.presets-page) .preset-slots{flex:0 0 auto!important}.dashboard:has(.presets-page) .preset-slots{width:100%!important}
       .dashboard:has(.presets-page) .preset-status{margin:0!important;justify-self:start!important}
       .dashboard:has(.presets-page) .editor{height:100%!important;max-height:100%!important;min-height:0!important;overflow:hidden!important;padding:4px 8px!important}
       .dashboard:has(.presets-page) .presets-page{zoom:1!important;transform:scale(.72)!important;transform-origin:top left!important;width:138.889%!important;height:138.889%!important;max-width:none!important;max-height:none!important;min-height:0!important;margin:0!important;overflow:visible!important;grid-template-rows:auto auto auto!important;gap:12px!important}
