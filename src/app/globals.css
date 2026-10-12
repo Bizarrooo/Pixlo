@@ -4010,11 +4010,13 @@ html, body, *, *::before, *::after {
   .dashboard:has(.presets-page) .preset-slot-state { font-size:11px!important; }
   .dashboard:has(.presets-page) .preset-name-label { font-size:12px!important; }
   .dashboard:has(.presets-page) .preset-name-label input { font-size:13px!important; padding:8px 10px!important; }
+  /* Shrink the entire profile preview inside its fixed frame so the full profile is visible without iframe scrolling. */
   .dashboard:has(.presets-page) .preset-real-preview iframe {
-    width:138.89%!important;
-    height:138.89%!important;
-    transform:scale(.72)!important;
+    width:200%!important;
+    height:200%!important;
+    transform:scale(.5)!important;
     transform-origin:top left!important;
+    overflow:hidden!important;
   }
   .dashboard:has(.presets-page) .preset-slot-card:nth-child(5) {
     grid-column:2 / span 2!important;
