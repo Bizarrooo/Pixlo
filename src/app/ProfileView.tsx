@@ -52,6 +52,7 @@ function rgbaFromHex(hex: string, alpha: number) {
 
 export default function ProfileView({ forcedUsername }: { forcedUsername?: string }) {
   const [settings, setSettings] = useState<ProfileSettings>(defaultSettings);
+  const [presetPreviewMode, setPresetPreviewMode] = useState(false);
   const [ready, setReady] = useState(false);
   const [profileStatus, setProfileStatus] = useState<"loading" | "found" | "missing" | "error">("loading");
   const [entered, setEntered] = useState(false);
@@ -105,6 +106,10 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     setEntered(false);
     setEntering(false);
   }, [forcedUsername]);
+
+  useEffect(() => {
+    setPresetPreviewMode(new URLSearchParams(window.location.search).has("presetPreview"));
+  }, []);
 
   useEffect(() => {
     const username = (forcedUsername || "").trim().toLowerCase();
@@ -434,7 +439,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           <span style={{ position: "absolute", zIndex: 2, left: `${settings.enterScreenCardPositionX}%`, top: `${settings.enterScreenCardPositionY}%`, transform: "translate(-50%, -50%)", display: "block", width: `min(90%, ${settings.enterScreenCardWidth}px)`, boxSizing: "border-box", padding: `${settings.enterScreenCardPadding}px`, borderRadius: settings.enterScreenCardRadius, border: `1px solid ${settings.enterScreenCardBorderColour}${Math.round(settings.enterScreenCardBorderOpacity*2.55).toString(16).padStart(2,"0")}`, background: `${settings.enterScreenCardBackgroundColour}${Math.round(settings.enterScreenCardOpacity*2.55).toString(16).padStart(2,"0")}`, color: settings.enterScreenTextColour,  fontSize: "clamp(1.2rem, 3vw, 2.2rem)", fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
         </button>
       )}
-      <section className="profile-wrap">
+      <section className={`profile-wrap ${presetPreviewMode ? "preset-preview-mode" : ""}`}>
         <div
           className={`profile-card ${settings.glow ? "glow-enabled" : ""} ${settings.alignment === "left" ? "text-left" : ""}`}
           style={{ boxShadow: shadow, "--glow-strength": settings.glowIntensity } as React.CSSProperties}
