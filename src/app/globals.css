@@ -4159,8 +4159,4 @@ body:has(.preset-preview-mode) { margin:0!important; }
   .preview-card.gradient-text-on *, .preview-card.gradient-socials-on *, .preview-card.gradient-badges-on * {
     animation-duration: 12s !important;
   }
-}  .profile-page.gradient-text-on *, .profile-page.gradient-socials-on *, .profile-page.gradient-badges-on *,
-  .preview-card.gradient-text-on *, .preview-card.gradient-socials-on *, .preview-card.gradient-badges-on * {
-    animation-duration: 12s !important;
-  }
 }
