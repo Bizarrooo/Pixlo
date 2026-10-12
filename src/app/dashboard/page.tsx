@@ -918,7 +918,6 @@ export default function Dashboard() {
       .dashboard:has(.presets-page) .presets-heading .hint{margin:6px 0!important}
       .dashboard:has(.presets-page) .preset-slots{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:auto auto!important;align-content:start!important;gap:12px!important;height:auto!important;min-height:0!important;overflow:visible!important}
       .dashboard:has(.presets-page) .preset-slot-card{min-width:0!important;min-height:0!important;height:auto!important;max-height:none!important;padding:16px!important;overflow:hidden!important}
-      .dashboard:has(.presets-page) .preset-slot-card:nth-child(5){grid-column:2 / span 2!important;width:50%!important;height:auto!important;max-height:none!important;justify-self:center!important}
       .dashboard:has(.presets-page) .preset-real-preview{height:310px!important;min-height:0!important;flex:none!important;aspect-ratio:auto!important}
       /* Give the embedded profile a larger virtual viewport, then fit it inside the unchanged preview frame. */
       .dashboard:has(.presets-page) .preset-real-preview iframe{width:125%!important;height:125%!important;transform:scale(.8)!important;transform-origin:top left!important}
