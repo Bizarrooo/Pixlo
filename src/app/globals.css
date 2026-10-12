@@ -4024,3 +4024,13 @@ html, body, *, *::before, *::after {
 }
 
 /* Trigger fresh Vercel production build for the preset viewport-fit fix. */
+
+
+/* Slightly boost profile content only inside the Premium Presets iframe previews. */
+.preset-preview-mode .profile-name-row { font-size:1.12em!important; }
+.preset-preview-mode .profile-display-name,
+.preset-preview-mode .profile-username,
+.preset-preview-mode .profile-bio { font-size:1.1em!important; }
+.preset-preview-mode .social { transform:scale(1.08); transform-origin:center; }
+.preset-preview-mode .pixlo-profile-badge { transform:scale(1.1); transform-origin:center; }
+.preset-preview-mode .profile-inner { gap:calc(var(--profile-content-gap, 12px) * 1.04); }
