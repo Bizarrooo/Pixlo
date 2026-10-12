@@ -29,6 +29,12 @@ export type ProfileSettings = {
   backgroundColour: string;
   accentColour: string;
   textColour: string;
+  gradientTextEnabled: boolean;
+  gradientTextColours: [string, string, string];
+  gradientSocialsEnabled: boolean;
+  gradientSocialsColours: [string, string, string];
+  gradientBadgesEnabled: boolean;
+  gradientBadgesColours: [string, string, string];
   textOpacity: number;
   profileOpacity: number;
   profileBlur: number;
@@ -169,6 +175,12 @@ export const defaultSettings: ProfileSettings = {
   backgroundColour: "#050505",
   accentColour: "#ff4d5f",
   textColour: "#ffffff",
+  gradientTextEnabled: false,
+  gradientTextColours: ["#ff4d5f", "#a855f7", "#3b82f6"],
+  gradientSocialsEnabled: false,
+  gradientSocialsColours: ["#ff4d5f", "#a855f7", "#3b82f6"],
+  gradientBadgesEnabled: false,
+  gradientBadgesColours: ["#ff4d5f", "#a855f7", "#3b82f6"],
   textOpacity: 92,
   profileOpacity: 0,
   profileBlur: 0,
