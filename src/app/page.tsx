@@ -83,24 +83,15 @@ function ProfileMockup({ variant = "main" }: { variant?: "main" | "alt" }) {
 function LiveProfileCard() {
   return (
     <div className="home-live-profile-card" aria-label="Live Pixlo profile preview">
-      <div className="home-live-profile-topline">
-        <span><i /> LIVE PROFILE</span>
-        <span className="home-live-profile-badge">PIXLO / BIZ</span>
-      </div>
-      <div className="home-live-profile-viewport">
-        <iframe
-          src="/user/biz?embed=1"
-          title="Live Pixlo profile for @biz"
-          loading="eager"
-          referrerPolicy="strict-origin-when-cross-origin"
-          tabIndex={-1}
-          aria-hidden="true"
-        />
-      </div>
-      <a className="home-live-profile-link" href="/user/biz" target="_blank" rel="noopener noreferrer">
-        <span><small>ACCOUNT LINK</small><b>pixlo1.vercel.app/user/biz</b></span>
-        <Icon name="arrow" size={16} />
-      </a>
+      <iframe
+        className="home-live-profile-iframe"
+        src="/user/biz?embed=1"
+        title="Live Pixlo profile for @biz"
+        loading="eager"
+        referrerPolicy="strict-origin-when-cross-origin"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
     </div>
   );
 }
@@ -146,7 +137,7 @@ export default function Home() {
       <header className="revamp-header">
         <Link href="/" className="revamp-logo" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
         <nav className="revamp-nav" aria-label="Main navigation">
-          <a href="#features">Platform</a><a href="#showcase">Showcase</a><a href="#why-pixlo">About</a><a href="#pricing">Premium</a>
+          <a href="#features">Platform</a><a href="#showcase">Showcase</a><a href="#showcase">About</a><a href="#pricing">Premium</a>
         </nav>
         <div className="revamp-account"><HomeAccountNav /></div>
       </header>
@@ -165,19 +156,10 @@ export default function Home() {
           <div className="revamp-hero-rule"><span>DESIGN IT YOUR WAY</span><span>NO CODE REQUIRED</span><span>MADE TO BE SHARED ↗</span></div>
         </div>
         <div className="revamp-hero-side">
-          <div className="revamp-side-index">01 <span> / PROFILE PREVIEW</span></div>
-          <div className="revamp-preview-frame">
-            <div className="revamp-frame-corner revamp-corner-tl" /><div className="revamp-frame-corner revamp-corner-br" />
-            <div className="revamp-preview-top"><span><i /> LIVE PROFILE</span><span>pixlo / you</span></div>
-            <LiveProfileCard />
-            <div className="revamp-preview-caption"><span>YOUR IDENTITY. ONE LINK.</span><span>↗</span></div>
-          </div>
-          <div className="revamp-side-note"><span className="revamp-note-mark">✳</span><span>Not another template.<br /><b>A space that feels like yours.</b></span></div>
+          <LiveProfileCard />
         </div>
         <div className="revamp-hero-index" aria-hidden="true">P</div>
       </section>
-
-      <section className="revamp-marquee" id="why-pixlo"><div><span>YOUR LINKS</span><i>✳</i><span>YOUR SOUND</span><i>✳</i><span>YOUR AESTHETIC</span><i>✳</i><span>YOUR SPACE</span><i>✳</i><span>YOUR LINKS</span><i>✳</i><span>YOUR SOUND</span></div></section>
 
       <section className="revamp-platform" id="features">
         <div className="revamp-section-intro"><div><span className="revamp-label">THE PIXLO PLATFORM / 02</span><h2>All of you.<br /><em>In one place.</em></h2></div><p>Start simple. Get specific. Shape every detail until your page feels like an extension of you — not a preset someone else made.</p></div>
