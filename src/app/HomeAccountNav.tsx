@@ -240,7 +240,7 @@ export default function HomeAccountNav() {
         aria-expanded={menuOpen}
         onClick={() => { setMenuOpen(value => !value); setSwapOpen(false); }}
       >
-        {avatar ? <img className="home-nav-avatar" src={avatar} alt="" /> : <span className="home-nav-avatar home-nav-avatar-fallback" aria-hidden="true">{(currentAccount?.username || "P").slice(0, 1).toUpperCase()}</span>}
+        {avatar ? <img className="home-nav-avatar" src={avatar} alt="" style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, aspectRatio: "1 / 1", objectFit: "cover", borderRadius: "50%", clipPath: "circle(50% at 50% 50%)", flex: "0 0 28px" }} /> : <span className="home-nav-avatar home-nav-avatar-fallback" aria-hidden="true" style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, aspectRatio: "1 / 1", borderRadius: "50%", flex: "0 0 28px" }}>{(currentAccount?.username || "P").slice(0, 1).toUpperCase()}</span>}
         <span>Account</span>
         <span className={`home-nav-account-chevron ${menuOpen ? "open" : ""}`} aria-hidden="true">⌄</span>
       </button>
