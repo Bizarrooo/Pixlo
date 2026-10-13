@@ -2129,6 +2129,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 /* Final guard: keep the home account avatar a compact nav icon even if generic image rules change. */
 .home-nav-account > .home-nav-avatar { width:28px !important; height:28px !important; min-width:28px !important; min-height:28px !important; max-width:28px !important; max-height:28px !important; aspect-ratio:1 / 1 !important; object-fit:cover !important; border-radius:50% !important; overflow:hidden !important; display:block !important; flex:0 0 28px !important; }
+.home-nav-account img.home-nav-avatar { clip-path: circle(50% at 50% 50%) !important; }
 .home-nav-account > .home-nav-avatar-fallback { border-radius:50% !important; }
 
 
@@ -5645,3 +5646,14 @@ html { scroll-behavior:smooth; }
     transform:none !important;
   }
 }
+
+/* Home hero live profile: stronger, eased pointer parallax on the actual card frame. */
+.pixlo-revamp-home .home-live-profile-card {
+  position: relative;
+  transform: perspective(1200px) rotateX(calc(var(--drift-y, 0) * -3deg)) rotateY(calc(var(--drift-x, 0) * 4deg)) translate3d(calc(var(--drift-x, 0) * 15px), calc(var(--drift-y, 0) * 12px), 0);
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 650ms cubic-bezier(.2,.75,.2,1), filter 500ms ease;
+}
+.pixlo-revamp-home .home-live-profile-card.has-pointer-drift { filter: drop-shadow(0 24px 42px rgba(0,0,0,.35)); }
+@media (prefers-reduced-motion: reduce) { .pixlo-revamp-home .home-live-profile-card { transform: none !important; transition: none !important; } }
