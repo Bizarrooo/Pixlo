@@ -5566,3 +5566,30 @@ html { scroll-behavior:smooth; }
 @media(max-width:1180px) { .dashboard-revamp { grid-template-columns:205px minmax(0,1fr)!important; }.dashboard-revamp .editor-grid { grid-template-columns:minmax(0,1fr) minmax(285px,37%)!important; } }
 @media(max-width:900px) { .dashboard-revamp .editor-grid { grid-template-columns:minmax(0,1fr)!important; }.dashboard-revamp .preview-panel { position:relative!important;top:auto!important;height:auto!important;min-height:580px;border-top:1px solid rgba(255,255,255,.1)!important; } }
 @media(max-width:640px) { .dashboard-revamp { grid-template-columns:minmax(0,1fr)!important; }.dashboard-revamp .dash-header { min-height:72px!important;padding:12px!important; }.dashboard-revamp .editor { padding:18px 12px!important; }.dashboard-revamp .preview-panel { min-height:540px;padding:16px 12px!important; } }
+
+
+/* Revamp cleanup: let the actual profile carry the hero, without stacked framing. */
+.pixlo-revamp-home .revamp-hero-side { align-self:center; min-width:0; }
+.pixlo-revamp-home .revamp-hero-side > .home-live-profile-card {
+  position:relative;
+  width:min(100%, 460px);
+  margin:0 auto;
+  padding:0;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;
+  background:#080808;
+  box-shadow:0 28px 80px rgba(0,0,0,.38);
+}
+.pixlo-revamp-home .home-live-profile-iframe {
+  display:block;
+  width:100%;
+  height:clamp(440px, 48vw, 610px);
+  border:0;
+  pointer-events:none;
+  background:#080808;
+}
+@media (max-width: 760px) {
+  .pixlo-revamp-home .revamp-hero-side > .home-live-profile-card { width:min(100%, 440px); }
+  .pixlo-revamp-home .home-live-profile-iframe { height:500px; }
+}
