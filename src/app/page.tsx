@@ -140,175 +140,75 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
   return (
-    <main className="pixlo-home">
-      <div className="home-noise" aria-hidden="true" />
-      <div className="home-grid" aria-hidden="true" />
-      <div className="home-orb home-orb-one" aria-hidden="true" />
-      <div className="home-orb home-orb-two" aria-hidden="true" />
-
-      <header className="home-nav-wrap">
-        <nav className="home-nav" aria-label="Main navigation">
-          <Link href="/" className="home-brand" aria-label="Pixlo home">
-            <img className="home-brand-logo" src="/pixlo-logo.png" alt="Pixlo" />
-          </Link>
-
-          <div className="home-nav-links">
-            <a href="#features">Features</a>
-            <a href="#showcase">Showcase</a>
-            <a href="#why-pixlo">Why Pixlo</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#donate">Donate</a>
-          </div>
-
-          <div className="home-nav-actions">
-            <HomeAccountNav />
-          </div>
+    <main className="pixlo-home pixlo-revamp-home">
+      <div className="revamp-grain" aria-hidden="true" />
+      <div className="revamp-grid" aria-hidden="true" />
+      <header className="revamp-header">
+        <Link href="/" className="revamp-logo" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
+        <nav className="revamp-nav" aria-label="Main navigation">
+          <a href="#features">Platform</a><a href="#showcase">Showcase</a><a href="#why-pixlo">About</a><a href="#pricing">Premium</a>
         </nav>
+        <div className="revamp-account"><HomeAccountNav /></div>
       </header>
 
-      <section className="home-hero">
-        <div className="home-hero-copy">
-          <div className="home-eyebrow"><span><Icon name="spark" size={13} /></span> the new home for your online identity</div>
-          <h1>Make your profile<br /><em>impossible to ignore.</em></h1>
-          <p>Build a profile that feels like you. Add your socials, music, links, effects and everything else that makes your corner of the internet yours.</p>
-          <div className="home-hero-actions">
-            <Link href="/dashboard" className="home-primary-btn">Build your Pixlo <Icon name="arrow" size={17} /></Link>
-            <a href="#showcase" className="home-secondary-btn"><span className="home-play"><Icon name="play" size={11} /></span> See it in action</a>
+      <section className="revamp-hero">
+        <div className="revamp-hero-main">
+          <div className="revamp-overline"><span className="revamp-live-dot" /> YOUR IDENTITY, UNCOMPROMISED <span className="revamp-overline-index">PX—001</span></div>
+          <h1>Your corner<br />of the internet<span className="revamp-title-period">.</span></h1>
+          <div className="revamp-hero-bottom">
+            <p>A profile that looks like <em>you</em>. Your links, music, socials and style — brought together in one space that feels unmistakably yours.</p>
+            <div className="revamp-hero-actions">
+              <Link href="/dashboard" className="revamp-button revamp-button-hot">Build your Pixlo <Icon name="arrow" size={17} /></Link>
+              <a href="#showcase" className="revamp-quiet-link">Explore the platform <span>↘</span></a>
+            </div>
           </div>
-          <div className="home-trust-row">
-            <span><i /> Free to start</span>
-            <span><i /> No design skills needed</span>
-            <span><i /> Fully customisable</span>
+          <div className="revamp-hero-rule"><span>DESIGN IT YOUR WAY</span><span>NO CODE REQUIRED</span><span>MADE TO BE SHARED ↗</span></div>
+        </div>
+        <div className="revamp-hero-side">
+          <div className="revamp-side-index">01 <span> / PROFILE PREVIEW</span></div>
+          <div className="revamp-preview-frame">
+            <div className="revamp-frame-corner revamp-corner-tl" /><div className="revamp-frame-corner revamp-corner-br" />
+            <div className="revamp-preview-top"><span><i /> LIVE PROFILE</span><span>pixlo / you</span></div>
+            <LiveProfileCard />
+            <div className="revamp-preview-caption"><span>YOUR IDENTITY. ONE LINK.</span><span>↗</span></div>
           </div>
+          <div className="revamp-side-note"><span className="revamp-note-mark">✳</span><span>Not another template.<br /><b>A space that feels like yours.</b></span></div>
         </div>
-
-        <div className="home-hero-visual" aria-label="Pixlo profile preview">
-          <div className="home-visual-backdrop" />
-          <div className="home-floating-chip chip-top"><span className="chip-icon"><Icon name="palette" size={15} /></span><span><b>Unlimited style</b><small>Make it yours</small></span></div>
-          <div className="home-floating-chip chip-bottom"><span className="chip-icon"><Icon name="music" size={15} /></span><span><b>Music ready</b><small>Set the mood</small></span></div>
-          <LiveProfileCard />
-        </div>
+        <div className="revamp-hero-index" aria-hidden="true">P</div>
       </section>
 
-      <section className="home-stat-strip" id="why-pixlo">
-        <div><strong>01</strong><span>One profile for<br />everything.</span></div>
-        <div><strong>02</strong><span>Built to look<br />like you.</span></div>
-        <div><strong>03</strong><span>Fast, clean and<br />easy to share.</span></div>
-        <div><strong>04</strong><span>Your style,<br />your rules.</span></div>
-      </section>
+      <section className="revamp-marquee" id="why-pixlo"><div><span>YOUR LINKS</span><i>✳</i><span>YOUR SOUND</span><i>✳</i><span>YOUR AESTHETIC</span><i>✳</i><span>YOUR SPACE</span><i>✳</i><span>YOUR LINKS</span><i>✳</i><span>YOUR SOUND</span></div></section>
 
-      <section className="home-section home-features" id="features">
-        <div className="home-section-heading">
-          <div>
-            <span className="home-section-kicker">WHAT YOU CAN BUILD</span>
-            <h2>More than a link page.</h2>
-          </div>
-          <p>Pixlo gives you the controls to turn a simple profile into a proper personal homepage.</p>
-        </div>
-
-        <div className="home-feature-grid">
-          <article className="home-feature-card feature-large">
-            <div className="home-feature-icon"><Icon name="palette" size={21} /></div>
-            <div>
-              <span className="home-feature-number">01</span>
-              <h3>Make it completely yours.</h3>
-              <p>Change colours, backgrounds, typography, spacing, glow, motion and more without touching code.</p>
-            </div>
-            <div className="home-card-preview home-style-preview">
-              <div className="style-preview-bar"><span /><span /><span /></div>
-              <div className="style-preview-lines"><i /><i /><i /><i /></div>
-              <div className="style-preview-gradient" />
-            </div>
+      <section className="revamp-platform" id="features">
+        <div className="revamp-section-intro"><div><span className="revamp-label">THE PIXLO PLATFORM / 02</span><h2>All of you.<br /><em>In one place.</em></h2></div><p>Start simple. Get specific. Shape every detail until your page feels like an extension of you — not a preset someone else made.</p></div>
+        <div className="revamp-feature-layout">
+          <article className="revamp-feature revamp-feature-custom">
+            <span className="revamp-feature-no">01 / CUSTOMISE</span><div className="revamp-feature-art revamp-art-controls"><div className="revamp-control-window"><div className="revamp-control-head"><i /><i /><i /><span>APPEARANCE.SYS</span></div><div className="revamp-control-body"><div className="revamp-control-sidebar"><i /><i /><i /><i /></div><div className="revamp-control-content"><b>Make it yours.</b><span /><span /><div><i /><i /><i /></div></div></div></div></div>
+            <h3>Every detail, under your control.</h3><p>Colours, fonts, backgrounds, layouts, motion and effects — no code needed.</p>
           </article>
-
-          <article className="home-feature-card">
-            <div className="home-feature-icon"><Icon name="link" size={21} /></div>
-            <span className="home-feature-number">02</span>
-            <h3>Everything in one place.</h3>
-            <p>Socials, custom links and your important pages, all under one clean username.</p>
-            <div className="home-link-stack" aria-label="Social links">
-              <span><Icon name="discord" size={19} /></span>
-              <span><Icon name="youtube" size={19} /></span>
-              <span><Icon name="github" size={19} /></span>
-              <span><Icon name="roblox" size={19} /></span>
-            </div>
+          <article className="revamp-feature revamp-feature-links">
+            <span className="revamp-feature-no">02 / CONNECT</span><div className="revamp-social-art"><div>in</div><div>▶</div><div>◈</div><div>◎</div><div>⌘</div><span>ALL YOUR PLACES<br />ONE PROFILE ↗</span></div><h3>Your internet, connected.</h3><p>Socials, custom links and the places people can find you.</p>
           </article>
-
-          <article className="home-feature-card">
-            <div className="home-feature-icon"><Icon name="music" size={21} /></div>
-            <span className="home-feature-number">03</span>
-            <h3>Set the atmosphere.</h3>
-            <p>Add your music, cover art and subtle effects to make the page feel alive.</p>
-            <div className="home-wave"><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div>
+          <article className="revamp-feature revamp-feature-music">
+            <span className="revamp-feature-no">03 / ATMOSPHERE</span><div className="revamp-music-art"><div className="revamp-disc"><i /></div><div className="revamp-wave"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div><span>PRESS PLAY. SET THE MOOD.</span></div><h3>Give your page a pulse.</h3><p>Music, artwork and subtle movement make your space feel alive.</p>
           </article>
-
-          <article className="home-feature-card feature-wide">
-            <div className="home-feature-icon"><Icon name="bolt" size={21} /></div>
-            <div>
-              <span className="home-feature-number">04</span>
-              <h3>Looks good everywhere.</h3>
-              <p>Designed for desktop and mobile so your profile stays clean when someone opens it anywhere.</p>
-            </div>
-            <div className="home-device-preview">
-              <div className="home-device phone"><div className="device-notch" /><ProfileMockup variant="alt" /></div>
-              <div className="home-device desktop"><div className="device-top"><span /><span /><span /></div><div className="device-content"><b>pixlo/you</b><span>your profile, your way.</span><i /></div></div>
-            </div>
+          <article className="revamp-feature revamp-feature-badges">
+            <span className="revamp-feature-no">04 / RECOGNITION</span><div className="revamp-badge-art"><div>✦</div><div>✓</div><div>↗</div><span>BUILT AROUND<br />YOUR IDENTITY</span></div><h3>Show what makes you, you.</h3><p>Discord integration, profile badges and Premium tools when you want more.</p>
           </article>
         </div>
       </section>
 
-      <section className="home-showcase" id="showcase">
-        <div className="home-showcase-copy">
-          <span className="home-section-kicker">YOUR PROFILE, NOT A TEMPLATE</span>
-          <h2>Give people a reason<br /><em>to stay.</em></h2>
-          <p>From the first glance to the last click, every part of your Pixlo can be tuned to your style. Keep it minimal, go loud, or land somewhere in between.</p>
-          <Link href="/dashboard" className="home-text-link">Open the dashboard <Icon name="arrow" size={16} /></Link>
-        </div>
-        <div className="home-showcase-stage">
-          <div className="showcase-ring ring-one" />
-          <div className="showcase-ring ring-two" />
-          <ProfileMockup variant="alt" />
-          <div className="showcase-label"><span>Pixlo</span><b>your space on the web.</b></div>
-        </div>
+      <section className="revamp-showcase" id="showcase">
+        <div className="revamp-showcase-art"><div className="revamp-showcase-grid" /><div className="revamp-showcase-stamp">PX<br /><span>PROFILE / 001</span></div><div className="revamp-showcase-copy-card"><span>YOUR PROFILE, YOUR RULES</span><b>Make a first<br />impression.</b><i>PIXLO / PERSONAL WEBSPACE</i></div><div className="revamp-showcase-line" /></div>
+        <div className="revamp-showcase-text"><span className="revamp-label">MORE THAN A LINK PAGE / 03</span><h2>Make it feel<br />like <em>your world.</em></h2><p>Minimal or expressive. Quiet or unapologetically loud. Build the profile you want people to remember, then share it with one clean link.</p><Link href="/dashboard" className="revamp-text-link">Open your dashboard <Icon name="arrow" size={16} /></Link><div className="revamp-showcase-foot"><span>01 — CUSTOMISE</span><span>02 — PUBLISH</span><span>03 — SHARE</span></div></div>
       </section>
 
-      <section id="donate" className="home-section" style={{ paddingTop: "72px", paddingBottom: "72px" }}>
-        <div className="home-section-heading">
-          <div>
-            <span className="home-section-kicker">SUPPORT THE PROJECT</span>
-            <h2>Help Pixlo keep growing.</h2>
-          </div>
-          <p>Enjoying Pixlo? Your support helps us improve the platform, build new features, cover running costs, and work towards our own custom domain.</p>
-        </div>
-        <article className="home-feature-card" style={{ minHeight: "250px", maxWidth: "760px", margin: "28px auto 0", width: "100%", padding: "clamp(24px, 5vw, 42px)" }}>
-          <div className="home-feature-icon"><Icon name="bolt" size={21} /></div>
-          <span className="home-feature-number">OFFICIAL DONATION LINK</span>
-          <h3>Support Pixlo with Stripe.</h3>
-          <p>Support Pixlo securely through Stripe's hosted checkout. Choose the amount you want to contribute. Donations are completely optional, and every contribution helps us improve the platform.</p>
-          <a href="https://buy.stripe.com/7sYaEY7DJbSigko0Nj9EI00" target="_blank" rel="noopener noreferrer" className="home-primary-btn" style={{ alignSelf: "flex-start", marginTop: "12px" }}>Donate with Stripe <Icon name="arrow" size={17} /></a>
-          <span style={{ color: "rgba(255,255,255,.42)", fontSize: "12px", marginTop: "8px" }}>Opens Stripe in a new tab.</span>
-        </article>
-        <p style={{ marginTop: "18px", color: "rgba(255,255,255,.48)", fontSize: "12px", lineHeight: 1.7 }}>Please only donate if you want to. Payment processing is handled by Stripe; Pixlo does not collect or store your card details.</p>
+      <section className="revamp-support" id="donate">
+        <div className="revamp-support-main"><span className="revamp-label">INDEPENDENTLY BUILT / 04</span><h2>Help us build<br /><em>what comes next.</em></h2><p>Pixlo is growing. Optional donations help cover running costs, improve the platform and bring us closer to our own custom domain.</p><a href="https://buy.stripe.com/7sYaEY7DJbSigko0Nj9EI00" target="_blank" rel="noopener noreferrer" className="revamp-button revamp-button-outline">Support Pixlo with Stripe <Icon name="arrow" size={16} /></a></div>
+        <div className="revamp-premium-panel" id="pricing"><div className="revamp-premium-top"><span>PIXLO / PREMIUM</span><span className="revamp-premium-mark">✳</span></div><span className="revamp-premium-kicker">BETA ACCESS</span><h3>More room<br />to make it yours.</h3><p>Get lifetime Pixlo Premium for £3.99 during beta. Pay once, no subscription, and keep your access.</p><Link href="/premium" className="revamp-button revamp-button-premium">Get lifetime Premium <Icon name="arrow" size={16} /></Link><small>ONE PAYMENT · LIFETIME ACCESS</small></div>
       </section>
 
-      <section className="home-cta" id="pricing">
-        <div className="home-cta-glow" />
-        <div className="home-cta-inner">
-          <span className="home-section-kicker">PIXLO PREMIUM BETA</span>
-          <h2>More room to make it<br /><em>your own.</em></h2>
-          <p>Get lifetime Pixlo Premium for £3.99 during beta. Pay once, with no subscription — and keep your access even if the price increases later.</p>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-            <Link href="/premium" className="home-primary-btn">Get Premium for £3.99 <Icon name="arrow" size={17} /></Link>
-            <Link href="/dashboard" className="home-secondary-btn">Create your Pixlo</Link>
-          </div>
-        </div>
-      </section>
-
-      <footer className="home-footer">
-        <Link href="/" className="home-brand" aria-label="Pixlo home"><img className="home-brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></Link>
-        <span>Build something that feels like you.</span>
-        <div><a href="#features">Features</a><a href="#showcase">Showcase</a><a href="#donate">Donate</a><Link href="/dashboard">Dashboard</Link></div>
-      </footer>
+      <footer className="revamp-footer"><Link href="/" className="revamp-logo"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span><div><a href="#features">Platform</a><a href="#showcase">Showcase</a><a href="#donate">Support</a><Link href="/dashboard">Dashboard ↗</Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
     </main>
   );
-}
+}}
