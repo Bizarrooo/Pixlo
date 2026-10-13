@@ -91,7 +91,7 @@ function LiveProfileCard() {
         <iframe
           src="/user/biz?embed=1"
           title="Live Pixlo profile for @biz"
-          loading="lazy"
+          loading="eager"
           referrerPolicy="strict-origin-when-cross-origin"
           tabIndex={-1}
           aria-hidden="true"
