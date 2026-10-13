@@ -6227,7 +6227,7 @@ html { scroll-behavior:smooth; }
 .dashboard-revamp .active-link-info b { color: #f7f2ee !important; }
 
 /* Text theme applies across the actual dashboard content, not just headings. */
-.dashboard-revamp.dashboard-text-gradient-on :is(
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-main :is(
   h1,h2,h3,h4,h5,p,span,b,strong,label,small,li,a,legend,summary,dt,dd,
   figcaption,caption,th,td,blockquote
 ):not(.nav-dot):not(.premium-heading-mark):not(.premium-heading-chevron):not(.presets-premium-mark):not(.active-link-handle):not(.social-editor-pencil):not(.admin-nav-owner):not(.toggle):not(.toggle *):not(.preview-panel *):not(svg):not(svg *) {
@@ -6241,13 +6241,13 @@ html { scroll-behavior:smooth; }
   -webkit-text-fill-color: transparent !important;
   animation: pixlo-dashboard-theme-shift 6s linear infinite !important;
 }
-.dashboard-revamp.dashboard-text-gradient-on :is(input,textarea,select,option) {
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-main :is(input,textarea,select,option) {
   color: #f7f2ee !important;
   -webkit-text-fill-color: #f7f2ee !important;
 }
 
 /* Solid mode mirrors the same coverage while leaving panels and controls intact. */
-.dashboard-revamp.dashboard-text-solid-on :is(
+.dashboard-revamp.dashboard-text-solid-on .dashboard-main :is(
   h1,h2,h3,h4,h5,p,span,b,strong,label,small,li,a,legend,summary,dt,dd,
   figcaption,caption,th,td,blockquote
 ):not(.nav-dot):not(.premium-heading-mark):not(.premium-heading-chevron):not(.presets-premium-mark):not(.active-link-handle):not(.social-editor-pencil):not(.admin-nav-owner):not(.toggle):not(.toggle *):not(.preview-panel *):not(svg):not(svg *) {
@@ -6258,7 +6258,7 @@ html { scroll-behavior:smooth; }
   -webkit-text-fill-color: var(--dashboard-text-solid, #f5f0ed) !important;
   animation: none !important;
 }
-.dashboard-revamp.dashboard-text-solid-on :is(input,textarea,select,option) {
+.dashboard-revamp.dashboard-text-solid-on .dashboard-main :is(input,textarea,select,option) {
   color: #f7f2ee !important;
   -webkit-text-fill-color: #f7f2ee !important;
 }
