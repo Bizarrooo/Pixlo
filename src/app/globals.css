@@ -4825,3 +4825,120 @@ body:has(.preset-preview-mode) { margin:0!important; }
 @media(prefers-reduced-motion:reduce) {
   .dashboard:after { animation:none!important; }
 }
+
+
+/* Homepage art direction pass: richer atmosphere, quieter gradients, stronger type. */
+.pixlo-home {
+  --home-ink:#070708;
+  --home-paper:#f3f0ed;
+  --home-muted:#aaa5a1;
+  position:relative;
+  isolation:isolate;
+  overflow:clip;
+  background:
+    radial-gradient(ellipse 58% 46% at 77% 13%,rgba(255,102,49,.105),transparent 72%),
+    radial-gradient(ellipse 42% 45% at 93% 29%,rgba(218,43,54,.095),transparent 73%),
+    radial-gradient(ellipse 46% 52% at 5% 70%,rgba(214,47,49,.07),transparent 75%),
+    #070708!important;
+}
+.pixlo-home .home-grid {
+  opacity:.44!important;
+  background-image:
+    linear-gradient(rgba(255,255,255,.032) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.032) 1px,transparent 1px)!important;
+  background-size:64px 64px!important;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.9) 0%,rgba(0,0,0,.45) 42%,transparent 78%)!important;
+}
+.pixlo-home .home-noise { opacity:.025!important; }
+.pixlo-home .home-orb {
+  filter:blur(125px)!important;
+  opacity:.085!important;
+  transform:translateZ(0);
+}
+.pixlo-home .home-orb-one { background:#ff713d!important; }
+.pixlo-home .home-orb-two { background:#d93443!important; opacity:.065!important; }
+.pixlo-home .home-nav {
+  background:rgba(10,10,11,.76)!important;
+  border-color:rgba(255,255,255,.105)!important;
+  box-shadow:0 20px 65px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.045)!important;
+}
+.pixlo-home .home-brand > span:last-child > span {
+  color:#ff8755!important;
+}
+.pixlo-home .home-hero h1,
+.pixlo-home .home-showcase h2,
+.pixlo-home .home-cta h2 {
+  color:#f2efec!important;
+  letter-spacing:-.065em!important;
+  font-weight:760!important;
+  text-wrap:balance;
+  text-shadow:none!important;
+}
+.pixlo-home .home-hero h1 em,
+.pixlo-home .home-showcase h2 em,
+.pixlo-home .home-cta h2 em {
+  display:inline;
+  color:transparent!important;
+  background:linear-gradient(105deg,#ffc08a 0%,#ff9567 38%,#f16a54 72%,#db4a4c 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  -webkit-text-fill-color:transparent;
+  filter:none!important;
+  text-shadow:none!important;
+}
+.pixlo-home .home-hero-copy > p {
+  color:#aaa6a3!important;
+  max-width:520px!important;
+  font-size:15px!important;
+  line-height:1.8!important;
+  letter-spacing:-.012em;
+}
+.pixlo-home .home-eyebrow,
+.pixlo-home .home-section-kicker {
+  color:#eaa17f!important;
+  letter-spacing:.145em!important;
+}
+.pixlo-home .home-eyebrow > span {
+  color:#ffb27c!important;
+  background:rgba(255,128,72,.085)!important;
+  border-color:rgba(255,151,102,.2)!important;
+  box-shadow:none!important;
+}
+.pixlo-home .home-primary-btn {
+  background:linear-gradient(110deg,#ff9858 0%,#f16c4f 58%,#df4b4f 100%)!important;
+  border-color:rgba(255,177,131,.28)!important;
+  box-shadow:0 8px 24px rgba(215,65,57,.13)!important;
+}
+.pixlo-home .home-primary-btn:hover {
+  box-shadow:0 11px 28px rgba(215,65,57,.2)!important;
+}
+.pixlo-home .home-secondary-btn {
+  background:rgba(255,255,255,.025)!important;
+  border-color:rgba(255,255,255,.12)!important;
+  color:#dedad7!important;
+}
+.pixlo-home .home-visual-backdrop {
+  background:radial-gradient(ellipse,rgba(255,109,59,.13),rgba(222,48,59,.045) 38%,transparent 72%)!important;
+  filter:blur(24px)!important;
+}
+.pixlo-home .home-live-profile-card {
+  border-color:rgba(255,255,255,.13)!important;
+  background:rgba(9,9,10,.96)!important;
+  box-shadow:0 34px 90px rgba(0,0,0,.5),0 0 55px rgba(240,75,51,.075),inset 0 1px rgba(255,255,255,.045)!important;
+}
+.pixlo-home .home-live-profile-card:hover {
+  border-color:rgba(255,151,100,.25)!important;
+  box-shadow:0 38px 96px rgba(0,0,0,.54),0 0 60px rgba(240,75,51,.1),inset 0 1px rgba(255,255,255,.05)!important;
+}
+.pixlo-home .home-feature-card {
+  background:linear-gradient(145deg,rgba(18,18,19,.88),rgba(10,10,11,.92))!important;
+  border-color:rgba(255,255,255,.095)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.025)!important;
+}
+.pixlo-home .home-feature-card:hover {
+  border-color:rgba(255,132,84,.23)!important;
+  box-shadow:0 14px 38px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.04)!important;
+}
+@media(prefers-reduced-motion:reduce) {
+  .pixlo-home .home-orb { transform:none!important; }
+}
