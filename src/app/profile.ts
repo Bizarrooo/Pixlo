@@ -40,6 +40,7 @@ export type ProfileSettings = {
   dashboardBackgroundGradientColours: [string, string, string];
   dashboardTextGradientEnabled: boolean;
   dashboardTextGradientColours: [string, string, string];
+  dashboardTextSolidColour: string;
   textOpacity: number;
   profileOpacity: number;
   profileBlur: number;
@@ -191,6 +192,7 @@ export const defaultSettings: ProfileSettings = {
   dashboardBackgroundGradientColours: ["#251016", "#171016", "#24130d"],
   dashboardTextGradientEnabled: false,
   dashboardTextGradientColours: ["#ff684f", "#ffad65", "#f04a43"],
+  dashboardTextSolidColour: "#f5f0ed",
   textOpacity: 92,
   profileOpacity: 0,
   profileBlur: 0,
@@ -355,6 +357,7 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     dashboardCustomisationEnabled: typeof parsed.dashboardCustomisationEnabled === "boolean" ? parsed.dashboardCustomisationEnabled : defaultSettings.dashboardCustomisationEnabled,
     dashboardBackgroundGradientEnabled: typeof parsed.dashboardBackgroundGradientEnabled === "boolean" ? parsed.dashboardBackgroundGradientEnabled : defaultSettings.dashboardBackgroundGradientEnabled,
     dashboardTextGradientEnabled: typeof parsed.dashboardTextGradientEnabled === "boolean" ? parsed.dashboardTextGradientEnabled : defaultSettings.dashboardTextGradientEnabled,
+    dashboardTextSolidColour: typeof parsed.dashboardTextSolidColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.dashboardTextSolidColour) ? parsed.dashboardTextSolidColour : defaultSettings.dashboardTextSolidColour,
     backgroundVideoMusicDisabled,
     backgroundVideo,
     musicTracks,
