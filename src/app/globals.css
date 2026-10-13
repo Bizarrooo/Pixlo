@@ -6038,3 +6038,33 @@ html { scroll-behavior:smooth; }
   .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master p,
   .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-footnote { animation:none !important; }
 }
+
+
+/* Final contrast sweep: secondary copy, status labels, saved-preset metadata and preview captions */
+.dashboard-revamp .preview-label small,
+.dashboard-revamp .preset-slot-number,
+.dashboard-revamp .preset-slot-state,
+.dashboard-revamp .preset-updated,
+.dashboard-revamp .font-section-note,
+.dashboard-revamp .subsection-heading > span,
+.dashboard-revamp .range span,
+.dashboard-revamp .range label,
+.dashboard-revamp .sidebar-bottom button,
+.dashboard-revamp .admin-nav-owner,
+.dashboard-revamp .preview-badge,
+.dashboard-revamp .badge-refresh-row > span,
+.dashboard-revamp .discord-linked-pill {
+  color: #c8bfba !important;
+  opacity: 1 !important;
+}
+.dashboard-revamp .preview-label span,
+.dashboard-revamp .preset-slot-top h3,
+.dashboard-revamp .preset-name-label,
+.dashboard-revamp .badge-refresh-row button,
+.dashboard-revamp .active-link-row,
+.dashboard-revamp .pixlo-badge-editor-info b,
+.dashboard-revamp .pixlo-badge-editor-info span {
+  color: #f0e9e5 !important;
+}
+.dashboard-revamp .dashboard-theme-page .premium-gradient-card p { color: #d0c6c0 !important; }
+.dashboard-revamp .dashboard-theme-page .premium-gradient-card h3 { color: #fbf6f2 !important; }
