@@ -350,6 +350,11 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
   return {
     ...defaultSettings,
     ...parsed,
+    dashboardBackgroundGradientColours: Array.isArray(parsed.dashboardBackgroundGradientColours) && parsed.dashboardBackgroundGradientColours.length === 3 ? parsed.dashboardBackgroundGradientColours.map((c: unknown, i: number) => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c) ? c : defaultSettings.dashboardBackgroundGradientColours[i]) as [string,string,string] : defaultSettings.dashboardBackgroundGradientColours,
+    dashboardTextGradientColours: Array.isArray(parsed.dashboardTextGradientColours) && parsed.dashboardTextGradientColours.length === 3 ? parsed.dashboardTextGradientColours.map((c: unknown, i: number) => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c) ? c : defaultSettings.dashboardTextGradientColours[i]) as [string,string,string] : defaultSettings.dashboardTextGradientColours,
+    dashboardCustomisationEnabled: typeof parsed.dashboardCustomisationEnabled === "boolean" ? parsed.dashboardCustomisationEnabled : defaultSettings.dashboardCustomisationEnabled,
+    dashboardBackgroundGradientEnabled: typeof parsed.dashboardBackgroundGradientEnabled === "boolean" ? parsed.dashboardBackgroundGradientEnabled : defaultSettings.dashboardBackgroundGradientEnabled,
+    dashboardTextGradientEnabled: typeof parsed.dashboardTextGradientEnabled === "boolean" ? parsed.dashboardTextGradientEnabled : defaultSettings.dashboardTextGradientEnabled,
     backgroundVideoMusicDisabled,
     backgroundVideo,
     musicTracks,
