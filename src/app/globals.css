@@ -6262,3 +6262,23 @@ html { scroll-behavior:smooth; }
   color: #f7f2ee !important;
   -webkit-text-fill-color: #f7f2ee !important;
 }
+
+
+/* Keep the Premium Dashboard submenu label purple regardless of dashboard text theme. */
+.dashboard-revamp .premium-nav-items > button.premium-dashboard-nav-button b,
+.dashboard-revamp.dashboard-text-gradient-on .premium-nav-items > button.premium-dashboard-nav-button b,
+.dashboard-revamp.dashboard-text-solid-on .premium-nav-items > button.premium-dashboard-nav-button b {
+  color: #e9d5ff !important;
+  -webkit-text-fill-color: #e9d5ff !important;
+  background: none !important;
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  animation: none !important;
+}
+/* Presets uses the same simple Premium unlock treatment as the other gated sections. */
+.dashboard .presets-lock-overlay { background: rgba(0,0,0,.48) !important; backdrop-filter: blur(2px) !important; }
+.dashboard .presets-unlock-prompt { padding: 30px !important; }
+.dashboard .presets-unlock-prompt .presets-lock-eyebrow { margin: 0 0 10px !important; color: #c084fc !important; letter-spacing: .12em !important; }
+.dashboard .presets-unlock-prompt h2 { background: none !important; color: #e9d5ff !important; -webkit-text-fill-color: #e9d5ff !important; }
+.dashboard .presets-unlock-prompt > p:not(.presets-lock-eyebrow) { color: #d5cbdc !important; }
