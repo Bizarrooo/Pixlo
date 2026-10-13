@@ -937,7 +937,7 @@ export default function Dashboard() {
       </div>
     </section>
   </div>}
-    <main className="dashboard" onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
+    <main className="dashboard dashboard-revamp" onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Profile customization</small></div>
       <nav className="dashboard-sidebar-nav">
