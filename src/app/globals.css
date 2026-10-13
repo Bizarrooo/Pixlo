@@ -4777,3 +4777,51 @@ body:has(.preset-preview-mode) { margin:0!important; }
   .pixlo-home.motion-ready .home-reveal-target { opacity:1!important;transform:none!important; }
   .home-live-profile-card { transform:none!important; }
 }
+
+
+/* Pixlo atmospheric background v2 — deep black, ember orange and crimson.
+   Kept CSS-only so it stays crisp and light on low-powered devices. */
+.dashboard {
+  background:#050506!important;
+  isolation:isolate!important;
+}
+.dashboard:before {
+  background:
+    radial-gradient(ellipse 48% 42% at 86% 9%,rgba(255,103,48,.19),transparent 72%),
+    radial-gradient(ellipse 44% 48% at 72% 20%,rgba(236,52,62,.13),transparent 74%),
+    radial-gradient(ellipse 48% 55% at 8% 92%,rgba(210,37,57,.15),transparent 72%),
+    radial-gradient(ellipse 30% 35% at 48% 58%,rgba(255,113,49,.045),transparent 78%),
+    linear-gradient(rgba(255,255,255,.075) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.075) 1px,transparent 1px),
+    #050506!important;
+  background-size:auto,auto,auto,auto,48px 48px,48px 48px,auto!important;
+  opacity:1!important;
+}
+.dashboard:after {
+  background:
+    radial-gradient(ellipse 62% 50% at 100% 0%,rgba(255,102,49,.075),transparent 68%),
+    radial-gradient(ellipse 60% 70% at 0% 100%,rgba(220,40,58,.075),transparent 72%),
+    linear-gradient(115deg,rgba(0,0,0,.04) 8%,transparent 35%,rgba(0,0,0,.22) 100%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='pixlo-grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23pixlo-grain)' opacity='.22'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at center,transparent 28%,rgba(0,0,0,.38) 100%)!important;
+  background-size:auto,auto,auto,180px 180px,auto!important;
+  opacity:.82!important;
+  animation:pixloAtmosphere 22s ease-in-out infinite alternate!important;
+}
+@keyframes pixloAtmosphere {
+  from { opacity:.68; }
+  to { opacity:.9; }
+}
+.dashboard .sidebar,
+.dashboard .dash-header {
+  background-color:rgba(7,7,9,.84)!important;
+  backdrop-filter:blur(24px) saturate(115%)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(115%)!important;
+}
+.dashboard .editor,
+.dashboard .preview-panel {
+  background:transparent!important;
+}
+@media(prefers-reduced-motion:reduce) {
+  .dashboard:after { animation:none!important; }
+}
