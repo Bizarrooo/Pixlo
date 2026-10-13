@@ -6068,3 +6068,99 @@ html { scroll-behavior:smooth; }
 }
 .dashboard-revamp .dashboard-theme-page .premium-gradient-card p { color: #d0c6c0 !important; }
 .dashboard-revamp .dashboard-theme-page .premium-gradient-card h3 { color: #fbf6f2 !important; }
+
+
+/* Compact sidebar + Premium dropdown polish */
+.dashboard-revamp .dashboard-sidebar-nav > button,
+.dashboard-revamp .premium-nav-items > button,
+.dashboard-revamp .admin-nav-button {
+  min-height: 36px !important;
+  height: 36px !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  margin-block: 2px !important;
+}
+.dashboard-revamp .dashboard-sidebar-nav { gap: 3px !important; }
+.dashboard-revamp .premium-nav-group {
+  display:flex !important;flex-direction:column !important;gap:5px !important;
+  margin-top:8px !important;padding-top:9px !important;
+  border-top:1px solid rgba(255,255,255,.085) !important;
+}
+.dashboard-revamp .premium-nav-heading.premium-nav-toggle {
+  width:100% !important;min-height:37px !important;height:37px !important;
+  display:flex !important;align-items:center !important;gap:10px !important;
+  padding:8px 11px !important;border-radius:10px !important;
+  border:1px solid rgba(168,85,247,.22) !important;
+  background:linear-gradient(110deg,rgba(124,58,237,.18),rgba(168,85,247,.09)) !important;
+  color:#e9d5ff !important;text-align:left !important;cursor:pointer !important;
+  font:inherit !important;letter-spacing:0 !important;
+}
+.dashboard-revamp .premium-nav-heading.premium-nav-toggle b {
+  color:#e9d5ff !important;font-size:12px !important;font-weight:750 !important;
+}
+.dashboard-revamp .premium-heading-mark { color:#c084fc !important;font-size:13px !important; }
+.dashboard-revamp .premium-heading-chevron {
+  margin-left:auto !important;color:#c4b5fd !important;font-size:17px !important;
+  transform:rotate(0deg);transition:transform .18s ease !important;
+}
+.dashboard-revamp .premium-nav-group-open .premium-heading-chevron { transform:rotate(180deg) !important; }
+.dashboard-revamp .premium-nav-heading.premium-nav-toggle:hover,
+.dashboard-revamp .premium-nav-heading.premium-nav-toggle.active {
+  border-color:rgba(192,132,252,.4) !important;
+  background:linear-gradient(110deg,rgba(124,58,237,.28),rgba(168,85,247,.15)) !important;
+}
+.dashboard-revamp .premium-nav-items {
+  display:grid !important;grid-template-rows:0fr !important;opacity:0 !important;
+  overflow:hidden !important;pointer-events:none !important;
+  transition:grid-template-rows .2s ease,opacity .16s ease !important;
+}
+.dashboard-revamp .premium-nav-items > button { min-height:0 !important;height:0 !important;padding-top:0 !important;padding-bottom:0 !important;overflow:hidden !important;opacity:0 !important; }
+.dashboard-revamp .premium-nav-group-open .premium-nav-items {
+  grid-template-rows:1fr !important;opacity:1 !important;overflow:visible !important;pointer-events:auto !important;
+}
+.dashboard-revamp .premium-nav-group-open .premium-nav-items > button {
+  min-height:35px !important;height:35px !important;padding-top:6px !important;padding-bottom:6px !important;
+  opacity:1 !important;overflow:visible !important;
+}
+.dashboard-revamp .premium-nav-items > button.active,
+.dashboard-revamp .premium-nav-items > button.active:hover {
+  border-color:rgba(168,85,247,.34) !important;
+  background:linear-gradient(105deg,rgba(124,58,237,.22),rgba(168,85,247,.11)) !important;
+  box-shadow:inset 2px 0 #a855f7 !important;
+}
+.dashboard-revamp .premium-nav-items > button b { color:#e9d5ff !important; }
+.dashboard-revamp .premium-nav-items > button .nav-dot { background:#a855f7 !important;box-shadow:0 0 9px rgba(168,85,247,.35) !important; }
+/* The colour sequence repeats at matching endpoints; one cycle translates by exactly half the doubled gradient image. */
+.dashboard-revamp.dashboard-text-gradient-on .header-copy h1,
+.dashboard-revamp.dashboard-text-gradient-on .brand small,
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-sidebar-nav button b,
+.dashboard-revamp.dashboard-text-gradient-on .premium-nav-heading,
+.dashboard-revamp.dashboard-text-gradient-on .section-intro h2,
+.dashboard-revamp.dashboard-text-gradient-on .section-intro p,
+.dashboard-revamp.dashboard-text-gradient-on .form-stack > .hint,
+.dashboard-revamp.dashboard-text-gradient-on .premium-gradient-card h3,
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master h3,
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master p,
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-footnote {
+  background-size:200% 100% !important;
+  background-repeat:no-repeat !important;
+  animation:pixlo-dashboard-gradient-seamless 6s linear infinite !important;
+  will-change:background-position;
+}
+@keyframes pixlo-dashboard-gradient-seamless {
+  from { background-position:0% 50%; }
+  to { background-position:100% 50%; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .dashboard-revamp.dashboard-text-gradient-on .header-copy h1,
+  .dashboard-revamp.dashboard-text-gradient-on .brand small,
+  .dashboard-revamp.dashboard-text-gradient-on .dashboard-sidebar-nav button b,
+  .dashboard-revamp.dashboard-text-gradient-on .premium-nav-heading,
+  .dashboard-revamp.dashboard-text-gradient-on .section-intro h2,
+  .dashboard-revamp.dashboard-text-gradient-on .section-intro p,
+  .dashboard-revamp.dashboard-text-gradient-on .form-stack > .hint,
+  .dashboard-revamp.dashboard-text-gradient-on .premium-gradient-card h3,
+  .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master h3,
+  .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master p,
+  .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-footnote { animation:none !important; }
+}
