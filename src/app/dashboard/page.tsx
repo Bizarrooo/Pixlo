@@ -939,12 +939,12 @@ export default function Dashboard() {
   </div>}
     <main className="dashboard dashboard-revamp" onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
-      <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Profile customization</small></div>
+      <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Make it yours</small></div>
       <nav className="dashboard-sidebar-nav">
         {sections.filter(([name]) => name !== "Admin").map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b></button>)}
-        {profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f" && <button type="button" key="Admin" className={`admin-nav-button ${active === "Admin" ? "active" : ""}`} onClick={() => { setActive("Admin"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="admin-nav-icon" aria-hidden="true">✦</span><b>ADMIN</b><span className="admin-nav-owner">OWNER</span></button>}
+        {profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f" && <button type="button" key="Admin" className={`admin-nav-button ${active === "Admin" ? "active" : ""}`} onClick={() => { setActive("Admin"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="admin-nav-icon" aria-hidden="true">✦</span><b>Admin</b><span className="admin-nav-owner">OWNER</span></button>}
         <div className="premium-nav-group">
-          <div className="premium-nav-heading"><span />PREMIUM<span /></div>
+          <div className="premium-nav-heading">Premium</div>
           <button type="button" className={active === "Presets" ? "active premium-nav-button premium-presets-nav-button" : "premium-nav-button premium-presets-nav-button"} onClick={() => { setActive("Presets"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}>
             <span className="nav-dot" /><b>Presets</b>{(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}
           </button>
@@ -972,7 +972,7 @@ export default function Dashboard() {
                 const preset = presets.find(item => item.slot_number === slot);
                 const previewUsername = String(settings.username || preset?.settings?.username || "");
                 return <article className={`preset-slot-card ${preset ? "has-preset" : "is-empty"}`} key={slot}>
-                  <div className="preset-slot-top"><div><span className="preset-slot-number">SLOT {String(slot).padStart(2, "0")}</span><h3>{preset?.name || `Preset ${slot}`}</h3></div>{preset && <span className="preset-slot-state saved-state">SAVED</span>}</div>
+                  <div className="preset-slot-top"><div><span className="preset-slot-number">Saved preset</span><h3>{preset?.name || `Preset ${slot}`}</h3></div>{preset && <span className="preset-slot-state saved-state">SAVED</span>}</div>
                   <label className="preset-name-label">Preset name<input aria-label={`Name for preset slot ${slot}`} maxLength={40} value={presetNames[slot] ?? preset?.name ?? ""} placeholder={`Name this preset`} onChange={event => setPresetNames(current => ({ ...current, [slot]: event.target.value }))} onBlur={() => void savePresetName(slot)} /></label>
                   <div className="preset-real-preview">
                     {preset && previewUsername ? <iframe key={`${slot}-${presetPreviewResetKey}`} title={`Pixlo profile preview for ${preset.name || `slot ${slot}`}`} src={`/${encodeURIComponent(previewUsername)}?presetPreview=${slot}&embedded=1`} loading="lazy" /> : <div className="preset-empty-preview" aria-label="Empty preset slot" />}
