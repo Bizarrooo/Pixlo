@@ -6164,3 +6164,21 @@ html { scroll-behavior:smooth; }
   .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master p,
   .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-footnote { animation:none !important; }
 }
+
+
+/* Reliable height animation for the Premium disclosure */
+.dashboard-revamp .premium-nav-items {
+  display:flex !important;flex-direction:column !important;gap:3px !important;
+  max-height:0 !important;height:auto !important;opacity:0 !important;
+  overflow:hidden !important;pointer-events:none !important;
+  transition:max-height .22s ease,opacity .16s ease !important;
+}
+.dashboard-revamp .premium-nav-items > button {
+  flex:0 0 auto !important;min-height:35px !important;height:35px !important;
+  padding-top:6px !important;padding-bottom:6px !important;
+  opacity:0 !important;overflow:hidden !important;
+}
+.dashboard-revamp .premium-nav-group-open .premium-nav-items {
+  max-height:150px !important;opacity:1 !important;overflow:visible !important;pointer-events:auto !important;
+}
+.dashboard-revamp .premium-nav-group-open .premium-nav-items > button { opacity:1 !important;overflow:visible !important; }
