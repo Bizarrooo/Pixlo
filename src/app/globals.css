@@ -6196,22 +6196,25 @@ html { scroll-behavior:smooth; }
 }
 
 
-/* Social links editor: keep every link-management panel on Pixlo's dark surface. */
+/* Keep Custom links and Active links visually unboxed; only the size/colour controls use dark panels. */
 .dashboard-revamp .custom-link-editor-list,
 .dashboard-revamp .custom-link-editor-row,
 .dashboard-revamp .active-links-list,
 .dashboard-revamp .active-link-row,
-.dashboard-revamp .social-size-control,
-.dashboard-revamp .social-global-colour,
 .dashboard-revamp .custom-link-empty {
-  background: rgba(16,16,18,.94) !important;
-  color: #f0ece8 !important;
-  border-color: rgba(255,255,255,.105) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 .dashboard-revamp .custom-link-editor-row,
-.dashboard-revamp .active-link-row,
+.dashboard-revamp .active-link-row {
+  border: 0 !important;
+  border-radius: 0 !important;
+}
 .dashboard-revamp .social-size-control,
 .dashboard-revamp .social-global-colour {
+  background: rgba(16,16,18,.94) !important;
+  color: #f0ece8 !important;
   border: 1px solid rgba(255,255,255,.105) !important;
   border-radius: 8px !important;
 }
