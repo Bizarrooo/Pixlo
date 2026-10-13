@@ -6071,16 +6071,7 @@ html { scroll-behavior:smooth; }
 
 
 /* Compact sidebar + Premium dropdown polish */
-.dashboard-revamp .dashboard-sidebar-nav > button,
-.dashboard-revamp .premium-nav-items > button,
-.dashboard-revamp .admin-nav-button {
-  min-height: 36px !important;
-  height: 36px !important;
-  padding-top: 7px !important;
-  padding-bottom: 7px !important;
-  margin-block: 2px !important;
-}
-.dashboard-revamp .dashboard-sidebar-nav { gap: 3px !important; }
+/* Leave the main navigation buttons at their existing size; only the Premium submenu is compact. */
 .dashboard-revamp .premium-nav-group {
   display:flex !important;flex-direction:column !important;gap:5px !important;
   margin-top:8px !important;padding-top:9px !important;
@@ -6182,3 +6173,24 @@ html { scroll-behavior:smooth; }
   max-height:150px !important;opacity:1 !important;overflow:visible !important;pointer-events:auto !important;
 }
 .dashboard-revamp .premium-nav-group-open .premium-nav-items > button { opacity:1 !important;overflow:visible !important; }
+
+
+/* Solid dashboard text mode: background gradient remains independently controlled. */
+.dashboard-revamp.dashboard-text-solid-on .header-copy h1,
+.dashboard-revamp.dashboard-text-solid-on .brand small,
+.dashboard-revamp.dashboard-text-solid-on .dashboard-sidebar-nav button b,
+.dashboard-revamp.dashboard-text-solid-on .premium-nav-heading,
+.dashboard-revamp.dashboard-text-solid-on .section-intro h2,
+.dashboard-revamp.dashboard-text-solid-on .section-intro p,
+.dashboard-revamp.dashboard-text-solid-on .form-stack > .hint,
+.dashboard-revamp.dashboard-text-solid-on .premium-gradient-card h3,
+.dashboard-revamp.dashboard-text-solid-on .dashboard-theme-master h3,
+.dashboard-revamp.dashboard-text-solid-on .dashboard-theme-master p,
+.dashboard-revamp.dashboard-text-solid-on .dashboard-theme-footnote {
+  color: var(--dashboard-text-solid, #f5f0ed) !important;
+  background-image: none !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  -webkit-text-fill-color: var(--dashboard-text-solid, #f5f0ed) !important;
+  animation: none !important;
+}
