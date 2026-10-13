@@ -256,6 +256,11 @@ export default function HomeAccountNav() {
           <span>Dashboard</span>
           <span className="home-account-menu-chevron" aria-hidden="true">›</span>
         </Link>
+        <Link href={currentAccount?.username ? `/user/${encodeURIComponent(currentAccount.username)}` : "/dashboard"} role="menuitem" className="home-account-menu-item" onClick={() => setMenuOpen(false)}>
+          <span className="home-account-menu-icon" aria-hidden="true">↗</span>
+          <span>My page</span>
+          <span className="home-account-menu-chevron" aria-hidden="true">›</span>
+        </Link>
         <button type="button" role="menuitem" className={`home-account-menu-item home-account-swap-trigger ${swapOpen ? "active" : ""}`} aria-expanded={swapOpen} onClick={() => setSwapOpen(value => !value)}>
           <span className="home-account-menu-icon" aria-hidden="true">⇄</span>
           <span>Swap accounts</span>
