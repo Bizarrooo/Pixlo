@@ -53,6 +53,7 @@ function rgbaFromHex(hex: string, alpha: number) {
 export default function ProfileView({ forcedUsername }: { forcedUsername?: string }) {
   const [settings, setSettings] = useState<ProfileSettings>(defaultSettings);
   const [presetPreviewMode, setPresetPreviewMode] = useState(false);
+  const [embedMode, setEmbedMode] = useState(false);
   const [ready, setReady] = useState(false);
   const [profileStatus, setProfileStatus] = useState<"loading" | "found" | "missing" | "error">("loading");
   const [entered, setEntered] = useState(false);
@@ -108,7 +109,9 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   }, [forcedUsername]);
 
   useEffect(() => {
-    setPresetPreviewMode(new URLSearchParams(window.location.search).has("presetPreview"));
+    const params = new URLSearchParams(window.location.search);
+    setPresetPreviewMode(params.has("presetPreview"));
+    setEmbedMode(params.get("embed") === "1");
   }, []);
 
   useEffect(() => {
@@ -164,7 +167,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   useEffect(() => {
     const username = (forcedUsername || "").trim().toLowerCase();
-    if (!username || new URLSearchParams(window.location.search).has("presetPreview")) return;
+    const params = new URLSearchParams(window.location.search);
+    if (!username || params.has("presetPreview") || params.get("embed") === "1") return;
     let visitorId = "";
     try {
       visitorId = localStorage.getItem("pixlo-visitor-id") || "";
@@ -412,16 +416,16 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             ref={videoRef}
             className="background-media"
             src={assets.backgroundVideo}
-            autoPlay={entered}
-            muted={Boolean(activeTrack) || settings.backgroundVideoMusicDisabled}
+            autoPlay={entered || embedMode}
+            muted={embedMode || Boolean(activeTrack) || settings.backgroundVideoMusicDisabled}
             loop
             playsInline
             preload="auto"
             onCanPlay={event => {
               const video = event.currentTarget;
-              if (!entered) { video.pause(); video.currentTime = 0; return; }
+              if (!entered && !embedMode) { video.pause(); video.currentTime = 0; return; }
               video.volume = 1;
-              video.muted = Boolean(activeTrack) || settings.backgroundVideoMusicDisabled;
+              video.muted = embedMode || Boolean(activeTrack) || settings.backgroundVideoMusicDisabled;
               void video.play().catch(() => { if (!activeTrack && !settings.backgroundVideoMusicDisabled) video.muted = true; void video.play().catch(() => {}); });
             }}
           />
@@ -435,7 +439,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       {settings.grain && <div className="effect-grain" aria-hidden="true" />}
       {settings.scanlines && <div className="effect-scanlines" aria-hidden="true" />}
 
-      {ready && !entered && (
+      {ready && !entered && !embedMode && (
         <button
           type="button"
           aria-label="Enter profile"
