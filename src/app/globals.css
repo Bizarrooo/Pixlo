@@ -6194,3 +6194,68 @@ html { scroll-behavior:smooth; }
   -webkit-text-fill-color: var(--dashboard-text-solid, #f5f0ed) !important;
   animation: none !important;
 }
+
+
+/* Social links editor: keep every link-management panel on Pixlo's dark surface. */
+.dashboard-revamp .custom-link-editor-list,
+.dashboard-revamp .custom-link-editor-row,
+.dashboard-revamp .active-links-list,
+.dashboard-revamp .active-link-row,
+.dashboard-revamp .social-size-control,
+.dashboard-revamp .social-global-colour,
+.dashboard-revamp .custom-link-empty {
+  background: rgba(16,16,18,.94) !important;
+  color: #f0ece8 !important;
+  border-color: rgba(255,255,255,.105) !important;
+}
+.dashboard-revamp .custom-link-editor-row,
+.dashboard-revamp .active-link-row,
+.dashboard-revamp .social-size-control,
+.dashboard-revamp .social-global-colour {
+  border: 1px solid rgba(255,255,255,.105) !important;
+  border-radius: 8px !important;
+}
+.dashboard-revamp .active-link-info b,
+.dashboard-revamp .active-link-info span,
+.dashboard-revamp .custom-link-empty,
+.dashboard-revamp .social-size-control p {
+  color: #c9c1bc !important;
+}
+.dashboard-revamp .active-link-info b { color: #f7f2ee !important; }
+
+/* Text theme applies across the actual dashboard content, not just headings. */
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-main :is(
+  h1,h2,h3,h4,h5,p,span,b,strong,label,small,li,a,legend,summary,dt,dd,
+  figcaption,caption,th,td,blockquote
+):not(.nav-dot):not(.premium-heading-mark):not(.premium-heading-chevron):not(.presets-premium-mark):not(.active-link-handle):not(.social-editor-pencil):not(.admin-nav-owner):not(.toggle):not(.toggle *):not(svg):not(svg *) {
+  background-image: var(--dashboard-text-gradient) !important;
+  background-size: 200% 100% !important;
+  background-position: 0% 50%;
+  background-repeat: repeat !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: pixlo-dashboard-theme-shift 6s linear infinite !important;
+}
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-main :is(input,textarea,select,option) {
+  color: #f7f2ee !important;
+  -webkit-text-fill-color: #f7f2ee !important;
+}
+
+/* Solid mode mirrors the same coverage while leaving panels and controls intact. */
+.dashboard-revamp.dashboard-text-solid-on .dashboard-main :is(
+  h1,h2,h3,h4,h5,p,span,b,strong,label,small,li,a,legend,summary,dt,dd,
+  figcaption,caption,th,td,blockquote
+):not(.nav-dot):not(.premium-heading-mark):not(.premium-heading-chevron):not(.presets-premium-mark):not(.active-link-handle):not(.social-editor-pencil):not(.admin-nav-owner):not(.toggle):not(.toggle *):not(svg):not(svg *) {
+  background-image: none !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  color: var(--dashboard-text-solid, #f5f0ed) !important;
+  -webkit-text-fill-color: var(--dashboard-text-solid, #f5f0ed) !important;
+  animation: none !important;
+}
+.dashboard-revamp.dashboard-text-solid-on .dashboard-main :is(input,textarea,select,option) {
+  color: #f7f2ee !important;
+  -webkit-text-fill-color: #f7f2ee !important;
+}
