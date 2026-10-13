@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import HomeAccountNav from "./HomeAccountNav";
 
 function Icon({ name, size = 20 }: { name: "spark" | "arrow" | "play" | "palette" | "music" | "link" | "bolt" | "shield" | "chevron" | "discord" | "youtube" | "github" | "roblox" | "twitch" | "instagram"; size?: number }) {
@@ -79,7 +79,66 @@ function ProfileMockup({ variant = "main" }: { variant?: "main" | "alt" }) {
   );
 }
 
+
+function LiveProfileCard() {
+  return (
+    <div className="home-live-profile-card" aria-label="Live Pixlo profile preview">
+      <div className="home-live-profile-topline">
+        <span><i /> LIVE PROFILE</span>
+        <span className="home-live-profile-badge">PIXLO / BIZ</span>
+      </div>
+      <div className="home-live-profile-viewport">
+        <iframe
+          src="/user/biz?embed=1"
+          title="Live Pixlo profile for @biz"
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+          tabIndex={-1}
+          aria-hidden="true"
+        />
+      </div>
+      <a className="home-live-profile-link" href="/user/biz" target="_blank" rel="noopener noreferrer">
+        <span><small>ACCOUNT LINK</small><b>pixlo1.vercel.app/user/biz</b></span>
+        <Icon name="arrow" size={16} />
+      </a>
+    </div>
+  );
+}
+
 export default function Home() {
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>(".pixlo-home");
+    if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const groups = [
+      [".home-hero-copy", "home-reveal-left"],
+      [".home-hero-visual", "home-reveal-right"],
+      [".home-stat-strip > div", "home-reveal-up"],
+      [".home-section-heading", "home-reveal-up"],
+      [".home-feature-card", "home-reveal-up"],
+      [".home-showcase-copy", "home-reveal-left"],
+      [".home-showcase-stage", "home-reveal-right"],
+      [".home-cta-inner", "home-reveal-up"],
+      [".home-footer", "home-reveal-up"]
+    ] as const;
+    const observed: HTMLElement[] = [];
+    groups.forEach(([selector, motionClass]) => {
+      root.querySelectorAll<HTMLElement>(selector).forEach((element, index) => {
+        element.classList.add("home-reveal-target", motionClass);
+        element.style.setProperty("--reveal-delay", `${Math.min(index % 4, 3) * 75}ms`);
+        observed.push(element);
+      });
+    });
+    root.classList.add("motion-ready");
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
+    observed.forEach(element => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
   return (
     <main className="pixlo-home">
       <div className="home-noise" aria-hidden="true" />
@@ -127,7 +186,7 @@ export default function Home() {
           <div className="home-visual-backdrop" />
           <div className="home-floating-chip chip-top"><span className="chip-icon"><Icon name="palette" size={15} /></span><span><b>Unlimited style</b><small>Make it yours</small></span></div>
           <div className="home-floating-chip chip-bottom"><span className="chip-icon"><Icon name="music" size={15} /></span><span><b>Music ready</b><small>Set the mood</small></span></div>
-          <ProfileMockup />
+          <LiveProfileCard />
         </div>
       </section>
 
