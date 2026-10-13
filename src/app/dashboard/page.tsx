@@ -937,7 +937,7 @@ export default function Dashboard() {
       </div>
     </section>
   </div>}
-    <main className="dashboard dashboard-revamp" onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
+    <main className={`dashboard dashboard-revamp ${settings.dashboardCustomisationEnabled ? "dashboard-customisation-on" : ""}`} style={{ "--dashboard-bg-gradient": `linear-gradient(125deg, ${settings.dashboardBackgroundGradientColours[0]}, ${settings.dashboardBackgroundGradientColours[1]}, ${settings.dashboardBackgroundGradientColours[2]})`, "--dashboard-text-gradient": `linear-gradient(110deg, ${settings.dashboardTextGradientColours[0]}, ${settings.dashboardTextGradientColours[1]}, ${settings.dashboardTextGradientColours[2]}, ${settings.dashboardTextGradientColours[0]})` } as React.CSSProperties} onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Make it yours</small></div>
       <nav className="dashboard-sidebar-nav">
@@ -949,6 +949,7 @@ export default function Dashboard() {
             <span className="nav-dot" /><b>Presets</b>{(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}
           </button>
           <button type="button" className={active === "Gradients" ? "active premium-nav-button premium-gradient-nav-button" : "premium-nav-button premium-gradient-nav-button"} onClick={() => { setActive("Gradients"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>Gradients</b>{(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}</button>
+          <button type="button" className={active === "Dashboard" ? "active premium-nav-button premium-dashboard-nav-button" : "premium-nav-button premium-dashboard-nav-button"} onClick={() => { setActive("Dashboard"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>Dashboard</b>{(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}</button>
         </div>
       </nav>
       <div className="sidebar-bottom"><button type="button" className="reset-button" style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }} onClick={reset}>Reset to default</button></div>
@@ -963,6 +964,28 @@ export default function Dashboard() {
 
       <div className="editor-grid" style={{ position: "relative" }}>
         <section className="editor">
+          {active === "Dashboard" && <div className="form-stack dashboard-theme-page">
+            <SectionIntro title="Dashboard appearance" text="Make your Pixlo workspace feel like yours. These settings change the dashboard only, not your public profile." />
+            {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>Premium dashboard themes</h3><p>Custom dashboard backgrounds and animated interface text are included with Pixlo Premium.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <>
+              <section className="dashboard-theme-master">
+                <div><h3>Dashboard customisation</h3><p>Turn your custom theme on or off at any time. Your colours are saved when you press Save changes.</p></div>
+                <Toggle value={settings.dashboardCustomisationEnabled} onChange={value => { set("dashboardCustomisationEnabled", value); setSaved(false); }} />
+              </section>
+              <div className={`dashboard-theme-controls ${settings.dashboardCustomisationEnabled ? "" : "is-disabled"}`}>
+                <section className="premium-gradient-card">
+                  <div className="premium-gradient-card-head"><div><h3>Background gradient</h3><p>Blend three colours across the dashboard background.</p></div><Toggle value={settings.dashboardBackgroundGradientEnabled} onChange={value => { set("dashboardBackgroundGradientEnabled", value); setSaved(false); }} /></div>
+                  <div className="dashboard-theme-swatch dashboard-bg-swatch" style={{ background: `linear-gradient(110deg, ${settings.dashboardBackgroundGradientColours.join(", ")})` }} />
+                  <div className="premium-gradient-colours">{([0,1,2] as const).map(index => <Colour key={index} label={`Background colour ${index+1}`} value={settings.dashboardBackgroundGradientColours[index]} onChange={value => { set("dashboardBackgroundGradientColours", settings.dashboardBackgroundGradientColours.map((colour, i) => i === index ? value : colour) as [string,string,string]); setSaved(false); }} />)}</div>
+                </section>
+                <section className="premium-gradient-card">
+                  <div className="premium-gradient-card-head"><div><h3>Animated text gradient</h3><p>Give dashboard headings, navigation and supporting interface text a smooth looping gradient.</p></div><Toggle value={settings.dashboardTextGradientEnabled} onChange={value => { set("dashboardTextGradientEnabled", value); setSaved(false); }} /></div>
+                  <div className="dashboard-theme-swatch" style={{ background: `linear-gradient(110deg, ${settings.dashboardTextGradientColours.join(", ")})` }} />
+                  <div className="premium-gradient-colours">{([0,1,2] as const).map(index => <Colour key={index} label={`Text colour ${index+1}`} value={settings.dashboardTextGradientColours[index]} onChange={value => { set("dashboardTextGradientColours", settings.dashboardTextGradientColours.map((colour, i) => i === index ? value : colour) as [string,string,string]); setSaved(false); }} />)}</div>
+                </section>
+              </div>
+              <p className="dashboard-theme-footnote">Your theme is private to your signed-in account. Turning customisation off restores the standard Pixlo dashboard without deleting your saved colours.</p>
+            </>}
+          </div>}
           {active === "Presets" && <div className="form-stack presets-page">
             <div className="presets-heading"><SectionIntro title="Premium presets" /></div>
             {presetMessage && <div className="preset-status" role="status">{presetMessage}</div>}
