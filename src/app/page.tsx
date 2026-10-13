@@ -128,7 +128,35 @@ export default function Home() {
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
     observed.forEach(element => observer.observe(element));
-    return () => observer.disconnect();
+
+    // Soft, eased parallax: elements drift with the pointer and settle back instead of snapping.
+    const motionAreas = Array.from(root.querySelectorAll<HTMLElement>(".revamp-hero, .revamp-showcase-art"));
+    const cleanups: (() => void)[] = [];
+    motionAreas.forEach(area => {
+      const onMove = (event: PointerEvent) => {
+        const rect = area.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+        area.style.setProperty("--drift-x", x.toFixed(3));
+        area.style.setProperty("--drift-y", y.toFixed(3));
+        area.classList.add("has-pointer-drift");
+      };
+      const onLeave = () => {
+        area.style.setProperty("--drift-x", "0");
+        area.style.setProperty("--drift-y", "0");
+        area.classList.remove("has-pointer-drift");
+      };
+      area.addEventListener("pointermove", onMove, { passive: true });
+      area.addEventListener("pointerleave", onLeave, { passive: true });
+      cleanups.push(() => {
+        area.removeEventListener("pointermove", onMove);
+        area.removeEventListener("pointerleave", onLeave);
+      });
+    });
+    return () => {
+      observer.disconnect();
+      cleanups.forEach(cleanup => cleanup());
+    };
   }, []);
   return (
     <main className="pixlo-home pixlo-revamp-home">
