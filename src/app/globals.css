@@ -5938,3 +5938,103 @@ html { scroll-behavior:smooth; }
   .dashboard-revamp .field textarea,
   .dashboard-revamp .field select { transition: none !important; }
 }
+
+
+/* Pixlo dashboard readability pass + Premium dashboard theme controls */
+.dashboard-revamp .discord-success-notice,
+.dashboard-revamp .discord-error-notice,
+.dashboard-revamp .discord-connect-copy,
+.dashboard-revamp .discord-connect-copy b,
+.dashboard-revamp .discord-connect-copy strong,
+.dashboard-revamp .discord-connect-copy p,
+.dashboard-revamp .discord-connect-copy a,
+.dashboard-revamp .discord-connect-card h3,
+.dashboard-revamp .discord-connect-card p,
+.dashboard-revamp .discord-connect-card small,
+.dashboard-revamp .discord-linked-pill,
+.dashboard-revamp .discord-card-top,
+.dashboard-revamp .discord-card-top * {
+  color: #f5f0ed !important;
+}
+.dashboard-revamp .discord-connect-copy p,
+.dashboard-revamp .discord-connect-card p,
+.dashboard-revamp .discord-connect-card small { color: #d0c7c2 !important; opacity: 1 !important; }
+.dashboard-revamp .discord-success-notice {
+  background: rgba(34,197,94,.11) !important;
+  border: 1px solid rgba(74,222,128,.3) !important;
+}
+.dashboard-revamp .discord-error-notice {
+  background: rgba(248,70,70,.11) !important;
+  border: 1px solid rgba(248,113,113,.3) !important;
+}
+.dashboard-revamp .hint,
+.dashboard-revamp .empty-state,
+.dashboard-revamp .preset-status,
+.dashboard-revamp .url-preview,
+.dashboard-revamp .section-intro p,
+.dashboard-revamp .section-intro .hint,
+.dashboard-revamp .field > span small,
+.dashboard-revamp .setting span,
+.dashboard-revamp .info-card span,
+.dashboard-revamp .upload-row span,
+.dashboard-revamp .premium-gradient-card p,
+.dashboard-revamp .dashboard-theme-footnote {
+  color: #c3bab5 !important;
+  opacity: 1 !important;
+}
+.dashboard-revamp .hint a,
+.dashboard-revamp .discord-connect-copy a,
+.dashboard-revamp .discord-error-notice a { color: #ffad7b !important; text-decoration-color: rgba(255,173,123,.6); }
+.dashboard-revamp .dashboard-theme-master {
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:20px;border:1px solid rgba(255,255,255,.13);border-radius:15px;
+  background:linear-gradient(120deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+}
+.dashboard-revamp .dashboard-theme-master h3 { margin:0;color:#fff;font-size:15px;font-weight:700; }
+.dashboard-revamp .dashboard-theme-master p { margin:6px 0 0;color:#c8bfba;font-size:12px;line-height:1.6; }
+.dashboard-revamp .dashboard-theme-controls { display:grid;grid-template-columns:minmax(0,1fr);gap:14px;transition:opacity .2s ease; }
+.dashboard-revamp .dashboard-theme-controls.is-disabled { opacity:.45; }
+.dashboard-revamp .dashboard-theme-controls.is-disabled > * { pointer-events:none; }
+.dashboard-revamp .dashboard-theme-swatch { height:42px;border-radius:10px;background-size:220% 100%;animation:pixlo-dashboard-theme-shift 7s ease-in-out infinite alternate; }
+.dashboard-revamp .dashboard-bg-swatch { animation:none; }
+.dashboard-revamp .dashboard-theme-footnote { margin:0;font-size:12px;line-height:1.65; }
+.dashboard-revamp.dashboard-bg-gradient-on { background:var(--dashboard-bg-gradient),#0b0b0d !important;background-attachment:fixed !important; }
+.dashboard-revamp.dashboard-text-gradient-on .header-copy h1,
+.dashboard-revamp.dashboard-text-gradient-on .brand small,
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-sidebar-nav button b,
+.dashboard-revamp.dashboard-text-gradient-on .premium-nav-heading,
+.dashboard-revamp.dashboard-text-gradient-on .section-intro h2,
+.dashboard-revamp.dashboard-text-gradient-on .section-intro p,
+.dashboard-revamp.dashboard-text-gradient-on .form-stack > .hint,
+.dashboard-revamp.dashboard-text-gradient-on .premium-gradient-card h3,
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master h3,
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master p,
+.dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-footnote {
+  color:transparent !important;
+  background-image:var(--dashboard-text-gradient) !important;
+  background-size:240% 100% !important;
+  background-position:0% 50%;
+  background-clip:text !important;
+  -webkit-background-clip:text !important;
+  -webkit-text-fill-color:transparent !important;
+  animation:pixlo-dashboard-theme-shift 8s linear infinite !important;
+}
+@keyframes pixlo-dashboard-theme-shift { from { background-position:0% 50%; } to { background-position:240% 50%; } }
+@media (max-width:640px) {
+  .dashboard-revamp .dashboard-theme-master { padding:16px; }
+  .dashboard-revamp .dashboard-theme-page .premium-gradient-colours { grid-template-columns:1fr; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .dashboard-revamp .dashboard-theme-swatch,
+  .dashboard-revamp.dashboard-text-gradient-on .header-copy h1,
+  .dashboard-revamp.dashboard-text-gradient-on .brand small,
+  .dashboard-revamp.dashboard-text-gradient-on .dashboard-sidebar-nav button b,
+  .dashboard-revamp.dashboard-text-gradient-on .premium-nav-heading,
+  .dashboard-revamp.dashboard-text-gradient-on .section-intro h2,
+  .dashboard-revamp.dashboard-text-gradient-on .section-intro p,
+  .dashboard-revamp.dashboard-text-gradient-on .form-stack > .hint,
+  .dashboard-revamp.dashboard-text-gradient-on .premium-gradient-card h3,
+  .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master h3,
+  .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-master p,
+  .dashboard-revamp.dashboard-text-gradient-on .dashboard-theme-footnote { animation:none !important; }
+}
