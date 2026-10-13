@@ -20,6 +20,22 @@ const sections = [
   ["Stats", "Views & profile activity", "12"],
 ] as const;
 
+const sectionLabels: Record<string, string> = {
+  General: "Basics",
+  Appearance: "Colours",
+  Fonts: "Typography",
+  Background: "Backdrop",
+  Profile: "Profile",
+  Socials: "Social links",
+  Badges: "Badges",
+  Music: "Music",
+  Effects: "Effects",
+  Layout: "Layout",
+  Admin: "Admin",
+  "Enter Screen": "Intro screen",
+  Stats: "Analytics",
+};
+
 type DashboardBadge = { id: string; name: string; description: string; icon_url: string | null };
 
 const socials: [SocialKey, string][] = [
@@ -938,11 +954,11 @@ export default function Dashboard() {
       </div>
     </section>
   </div>}
-    <main className={`dashboard dashboard-revamp ${settings.dashboardCustomisationEnabled ? "dashboard-customisation-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardBackgroundGradientEnabled ? "dashboard-bg-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardTextGradientEnabled ? "dashboard-text-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && !settings.dashboardTextGradientEnabled ? "dashboard-text-solid-on" : ""}`} style={{ "--dashboard-bg-gradient": `linear-gradient(125deg, ${settings.dashboardBackgroundGradientColours[0]}, ${settings.dashboardBackgroundGradientColours[1]}, ${settings.dashboardBackgroundGradientColours[2]})`, "--dashboard-text-gradient": `linear-gradient(90deg, ${settings.dashboardTextGradientColours[0]} 0%, ${settings.dashboardTextGradientColours[1]} 16.666%, ${settings.dashboardTextGradientColours[2]} 33.333%, ${settings.dashboardTextGradientColours[0]} 50%, ${settings.dashboardTextGradientColours[1]} 66.666%, ${settings.dashboardTextGradientColours[2]} 83.333%, ${settings.dashboardTextGradientColours[0]} 100%)` } as React.CSSProperties} onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
+    <main className={`dashboard dashboard-revamp ${settings.dashboardCustomisationEnabled ? "dashboard-customisation-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardBackgroundGradientEnabled ? "dashboard-bg-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardTextGradientEnabled ? "dashboard-text-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && !settings.dashboardTextGradientEnabled ? "dashboard-text-solid-on" : ""}`} style={{ "--dashboard-bg-gradient": `linear-gradient(125deg, ${settings.dashboardBackgroundGradientColours[0]}, ${settings.dashboardBackgroundGradientColours[1]}, ${settings.dashboardBackgroundGradientColours[2]})`, "--dashboard-text-gradient": `linear-gradient(90deg, ${settings.dashboardTextGradientColours[0]} 0%, ${settings.dashboardTextGradientColours[1]} 16.666%, ${settings.dashboardTextGradientColours[2]} 33.333%, ${settings.dashboardTextGradientColours[0]} 50%, ${settings.dashboardTextGradientColours[1]} 66.666%, ${settings.dashboardTextGradientColours[2]} 83.333%, ${settings.dashboardTextGradientColours[0]} 100%)`, "--dashboard-text-solid": settings.dashboardTextSolidColour } as React.CSSProperties} onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Make it yours</small></div>
       <nav className="dashboard-sidebar-nav">
-        {sections.filter(([name]) => name !== "Admin").map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setPremiumOpen(false); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{name}</b></button>)}
+        {sections.filter(([name]) => name !== "Admin").map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setPremiumOpen(false); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{sectionLabels[name] || name}</b></button>)}
         {profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f" && <button type="button" key="Admin" className={`admin-nav-button ${active === "Admin" ? "active" : ""}`} onClick={() => { setActive("Admin"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="admin-nav-icon" aria-hidden="true">✦</span><b>Admin</b><span className="admin-nav-owner">OWNER</span></button>}
         <div className={`premium-nav-group ${premiumOpen || ["Presets", "Gradients", "Dashboard"].includes(active) ? "premium-nav-group-open" : ""}`}>
           <button type="button" className={`premium-nav-heading premium-nav-toggle ${["Presets", "Gradients", "Dashboard"].includes(active) ? "active" : ""}`} aria-expanded={premiumOpen || ["Presets", "Gradients", "Dashboard"].includes(active)} onClick={() => setPremiumOpen(value => !value)}>
