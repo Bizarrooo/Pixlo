@@ -2128,7 +2128,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .discord-preferences{margin-top:12px;display:grid;gap:8px}
 
 /* Final guard: keep the home account avatar a compact nav icon even if generic image rules change. */
-.home-nav-account > .home-nav-avatar { width:28px !important; height:28px !important; min-width:28px !important; min-height:28px !important; max-width:28px !important; max-height:28px !important; object-fit:cover !important; flex:0 0 28px !important; }
+.home-nav-account > .home-nav-avatar { width:28px !important; height:28px !important; min-width:28px !important; min-height:28px !important; max-width:28px !important; max-height:28px !important; aspect-ratio:1 / 1 !important; object-fit:cover !important; border-radius:50% !important; overflow:hidden !important; display:block !important; flex:0 0 28px !important; }
+.home-nav-account > .home-nav-avatar-fallback { border-radius:50% !important; }
 
 
 /* A deliberately cleaner Discord connection panel: clear hierarchy, readable copy and controls. */
