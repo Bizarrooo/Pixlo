@@ -5593,3 +5593,54 @@ html { scroll-behavior:smooth; }
   .pixlo-revamp-home .revamp-hero-side > .home-live-profile-card { width:min(100%, 440px); }
   .pixlo-revamp-home .home-live-profile-iframe { height:500px; }
 }
+
+
+/* Natural copy and smooth, pointer-led motion for the homepage. */
+.pixlo-revamp-home .revamp-hero,
+.pixlo-revamp-home .revamp-showcase-art {
+  --drift-x: 0;
+  --drift-y: 0;
+}
+.pixlo-revamp-home .revamp-hero-side {
+  translate: calc(var(--drift-x) * -7px) calc(var(--drift-y) * -6px);
+  transition: translate 680ms cubic-bezier(.2,.75,.2,1);
+  will-change: translate;
+}
+.pixlo-revamp-home .revamp-showcase-copy-card {
+  translate: calc(var(--drift-x) * 11px) calc(var(--drift-y) * 8px);
+  transition: translate 760ms cubic-bezier(.16,1,.3,1);
+  will-change: translate;
+}
+.pixlo-revamp-home .revamp-showcase-stamp {
+  translate: calc(var(--drift-x) * -15px) calc(var(--drift-y) * -10px);
+  transition: translate 900ms cubic-bezier(.16,1,.3,1);
+  will-change: translate;
+}
+.pixlo-revamp-home .revamp-showcase-grid {
+  translate: calc(var(--drift-x) * 5px) calc(var(--drift-y) * 4px);
+  transition: translate 1100ms cubic-bezier(.16,1,.3,1);
+}
+.pixlo-revamp-home .revamp-showcase-line {
+  transform: translate3d(calc(var(--drift-x) * 8px), calc(var(--drift-y) * 5px), 0);
+  transition: transform 850ms cubic-bezier(.16,1,.3,1);
+}
+.pixlo-revamp-home .revamp-label,
+.pixlo-revamp-home .revamp-showcase-stamp span,
+.pixlo-revamp-home .revamp-showcase-copy-card i,
+.pixlo-revamp-home .revamp-showcase-foot,
+.pixlo-revamp-home .revamp-support-main > .revamp-label,
+.pixlo-revamp-home .revamp-premium-top > span:first-child,
+.pixlo-revamp-home .revamp-premium-panel > small {
+  letter-spacing: normal;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pixlo-revamp-home .revamp-hero-side,
+  .pixlo-revamp-home .revamp-showcase-copy-card,
+  .pixlo-revamp-home .revamp-showcase-stamp,
+  .pixlo-revamp-home .revamp-showcase-grid,
+  .pixlo-revamp-home .revamp-showcase-line {
+    transition:none !important;
+    translate:none !important;
+    transform:none !important;
+  }
+}
