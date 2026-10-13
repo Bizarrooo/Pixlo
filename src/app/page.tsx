@@ -130,7 +130,7 @@ export default function Home() {
     observed.forEach(element => observer.observe(element));
 
     // Soft, eased parallax: elements drift with the pointer and settle back instead of snapping.
-    const motionAreas = Array.from(root.querySelectorAll<HTMLElement>(".revamp-hero, .revamp-showcase-art"));
+    const motionAreas = Array.from(root.querySelectorAll<HTMLElement>(".revamp-hero, .revamp-showcase-art, .home-live-profile-card"));
     const cleanups: (() => void)[] = [];
     motionAreas.forEach(area => {
       const onMove = (event: PointerEvent) => {
@@ -172,7 +172,7 @@ export default function Home() {
 
       <section className="revamp-hero">
         <div className="revamp-hero-main">
-          <div className="revamp-overline"><span className="revamp-live-dot" /> YOUR IDENTITY, UNCOMPROMISED <span className="revamp-overline-index">PX—001</span></div>
+          
           <h1>Your corner<br />of the internet<span className="revamp-title-period">.</span></h1>
           <div className="revamp-hero-bottom">
             <p>A profile that looks like <em>you</em>. Your links, music, socials and style — brought together in one space that feels unmistakably yours.</p>
@@ -181,7 +181,7 @@ export default function Home() {
               <a href="#showcase" className="revamp-quiet-link">Explore the platform <span>↘</span></a>
             </div>
           </div>
-          <div className="revamp-hero-rule"><span>DESIGN IT YOUR WAY</span><span>NO CODE REQUIRED</span><span>MADE TO BE SHARED ↗</span></div>
+          
         </div>
         <div className="revamp-hero-side">
           <LiveProfileCard />
@@ -190,20 +190,20 @@ export default function Home() {
       </section>
 
       <section className="revamp-platform" id="features">
-        <div className="revamp-section-intro"><div><span className="revamp-label">THE PIXLO PLATFORM / 02</span><h2>All of you.<br /><em>In one place.</em></h2></div><p>Start simple. Get specific. Shape every detail until your page feels like an extension of you — not a preset someone else made.</p></div>
+        <div className="revamp-section-intro"><div><h2>All of you.<br /><em>In one place.</em></h2></div><p>Start simple. Get specific. Shape every detail until your page feels like an extension of you — not a preset someone else made.</p></div>
         <div className="revamp-feature-layout">
           <article className="revamp-feature revamp-feature-custom">
-            <span className="revamp-feature-no">01 / CUSTOMISE</span><div className="revamp-feature-art revamp-art-controls"><div className="revamp-control-window"><div className="revamp-control-head"><i /><i /><i /><span>APPEARANCE.SYS</span></div><div className="revamp-control-body"><div className="revamp-control-sidebar"><i /><i /><i /><i /></div><div className="revamp-control-content"><b>Make it yours.</b><span /><span /><div><i /><i /><i /></div></div></div></div></div>
+            <span className="revamp-feature-no">CUSTOMISE</span><div className="revamp-feature-art revamp-art-controls"><div className="revamp-control-window"><div className="revamp-control-head"><i /><i /><i /><span>APPEARANCE.SYS</span></div><div className="revamp-control-body"><div className="revamp-control-sidebar"><i /><i /><i /><i /></div><div className="revamp-control-content"><b>Make it yours.</b><span /><span /><div><i /><i /><i /></div></div></div></div></div>
             <h3>Every detail, under your control.</h3><p>Colours, fonts, backgrounds, layouts, motion and effects — no code needed.</p>
           </article>
           <article className="revamp-feature revamp-feature-links">
-            <span className="revamp-feature-no">02 / CONNECT</span><div className="revamp-social-art"><div>in</div><div>▶</div><div>◈</div><div>◎</div><div>⌘</div><span>ALL YOUR PLACES<br />ONE PROFILE ↗</span></div><h3>Your internet, connected.</h3><p>Socials, custom links and the places people can find you.</p>
+            <span className="revamp-feature-no">CONNECT</span><div className="revamp-social-art"><div>in</div><div>▶</div><div>◈</div><div>◎</div><div>⌘</div><span>ALL YOUR PLACES<br />ONE PROFILE ↗</span></div><h3>Your internet, connected.</h3><p>Socials, custom links and the places people can find you.</p>
           </article>
           <article className="revamp-feature revamp-feature-music">
-            <span className="revamp-feature-no">03 / ATMOSPHERE</span><div className="revamp-music-art"><div className="revamp-disc"><i /></div><div className="revamp-wave"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div><span>PRESS PLAY. SET THE MOOD.</span></div><h3>Give your page a pulse.</h3><p>Music, artwork and subtle movement make your space feel alive.</p>
+            <span className="revamp-feature-no">ATMOSPHERE</span><div className="revamp-music-art"><div className="revamp-disc"><i /></div><div className="revamp-wave"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div><span>PRESS PLAY. SET THE MOOD.</span></div><h3>Give your page a pulse.</h3><p>Music, artwork and subtle movement make your space feel alive.</p>
           </article>
           <article className="revamp-feature revamp-feature-badges">
-            <span className="revamp-feature-no">04 / RECOGNITION</span><div className="revamp-badge-art"><div>✦</div><div>✓</div><div>↗</div><span>BUILT AROUND<br />YOUR IDENTITY</span></div><h3>Show what makes you, you.</h3><p>Discord integration, profile badges and Premium tools when you want more.</p>
+            <span className="revamp-feature-no">RECOGNITION</span><div className="revamp-badge-art"><div>✦</div><div>✓</div><div>↗</div><span>BUILT AROUND<br />YOUR IDENTITY</span></div><h3>Show what makes you, you.</h3><p>Discord integration, profile badges and Premium tools when you want more.</p>
           </article>
         </div>
       </section>
