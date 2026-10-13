@@ -35,6 +35,11 @@ export type ProfileSettings = {
   gradientSocialsColours: [string, string, string];
   gradientBadgesEnabled: boolean;
   gradientBadgesColours: [string, string, string];
+  dashboardCustomisationEnabled: boolean;
+  dashboardBackgroundGradientEnabled: boolean;
+  dashboardBackgroundGradientColours: [string, string, string];
+  dashboardTextGradientEnabled: boolean;
+  dashboardTextGradientColours: [string, string, string];
   textOpacity: number;
   profileOpacity: number;
   profileBlur: number;
@@ -181,6 +186,11 @@ export const defaultSettings: ProfileSettings = {
   gradientSocialsColours: ["#ff4d5f", "#a855f7", "#3b82f6"],
   gradientBadgesEnabled: false,
   gradientBadgesColours: ["#ff4d5f", "#a855f7", "#3b82f6"],
+  dashboardCustomisationEnabled: false,
+  dashboardBackgroundGradientEnabled: true,
+  dashboardBackgroundGradientColours: ["#251016", "#171016", "#24130d"],
+  dashboardTextGradientEnabled: false,
+  dashboardTextGradientColours: ["#ff684f", "#ffad65", "#f04a43"],
   textOpacity: 92,
   profileOpacity: 0,
   profileBlur: 0,
