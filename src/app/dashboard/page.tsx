@@ -1406,12 +1406,11 @@ export default function Dashboard() {
           </div>
           </>}
         </aside>
-        {active === "Presets" && presetsPremiumReady && !presetsPremium && !presetMessage && <div className="presets-lock-overlay" role="region" aria-label="Premium presets locked">
-          <div className="presets-lock-card">
-            {(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark presets-premium-mark-lock" aria-hidden="true">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 14.8 8l5.8.9-4.2 4.1 1 5.8-5.4-2.8-5.4 2.8 1-5.8-4.2-4.1L9.2 8 12 2.8Z" /></svg>}</span>; })()}
+        {active === "Presets" && presetsPremiumReady && !presetsPremium && !presetMessage && <div className="presets-lock-overlay" role="region" aria-label="Premium presets">
+          <div className="presets-lock-card presets-unlock-prompt">
             <p className="presets-lock-eyebrow">PIXLO PREMIUM</p>
-            <h2>This section is locked</h2>
-            <p>Presets are an exclusive Premium feature. Unlock all four save slots, taller previews and instant profile switching.</p>
+            <h2>Unlock this section with Premium</h2>
+            <p>Save and switch between your profile presets with Pixlo Premium.</p>
             <a href="/premium" className="presets-unlock-button">Explore Premium <span aria-hidden="true">↗</span></a>
           </div>
         </div>}
