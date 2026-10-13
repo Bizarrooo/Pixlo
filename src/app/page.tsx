@@ -211,4 +211,4 @@ export default function Home() {
       <footer className="revamp-footer"><Link href="/" className="revamp-logo"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span><div><a href="#features">Platform</a><a href="#showcase">Showcase</a><a href="#donate">Support</a><Link href="/dashboard">Dashboard ↗</Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
     </main>
   );
-}}
+}
