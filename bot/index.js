@@ -101,6 +101,20 @@ async function getAllPremiumGifts() {
   return gifts;
 }
 
+async function getAllPremiumRevocations() {
+  const events = [];
+  let offset = 0;
+  const pageSize = 1000;
+  while (true) {
+    const page = await db(`pixlo_premium_revocation_events?select=id,user_id,username,discord_id,revoked_at,announced_at&announced_at=is.null&order=revoked_at.asc&limit=${pageSize}&offset=${offset}`);
+    if (!Array.isArray(page) || page.length === 0) break;
+    events.push(...page);
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+  return events;
+}
+
 async function announcePremiumGift(guild, profiles, gift) {
   if (gift.announced_at) return;
   const giverProfile = profiles.find(profile => String(profile.id) === String(gift.giver_user_id));
@@ -282,7 +296,25 @@ async function announcePremiumRevocation(guild, member, profile) {
   return true;
 }
 
-async function syncPremiumRole(guild, profiles, entitlements, gifts = []) {
+async function announcePremiumRevocationEvent(guild, profiles, event) {
+  const profile = profiles.find(item => String(item.id) === String(event.user_id)) || {
+    id: event.user_id,
+    username: event.username,
+    discord_id: event.discord_id || null,
+  };
+  const discordId = String(event.discord_id || profile.discord_id || "");
+  const member = discordId ? guild.members.cache.get(discordId) || null : null;
+  const posted = await announcePremiumRevocation(guild, member, profile);
+  if (!posted) return;
+  await db(`pixlo_premium_revocation_events?id=eq.${encodeURIComponent(String(event.id))}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ announced_at: new Date().toISOString() }),
+  });
+  console.log(`[premium-revocation-queue] marked event ${event.id} announced`);
+}
+
+async function syncPremiumRole(guild, profiles, entitlements, gifts = [], revocations = []) {
   const configuredRoleId = process.env.DISCORD_PREMIUM_ROLE_ID || "1558112636044836946";
   const role = guild.roles.cache.get(configuredRoleId) ||
     guild.roles.cache.find(item => item.name.trim().toLowerCase() === "premium") ||
@@ -297,6 +329,7 @@ async function syncPremiumRole(guild, profiles, entitlements, gifts = []) {
   const activeEntitlementByUserId = new Map(entitlements.filter(item => item.status === "active").map(item => [String(item.user_id), item]));
   const giftedRecipientIds = new Set(gifts.filter(gift => gift.status === "completed").map(gift => String(gift.recipient_user_id)));
   const queuedGiftRevocations = new Set(gifts.filter(gift => gift.status === "revoked" && !gift.announced_at).map(gift => String(gift.recipient_user_id)));
+  const queuedRevocationUserIds = new Set(revocations.filter(event => !event.announced_at).map(event => String(event.user_id)));
   let added = 0;
   let removed = 0;
   for (const member of guild.members.cache.values()) {
@@ -312,7 +345,7 @@ async function syncPremiumRole(guild, profiles, entitlements, gifts = []) {
       } else if (!shouldHaveRole && alreadyHasRole) {
         await member.roles.remove(role.id, "Pixlo Premium lifetime entitlement is not active or account is not linked");
         removed += 1;
-        if (!queuedGiftRevocations.has(String(profile?.id || ""))) await announcePremiumRevocation(guild, member, profile);
+        if (!queuedGiftRevocations.has(String(profile?.id || "")) && !queuedRevocationUserIds.has(String(profile?.id || ""))) await announcePremiumRevocation(guild, member, profile);
       }
       if (shouldHaveRole && !giftedRecipientIds.has(String(profile?.id || ""))) {
         await announcePremiumPurchase(guild, member, entitlement);
@@ -470,11 +503,22 @@ async function syncBadges() {
     console.log(`[badge-sync] loaded ${mappings.length} role-to-badge mappings and ${linkedProfiles.length} Pixlo profiles linked to Discord; server member cache has ${guild.members.cache.size} members`);
 
     try {
-      const [premiumEntitlements, premiumGifts] = await Promise.all([getAllPremiumEntitlements(), getAllPremiumGifts()]);
-      await syncPremiumRole(guild, linkedProfiles, premiumEntitlements, premiumGifts);
+      const [premiumEntitlements, premiumGifts, premiumRevocations] = await Promise.all([
+        getAllPremiumEntitlements(),
+        getAllPremiumGifts(),
+        getAllPremiumRevocations().catch(error => {
+          console.error("[premium-revocation-queue] could not read revocation events (run the latest Supabase migration):", error instanceof Error ? error.message : error);
+          return [];
+        }),
+      ]);
+      await syncPremiumRole(guild, linkedProfiles, premiumEntitlements, premiumGifts, premiumRevocations);
       for (const gift of premiumGifts) {
         try { await announcePremiumGift(guild, linkedProfiles, gift); }
         catch (error) { console.error("[premium-gift] announcement failed:", error instanceof Error ? error.message : error); }
+      }
+      for (const event of premiumRevocations) {
+        try { await announcePremiumRevocationEvent(guild, linkedProfiles, event); }
+        catch (error) { console.error("[premium-revocation-queue] announcement failed:", error instanceof Error ? error.message : error); }
       }
     } catch (error) {
       console.error("[premium-role] entitlement sync failed:", error instanceof Error ? error.message : error);
@@ -612,13 +656,23 @@ client.once("ready", async () => {
     void (async () => {
       try {
         const guild = client.guilds.cache.get(GUILD_ID) || await client.guilds.fetch(GUILD_ID);
-        const [profiles, entitlements, gifts] = await Promise.all([
-          getAllProfiles(), getAllPremiumEntitlements(), getAllPremiumGifts(),
+        const [profiles, entitlements, gifts, revocations] = await Promise.all([
+          getAllProfiles(),
+          getAllPremiumEntitlements(),
+          getAllPremiumGifts(),
+          getAllPremiumRevocations().catch(error => {
+            console.error("[premium-revocation-queue] could not read revocation events (run the latest Supabase migration):", error instanceof Error ? error.message : error);
+            return [];
+          }),
         ]);
-        await syncPremiumRole(guild, profiles, entitlements, gifts);
+        await syncPremiumRole(guild, profiles, entitlements, gifts, revocations);
         for (const gift of gifts) {
           try { await announcePremiumGift(guild, profiles, gift); }
           catch (error) { console.error("[premium-gift] fast announcement check failed:", error instanceof Error ? error.message : error); }
+        }
+        for (const event of revocations) {
+          try { await announcePremiumRevocationEvent(guild, profiles, event); }
+          catch (error) { console.error("[premium-revocation-queue] fast announcement check failed:", error instanceof Error ? error.message : error); }
         }
       } catch (error) {
         console.error("[premium-fast-sync] failed:", error instanceof Error ? error.message : error);
