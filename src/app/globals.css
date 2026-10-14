@@ -6797,3 +6797,47 @@ html { scroll-behavior:smooth; }
     transform: translate(2%, 1%) rotate(-.5deg) scale(.98);
   }
 }
+
+
+/* Exact homepage showcase positioning pass: move cards only, preserve their existing appearance. */
+.pixlo-revamp-home .home-profile-stack-live {
+  border: 0 !important;
+  outline: 0 !important;
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-35%, -9%) rotate(-8deg) scale(.88) !important;
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(-4%, -3%) rotate(-4.5deg) scale(.94) !important;
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front {
+  transform: translate(22%, 2%) rotate(1.5deg) scale(1.02) !important;
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-37%, -11%) rotate(-8.5deg) scale(.88) !important;
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(-6%, -4%) rotate(-5deg) scale(.94) !important;
+}
+@media (max-width: 1100px) {
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third {
+    transform: translate(-28%, -7%) rotate(-7deg) scale(.88) !important;
+  }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second {
+    transform: translate(-2%, -2%) rotate(-4deg) scale(.94) !important;
+  }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front {
+    transform: translate(14%, 2%) rotate(1deg) scale(1) !important;
+  }
+}
+@media (max-width: 600px) {
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third {
+    transform: translate(-18%, -5%) rotate(-5deg) scale(.9) !important;
+  }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second {
+    transform: translate(-2%, -2%) rotate(-2.5deg) scale(.95) !important;
+  }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front {
+    transform: translate(7%, 1%) rotate(.5deg) scale(.98) !important;
+  }
+}
