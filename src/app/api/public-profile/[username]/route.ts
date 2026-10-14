@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authHeaders, supabaseConfig } from "../../../../lib/supabase-config";
+import { serverEnv } from "../../../../lib/server-env";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,22 @@ export async function GET(_request: Request, context: { params: Promise<{ userna
     const row = Array.isArray(rows) ? rows[0] : null;
     if (!row) return NextResponse.json({ profile: null }, { status: 404 });
 
+    // Public profile extras are Premium-only. Verify the entitlement server-side
+    // instead of trusting a client-supplied flag or saved profile settings.
+    let isPremium = String(row.id) === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
+    const serviceKey = serverEnv("SUPABASE_SERVICE_ROLE_KEY");
+    if (!isPremium && serviceKey) {
+      const liveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
+      const entitlementResponse = await fetch(
+        `${url}/rest/v1/pixlo_premium_entitlements?select=status&user_id=eq.${encodeURIComponent(String(row.id))}&livemode=eq.${liveMode}&limit=1`,
+        { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
+      );
+      if (entitlementResponse.ok) {
+        const entitlements = await entitlementResponse.json().catch(() => []);
+        isPremium = Array.isArray(entitlements) && entitlements.some((item: { status?: string }) => item.status === "active");
+      }
+    }
+
     let badges: Array<{ id: string; name: string; description: string; icon_url: string | null }> = [];
     const awardsResponse = await fetch(`${url}/rest/v1/public_badge_awards?select=badge_id&user_id=eq.${encodeURIComponent(String(row.id))}`, { headers, cache: "no-store" });
     if (awardsResponse.ok) {
@@ -41,6 +58,7 @@ export async function GET(_request: Request, context: { params: Promise<{ userna
         username: row.username,
         displayName: row.display_name || row.username,
         settings: row.settings && typeof row.settings === "object" ? row.settings : {},
+        premium: isPremium,
         badges,
       },
     }, { headers: { "Cache-Control": "no-store, max-age=0" } });
