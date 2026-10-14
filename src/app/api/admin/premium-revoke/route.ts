@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   if (!serviceKey) return NextResponse.json({ error: "Premium storage is not configured." }, { status: 503 });
   const { url } = supabaseConfig();
   const headers = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json" };
-  const profileResponse = await fetch(`${url}/rest/v1/profiles?select=id,username,display_name&username=ilike.${encodeURIComponent(username)}&limit=1`, { headers, cache: "no-store" });
+  const profileResponse = await fetch(`${url}/rest/v1/profiles?select=id,username,display_name,discord_id&username=ilike.${encodeURIComponent(username)}&limit=1`, { headers, cache: "no-store" });
   const profiles = await profileResponse.json().catch(() => []);
   if (!profileResponse.ok || !Array.isArray(profiles) || !profiles[0]?.id) {
     return NextResponse.json({ error: "That Pixlo username could not be found." }, { status: 404 });
@@ -61,11 +61,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `@${"${recipient.username}"} does not have any active Premium entitlement in live or test mode.` }, { status: 404 });
   }
 
+  // Queue a durable revocation event so the bot announces it even if the Discord
+  // Premium role was already missing or the bot was offline during the revoke.
+  const revocationEventResponse = await fetch(`${url}/rest/v1/pixlo_premium_revocation_events`, {
+    method: "POST",
+    headers: { ...headers, Prefer: "return=minimal" },
+    body: JSON.stringify({
+      user_id: recipient.id,
+      username: recipient.username,
+      discord_id: recipient.discord_id || null,
+      revoked_at: new Date().toISOString(),
+    }),
+    cache: "no-store",
+  });
+  if (!revocationEventResponse.ok) {
+    console.error("[admin/premium-revoke] Could not queue Discord announcement:", revocationEventResponse.status, (await revocationEventResponse.text().catch(() => "")).slice(0, 200));
+    return NextResponse.json({ error: "Premium was revoked, but the Discord announcement could not be queued. Please contact the Pixlo owner before retrying." }, { status: 503 });
+  }
+
   // Mark gift ledger entries as handled and revoked so the bot cannot announce an old, unannounced gift later.
   const giftResponse = await fetch(`${url}/rest/v1/pixlo_premium_gifts?recipient_user_id=eq.${encodeURIComponent(String(recipient.id))}&status=eq.completed`, {
     method: "PATCH",
     headers: { ...headers, Prefer: "return=minimal" },
-    body: JSON.stringify({ status: "revoked", announced_at: null }),
+    body: JSON.stringify({ status: "revoked", announced_at: new Date().toISOString() }),
     cache: "no-store",
   });
   if (!giftResponse.ok) {
