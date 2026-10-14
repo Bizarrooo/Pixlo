@@ -6841,3 +6841,49 @@ html { scroll-behavior:smooth; }
     transform: translate(7%, 1%) rotate(.5deg) scale(.98) !important;
   }
 }
+
+
+/* Reference-match layout: explicitly place the three cards across the stage.
+   These rules override older transform declarations without changing card styling. */
+.pixlo-revamp-home .home-profile-stack {
+  position: relative !important;
+  overflow: visible !important;
+}
+.pixlo-revamp-home .home-profile-stack-live {
+  left: 8% !important;
+  right: auto !important;
+  width: 78% !important;
+  inset-block: 4% 3% !important;
+  border: 0 !important;
+  outline: 0 !important;
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-24%, -9%) rotate(-8deg) scale(.88) !important;
+  z-index: 1 !important;
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(4%, -2%) rotate(-4deg) scale(.94) !important;
+  z-index: 2 !important;
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front {
+  transform: translate(38%, 2%) rotate(1deg) scale(1) !important;
+  z-index: 3 !important;
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-26%, -10%) rotate(-8.5deg) scale(.88) !important;
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(2%, -3%) rotate(-4.5deg) scale(.94) !important;
+}
+@media (max-width: 1100px) {
+  .pixlo-revamp-home .home-profile-stack-live { left: 8% !important; width: 80% !important; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third { transform: translate(-21%, -7%) rotate(-7deg) scale(.88) !important; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second { transform: translate(1%, -2%) rotate(-3.5deg) scale(.94) !important; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front { transform: translate(28%, 2%) rotate(1deg) scale(.98) !important; }
+}
+@media (max-width: 600px) {
+  .pixlo-revamp-home .home-profile-stack-live { left: 7% !important; width: 84% !important; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third { transform: translate(-13%, -5%) rotate(-5deg) scale(.9) !important; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second { transform: translate(0%, -1%) rotate(-2.5deg) scale(.95) !important; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front { transform: translate(13%, 1%) rotate(.5deg) scale(.98) !important; }
+}
