@@ -1011,8 +1011,7 @@ export default function Dashboard() {
           {active === "Presets" && <div className="form-stack presets-page">
             <div className="presets-heading"><SectionIntro title="Premium presets" /></div>
             {presetMessage && <div className="preset-status" role="status">{presetMessage}</div>}
-            
-            <div className="preset-slots">
+            {presetsPremiumReady && !presetsPremium ? <div className="premium-gradient-card"><h3>✦ Premium feature</h3><p>Save and switch between your profile presets with Pixlo Premium.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <div className="preset-slots">
               {[1,2,3,4].map(slot => {
                 const preset = presets.find(item => item.slot_number === slot);
                 const previewUsername = String(settings.username || preset?.settings?.username || "");
@@ -1030,7 +1029,7 @@ export default function Dashboard() {
                   </div>
                 </article>;
               })}
-            </div>
+            </div>}
           </div>}
 
           {active === "Badges" && <div className="form-stack">
@@ -1406,14 +1405,6 @@ export default function Dashboard() {
           </div>
           </>}
         </aside>
-        {active === "Presets" && presetsPremiumReady && !presetsPremium && !presetMessage && <div className="presets-lock-overlay" role="region" aria-label="Premium presets">
-          <div className="presets-lock-card presets-unlock-prompt">
-            <p className="presets-lock-eyebrow">PIXLO PREMIUM</p>
-            <h2>Unlock this section with Premium</h2>
-            <p>Save and switch between your profile presets with Pixlo Premium.</p>
-            <a href="/premium" className="presets-unlock-button">Explore Premium <span aria-hidden="true">↗</span></a>
-          </div>
-        </div>}
       </div>
     </div>
   </main>
