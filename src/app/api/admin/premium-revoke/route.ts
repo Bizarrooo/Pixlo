@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   const giftResponse = await fetch(`${url}/rest/v1/pixlo_premium_gifts?recipient_user_id=eq.${encodeURIComponent(String(recipient.id))}&status=eq.completed`, {
     method: "PATCH",
     headers: { ...headers, Prefer: "return=minimal" },
-    body: JSON.stringify({ status: "revoked", announced_at: new Date().toISOString() }),
+    body: JSON.stringify({ status: "revoked", announced_at: null }),
     cache: "no-store",
   });
   if (!giftResponse.ok) {
