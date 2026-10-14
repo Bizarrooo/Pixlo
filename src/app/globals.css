@@ -3815,8 +3815,7 @@ html, body, *, *::before, *::after {
 .dashboard .presets-unlock-button { background:linear-gradient(100deg,#f0443e,#ff742f)!important; color:#fff!important; }
 @media(max-width:900px){.dashboard .preset-slots{grid-template-columns:minmax(0,1fr)}}
 
-/* Gradient typography is consistent across the Premium presets section. */
-.dashboard .presets-heading .section-intro h2,
+/* Match the presets section heading to the other dashboard tabs; reserve the accent gradient for preset-card titles. */
 .dashboard .presets-page .preset-slot-top h3 {
   background:linear-gradient(100deg,#ff493d 0%,#ff8b32 100%);
   -webkit-background-clip:text;
