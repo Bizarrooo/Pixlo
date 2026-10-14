@@ -49,7 +49,7 @@ async function getAllProfiles() {
   let offset = 0;
   const pageSize = 1000;
   while (true) {
-    const page = await db(`profiles?select=id,username,display_name,discord_id&discord_id=not.is.null&order=id.asc&limit=${pageSize}&offset=${offset}`);
+    const page = await db(`profiles?select=id,username,display_name,discord_id&order=id.asc&limit=${pageSize}&offset=${offset}`);
     if (!Array.isArray(page) || page.length === 0) break;
     profiles.push(...page);
     if (page.length < pageSize) break;
