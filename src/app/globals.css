@@ -6627,3 +6627,117 @@ html { scroll-behavior:smooth; }
   .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-third { transform: translate(-20%, -2%) rotate(-6.5deg) scale(.81); }
   .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-second { transform: translate(-9%, -1%) rotate(-3.5deg) scale(.9); }
 }
+
+
+/* Homepage most-viewed profiles: angled, overlapping showcase matching the supplied reference. */
+.pixlo-revamp-home .revamp-hero-side {
+  position: relative;
+  min-width: 0;
+  align-self: stretch;
+}
+.pixlo-revamp-home .home-profile-stack {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 700px);
+  min-height: clamp(470px, 49vw, 650px);
+  perspective: 1400px;
+}
+.pixlo-revamp-home .home-profile-stack-live {
+  inset: 4% 8% 3%;
+  overflow: visible;
+  border: 1.5px solid rgba(177, 92, 205, .86);
+  border-radius: 30px;
+  background: #0b090d;
+  box-shadow: 0 22px 55px rgba(0,0,0,.45);
+  transform-origin: 50% 52%;
+  transition: transform 600ms cubic-bezier(.2,.75,.25,1), filter 600ms ease, box-shadow 600ms ease;
+}
+.pixlo-revamp-home .home-profile-stack-iframe-shell {
+  inset: 0;
+  overflow: hidden;
+  border-radius: 28px;
+  background: #0b090d;
+}
+.pixlo-revamp-home .home-profile-stack-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  pointer-events: none;
+  background: #0b090d;
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third {
+  z-index: 1;
+  transform: translate(-26%, -10%) rotate(-8deg) scale(.88);
+  opacity: .92;
+  filter: brightness(.58) saturate(.72);
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second {
+  z-index: 2;
+  transform: translate(-13%, -3%) rotate(-4.5deg) scale(.94);
+  opacity: .98;
+  filter: brightness(.78) saturate(.86);
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front {
+  z-index: 3;
+  transform: translate(7%, 4%) rotate(-1.5deg) scale(1.02);
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 30px 78px rgba(0,0,0,.56);
+}
+.pixlo-revamp-home .home-profile-stack-live::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 45% 0 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, transparent 0%, rgba(8,7,10,.12) 35%, rgba(8,7,10,.82) 100%);
+  pointer-events: none;
+}
+.pixlo-revamp-home .home-profile-stack-rank {
+  z-index: 4;
+  left: 14px;
+  bottom: 13px;
+  padding: 6px 9px;
+  border: 1px solid rgba(191, 115, 216, .42);
+  border-radius: 999px;
+  background: rgba(12,9,15,.72);
+  color: rgba(255,255,255,.86);
+  font-size: 10px;
+  backdrop-filter: blur(8px);
+}
+.pixlo-revamp-home .home-profile-stack-glow {
+  position: absolute;
+  z-index: 0;
+  inset: 18% 8% 0;
+  background: radial-gradient(ellipse at 52% 45%, rgba(150,66,174,.2), transparent 66%);
+  filter: blur(28px);
+  pointer-events: none;
+}
+.pixlo-revamp-home .home-profile-stack-live:hover {
+  border-color: rgba(207, 135, 232, .95);
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-28%, -12%) rotate(-9deg) scale(.88);
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(-15%, -4%) rotate(-5deg) scale(.94);
+}
+@media (max-width: 1100px) {
+  .pixlo-revamp-home .home-profile-stack {
+    width: min(100%, 640px);
+    min-height: clamp(400px, 64vw, 540px);
+  }
+  .pixlo-revamp-home .home-profile-stack-live { inset: 5% 8% 4%; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third { transform: translate(-21%, -7%) rotate(-7deg) scale(.88); }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second { transform: translate(-10%, -2%) rotate(-4deg) scale(.94); }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front { transform: translate(5%, 3%) rotate(-1deg) scale(1); }
+}
+@media (max-width: 600px) {
+  .pixlo-revamp-home .home-profile-stack { min-height: 390px; }
+  .pixlo-revamp-home .home-profile-stack-live { inset: 5% 6% 4%; border-radius: 22px; }
+  .pixlo-revamp-home .home-profile-stack-iframe-shell { border-radius: 20px; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third { transform: translate(-13%, -4%) rotate(-5deg) scale(.9); }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second { transform: translate(-6%, -1%) rotate(-3deg) scale(.95); }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front { transform: translate(2%, 2%) rotate(-.5deg) scale(.98); }
+  .pixlo-revamp-home .home-profile-stack-rank { left: 8px; bottom: 8px; font-size: 9px; }
+}
