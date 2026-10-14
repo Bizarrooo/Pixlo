@@ -16,6 +16,9 @@ const REVOCATION_CHANNEL_ID = "1558891471963168778";
 const BADGE_INFO_CHANNEL_ID = "1558891359572852946";
 const EMBED_ORANGE = 0xFFD580;
 const INTERVAL_MS = 5 * 60 * 1000;
+const PREMIUM_SYNC_INTERVAL_MS = 15 * 1000;
+const checkedPurchaseAnnouncements = new Set();
+let premiumFastSyncing = false;
 const pendingRoleChanges = new Map();
 let syncing = false;
 let syncAgain = false;
@@ -168,6 +171,8 @@ async function announcePremiumGift(guild, profiles, gift) {
 }
 
 async function announcePremiumPurchase(guild, member, entitlement) {
+  const purchaseKey = `${member.id}:${entitlement.purchased_at || entitlement.updated_at || "unknown"}`;
+  if (checkedPurchaseAnnouncements.has(purchaseKey)) return;
   const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
   if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
     console.error("[premium-role] Missing or inaccessible Premium purchase announcement channel " + AWARD_CHANNEL_ID);
@@ -186,7 +191,7 @@ async function announcePremiumPurchase(guild, member, entitlement) {
         )
       )
     );
-    if (alreadyAnnounced) return;
+    if (alreadyAnnounced) { checkedPurchaseAnnouncements.add(purchaseKey); return; }
   } catch (error) {
     console.warn("[premium-role] Could not check existing purchase announcements:", error instanceof Error ? error.message : error);
   }
@@ -221,7 +226,30 @@ async function announcePremiumPurchase(guild, member, entitlement) {
   }
 
   await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+  checkedPurchaseAnnouncements.add(purchaseKey);
   console.log(`[premium-role] posted purchase confirmation for Discord user ${member.id}`);
+}
+
+async function announcePremiumRevocation(guild, member, profile) {
+  const channel = await guild.channels.fetch(REVOCATION_CHANNEL_ID).catch(() => null);
+  if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
+    console.error("[premium-role] Missing or inaccessible Premium revocation channel " + REVOCATION_CHANNEL_ID);
+    return;
+  }
+  const username = profile?.username ? `@${profile.username}` : member.user.username;
+  const embed = new EmbedBuilder()
+    .setColor(0xE05A47)
+    .setTitle("🚫 Pixlo Premium Revoked")
+    .setDescription(`Premium access for <@${member.id}> (${username}) has been revoked. Their Pixlo Premium role has been removed because no active Premium entitlement remains.`)
+    .addFields(
+      { name: "👤 Member", value: `<@${member.id}>`, inline: true },
+      { name: "💎 Access", value: "Pixlo Premium — Lifetime", inline: true },
+      { name: "📌 Status", value: "Revoked", inline: true },
+    )
+    .setFooter({ text: "Pixlo • Premium access update" })
+    .setTimestamp();
+  await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+  console.log(`[premium-role] posted revocation announcement for Discord user ${member.id}`);
 }
 
 async function syncPremiumRole(guild, profiles, entitlements, gifts = []) {
@@ -253,6 +281,7 @@ async function syncPremiumRole(guild, profiles, entitlements, gifts = []) {
       } else if (!shouldHaveRole && alreadyHasRole) {
         await member.roles.remove(role.id, "Pixlo Premium lifetime entitlement is not active or account is not linked");
         removed += 1;
+        await announcePremiumRevocation(guild, member, profile);
       }
       if (shouldHaveRole && !giftedRecipientIds.has(String(profile?.id || ""))) {
         await announcePremiumPurchase(guild, member, entitlement);
@@ -543,7 +572,31 @@ client.once("ready", async () => {
   }
   await syncBadges();
   setInterval(() => void syncBadges(), INTERVAL_MS);
-});
+
+  // Premium payments and gifts are time-sensitive; reconcile separately from badge sync.
+  // This reduces announcement latency from up to five minutes to roughly 15 seconds.
+  setInterval(() => {
+    if (premiumFastSyncing || syncing) return;
+    premiumFastSyncing = true;
+    void (async () => {
+      try {
+        const guild = client.guilds.cache.get(GUILD_ID) || await client.guilds.fetch(GUILD_ID);
+        const [profiles, entitlements, gifts] = await Promise.all([
+          getAllProfiles(), getAllPremiumEntitlements(), getAllPremiumGifts(),
+        ]);
+        await syncPremiumRole(guild, profiles, entitlements, gifts);
+        for (const gift of gifts) {
+          try { await announcePremiumGift(guild, profiles, gift); }
+          catch (error) { console.error("[premium-gift] fast announcement check failed:", error instanceof Error ? error.message : error); }
+        }
+      } catch (error) {
+        console.error("[premium-fast-sync] failed:", error instanceof Error ? error.message : error);
+      } finally {
+        premiumFastSyncing = false;
+      }
+    })();
+  }, PREMIUM_SYNC_INTERVAL_MS);
+}
 
 function scheduleSync() {
   if (scheduledSync) clearTimeout(scheduledSync);
