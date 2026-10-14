@@ -6282,3 +6282,10 @@ html { scroll-behavior:smooth; }
 .dashboard .presets-unlock-prompt .presets-lock-eyebrow { margin: 0 0 10px !important; color: #c084fc !important; letter-spacing: .12em !important; }
 .dashboard .presets-unlock-prompt h2 { background: none !important; color: #e9d5ff !important; -webkit-text-fill-color: #e9d5ff !important; }
 .dashboard .presets-unlock-prompt > p:not(.presets-lock-eyebrow) { color: #d5cbdc !important; }
+
+
+/* Fix homepage live-card parallax: the embedded profile iframe was swallowing
+   pointer events, so the outer card never received the pointer movement. */
+.pixlo-revamp-home .home-live-profile-iframe {
+  pointer-events: none !important;
+}
