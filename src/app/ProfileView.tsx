@@ -65,7 +65,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const [isPremium, setIsPremium] = useState(false);
   const [extrasPage, setExtrasPage] = useState(1);
   const [clockNow, setClockNow] = useState(() => new Date());
-  const extrasPageRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const extrasPageRefs = useRef<Record<number, HTMLElement | null>>({});
   const [trackIndex, setTrackIndex] = useState(0);
   const [musicVideoFallback, setMusicVideoFallback] = useState(false);
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
@@ -567,9 +567,9 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           </div>
         </div>
       </section>
-      {isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername && <section className={`pixlo-extras pixlo-extras-${settings.extrasLayout}`} aria-label="Extras">
-        <div className="pixlo-extras-heading"><div><span>PIXLO / PREMIUM</span><h2>Extras</h2><p>Little details, across time zones.</p></div><div className="pixlo-extras-status"><i /> LIVE</div></div>
-        <nav className="pixlo-extras-pages" aria-label="Extras pages">
+      {isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername && <section className={`pixlo-extras pixlo-extras-${settings.extrasLayout}`} aria-label="Extra">
+        <div className="pixlo-extras-heading"><div><span>PIXLO / PREMIUM</span><h2>Extra</h2><p>Little details, across time zones.</p></div><div className="pixlo-extras-status"><i /> LIVE</div></div>
+        <nav className="pixlo-extras-pages" aria-label="Extra pages">
           {Array.from({ length: Math.max(2, settings.timezonePage) }, (_, index) => index + 1).map(page => <button type="button" key={page} className={extrasPage === page ? "active" : ""} onClick={() => setExtrasPage(page)} aria-current={extrasPage === page ? "page" : undefined}><span>{String(page).padStart(2, "0")}</span><small>{page === 1 ? "Overview" : page === settings.timezonePage ? "Extra" : "Coming soon"}</small></button>)}
         </nav>
         <div className="pixlo-extras-viewport" key={settings.extrasLayout}>
