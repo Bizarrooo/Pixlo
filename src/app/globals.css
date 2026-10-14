@@ -6301,93 +6301,58 @@ html { scroll-behavior:smooth; }
 }
 
 
-/* Layered profile-card stack on the homepage, inspired by the requested
-   overlapping-card treatment. Keep the live profile in front and preserve
-   its pointer parallax; the two rear cards are decorative showcase mockups. */
-.pixlo-revamp-home .revamp-hero-side {
-  perspective: 1400px;
-  min-width: 0;
-}
+/* Layered profile-card stack: expose clear edges of both rear cards and
+   give the overall cards a slightly taller, more portrait-like proportion. */
 .pixlo-revamp-home .home-profile-stack {
-  position: relative;
-  width: min(100%, 570px);
-  min-height: clamp(390px, 42vw, 570px);
-  margin-inline: auto;
-  isolation: isolate;
+  min-height: clamp(430px, 46vw, 610px);
 }
 .pixlo-revamp-home .home-profile-stack-card {
-  position: absolute;
-  inset: 5% 3% 4%;
-  transform-origin: 50% 55%;
-  transition: transform 700ms cubic-bezier(.2,.75,.25,1), filter 700ms ease;
-  will-change: transform;
-}
-.pixlo-revamp-home .home-profile-stack-card .home-profile-mock,
-.pixlo-revamp-home .home-profile-stack-card .home-live-profile-card {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
+  inset: 3% 7% 2%;
 }
 .pixlo-revamp-home .home-profile-stack-third {
   z-index: 1;
-  transform: translate(-8%, -1%) rotate(-7deg) scale(.91);
-  opacity: .57;
-  filter: saturate(.75) brightness(.72);
-  clip-path: inset(0 0 0 0 round 22px);
+  transform: translate(-19%, -3%) rotate(-8deg) scale(.90);
+  opacity: .82;
+  filter: saturate(.88) brightness(.76);
 }
 .pixlo-revamp-home .home-profile-stack-second {
   z-index: 2;
-  transform: translate(-3%, 1%) rotate(-3.5deg) scale(.96);
-  opacity: .82;
-  filter: brightness(.86);
-  clip-path: inset(0 0 0 0 round 22px);
+  transform: translate(-10%, -1%) rotate(-4.5deg) scale(.95);
+  opacity: .94;
+  filter: brightness(.9);
 }
 .pixlo-revamp-home .home-profile-stack-front {
   z-index: 3;
-  transform: translate(2%, 2%) rotate(1.5deg);
-}
-.pixlo-revamp-home .home-profile-stack-front .home-live-profile-card {
-  height: 100%;
-  overflow: hidden;
-  border-radius: 22px;
-  box-shadow: 0 34px 90px rgba(0,0,0,.48), 0 0 0 1px rgba(255,95,35,.18);
-}
-.pixlo-revamp-home .home-profile-stack-front .home-live-profile-iframe {
-  height: 100%;
-  pointer-events: none !important;
-}
-.pixlo-revamp-home .home-profile-stack-glow {
-  position: absolute;
-  z-index: -1;
-  inset: 20% 9% 4%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255,70,18,.2), rgba(255,130,35,.07) 42%, transparent 72%);
-  filter: blur(32px);
-  pointer-events: none;
+  transform: translate(4%, 2%) rotate(1.5deg);
 }
 .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-third {
-  transform: translate(-11%, -3%) rotate(-9deg) scale(.91);
+  transform: translate(-22%, -5%) rotate(-9deg) scale(.90);
 }
 .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-second {
-  transform: translate(-5%, 0%) rotate(-4.5deg) scale(.96);
+  transform: translate(-12%, -2%) rotate(-5.5deg) scale(.95);
 }
 @media (max-width: 900px) {
   .pixlo-revamp-home .home-profile-stack {
-    width: min(100%, 520px);
-    min-height: clamp(340px, 82vw, 470px);
+    min-height: clamp(380px, 88vw, 500px);
   }
   .pixlo-revamp-home .home-profile-stack-card {
-    inset: 4% 2% 4%;
+    inset: 4% 5% 3%;
+  }
+  .pixlo-revamp-home .home-profile-stack-third {
+    transform: translate(-14%, -2%) rotate(-7deg) scale(.90);
+  }
+  .pixlo-revamp-home .home-profile-stack-second {
+    transform: translate(-7%, 0%) rotate(-4deg) scale(.95);
   }
 }
 @media (max-width: 520px) {
   .pixlo-revamp-home .home-profile-stack {
-    min-height: 350px;
+    min-height: 380px;
   }
   .pixlo-revamp-home .home-profile-stack-third {
-    transform: translate(-5%, -1%) rotate(-5deg) scale(.92);
+    transform: translate(-10%, -1%) rotate(-5deg) scale(.91);
   }
   .pixlo-revamp-home .home-profile-stack-second {
-    transform: translate(-2%, 1%) rotate(-2.5deg) scale(.96);
+    transform: translate(-5%, 1%) rotate(-2.5deg) scale(.96);
   }
 }
