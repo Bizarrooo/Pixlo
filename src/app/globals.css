@@ -7046,3 +7046,70 @@ html { scroll-behavior:smooth; }
   .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second { left: 13% !important; top: 6% !important; transform: rotate(-2.5deg) !important; }
   .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front { left: 32% !important; top: 11% !important; transform: rotate(.5deg) !important; }
 }
+
+
+/* Interactive showcase: hovering any individual profile brings it forward and reveals it. */
+.pixlo-revamp-home .home-profile-stack-live {
+  transition:
+    transform 420ms cubic-bezier(.2,.8,.2,1),
+    filter 420ms ease,
+    opacity 420ms ease,
+    box-shadow 420ms ease;
+  cursor: pointer;
+  will-change: transform;
+}
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-third:hover) .home-profile-stack-live.home-profile-stack-third {
+  z-index: 20 !important;
+  transform: translate(1%, -5%) rotate(-3deg) scale(1.08) !important;
+  filter: brightness(1.08) saturate(1.02) !important;
+  opacity: 1 !important;
+  box-shadow: 0 32px 85px rgba(0,0,0,.62) !important;
+}
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-third:hover) .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(24%, 1%) rotate(-3deg) scale(.96) !important;
+  filter: brightness(.56) saturate(.75) !important;
+}
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-third:hover) .home-profile-stack-live.home-profile-stack-front {
+  transform: translate(62%, 4%) rotate(1deg) scale(.96) !important;
+  filter: brightness(.62) saturate(.78) !important;
+}
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-second:hover) .home-profile-stack-live.home-profile-stack-second {
+  z-index: 20 !important;
+  transform: translate(8%, -5%) rotate(-1deg) scale(1.08) !important;
+  filter: brightness(1.08) saturate(1.02) !important;
+  opacity: 1 !important;
+  box-shadow: 0 32px 85px rgba(0,0,0,.62) !important;
+}
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-second:hover) .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-27%, 2%) rotate(-8deg) scale(.94) !important;
+  filter: brightness(.55) saturate(.75) !important;
+}
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-second:hover) .home-profile-stack-live.home-profile-stack-front {
+  transform: translate(61%, 4%) rotate(1deg) scale(.95) !important;
+  filter: brightness(.62) saturate(.78) !important;
+}
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-front:hover) .home-profile-stack-live.home-profile-stack-front {
+  z-index: 20 !important;
+  transform: translate(35%, -4%) rotate(0deg) scale(1.08) !important;
+  filter: brightness(1.08) saturate(1.02) !important;
+  opacity: 1 !important;
+  box-shadow: 0 32px 85px rgba(0,0,0,.62) !important;
+}
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-front:hover) .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(-1%, -1%) rotate(-4deg) scale(.94) !important;
+  filter: brightness(.55) saturate(.75) !important;
+}
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-front:hover) .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-26%, -2%) rotate(-8deg) scale(.92) !important;
+  filter: brightness(.5) saturate(.72) !important;
+}
+@media (hover: none) {
+  .pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-third:hover) .home-profile-stack-live,
+  .pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-second:hover) .home-profile-stack-live,
+  .pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-front:hover) .home-profile-stack-live {
+    filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pixlo-revamp-home .home-profile-stack-live { transition: none !important; }
+}
