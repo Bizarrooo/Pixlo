@@ -5,6 +5,8 @@ import { ensurePremiumBadge } from "../../../../lib/premium-badge";
 
 export const runtime = "nodejs";
 
+const PIXLO_OWNER_ID = "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
+
 function cookieValue(request: Request, name: string) {
   const raw = request.headers.get("cookie") || "";
   const value = raw.match(new RegExp(`(?:^|; )${name}=([^;]+)`))?.[1] || "";
@@ -26,6 +28,12 @@ export async function GET(request: Request) {
 
   const serviceKey = serverEnv("SUPABASE_SERVICE_ROLE_KEY");
   if (!serviceKey) return NextResponse.json({ error: "Premium storage is not configured." }, { status: 503 });
+  if (user.id === PIXLO_OWNER_ID) {
+    try { await ensurePremiumBadge(user.id); }
+    catch (error) { console.error("[premium/status] Premium badge reconciliation failed:", error instanceof Error ? error.message : error); }
+    return NextResponse.json({ authenticated: true, premium: true, entitlement: null }, { headers: { "Cache-Control": "no-store, max-age=0" } });
+  }
+
   const liveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
   const entitlementResponse = await fetch(
     `${url}/rest/v1/pixlo_premium_entitlements?select=status,purchased_at,price_paid,currency,livemode&user_id=eq.${encodeURIComponent(user.id)}&livemode=eq.${liveMode}&limit=1`,
