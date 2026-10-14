@@ -4,8 +4,6 @@ import { supabaseConfig } from "../../../lib/supabase-config";
 
 export const runtime = "nodejs";
 
-const PIXLO_OWNER_ID = "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
-
 // The Pixlo owner account has Premium access for testing and administration.
 const PIXLO_OWNER_ID = "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
 
