@@ -6584,3 +6584,46 @@ html { scroll-behavior:smooth; }
   .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-third { transform: translate(-17%, -3%) rotate(-7deg) scale(.90); }
   .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-second { transform: translate(-8%, -1%) rotate(-4deg) scale(.96); }
 }
+
+
+/* Keep the full silhouette of all three profile cards visible in the homepage stack. */
+.pixlo-revamp-home .home-profile-stack {
+  width: min(100%, 700px);
+  min-height: clamp(490px, 52vw, 680px);
+}
+.pixlo-revamp-home .home-profile-stack-live {
+  inset: 5% 10% 5%;
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-25%, -2%) rotate(-8deg) scale(.82);
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(-12%, 0%) rotate(-4deg) scale(.91);
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front {
+  transform: translate(2%, 2%) rotate(0deg) scale(.98);
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-28%, -3%) rotate(-9deg) scale(.82);
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(-14%, -1%) rotate(-4.5deg) scale(.91);
+}
+@media (max-width: 900px) {
+  .pixlo-revamp-home .home-profile-stack { min-height: clamp(430px, 94vw, 560px); }
+  .pixlo-revamp-home .home-profile-stack-live { inset: 5% 8% 5%; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third { transform: translate(-22%, -2%) rotate(-7deg) scale(.82); }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second { transform: translate(-10%, 0%) rotate(-3.5deg) scale(.91); }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front { transform: translate(1%, 2%) rotate(0deg) scale(.97); }
+  .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-third { transform: translate(-24%, -3%) rotate(-8deg) scale(.82); }
+  .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-second { transform: translate(-11%, -1%) rotate(-4deg) scale(.91); }
+}
+@media (max-width: 520px) {
+  .pixlo-revamp-home .home-profile-stack { min-height: 390px; }
+  .pixlo-revamp-home .home-profile-stack-live { inset: 5% 6% 5%; }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third { transform: translate(-18%, -1%) rotate(-6deg) scale(.81); }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second { transform: translate(-8%, 0%) rotate(-3deg) scale(.9); }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front { transform: translate(0%, 2%) rotate(0deg) scale(.96); }
+  .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-third { transform: translate(-20%, -2%) rotate(-6.5deg) scale(.81); }
+  .pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-second { transform: translate(-9%, -1%) rotate(-3.5deg) scale(.9); }
+}
