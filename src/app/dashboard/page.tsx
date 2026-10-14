@@ -34,6 +34,7 @@ const sectionLabels: Record<string, string> = {
   Admin: "Admin",
   "Enter Screen": "Intro screen",
   Stats: "Analytics",
+  Extras: "Extras",
 };
 
 type DashboardBadge = { id: string; name: string; description: string; icon_url: string | null };
@@ -1072,7 +1073,7 @@ export default function Dashboard() {
         {sections.filter(([name]) => name !== "Admin").map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setPremiumOpen(false); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{sectionLabels[name] || name}</b></button>)}
         {profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f" && <button type="button" key="Admin" className={`admin-nav-button ${active === "Admin" ? "active" : ""}`} onClick={() => { setActive("Admin"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="admin-nav-icon" aria-hidden="true">✦</span><b>Admin</b><span className="admin-nav-owner">OWNER</span></button>}
         <div className={`premium-nav-group ${premiumOpen || ["Presets", "Gradients", "Dashboard", "Extras"].includes(active) ? "premium-nav-group-open" : ""}`}>
-          <button type="button" className={`premium-nav-heading premium-nav-toggle ${["Presets", "Gradients", "Dashboard"].includes(active) ? "active" : ""}`} aria-expanded={premiumOpen || ["Presets", "Gradients", "Dashboard"].includes(active)} onClick={() => setPremiumOpen(value => !value)}>
+          <button type="button" className={`premium-nav-heading premium-nav-toggle ${["Presets", "Gradients", "Dashboard", "Extras"].includes(active) ? "active" : ""}`} aria-expanded={premiumOpen || ["Presets", "Gradients", "Dashboard", "Extras"].includes(active)} onClick={() => setPremiumOpen(value => !value)}>
             <span className="premium-heading-mark" aria-hidden="true">✦</span><b>Premium</b><span className="premium-heading-chevron" aria-hidden="true">⌄</span>
           </button>
           <div className="premium-nav-items">
