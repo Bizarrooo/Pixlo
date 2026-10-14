@@ -1,4 +1,4 @@
-export type SocialKey = "discord" | "youtube" | "roblox" | "github" | "twitch" | "instagram";
+export type SocialKey = "discord" | "youtube" | "roblox" | "github" | "twitch" | "instagram" | "spotify";
 export type ProfileFont = "Inter" | "DM Sans" | "Manrope" | "Poppins" | "Montserrat" | "Space Grotesk" | "Outfit" | "Plus Jakarta Sans" | "Rubik" | "Raleway" | "Playfair Display" | "Bebas Neue" | "Oswald" | "JetBrains Mono" | "Fira Code" | "Arial" | "system" | "monospace" | "Georgia" | "Courier New" | "Trebuchet MS" | "Impact" | "Times New Roman" | "Verdana";
 export type TextAnimation = "none" | "fade-up" | "blur-in" | "typewriter" | "glitch" | "slide" | "float" | "pop";
 export type CustomLink = {
@@ -246,8 +246,8 @@ export const defaultSettings: ProfileSettings = {
   alignment: "center",
   socialsPerRow: 3,
   views: 0,
-  socials: { discord: "", youtube: "", roblox: "", github: "", twitch: "", instagram: "" },
-  socialColours: { discord: "#FFFFFF", youtube: "#FFFFFF", roblox: "#FFFFFF", github: "#FFFFFF", twitch: "#FFFFFF", instagram: "#FFFFFF" },
+  socials: { discord: "", youtube: "", roblox: "", github: "", twitch: "", instagram: "", spotify: "" },
+  socialColours: { discord: "#FFFFFF", youtube: "#FFFFFF", roblox: "#FFFFFF", github: "#FFFFFF", twitch: "#FFFFFF", instagram: "#FFFFFF", spotify: "#FFFFFF" },
   socialIconColour: "#FFFFFF",
   socialIconSize: 28,
   customLinks: [],
