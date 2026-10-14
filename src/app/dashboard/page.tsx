@@ -242,6 +242,18 @@ export default function Dashboard() {
   const [saved, setSaved] = useState(false);
   const [presetsPremium, setPresetsPremium] = useState(false);
   const [presetsPremiumReady, setPresetsPremiumReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/premium/status", { cache: "no-store", credentials: "include" })
+      .then(async response => ({ ok: response.ok, data: await response.json().catch(() => ({})) }))
+      .then(({ ok, data }) => {
+        if (cancelled) return;
+        setPresetsPremium(Boolean(ok && data?.premium));
+        setPresetsPremiumReady(true);
+      })
+      .catch(() => { if (!cancelled) setPresetsPremiumReady(true); });
+    return () => { cancelled = true; };
+  }, []);
   const [presets, setPresets] = useState<{ slot_number: number; name: string; settings: Partial<ProfileSettings>; updated_at: string }[]>([]);
   const [presetBusy, setPresetBusy] = useState<number | null>(null);
   const [presetNames, setPresetNames] = useState<Record<number, string>>({});
