@@ -91,6 +91,10 @@ export type ProfileSettings = {
   showFooter: boolean;
   socialPills: boolean;
   layout: "Default" | "Modern" | "Minimal" | "Sleek" | "Text Only";
+  extrasLayout: "pages" | "vertical" | "horizontal";
+  timezoneEnabled: boolean;
+  timezone: string;
+  timezonePage: number;
   alignment: "center" | "left";
   socialsPerRow: 2 | 3 | 4;
   views: number;
@@ -243,6 +247,10 @@ export const defaultSettings: ProfileSettings = {
   showFooter: true,
   socialPills: true,
   layout: "Default",
+  extrasLayout: "pages",
+  timezoneEnabled: true,
+  timezone: "Europe/London",
+  timezonePage: 2,
   alignment: "center",
   socialsPerRow: 3,
   views: 0,
@@ -352,6 +360,10 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
   return {
     ...defaultSettings,
     ...parsed,
+    extrasLayout: parsed.extrasLayout === "vertical" || parsed.extrasLayout === "horizontal" ? parsed.extrasLayout : "pages",
+    timezoneEnabled: typeof parsed.timezoneEnabled === "boolean" ? parsed.timezoneEnabled : defaultSettings.timezoneEnabled,
+    timezone: typeof parsed.timezone === "string" && parsed.timezone.length <= 80 ? parsed.timezone : defaultSettings.timezone,
+    timezonePage: Math.max(2, Math.min(12, Number.isFinite(Number(parsed.timezonePage)) ? Math.round(Number(parsed.timezonePage)) : 2)),
     dashboardBackgroundGradientColours: Array.isArray(parsed.dashboardBackgroundGradientColours) && parsed.dashboardBackgroundGradientColours.length === 3 ? parsed.dashboardBackgroundGradientColours.map((c: unknown, i: number) => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c) ? c : defaultSettings.dashboardBackgroundGradientColours[i]) as [string,string,string] : defaultSettings.dashboardBackgroundGradientColours,
     dashboardTextGradientColours: Array.isArray(parsed.dashboardTextGradientColours) && parsed.dashboardTextGradientColours.length === 3 ? parsed.dashboardTextGradientColours.map((c: unknown, i: number) => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c) ? c : defaultSettings.dashboardTextGradientColours[i]) as [string,string,string] : defaultSettings.dashboardTextGradientColours,
     dashboardCustomisationEnabled: typeof parsed.dashboardCustomisationEnabled === "boolean" ? parsed.dashboardCustomisationEnabled : defaultSettings.dashboardCustomisationEnabled,
