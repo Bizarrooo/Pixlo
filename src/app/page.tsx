@@ -119,7 +119,7 @@ function TopViewedProfiles() {
                 <div className="home-profile-stack-iframe-shell">
                   <iframe
                     className="home-profile-stack-iframe"
-                    src={`/${encodeURIComponent(profile.username)}?embed=1`}
+                    src={`/user/${encodeURIComponent(profile.username)}?embed=1`}
                     title={`${profile.displayName || profile.username} Pixlo profile`}
                     loading="lazy"
                     tabIndex={-1}
