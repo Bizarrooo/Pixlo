@@ -116,6 +116,7 @@ async function announcePremiumPurchase(guild, member, entitlement) {
     ? new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(amount / 100)
     : "Amount unavailable";
 
+  const premiumBadgeEmoji = guild.emojis.cache.find(emoji => emoji.name === "White_Premium_Badge") || null;
   const embed = new EmbedBuilder()
     .setColor(EMBED_ORANGE)
     .setTitle("💎 Pixlo Premium Successfully Purchased!")
@@ -128,6 +129,12 @@ async function announcePremiumPurchase(guild, member, entitlement) {
     )
     .setFooter({ text: "Pixlo • Premium purchase confirmation" })
     .setTimestamp(validDate ? purchasedDate : new Date());
+
+  if (premiumBadgeEmoji) {
+    embed.setThumbnail(premiumBadgeEmoji.imageURL({ extension: "png", size: 256 }));
+  } else {
+    embed.setThumbnail("https://pixlo1.vercel.app/pixlo-premium-icon.svg");
+  }
 
   await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
   console.log(`[premium-role] posted purchase confirmation for Discord user ${member.id}`);
@@ -214,7 +221,7 @@ async function postBadgeInfo(guild) {
     { name: `${customEmojiText(guild, "White_Bug_Hunter_Badge")}  __Bug Hunter:__`, value: "Report **2 or more valid bugs** affecting Pixlo. Each report must be reviewed and confirmed as a valid bug." },
     { name: `${customEmojiText(guild, "White_Server_Booster_Badge")}  __Server Booster:__`, value: "Boost the official Pixlo Discord server at least once and **maintain your boost permanently** to keep this badge." },
     { name: `${customEmojiText(guild, "White_Donor_Badge")}  __Donor:__`, value: "Support Pixlo with a donation of **£5 or more**." },
-    { name: `${customEmojiText(guild, "White_Premium_Badge")}  __Premium:__`, value: "Purchase a **Pixlo Premium** subscription. **Coming soon.**" },
+    { name: `${customEmojiText(guild, "White_Premium_Badge")}  __Premium:__`, value: "Purchase **Pixlo Premium — Lifetime** through the official Pixlo website." },
     { name: `${customEmojiText(guild, "White_Verification_Badge")}  __Verified:__`, value: "Be a content creator with **5,000+ YouTube subscribers** or **10,000+ TikTok followers**, **or receive direct approval from Bizarro**." },
   ];
   const embed = new EmbedBuilder()
