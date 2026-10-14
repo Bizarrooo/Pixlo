@@ -19,6 +19,8 @@ const INTERVAL_MS = 5 * 60 * 1000;
 const PREMIUM_SYNC_INTERVAL_MS = 15 * 1000;
 const checkedPurchaseAnnouncements = new Set();
 const announcedRevocationRecipients = new Set();
+const processingPremiumGiftIds = new Set();
+const processingPremiumPurchaseKeys = new Set();
 let premiumFastSyncing = false;
 const pendingRoleChanges = new Map();
 let syncing = false;
@@ -116,6 +118,24 @@ async function getAllPremiumRevocations() {
 }
 
 async function announcePremiumGift(guild, profiles, gift) {
+  const giftId = String(gift?.id || "");
+  if (!giftId) {
+    console.error("[premium-gift] Skipping a gift record without an id.");
+    return;
+  }
+  if (processingPremiumGiftIds.has(giftId)) {
+    console.log(`[premium-gift] duplicate in-flight processing skipped for gift ${giftId}`);
+    return;
+  }
+  processingPremiumGiftIds.add(giftId);
+  try {
+    await announcePremiumGiftOnce(guild, profiles, gift);
+  } finally {
+    processingPremiumGiftIds.delete(giftId);
+  }
+}
+
+async function announcePremiumGiftOnce(guild, profiles, gift) {
   if (gift.announced_at) return;
   const giverProfile = profiles.find(profile => String(profile.id) === String(gift.giver_user_id));
   const recipientProfile = profiles.find(profile => String(profile.id) === String(gift.recipient_user_id));
@@ -213,6 +233,16 @@ async function announcePremiumGift(guild, profiles, gift) {
 
 async function announcePremiumPurchase(guild, member, entitlement) {
   const purchaseKey = `${member.id}:${entitlement.purchased_at || entitlement.updated_at || "unknown"}`;
+  if (checkedPurchaseAnnouncements.has(purchaseKey) || processingPremiumPurchaseKeys.has(purchaseKey)) return;
+  processingPremiumPurchaseKeys.add(purchaseKey);
+  try {
+    await announcePremiumPurchaseOnce(guild, member, entitlement, purchaseKey);
+  } finally {
+    processingPremiumPurchaseKeys.delete(purchaseKey);
+  }
+}
+
+async function announcePremiumPurchaseOnce(guild, member, entitlement, purchaseKey) {
   if (checkedPurchaseAnnouncements.has(purchaseKey)) return;
   const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
   if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
@@ -666,6 +696,7 @@ client.once("ready", async () => {
           }),
         ]);
         await syncPremiumRole(guild, profiles, entitlements, gifts, revocations);
+        console.log(`[premium-fast-sync] loaded ${profiles.length} profiles, ${entitlements.length} active entitlements, ${gifts.filter(gift => gift.status === "completed" && !gift.announced_at).length} unannounced completed gifts, ${revocations.length} pending revocations`);
         for (const gift of gifts) {
           try { await announcePremiumGift(guild, profiles, gift); }
           catch (error) { console.error("[premium-gift] fast announcement check failed:", error instanceof Error ? error.message : error); }
