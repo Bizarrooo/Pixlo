@@ -4,6 +4,9 @@ import { supabaseConfig } from "../../../lib/supabase-config";
 
 export const runtime = "nodejs";
 
+// The Pixlo owner account has Premium access for testing and administration.
+const PIXLO_OWNER_ID = "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
+
 function cookieValue(request: Request, name: string) {
   const raw = request.headers.get("cookie") || "";
   const value = raw.match(new RegExp(`(?:^|; )${name}=([^;]+)`))?.[1] || "";
@@ -21,6 +24,7 @@ async function sessionUser(request: Request) {
 }
 
 async function premiumAccess(userId: string, url: string, serviceKey: string) {
+  if (userId === PIXLO_OWNER_ID) return true;
   const liveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
   const response = await fetch(
     `${url}/rest/v1/pixlo_premium_entitlements?select=status&user_id=eq.${encodeURIComponent(userId)}&livemode=eq.${liveMode}&limit=1`,
