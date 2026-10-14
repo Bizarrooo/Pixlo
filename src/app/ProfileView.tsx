@@ -570,7 +570,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       {isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername && <section className={`pixlo-extras pixlo-extras-${settings.extrasLayout}`} aria-label="Extras">
         <div className="pixlo-extras-heading"><div><span>PIXLO / PREMIUM</span><h2>Extras</h2><p>Little details, across time zones.</p></div><div className="pixlo-extras-status"><i /> LIVE</div></div>
         <nav className="pixlo-extras-pages" aria-label="Extras pages">
-          {Array.from({ length: Math.max(2, settings.timezonePage) }, (_, index) => index + 1).map(page => <button type="button" key={page} className={extrasPage === page ? "active" : ""} onClick={() => setExtrasPage(page)} aria-current={extrasPage === page ? "page" : undefined}><span>{String(page).padStart(2, "0")}</span><small>{page === 1 ? "Overview" : page === settings.timezonePage ? "Timezones" : "Coming soon"}</small></button>)}
+          {Array.from({ length: Math.max(2, settings.timezonePage) }, (_, index) => index + 1).map(page => <button type="button" key={page} className={extrasPage === page ? "active" : ""} onClick={() => setExtrasPage(page)} aria-current={extrasPage === page ? "page" : undefined}><span>{String(page).padStart(2, "0")}</span><small>{page === 1 ? "Overview" : page === settings.timezonePage ? "Extra" : "Coming soon"}</small></button>)}
         </nav>
         <div className="pixlo-extras-viewport" key={settings.extrasLayout}>
           {(settings.extrasLayout === "pages" ? [extrasPage] : Array.from({ length: Math.max(2, settings.timezonePage) }, (_, index) => index + 1)).map(page => <article key={`${page}-${extrasPage}`} ref={node => { extrasPageRefs.current[page] = node; }} className={`pixlo-extras-panel ${extrasPage === page ? "is-current" : ""} ${page === settings.timezonePage ? "pixlo-timezone-panel" : ""}`}>
@@ -605,7 +605,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           .pixlo-extras-vertical .pixlo-extras-viewport{max-height:580px;overflow-y:auto;scroll-behavior:smooth;padding-right:3px}.pixlo-extras-horizontal .pixlo-extras-viewport{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding-bottom:5px}.pixlo-extras-horizontal .pixlo-extras-panel{flex:0 0 100%;scroll-snap-align:center}.pixlo-extras-vertical .pixlo-extras-panel{margin-bottom:12px}
           @media(max-width:650px){.pixlo-extras{padding:14px;border-radius:20px}.pixlo-extras-welcome{padding:22px;min-height:205px}.pixlo-extras-orbit{display:none}.pixlo-timezone-content{padding:17px}.pixlo-timezone-grid{grid-template-columns:1fr}.pixlo-timezone-primary{gap:16px;padding:15px}.pixlo-analog-clock,.pixlo-clock-face{width:76px;height:76px;flex-basis:76px}.pixlo-clock-hour{height:18px}.pixlo-clock-minute{height:25px}.pixlo-clock-second{height:28px}.pixlo-timezone-footer{font-size:8px}.pixlo-extras-pages button{padding:8px 10px}}
         `}</style>
-      </section>
+      </section>}
     </main>
   );
 }
