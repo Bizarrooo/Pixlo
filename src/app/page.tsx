@@ -80,6 +80,71 @@ function ProfileMockup({ variant = "main" }: { variant?: "main" | "alt" }) {
 }
 
 
+type ViewedProfile = { username: string; displayName: string; views: number; rank: number };
+
+function TopViewedProfiles() {
+  const [profiles, setProfiles] = useState<ViewedProfile[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/profile-stats?username=pixlo", { cache: "no-store" })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error("Leaderboard unavailable")))
+      .then(data => {
+        if (cancelled) return;
+        const ranked = Array.isArray(data?.leaderboard) ? data.leaderboard : [];
+        setProfiles(ranked.slice(0, 3).filter((profile: Partial<ViewedProfile>) =>
+          typeof profile.username === "string" && /^[a-z0-9._-]{3,24}$/i.test(profile.username)
+        ));
+        setLoaded(true);
+      })
+      .catch(() => { if (!cancelled) setLoaded(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div className="home-profile-stack" aria-label="Pixlo's three most viewed profiles">
+      {profiles.length === 3 ? (
+        <>
+          {[profiles[2], profiles[1], profiles[0]].map((profile, index) => {
+            const layer = index === 0 ? "third" : index === 1 ? "second" : "front";
+            return (
+              <Link
+                key={profile.username}
+                href={`/${encodeURIComponent(profile.username)}`}
+                className={`home-profile-stack-card home-profile-stack-${layer} home-profile-stack-live`}
+                aria-label={`#${profile.rank} most viewed profile: ${profile.displayName || profile.username}, ${profile.views.toLocaleString()} views`}
+                style={{ zIndex: index + 1 }}
+              >
+                <div className="home-profile-stack-iframe-shell">
+                  <iframe
+                    className="home-profile-stack-iframe"
+                    src={`/${encodeURIComponent(profile.username)}?embed=1`}
+                    title={`${profile.displayName || profile.username} Pixlo profile`}
+                    loading="lazy"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  />
+                </div>
+                <span className="home-profile-stack-rank">#{profile.rank} · {profile.views.toLocaleString()} views</span>
+              </Link>
+            );
+          })}
+          <span className="home-profile-stack-glow" aria-hidden="true" />
+        </>
+      ) : (
+        <div className="home-profile-stack-empty">
+          <span className="home-profile-stack-empty-mark">P</span>
+          <strong>{loaded ? "Discover Pixlo profiles" : "Loading top profiles…"}</strong>
+          <span>{loaded ? "The views leaderboard will appear here when profile data is available." : "Finding the three most viewed profiles"}</span>
+          <Link href="/user">Explore profiles <Icon name="arrow" size={14} /></Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function LiveProfileCard() {
   return (
     <div className="home-live-profile-card" aria-label="Live Pixlo profile preview">
@@ -184,12 +249,7 @@ export default function Home() {
           
         </div>
         <div className="revamp-hero-side">
-          <div className="home-profile-stack" aria-label="Layered Pixlo profile showcase">
-            <div className="home-profile-stack-card home-profile-stack-back home-profile-stack-third" aria-hidden="true"><ProfileMockup variant="alt" /></div>
-            <div className="home-profile-stack-card home-profile-stack-back home-profile-stack-second" aria-hidden="true"><ProfileMockup /></div>
-            <div className="home-profile-stack-card home-profile-stack-front"><LiveProfileCard /></div>
-            <span className="home-profile-stack-glow" aria-hidden="true" />
-          </div>
+          <TopViewedProfiles />
         </div>
         <div className="revamp-hero-index" aria-hidden="true">P</div>
       </section>
