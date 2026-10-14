@@ -174,7 +174,14 @@ export default function Home() {
       [".home-showcase-copy", "home-reveal-left"],
       [".home-showcase-stage", "home-reveal-right"],
       [".home-cta-inner", "home-reveal-up"],
-      [".home-footer", "home-reveal-up"]
+      [".home-footer", "home-reveal-up"],
+      [".revamp-section-intro", "home-reveal-up"],
+      [".revamp-feature", "home-reveal-up"],
+      [".revamp-showcase-art", "home-reveal-left"],
+      [".revamp-showcase-text", "home-reveal-right"],
+      [".revamp-support-main", "home-reveal-left"],
+      [".revamp-premium-panel", "home-reveal-right"],
+      [".revamp-footer", "home-reveal-up"]
     ] as const;
     const observed: HTMLElement[] = [];
     groups.forEach(([selector, motionClass]) => {
