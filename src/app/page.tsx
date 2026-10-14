@@ -184,7 +184,12 @@ export default function Home() {
           
         </div>
         <div className="revamp-hero-side">
-          <LiveProfileCard />
+          <div className="home-profile-stack" aria-label="Layered Pixlo profile showcase">
+            <div className="home-profile-stack-card home-profile-stack-back home-profile-stack-third" aria-hidden="true"><ProfileMockup variant="alt" /></div>
+            <div className="home-profile-stack-card home-profile-stack-back home-profile-stack-second" aria-hidden="true"><ProfileMockup /></div>
+            <div className="home-profile-stack-card home-profile-stack-front"><LiveProfileCard /></div>
+            <span className="home-profile-stack-glow" aria-hidden="true" />
+          </div>
         </div>
         <div className="revamp-hero-index" aria-hidden="true">P</div>
       </section>
