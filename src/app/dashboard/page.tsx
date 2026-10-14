@@ -589,7 +589,7 @@ export default function Dashboard() {
       setPremiumRevokeMessage("Enter a valid Pixlo username.");
       return;
     }
-    if (!window.confirm(`Revoke lifetime Pixlo Premium from @${username}? This will remove their Premium entitlement and Premium badge. No Discord announcement will be sent.`)) return;
+    if (!window.confirm(`Revoke lifetime Pixlo Premium from @${username}? This will remove their Premium entitlement and Premium badge. The Discord bot will announce the revocation when it next syncs and removes their Premium role.`)) return;
     setPremiumRevokeBusy(true);
     setPremiumRevokeMessage("");
     try {
@@ -602,7 +602,7 @@ export default function Dashboard() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Could not revoke Premium.");
-      setPremiumRevokeMessage(`Revoked lifetime Premium from @${data.recipient?.username || username}. No Discord announcement was sent.`);
+      setPremiumRevokeMessage(`Revoked lifetime Premium from @${data.recipient?.username || username}. The Discord bot will announce the revocation on its next Premium sync.`);
       setPremiumRevokeUsername("");
     } catch (error) {
       setPremiumRevokeMessage(error instanceof Error ? error.message : "Could not revoke Premium.");
@@ -1400,7 +1400,7 @@ export default function Dashboard() {
               {premiumGiftMessage && <p className="view-admin-message" role="status">{premiumGiftMessage}</p>}
             </div>
             <div className="view-admin-tool">
-              <div><b>Revoke lifetime Premium</b><p>Remove a Pixlo account’s Premium entitlement and Premium badge. This action does not send a Discord announcement.</p></div>
+              <div><b>Revoke lifetime Premium</b><p>Remove a Pixlo account’s Premium entitlement and Premium badge. The Discord bot announces the revocation when its next sync removes their Premium role.</p></div>
               <Field label="Account username"><input value={premiumRevokeUsername} onChange={event => setPremiumRevokeUsername(event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 24))} placeholder="username" autoComplete="off" maxLength={24} /></Field>
               <div className="view-admin-actions"><button type="button" disabled={premiumRevokeBusy || premiumRevokeUsername.trim().length < 3} onClick={() => void revokePremium()}>{premiumRevokeBusy ? "Revoking Premium…" : "Revoke Premium"}</button></div>
               {premiumRevokeMessage && <p className="view-admin-message" role="status">{premiumRevokeMessage}</p>}
