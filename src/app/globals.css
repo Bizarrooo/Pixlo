@@ -6289,3 +6289,13 @@ html { scroll-behavior:smooth; }
 .pixlo-revamp-home .home-live-profile-iframe {
   pointer-events: none !important;
 }
+
+
+/* Keep the dashboard live preview aligned to the top of the viewport.
+   The editor header occupies the first row, but the preview is its own sticky column. */
+.dashboard-revamp .preview-panel {
+  margin-top: -82px !important;
+  top: 82px !important;
+  height: calc(100vh - 82px) !important;
+  padding-top: 18px !important;
+}
