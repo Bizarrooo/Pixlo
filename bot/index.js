@@ -18,6 +18,7 @@ const EMBED_ORANGE = 0xFFD580;
 const INTERVAL_MS = 5 * 60 * 1000;
 const PREMIUM_SYNC_INTERVAL_MS = 15 * 1000;
 const checkedPurchaseAnnouncements = new Set();
+const announcedRevocationRecipients = new Set();
 let premiumFastSyncing = false;
 const pendingRoleChanges = new Map();
 let syncing = false;
@@ -91,7 +92,7 @@ async function getAllPremiumGifts() {
   let offset = 0;
   const pageSize = 1000;
   while (true) {
-    const page = await db(`pixlo_premium_gifts?select=id,giver_user_id,recipient_user_id,gift_type,value_pence,currency,status,created_at,announced_at&status=eq.completed&order=created_at.asc&limit=${pageSize}&offset=${offset}`);
+    const page = await db(`pixlo_premium_gifts?select=id,giver_user_id,recipient_user_id,gift_type,value_pence,currency,status,created_at,announced_at&status=in.(completed,revoked)&order=created_at.asc&limit=${pageSize}&offset=${offset}`);
     if (!Array.isArray(page) || page.length === 0) break;
     gifts.push(...page);
     if (page.length < pageSize) break;
@@ -107,6 +108,32 @@ async function announcePremiumGift(guild, profiles, gift) {
   const giverMember = giverProfile?.discord_id ? guild.members.cache.get(String(giverProfile.discord_id)) : null;
   const recipientMember = recipientProfile?.discord_id ? guild.members.cache.get(String(recipientProfile.discord_id)) : null;
   if (!recipientProfile) return;
+
+  // A revoke action resets announced_at on the gift ledger row. Process this durable
+  // event even if the Premium role was already absent when the bot next syncs.
+  if (gift.status === "revoked") {
+    const recipientId = String(recipientProfile.id);
+    if (announcedRevocationRecipients.has(recipientId)) return;
+    announcedRevocationRecipients.add(recipientId);
+    try {
+      const posted = await announcePremiumRevocation(guild, recipientMember, recipientProfile);
+      if (!posted) {
+        announcedRevocationRecipients.delete(recipientId);
+        return;
+      }
+      const announcedAt = new Date().toISOString();
+      await db(`pixlo_premium_gifts?recipient_user_id=eq.${encodeURIComponent(recipientId)}&status=eq.revoked`, {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({ announced_at: announcedAt }),
+      });
+      console.log(`[premium-gift] recorded revocation announcement for Pixlo user ${recipientProfile.username}`);
+    } catch (error) {
+      announcedRevocationRecipients.delete(recipientId);
+      throw error;
+    }
+    return;
+  }
   const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
   if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
     console.error("[premium-gift] Missing or inaccessible gift announcement channel " + AWARD_CHANNEL_ID);
@@ -231,25 +258,32 @@ async function announcePremiumPurchase(guild, member, entitlement) {
 }
 
 async function announcePremiumRevocation(guild, member, profile) {
+  const discordId = String(member?.id || profile?.discord_id || "");
+  if (!discordId) {
+    console.error("[premium-role] Cannot announce revocation because the recipient has no linked Discord account.");
+    return false;
+  }
   const channel = await guild.channels.fetch(REVOCATION_CHANNEL_ID).catch(() => null);
   if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
     console.error("[premium-role] Missing or inaccessible Premium revocation channel " + REVOCATION_CHANNEL_ID);
-    return;
+    return false;
   }
-  const username = profile?.username ? `@${profile.username}` : member.user.username;
+  const username = profile?.username ? `@${profile.username}` : (member?.user?.username || "Pixlo member");
+  const memberText = member ? `<@${discordId}>` : username;
   const embed = new EmbedBuilder()
     .setColor(0xE05A47)
     .setTitle("🚫 Pixlo Premium Revoked")
-    .setDescription(`Premium access for <@${member.id}> (${username}) has been revoked. Their Pixlo Premium role has been removed because no active Premium entitlement remains.`)
+    .setDescription(`Premium access for ${memberText} (${username}) has been revoked. Their Pixlo Premium access is no longer active.`)
     .addFields(
-      { name: "👤 Member", value: `<@${member.id}>`, inline: true },
+      { name: "👤 Member", value: member ? `<@${discordId}>` : username, inline: true },
       { name: "💎 Access", value: "Pixlo Premium — Lifetime", inline: true },
       { name: "📌 Status", value: "Revoked", inline: true },
     )
     .setFooter({ text: "Pixlo • Premium access update" })
     .setTimestamp();
   await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
-  console.log(`[premium-role] posted revocation announcement for Discord user ${member.id}`);
+  console.log(`[premium-role] posted revocation announcement for Discord user ${discordId}`);
+  return true;
 }
 
 async function syncPremiumRole(guild, profiles, entitlements, gifts = []) {
@@ -266,6 +300,7 @@ async function syncPremiumRole(guild, profiles, entitlements, gifts = []) {
   const profileByDiscordId = new Map(profiles.filter(profile => profile.discord_id).map(profile => [String(profile.discord_id), profile]));
   const activeEntitlementByUserId = new Map(entitlements.filter(item => item.status === "active").map(item => [String(item.user_id), item]));
   const giftedRecipientIds = new Set(gifts.filter(gift => gift.status === "completed").map(gift => String(gift.recipient_user_id)));
+  const queuedGiftRevocations = new Set(gifts.filter(gift => gift.status === "revoked" && !gift.announced_at).map(gift => String(gift.recipient_user_id)));
   let added = 0;
   let removed = 0;
   for (const member of guild.members.cache.values()) {
@@ -281,7 +316,7 @@ async function syncPremiumRole(guild, profiles, entitlements, gifts = []) {
       } else if (!shouldHaveRole && alreadyHasRole) {
         await member.roles.remove(role.id, "Pixlo Premium lifetime entitlement is not active or account is not linked");
         removed += 1;
-        await announcePremiumRevocation(guild, member, profile);
+        if (!queuedGiftRevocations.has(String(profile?.id || ""))) await announcePremiumRevocation(guild, member, profile);
       }
       if (shouldHaveRole && !giftedRecipientIds.has(String(profile?.id || ""))) {
         await announcePremiumPurchase(guild, member, entitlement);
