@@ -6741,3 +6741,59 @@ html { scroll-behavior:smooth; }
   .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front { transform: translate(2%, 2%) rotate(-.5deg) scale(.98); }
   .pixlo-revamp-home .home-profile-stack-rank { left: 8px; bottom: 8px; font-size: 9px; }
 }
+
+
+/* Fine-tune only the three profile positions; remove all card outlines. */
+.pixlo-revamp-home .home-profile-stack-live {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: 0 22px 55px rgba(0,0,0,.38);
+  border-radius: 30px;
+}
+.pixlo-revamp-home .home-profile-stack-iframe-shell {
+  border-radius: 29px;
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-34%, -12%) rotate(-2deg) scale(.88);
+  filter: brightness(.58) saturate(.72);
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(-18%, -5%) rotate(-1.5deg) scale(.94);
+  filter: brightness(.78) saturate(.86);
+}
+.pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front {
+  transform: translate(5%, 1%) rotate(-1deg) scale(1.02);
+  filter: none;
+}
+.pixlo-revamp-home .home-profile-stack-live:hover {
+  border: 0 !important;
+  outline: 0 !important;
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-third {
+  transform: translate(-35%, -13%) rotate(-2.2deg) scale(.88);
+}
+.pixlo-revamp-home .home-profile-stack:hover .home-profile-stack-live.home-profile-stack-second {
+  transform: translate(-19%, -6%) rotate(-1.7deg) scale(.94);
+}
+@media (max-width: 1100px) {
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third {
+    transform: translate(-27%, -8%) rotate(-2deg) scale(.88);
+  }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second {
+    transform: translate(-14%, -3%) rotate(-1.5deg) scale(.94);
+  }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front {
+    transform: translate(4%, 1%) rotate(-1deg) scale(1);
+  }
+}
+@media (max-width: 600px) {
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-third {
+    transform: translate(-17%, -5%) rotate(-2deg) scale(.9);
+  }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-second {
+    transform: translate(-9%, -2%) rotate(-1.5deg) scale(.95);
+  }
+  .pixlo-revamp-home .home-profile-stack-live.home-profile-stack-front {
+    transform: translate(2%, 1%) rotate(-.5deg) scale(.98);
+  }
+}
