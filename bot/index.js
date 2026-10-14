@@ -681,7 +681,7 @@ client.once("ready", async () => {
       }
     })();
   }, PREMIUM_SYNC_INTERVAL_MS);
-}
+});
 
 function scheduleSync() {
   if (scheduledSync) clearTimeout(scheduledSync);
