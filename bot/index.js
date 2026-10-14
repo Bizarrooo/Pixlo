@@ -149,7 +149,7 @@ async function announcePremiumGift(guild, profiles, gift) {
     .addFields(
       { name: "💝 Gifted By", value: giverText, inline: true },
       { name: "🎁 Recipient", value: recipientText, inline: true },
-      { name: "✨ Gift Value", value: `${valueText} value`, inline: true },
+      { name: "✨ Gift Value", value: `${valueText} lifetime value`, inline: true },
       { name: "♾️ Access", value: "Lifetime Premium", inline: true },
       { name: "🎟️ Gift Type", value: gift.gift_type === "free" ? "Owner gift" : "Purchased gift", inline: true },
     )
