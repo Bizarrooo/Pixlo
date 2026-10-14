@@ -44,8 +44,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "That Pixlo username could not be found." }, { status: 404 });
   }
   const recipient = profiles[0];
-  const liveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
-  const entitlementResponse = await fetch(`${url}/rest/v1/pixlo_premium_entitlements?select=user_id,status&user_id=eq.${encodeURIComponent(String(recipient.id))}&livemode=eq.${liveMode}&status=eq.active`, {
+  // Revoke active entitlements from either Stripe mode. Sandbox purchases are not
+  // production Premium, but the admin revoke control should still clean up stale test rows.
+  const entitlementResponse = await fetch(`${url}/rest/v1/pixlo_premium_entitlements?select=user_id,status,livemode&user_id=eq.${encodeURIComponent(String(recipient.id))}&status=eq.active`, {
     method: "PATCH",
     headers: { ...headers, Prefer: "return=representation" },
     body: JSON.stringify({ status: "revoked", updated_at: new Date().toISOString() }),
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not revoke the Premium entitlement." }, { status: 503 });
   }
   if (!Array.isArray(changed) || changed.length === 0) {
-    return NextResponse.json({ error: `@ ${recipient.username} does not have an active Premium entitlement in this mode.`.replace("@ ", "@") }, { status: 404 });
+    return NextResponse.json({ error: `@${"${recipient.username}"} does not have any active Premium entitlement in live or test mode.` }, { status: 404 });
   }
 
   // Mark gift ledger entries as handled and revoked so the bot cannot announce an old, unannounced gift later.
