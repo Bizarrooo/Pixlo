@@ -156,53 +156,38 @@ async function announcePremiumGiftOnce(guild, profiles, gift) {
       return;
     }
 
-    const alreadyAnnounced = await channel.messages.fetch({ limit: 100 }).then(recent =>
-      recent.some(message =>
-        message.author.id === client.user.id &&
-        message.embeds.some(embed =>
-          embed.title === "💎 Pixlo Premium Gifted!" &&
-          (embed.fields || []).some(field => field.name === "🎁 Recipient" && field.value.includes(String(recipientMember?.id || recipientProfile.username))) &&
-          (embed.fields || []).some(field => field.name === "💝 Gifted By" && field.value.includes(String(giverMember?.id || giverProfile?.username || gift.giver_user_id)))
-        )
+    // Do not deduplicate by giver/recipient: the same people can exchange multiple gifts.
+    // award_announced_at is the per-gift idempotency marker; an old message must not
+    // suppress a new gift's announcement.
+    const value = Number(gift.value_pence);
+    const currency = String(gift.currency || "gbp").toUpperCase();
+    let valueText = "Value unavailable";
+    try {
+      if (Number.isFinite(value)) valueText = new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(value / 100);
+    } catch {}
+    const giftDate = new Date(gift.created_at || Date.now());
+    const validDate = !Number.isNaN(giftDate.getTime());
+    const premiumBadgeEmoji = guild.emojis.cache.find(emoji => emoji.name === "White_Premium_Badge") || null;
+    const giverText = giverMember ? `<@${giverMember.id}>` : `@${giverProfile?.username || "Pixlo"}`;
+    const recipientText = recipientMember ? `<@${recipientMember.id}>` : `@${recipientProfile.username}`;
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_ORANGE)
+      .setTitle("💎 Pixlo Premium Gifted!")
+      .setDescription(`🎁 ${giverText} has gifted ${recipientText} **lifetime Pixlo Premium**!`)
+      .addFields(
+        { name: "💝 Gifted By", value: giverText, inline: true },
+        { name: "🎁 Recipient", value: recipientText, inline: true },
+        { name: "✨ Gift Value", value: `${valueText} lifetime value`, inline: true },
+        { name: "♾️ Access", value: "Lifetime Premium", inline: true },
+        { name: "🎟️ Gift Type", value: gift.gift_type === "free" ? "Owner gift" : "Purchased gift", inline: true },
       )
-    ).catch(error => {
-      console.warn("[premium-gift] Could not check existing gift announcements:", error instanceof Error ? error.message : error);
-      return false;
-    });
+      .setFooter({ text: "Pixlo • Keep earning, keep flexing." })
+      .setTimestamp(validDate ? giftDate : new Date());
+    if (premiumBadgeEmoji) embed.setThumbnail(premiumBadgeEmoji.imageURL({ extension: "png", size: 256 }));
+    else embed.setThumbnail("https://pixlo1.vercel.app/pixlo-premium-icon.svg");
 
-    if (!alreadyAnnounced) {
-      const value = Number(gift.value_pence);
-      const currency = String(gift.currency || "gbp").toUpperCase();
-      let valueText = "Value unavailable";
-      try {
-        if (Number.isFinite(value)) valueText = new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(value / 100);
-      } catch {}
-      const giftDate = new Date(gift.created_at || Date.now());
-      const validDate = !Number.isNaN(giftDate.getTime());
-      const premiumBadgeEmoji = guild.emojis.cache.find(emoji => emoji.name === "White_Premium_Badge") || null;
-      const giverText = giverMember ? `<@${giverMember.id}>` : `@${giverProfile?.username || "Pixlo"}`;
-      const recipientText = recipientMember ? `<@${recipientMember.id}>` : `@${recipientProfile.username}`;
-      const embed = new EmbedBuilder()
-        .setColor(EMBED_ORANGE)
-        .setTitle("💎 Pixlo Premium Gifted!")
-        .setDescription(`🎁 ${giverText} has gifted ${recipientText} **lifetime Pixlo Premium**!`)
-        .addFields(
-          { name: "💝 Gifted By", value: giverText, inline: true },
-          { name: "🎁 Recipient", value: recipientText, inline: true },
-          { name: "✨ Gift Value", value: `${valueText} lifetime value`, inline: true },
-          { name: "♾️ Access", value: "Lifetime Premium", inline: true },
-          { name: "🎟️ Gift Type", value: gift.gift_type === "free" ? "Owner gift" : "Purchased gift", inline: true },
-        )
-        .setFooter({ text: "Pixlo • Keep earning, keep flexing." })
-        .setTimestamp(validDate ? giftDate : new Date());
-      if (premiumBadgeEmoji) embed.setThumbnail(premiumBadgeEmoji.imageURL({ extension: "png", size: 256 }));
-      else embed.setThumbnail("https://pixlo1.vercel.app/pixlo-premium-icon.svg");
-
-      await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
-      console.log(`[premium-gift] posted ${gift.gift_type} Premium gift announcement for recipient ${recipientProfile.username}`);
-    } else {
-      console.log(`[premium-gift] matching award announcement already exists for gift ${gift.id}; marking it handled`);
-    }
+    await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+    console.log(`[premium-gift] posted ${gift.gift_type} Premium gift announcement for recipient ${recipientProfile.username} (gift ${gift.id})`);
 
     const awardAnnouncedAt = new Date().toISOString();
     const patch = await db(`pixlo_premium_gifts?id=eq.${encodeURIComponent(String(gift.id))}`, {
