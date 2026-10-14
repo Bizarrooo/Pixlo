@@ -7347,3 +7347,22 @@ html { scroll-behavior:smooth; }
     transition: none !important;
   }
 }
+
+
+/* Preserve the normal hover lift after a section has finished its scroll reveal. */
+.pixlo-revamp-home.motion-ready .revamp-feature.is-visible:hover {
+  transform: translateY(-7px);
+}
+.pixlo-revamp-home.motion-ready .revamp-showcase-art.is-visible:hover {
+  transform: perspective(1000px) rotateY(-2deg) rotateX(1deg) translateY(-4px);
+}
+.pixlo-revamp-home.motion-ready .revamp-premium-panel.is-visible:hover {
+  transform: translateY(-5px);
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .pixlo-revamp-home.motion-ready .revamp-feature.is-visible:hover,
+  .pixlo-revamp-home.motion-ready .revamp-showcase-art.is-visible:hover,
+  .pixlo-revamp-home.motion-ready .revamp-premium-panel.is-visible:hover {
+    transform: translate3d(0, 0, 0);
+  }
+}
