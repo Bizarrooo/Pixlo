@@ -4067,6 +4067,8 @@ body:has(.preset-preview-mode) { margin:0!important; }
 
 /* Pixlo Premium gradients: duplicated colour stops make the moving loop seamless. */
 .profile-page.gradient-text-on .profile-name-row h1,
+.profile-page.gradient-text-on .username,
+.profile-page.gradient-text-on .description,
 .profile-page.gradient-text-on .profile-username,
 .profile-page.gradient-text-on .profile-description,
 .profile-page.gradient-text-on .profile-location,
