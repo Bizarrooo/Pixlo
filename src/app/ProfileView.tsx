@@ -62,6 +62,10 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const [playing, setPlaying] = useState(false);
   const [assets, setAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", musicCover: "", musicAudio: "", musicMediaType: "", customLinkIcons: {} as Record<string, string> });
   const [profileBadges, setProfileBadges] = useState<Array<{ id: string; name: string; icon_url: string | null; description: string }>>([]);
+  const [isPremium, setIsPremium] = useState(false);
+  const [extrasPage, setExtrasPage] = useState(1);
+  const [clockNow, setClockNow] = useState(() => new Date());
+  const extrasPageRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const [trackIndex, setTrackIndex] = useState(0);
   const [musicVideoFallback, setMusicVideoFallback] = useState(false);
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
@@ -132,6 +136,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       })
       .then(async data => {
         if (!cancelled) setProfileBadges(Array.isArray(data?.profile?.badges) ? data.profile.badges : []);
+        if (!cancelled) setIsPremium(Boolean(data?.profile?.premium));
         const previewSlot = new URLSearchParams(window.location.search).get("presetPreview");
         let remote = data?.profile?.settings;
         if (previewSlot && /^[1-5]$/.test(previewSlot)) {
@@ -165,6 +170,21 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       .catch(() => { if (!cancelled) setProfileStatus("error"); });
     return () => { cancelled = true; };
   }, [forcedUsername]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setClockNow(new Date()), 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setExtrasPage(1);
+  }, [forcedUsername]);
+
+  useEffect(() => {
+    if (settings.extrasLayout === "pages") return;
+    const target = extrasPageRefs.current[extrasPage];
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: settings.extrasLayout === "horizontal" ? "center" : "nearest" });
+  }, [extrasPage, settings.extrasLayout, settings.timezonePage]);
 
   useEffect(() => {
     const username = (forcedUsername || "").trim().toLowerCase();
@@ -543,8 +563,47 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             )}
 
             {settings.showFooter && <div className="profile-footer"><span><i className="online-dot" /> Online</span>{settings.showViews && <span>{settings.views || 0} views</span>}</div>}
+
           </div>
         </div>
+      </section>
+      {isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername && <section className={`pixlo-extras pixlo-extras-${settings.extrasLayout}`} aria-label="Extras">
+        <div className="pixlo-extras-heading"><div><span>PIXLO / PREMIUM</span><h2>Extras</h2><p>Little details, across time zones.</p></div><div className="pixlo-extras-status"><i /> LIVE</div></div>
+        <nav className="pixlo-extras-pages" aria-label="Extras pages">
+          {Array.from({ length: Math.max(2, settings.timezonePage) }, (_, index) => index + 1).map(page => <button type="button" key={page} className={extrasPage === page ? "active" : ""} onClick={() => setExtrasPage(page)} aria-current={extrasPage === page ? "page" : undefined}><span>{String(page).padStart(2, "0")}</span><small>{page === 1 ? "Overview" : page === settings.timezonePage ? "Timezones" : "Coming soon"}</small></button>)}
+        </nav>
+        <div className="pixlo-extras-viewport" key={settings.extrasLayout}>
+          {(settings.extrasLayout === "pages" ? [extrasPage] : Array.from({ length: Math.max(2, settings.timezonePage) }, (_, index) => index + 1)).map(page => <article key={page} ref={node => { extrasPageRefs.current[page] = node; }} className={`pixlo-extras-panel ${extrasPage === page ? "is-current" : ""} ${page === settings.timezonePage ? "pixlo-timezone-panel" : ""}`}>
+            {page === 1 ? <div className="pixlo-extras-welcome"><span className="pixlo-extras-orbit" aria-hidden="true"><i /><i /><i /></span><div><span className="pixlo-extras-kicker">YOUR SPACE, EXPANDED</span><h3>More than a profile.</h3><p>Explore little widgets and useful details picked by the profile owner. New extras can live here without crowding the main page.</p><button type="button" onClick={() => setExtrasPage(Math.min(2, settings.timezonePage))}>Explore extras <span>↗</span></button></div><span className="pixlo-extras-page-number">01</span></div>
+            : page === settings.timezonePage ? <div className="pixlo-timezone-content">
+                <div className="pixlo-timezone-topline"><span className="pixlo-extras-kicker">WORLD CLOCK</span><span className="pixlo-timezone-zone">{settings.timezone.replace(/_/g, " ").split("/").slice(-1)[0]}</span></div>
+                <div className="pixlo-timezone-grid">
+                  <div className="pixlo-timezone-primary">
+                    <div className="pixlo-analog-clock" aria-label={new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, hour: "2-digit", minute: "2-digit" }).format(clockNow)}>
+                      <span className="pixlo-clock-face"><i className="pixlo-clock-hour" style={{ transform: `rotate(${(Number(new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, hour: "2-digit", hourCycle: "h23" }).format(clockNow)) % 12) * 30 + Number(new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, minute: "2-digit" }).format(clockNow)) / 2}deg)` }} /><i className="pixlo-clock-minute" style={{ transform: `rotate(${Number(new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, minute: "2-digit" }).format(clockNow)) * 6}deg)` }} /><i className="pixlo-clock-second" style={{ transform: `rotate(${Number(new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, second: "2-digit" }).format(clockNow)) * 6}deg)` }} /><b /></span>
+                    </div>
+                    <div className="pixlo-timezone-digital"><strong>{new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).format(clockNow)}</strong><span>{new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(clockNow)}</span><small>{new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, timeZoneName: "long" }).formatToParts(clockNow).find(part => part.type === "timeZoneName")?.value}</small></div>
+                  </div>
+                  <div className="pixlo-local-time"><span className="pixlo-local-time-icon">⌖</span><div><small>YOUR LOCAL TIME</small><strong>{new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).format(clockNow)}</strong><span>{new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric" }).format(clockNow)}</span><em>{Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " ")}</em></div><i className="pixlo-local-live-dot" /></div>
+                </div>
+                <div className="pixlo-timezone-footer"><span><i /> Both clocks update live</span><span>TIMEZONE COMPARISON</span></div>
+              </div>
+            : <div className="pixlo-extras-empty"><span className="pixlo-extras-empty-icon">✳</span><span className="pixlo-extras-kicker">PAGE {String(page).padStart(2, "0")}</span><h3>Something good is coming.</h3><p>This page is ready for another Premium extra.</p><span className="pixlo-extras-page-number">{String(page).padStart(2, "0")}</span></div>}
+          </article>)}
+        </div>
+        <style jsx>{`
+          .pixlo-extras{--extra-accent:#ff815f;width:min(100%,760px);margin:26px auto 36px;padding:22px;border:1px solid rgba(255,255,255,.1);border-radius:25px;background:linear-gradient(145deg,rgba(17,15,18,.9),rgba(9,9,12,.82));box-shadow:0 25px 80px rgba(0,0,0,.28);color:#fff;backdrop-filter:blur(22px);animation:pixloExtrasIntro .72s cubic-bezier(.2,.82,.22,1) both}
+          @keyframes pixloExtrasIntro{0%{opacity:0;transform:translateY(18px) scale(.965);filter:blur(8px)}65%{opacity:1;transform:translateY(-2px) scale(1.008);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1)}}
+          .pixlo-extras-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}.pixlo-extras-heading>div:first-child>span,.pixlo-extras-kicker{font-size:9px;letter-spacing:.2em;font-weight:800;color:#ff9a78}.pixlo-extras-heading h2{margin:5px 0 3px;font-size:25px;letter-spacing:-.05em}.pixlo-extras-heading p{margin:0;color:rgba(255,255,255,.5);font-size:12px}.pixlo-extras-status{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:99px;border:1px solid rgba(255,137,95,.2);color:#ffad8b;font-size:9px;letter-spacing:.12em;font-weight:800}.pixlo-extras-status i,.pixlo-timezone-footer i{width:5px;height:5px;border-radius:50%;background:#ff966e;box-shadow:0 0 12px #ff966e}
+          .pixlo-extras-pages{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 13px;scrollbar-width:thin;scrollbar-color:rgba(255,130,95,.25) transparent}.pixlo-extras-pages button{display:flex;align-items:center;gap:9px;flex:0 0 auto;padding:9px 12px;border:1px solid rgba(255,255,255,.075);border-radius:12px;background:rgba(255,255,255,.025);color:rgba(255,255,255,.52);cursor:pointer;transition:transform .25s cubic-bezier(.2,.8,.2,1),border-color .25s,background .25s}.pixlo-extras-pages button:hover{transform:translateY(-2px)}.pixlo-extras-pages button span{font-size:10px;font-weight:800}.pixlo-extras-pages button small{font-size:11px}.pixlo-extras-pages button.active{color:#fff;border-color:rgba(255,133,95,.45);background:linear-gradient(120deg,rgba(255,91,67,.14),rgba(255,160,83,.07));box-shadow:0 5px 18px rgba(255,93,62,.08)}
+          .pixlo-extras-viewport{min-width:0}.pixlo-extras-panel{position:relative;min-width:0;overflow:hidden;border:1px solid rgba(255,255,255,.075);border-radius:19px;background:radial-gradient(ellipse at 95% 0%,rgba(255,112,75,.1),transparent 43%),linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.012));animation:pixloPanelPop .62s cubic-bezier(.18,.86,.22,1) both}.pixlo-extras-pages~.pixlo-extras-viewport>.pixlo-extras-panel{margin-bottom:12px}.pixlo-extras-pages~.pixlo-extras-viewport>.pixlo-extras-panel:last-child{margin-bottom:0}.pixlo-extras-pages~.pixlo-extras-viewport>.pixlo-extras-panel.is-current{border-color:rgba(255,131,92,.3)}
+          @keyframes pixloPanelPop{0%{opacity:0;transform:translateY(14px) scale(.975);filter:blur(5px)}70%{opacity:1;transform:translateY(-1px) scale(1.006);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1)}}
+          .pixlo-extras-welcome{position:relative;display:flex;align-items:center;gap:25px;min-height:235px;padding:30px;overflow:hidden}.pixlo-extras-welcome>div{position:relative;z-index:1;max-width:390px}.pixlo-extras-welcome h3,.pixlo-extras-empty h3{font-size:clamp(22px,4vw,32px);letter-spacing:-.055em;margin:9px 0}.pixlo-extras-welcome p,.pixlo-extras-empty p{font-size:13px;line-height:1.7;color:rgba(255,255,255,.58);margin:0 0 18px}.pixlo-extras-welcome button{padding:10px 13px;border:1px solid rgba(255,137,95,.32);border-radius:11px;background:rgba(255,104,72,.1);color:#fff;font:inherit;font-size:12px;font-weight:700;cursor:pointer}.pixlo-extras-welcome button span{color:#ff9a78;margin-left:7px}.pixlo-extras-orbit{position:relative;display:block;flex:0 0 165px;width:165px;height:165px;border-radius:50%;border:1px solid rgba(255,144,106,.17);background:radial-gradient(circle,rgba(255,113,74,.17),transparent 66%);box-shadow:inset 0 0 40px rgba(255,107,70,.08),0 0 50px rgba(255,107,70,.06)}.pixlo-extras-orbit:before,.pixlo-extras-orbit:after{content:"";position:absolute;inset:18px;border:1px solid rgba(255,146,108,.15);border-radius:50%;transform:rotate(-25deg) scaleX(.55)}.pixlo-extras-orbit:after{transform:rotate(55deg) scaleX(.55)}.pixlo-extras-orbit i{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;background:#ff8d68;box-shadow:0 0 18px #ff7756}.pixlo-extras-orbit i:nth-child(1){transform:translate(-50%,-80px)}.pixlo-extras-orbit i:nth-child(2){transform:translate(42px,14px);background:#ffb16c}.pixlo-extras-orbit i:nth-child(3){transform:translate(-54px,28px);background:#e95d4b}
+          .pixlo-extras-page-number{position:absolute;right:18px;bottom:14px;font-size:11px;letter-spacing:.1em;color:rgba(255,255,255,.25);font-variant-numeric:tabular-nums}.pixlo-extras-empty{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:230px;padding:30px}.pixlo-extras-empty-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;color:#ff9a78;background:rgba(255,120,82,.1);font-size:19px;margin-bottom:20px}
+          .pixlo-timezone-content{padding:25px}.pixlo-timezone-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.pixlo-timezone-zone{font-size:10px;color:rgba(255,255,255,.58);padding:6px 9px;border:1px solid rgba(255,255,255,.1);border-radius:99px;background:rgba(255,255,255,.025)}.pixlo-timezone-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}.pixlo-timezone-primary{display:flex;align-items:center;gap:22px;padding:20px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(0,0,0,.15);min-width:0}.pixlo-analog-clock{flex:0 0 94px;width:94px;height:94px}.pixlo-clock-face{position:relative;display:block;width:94px;height:94px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:radial-gradient(circle,rgba(255,255,255,.045),rgba(0,0,0,.2));box-shadow:0 0 35px rgba(255,116,77,.1),inset 0 0 0 5px rgba(255,255,255,.025)}.pixlo-clock-face:before{content:"";position:absolute;inset:7px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.72) 0deg 1deg,transparent 1deg 30deg);mask:radial-gradient(circle,transparent 0 79%,#000 80%)}.pixlo-clock-face:after{content:"";position:absolute;inset:16px;border-radius:50%;background:radial-gradient(circle,rgba(255,125,86,.07),transparent 70%)}.pixlo-clock-face i{position:absolute;left:calc(50% - 1px);bottom:50%;display:block;transform-origin:bottom center;border-radius:99px;z-index:2}.pixlo-clock-hour{width:3px;height:22px;background:#fff}.pixlo-clock-minute{width:2px;height:31px;background:#ff9b77}.pixlo-clock-second{width:1px;height:35px;background:#ff644e}.pixlo-clock-face b{position:absolute;z-index:3;left:calc(50% - 3px);top:calc(50% - 3px);width:6px;height:6px;border-radius:50%;background:#ff986f;box-shadow:0 0 10px #ff986f}.pixlo-timezone-digital{display:flex;flex-direction:column;gap:5px;min-width:0}.pixlo-timezone-digital strong{font-size:clamp(24px,4vw,38px);line-height:1;letter-spacing:-.065em;font-variant-numeric:tabular-nums;white-space:nowrap}.pixlo-timezone-digital span{font-size:11px;line-height:1.5;color:rgba(255,255,255,.65)}.pixlo-timezone-digital small{font-size:10px;color:#ff9a78}.pixlo-local-time{position:relative;display:flex;align-items:flex-start;gap:12px;padding:19px 16px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012));min-width:0}.pixlo-local-time-icon{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:10px;background:rgba(255,123,85,.1);color:#ff9a78}.pixlo-local-time>div{display:flex;flex-direction:column;gap:6px;min-width:0}.pixlo-local-time small{font-size:9px;letter-spacing:.12em;color:rgba(255,255,255,.48);font-weight:800}.pixlo-local-time strong{font-size:clamp(19px,2.7vw,27px);letter-spacing:-.05em;white-space:nowrap;font-variant-numeric:tabular-nums}.pixlo-local-time span:not(.pixlo-local-time-icon){font-size:11px;color:rgba(255,255,255,.65)}.pixlo-local-time em{font-size:10px;color:#ff9a78;font-style:normal;line-height:1.5}.pixlo-local-live-dot{position:absolute;right:13px;top:13px;width:6px;height:6px;border-radius:50%;background:#ff986f;box-shadow:0 0 10px #ff986f;animation:pixloLivePulse 1.6s ease-in-out infinite}@keyframes pixloLivePulse{50%{opacity:.4;transform:scale(.8)}}.pixlo-timezone-footer{display:flex;justify-content:space-between;gap:12px;margin-top:16px;color:rgba(255,255,255,.45);font-size:9px;letter-spacing:.1em}.pixlo-timezone-footer span:first-child{display:flex;align-items:center;gap:7px}
+          .pixlo-extras-vertical .pixlo-extras-viewport{max-height:580px;overflow-y:auto;scroll-behavior:smooth;padding-right:3px}.pixlo-extras-horizontal .pixlo-extras-viewport{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding-bottom:5px}.pixlo-extras-horizontal .pixlo-extras-panel{flex:0 0 100%;scroll-snap-align:center}.pixlo-extras-vertical .pixlo-extras-panel{margin-bottom:12px}
+          @media(max-width:650px){.pixlo-extras{padding:14px;border-radius:20px}.pixlo-extras-welcome{padding:22px;min-height:205px}.pixlo-extras-orbit{display:none}.pixlo-timezone-content{padding:17px}.pixlo-timezone-grid{grid-template-columns:1fr}.pixlo-timezone-primary{gap:16px;padding:15px}.pixlo-analog-clock,.pixlo-clock-face{width:76px;height:76px;flex-basis:76px}.pixlo-clock-hour{height:18px}.pixlo-clock-minute{height:25px}.pixlo-clock-second{height:28px}.pixlo-timezone-footer{font-size:8px}.pixlo-extras-pages button{padding:8px 10px}}
+        `}</style>
       </section>
     </main>
   );
