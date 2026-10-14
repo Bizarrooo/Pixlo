@@ -81,6 +81,35 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not record Premium purchase." }, { status: 500 });
   }
 
+  const giftType = session?.metadata?.gift_type === "paid" ? "paid" : null;
+  const giftedByUserId = session?.metadata?.gifted_by_user_id;
+  if (giftType && typeof giftedByUserId === "string" && /^[0-9a-f-]{36}$/i.test(giftedByUserId) && giftedByUserId !== userId) {
+    const giftResponse = await fetch(`${url}/rest/v1/pixlo_premium_gifts?on_conflict=stripe_session_id`, {
+      method: "POST",
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        "Content-Type": "application/json",
+        Prefer: "resolution=ignore-duplicates,return=minimal",
+      },
+      body: JSON.stringify({
+        giver_user_id: giftedByUserId,
+        recipient_user_id: userId,
+        gift_type: "paid",
+        value_pence: amountTotal,
+        currency,
+        status: "completed",
+        stripe_session_id: checkoutSessionId,
+      }),
+      cache: "no-store",
+    });
+    if (!giftResponse.ok) {
+      const detail = await giftResponse.text().catch(() => "");
+      console.error("Could not record Pixlo Premium gift:", giftResponse.status, detail.slice(0, 300));
+      return NextResponse.json({ error: "Could not record Premium gift." }, { status: 500 });
+    }
+  }
+
   try {
     await ensurePremiumBadge(userId);
   } catch (error) {
