@@ -88,7 +88,7 @@ async function getAllPremiumGifts() {
   let offset = 0;
   const pageSize = 1000;
   while (true) {
-    const page = await db(`pixlo_premium_gifts?select=id,giver_user_id,recipient_user_id,gift_type,value_pence,currency,status,created_at&status=eq.completed&order=created_at.asc&limit=${pageSize}&offset=${offset}`);
+    const page = await db(`pixlo_premium_gifts?select=id,giver_user_id,recipient_user_id,gift_type,value_pence,currency,status,created_at&status=eq.completed&announced_at=is.null&order=created_at.asc&limit=${pageSize}&offset=${offset}`);
     if (!Array.isArray(page) || page.length === 0) break;
     gifts.push(...page);
     if (page.length < pageSize) break;
@@ -151,6 +151,11 @@ async function announcePremiumGift(guild, profiles, gift) {
   else embed.setThumbnail("https://pixlo1.vercel.app/pixlo-premium-icon.svg");
 
   await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+  await db(`pixlo_premium_gifts?id=eq.${encodeURIComponent(String(gift.id))}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ announced_at: new Date().toISOString() }),
+  });
   console.log(`[premium-gift] posted ${gift.gift_type} Premium gift announcement for recipient ${recipientProfile.username}`);
 }
 
