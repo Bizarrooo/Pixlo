@@ -220,7 +220,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   }, []);
 
   useEffect(() => {
-    if (!ready || !settings.musicAutoplay || manualPauseRef.current) return;
+    if (!ready || embedMode || !settings.musicAutoplay || manualPauseRef.current) return;
 
     const startMedia = () => {
       const audio = audioRef.current;
@@ -256,7 +256,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       window.removeEventListener("pointerdown", unlockMedia, true);
       window.removeEventListener("keydown", unlockMedia, true);
     };
-  }, [ready, activeTrack?.id, settings.musicAutoplay, settings.musicLoop]);
+  }, [ready, embedMode, activeTrack?.id, settings.musicAutoplay, settings.musicLoop]);
 
   useEffect(() => {
     if (!assets.musicAudio || !audioRef.current || !activeTrack) return;
