@@ -362,7 +362,11 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     ...parsed,
     extrasLayout: parsed.extrasLayout === "vertical" || parsed.extrasLayout === "horizontal" ? parsed.extrasLayout : "pages",
     timezoneEnabled: typeof parsed.timezoneEnabled === "boolean" ? parsed.timezoneEnabled : defaultSettings.timezoneEnabled,
-    timezone: typeof parsed.timezone === "string" && parsed.timezone.length <= 80 ? parsed.timezone : defaultSettings.timezone,
+    timezone: (() => {
+      const candidate = typeof parsed.timezone === "string" && parsed.timezone.length <= 80 ? parsed.timezone : defaultSettings.timezone;
+      try { new Intl.DateTimeFormat("en-US", { timeZone: candidate }); return candidate; }
+      catch { return defaultSettings.timezone; }
+    })(),
     timezonePage: Math.max(2, Math.min(12, Number.isFinite(Number(parsed.timezonePage)) ? Math.round(Number(parsed.timezonePage)) : 2)),
     dashboardBackgroundGradientColours: Array.isArray(parsed.dashboardBackgroundGradientColours) && parsed.dashboardBackgroundGradientColours.length === 3 ? parsed.dashboardBackgroundGradientColours.map((c: unknown, i: number) => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c) ? c : defaultSettings.dashboardBackgroundGradientColours[i]) as [string,string,string] : defaultSettings.dashboardBackgroundGradientColours,
     dashboardTextGradientColours: Array.isArray(parsed.dashboardTextGradientColours) && parsed.dashboardTextGradientColours.length === 3 ? parsed.dashboardTextGradientColours.map((c: unknown, i: number) => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c) ? c : defaultSettings.dashboardTextGradientColours[i]) as [string,string,string] : defaultSettings.dashboardTextGradientColours,
