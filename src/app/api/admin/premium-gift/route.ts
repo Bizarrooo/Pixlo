@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { serverEnv } from "../../../../../lib/server-env";
-import { supabaseConfig } from "../../../../../lib/supabase-config";
-import { ensurePremiumBadge } from "../../../../../lib/premium-badge";
+import { serverEnv } from "../../../../lib/server-env";
+import { supabaseConfig } from "../../../../lib/supabase-config";
+import { ensurePremiumBadge } from "../../../../lib/premium-badge";
 
 export const runtime = "nodejs";
 const OWNER_USER_ID = "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
