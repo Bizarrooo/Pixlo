@@ -1,7 +1,9 @@
 import { serverEnv } from "./server-env";
 import { supabaseConfig } from "./supabase-config";
 
-type BadgeRow = { id: string; badge_key?: string; name?: string };
+type BadgeRow = { id: string; badge_key?: string; name?: string; icon_url?: string | null };
+
+const PREMIUM_ICON_URL = "https://pixlo1.vercel.app/pixlo-premium-icon.svg";
 
 export async function ensurePremiumBadge(userId: string): Promise<boolean> {
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return false;
@@ -15,14 +17,14 @@ export async function ensurePremiumBadge(userId: string): Promise<boolean> {
   };
 
   const findBadge = async (): Promise<BadgeRow | null> => {
-    const byKey = await fetch(`${url}/rest/v1/badges?select=id,badge_key,name&badge_key=eq.premium&limit=1`, {
+    const byKey = await fetch(`${url}/rest/v1/badges?select=id,badge_key,name,icon_url&badge_key=eq.premium&limit=1`, {
       headers, cache: "no-store",
     });
     if (!byKey.ok) throw new Error(`Could not look up the Premium badge (${byKey.status}).`);
     const keyed = await byKey.json().catch(() => []);
     if (Array.isArray(keyed) && keyed[0]?.id) return keyed[0] as BadgeRow;
 
-    const byName = await fetch(`${url}/rest/v1/badges?select=id,badge_key,name&name=ilike.%25premium%25&limit=1`, {
+    const byName = await fetch(`${url}/rest/v1/badges?select=id,badge_key,name,icon_url&name=ilike.%25premium%25&limit=1`, {
       headers, cache: "no-store",
     });
     if (!byName.ok) throw new Error(`Could not search for the Premium badge (${byName.status}).`);
@@ -39,7 +41,7 @@ export async function ensurePremiumBadge(userId: string): Promise<boolean> {
         badge_key: "premium",
         name: "Premium",
         description: "Pixlo Premium lifetime member",
-        icon_url: null,
+        icon_url: PREMIUM_ICON_URL,
         is_active: true,
       }),
       cache: "no-store",
@@ -55,6 +57,24 @@ export async function ensurePremiumBadge(userId: string): Promise<boolean> {
     }
   }
   if (!badge?.id) throw new Error("The Premium badge could not be found or created.");
+
+  // Repair older Premium badge rows that were created without an icon.
+  if (!badge.icon_url) {
+    const iconResponse = await fetch(
+      `${url}/rest/v1/badges?id=eq.${encodeURIComponent(badge.id)}`,
+      {
+        method: "PATCH",
+        headers: { ...headers, Prefer: "return=minimal" },
+        body: JSON.stringify({ icon_url: PREMIUM_ICON_URL }),
+        cache: "no-store",
+      },
+    );
+    if (!iconResponse.ok) {
+      const detail = await iconResponse.text().catch(() => "");
+      throw new Error(`Could not set the Premium badge icon (${iconResponse.status}): ${detail.slice(0, 200)}`);
+    }
+    badge.icon_url = PREMIUM_ICON_URL;
+  }
 
   const existingResponse = await fetch(
     `${url}/rest/v1/user_badges?select=id&user_id=eq.${encodeURIComponent(userId)}&badge_id=eq.${encodeURIComponent(badge.id)}&source=eq.premium_purchase&limit=1`,
