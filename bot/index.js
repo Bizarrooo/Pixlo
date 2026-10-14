@@ -94,7 +94,7 @@ async function getAllPremiumGifts() {
   let offset = 0;
   const pageSize = 1000;
   while (true) {
-    const page = await db(`pixlo_premium_gifts?select=id,giver_user_id,recipient_user_id,gift_type,value_pence,currency,status,created_at,announced_at&status=in.(completed,revoked)&order=created_at.asc&limit=${pageSize}&offset=${offset}`);
+    const page = await db(`pixlo_premium_gifts?select=id,giver_user_id,recipient_user_id,gift_type,value_pence,currency,status,created_at,announced_at,award_announced_at&status=in.(completed,revoked)&order=created_at.asc&limit=${pageSize}&offset=${offset}`);
     if (!Array.isArray(page) || page.length === 0) break;
     gifts.push(...page);
     if (page.length < pageSize) break;
@@ -136,101 +136,87 @@ async function announcePremiumGift(guild, profiles, gift) {
 }
 
 async function announcePremiumGiftOnce(guild, profiles, gift) {
-  if (gift.announced_at) return;
   const giverProfile = profiles.find(profile => String(profile.id) === String(gift.giver_user_id));
   const recipientProfile = profiles.find(profile => String(profile.id) === String(gift.recipient_user_id));
   const giverMember = giverProfile?.discord_id ? guild.members.cache.get(String(giverProfile.discord_id)) : null;
   const recipientMember = recipientProfile?.discord_id ? guild.members.cache.get(String(recipientProfile.discord_id)) : null;
-  if (!recipientProfile) return;
-
-  // A revoke action resets announced_at on the gift ledger row. Process this durable
-  // event even if the Premium role was already absent when the bot next syncs.
-  if (gift.status === "revoked") {
-    const recipientId = String(recipientProfile.id);
-    if (announcedRevocationRecipients.has(recipientId)) return;
-    announcedRevocationRecipients.add(recipientId);
-    try {
-      const posted = await announcePremiumRevocation(guild, recipientMember, recipientProfile);
-      if (!posted) {
-        announcedRevocationRecipients.delete(recipientId);
-        return;
-      }
-      const announcedAt = new Date().toISOString();
-      await db(`pixlo_premium_gifts?recipient_user_id=eq.${encodeURIComponent(recipientId)}&status=eq.revoked`, {
-        method: "PATCH",
-        headers: { Prefer: "return=minimal" },
-        body: JSON.stringify({ announced_at: announcedAt }),
-      });
-      console.log(`[premium-gift] recorded revocation announcement for Pixlo user ${recipientProfile.username}`);
-    } catch (error) {
-      announcedRevocationRecipients.delete(recipientId);
-      throw error;
-    }
-    return;
-  }
-  const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
-  if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
-    console.error("[premium-gift] Missing or inaccessible gift announcement channel " + AWARD_CHANNEL_ID);
+  if (!recipientProfile) {
+    console.error(`[premium-gift] Cannot announce gift ${gift.id}: recipient profile ${gift.recipient_user_id} was not found`);
     return;
   }
 
-  try {
-    const recent = await channel.messages.fetch({ limit: 100 });
-    const alreadyAnnounced = recent.some(message =>
-      message.author.id === client.user.id &&
-      message.embeds.some(embed =>
-        embed.title === "💎 Pixlo Premium Gifted!" &&
-        (embed.fields || []).some(field => field.name === "🎁 Recipient" && field.value.includes(String(recipientMember?.id || recipientProfile.username))) &&
-        (embed.fields || []).some(field => field.name === "💝 Gifted By" && field.value.includes(String(giverMember?.id || giverProfile?.username || gift.giver_user_id)))
-      )
-    );
-    if (alreadyAnnounced) {
-      await db(`pixlo_premium_gifts?id=eq.${encodeURIComponent(String(gift.id))}`, {
-        method: "PATCH",
-        headers: { Prefer: "return=minimal" },
-        body: JSON.stringify({ announced_at: new Date().toISOString() }),
-      });
+  // Award and revoke are separate events. A revoke must never erase an award that
+  // the bot has not yet announced, so award_announced_at is independent of announced_at.
+  const awardAlreadyAnnounced = Boolean(gift.award_announced_at) ||
+    (gift.status === "completed" && Boolean(gift.announced_at));
+  if (!awardAlreadyAnnounced) {
+    const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
+    if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
+      console.error("[premium-gift] Missing or inaccessible gift announcement channel " + AWARD_CHANNEL_ID);
       return;
     }
-  } catch (error) {
-    console.warn("[premium-gift] Could not check existing gift announcements:", error instanceof Error ? error.message : error);
+
+    const alreadyAnnounced = await channel.messages.fetch({ limit: 100 }).then(recent =>
+      recent.some(message =>
+        message.author.id === client.user.id &&
+        message.embeds.some(embed =>
+          embed.title === "💎 Pixlo Premium Gifted!" &&
+          (embed.fields || []).some(field => field.name === "🎁 Recipient" && field.value.includes(String(recipientMember?.id || recipientProfile.username))) &&
+          (embed.fields || []).some(field => field.name === "💝 Gifted By" && field.value.includes(String(giverMember?.id || giverProfile?.username || gift.giver_user_id)))
+        )
+      )
+    ).catch(error => {
+      console.warn("[premium-gift] Could not check existing gift announcements:", error instanceof Error ? error.message : error);
+      return false;
+    });
+
+    if (!alreadyAnnounced) {
+      const value = Number(gift.value_pence);
+      const currency = String(gift.currency || "gbp").toUpperCase();
+      let valueText = "Value unavailable";
+      try {
+        if (Number.isFinite(value)) valueText = new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(value / 100);
+      } catch {}
+      const giftDate = new Date(gift.created_at || Date.now());
+      const validDate = !Number.isNaN(giftDate.getTime());
+      const premiumBadgeEmoji = guild.emojis.cache.find(emoji => emoji.name === "White_Premium_Badge") || null;
+      const giverText = giverMember ? `<@${giverMember.id}>` : `@${giverProfile?.username || "Pixlo"}`;
+      const recipientText = recipientMember ? `<@${recipientMember.id}>` : `@${recipientProfile.username}`;
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_ORANGE)
+        .setTitle("💎 Pixlo Premium Gifted!")
+        .setDescription(`🎁 ${giverText} has gifted ${recipientText} **lifetime Pixlo Premium**!`)
+        .addFields(
+          { name: "💝 Gifted By", value: giverText, inline: true },
+          { name: "🎁 Recipient", value: recipientText, inline: true },
+          { name: "✨ Gift Value", value: `${valueText} lifetime value`, inline: true },
+          { name: "♾️ Access", value: "Lifetime Premium", inline: true },
+          { name: "🎟️ Gift Type", value: gift.gift_type === "free" ? "Owner gift" : "Purchased gift", inline: true },
+        )
+        .setFooter({ text: "Pixlo • Keep earning, keep flexing." })
+        .setTimestamp(validDate ? giftDate : new Date());
+      if (premiumBadgeEmoji) embed.setThumbnail(premiumBadgeEmoji.imageURL({ extension: "png", size: 256 }));
+      else embed.setThumbnail("https://pixlo1.vercel.app/pixlo-premium-icon.svg");
+
+      await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+      console.log(`[premium-gift] posted ${gift.gift_type} Premium gift announcement for recipient ${recipientProfile.username}`);
+    } else {
+      console.log(`[premium-gift] matching award announcement already exists for gift ${gift.id}; marking it handled`);
+    }
+
+    const awardAnnouncedAt = new Date().toISOString();
+    const patch = await db(`pixlo_premium_gifts?id=eq.${encodeURIComponent(String(gift.id))}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({ award_announced_at: awardAnnouncedAt }),
+    });
+    if (patch === null) console.warn(`[premium-gift] Award announcement sent/verified but award marker could not be confirmed for gift ${gift.id}`);
+    return;
   }
 
-  const giverText = giverMember ? `<@${giverMember.id}>` : `@${giverProfile?.username || "Pixlo"}`;
-  const recipientText = recipientMember ? `<@${recipientMember.id}>` : `@${recipientProfile.username}`;
-  const value = Number(gift.value_pence);
-  const currency = String(gift.currency || "gbp").toUpperCase();
-  const valueText = Number.isFinite(value)
-    ? new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(value / 100)
-    : "Value unavailable";
-  const giftDate = new Date(gift.created_at || Date.now());
-  const validDate = !Number.isNaN(giftDate.getTime());
-  const premiumBadgeEmoji = guild.emojis.cache.find(emoji => emoji.name === "White_Premium_Badge") || null;
-  const embed = new EmbedBuilder()
-    .setColor(EMBED_ORANGE)
-    .setTitle("💎 Pixlo Premium Gifted!")
-    .setDescription(`🎁 ${giverText} has gifted ${recipientText} **lifetime Pixlo Premium**!`)
-    .addFields(
-      { name: "💝 Gifted By", value: giverText, inline: true },
-      { name: "🎁 Recipient", value: recipientText, inline: true },
-      { name: "✨ Gift Value", value: `${valueText} lifetime value`, inline: true },
-      { name: "♾️ Access", value: "Lifetime Premium", inline: true },
-      { name: "🎟️ Gift Type", value: gift.gift_type === "free" ? "Owner gift" : "Purchased gift", inline: true },
-    )
-    .setFooter({ text: "Pixlo • Keep earning, keep flexing." })
-    .setTimestamp(validDate ? giftDate : new Date());
-  if (premiumBadgeEmoji) embed.setThumbnail(premiumBadgeEmoji.imageURL({ extension: "png", size: 256 }));
-  else embed.setThumbnail("https://pixlo1.vercel.app/pixlo-premium-icon.svg");
-
-  await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
-  await db(`pixlo_premium_gifts?id=eq.${encodeURIComponent(String(gift.id))}`, {
-    method: "PATCH",
-    headers: { Prefer: "return=minimal" },
-    body: JSON.stringify({ announced_at: new Date().toISOString() }),
-  });
-  console.log(`[premium-gift] posted ${gift.gift_type} Premium gift announcement for recipient ${recipientProfile.username}`);
+  // Legacy gift-row revocations are only a fallback. The durable revocation-event
+  // queue owns the actual revocation announcement, so never send a second one here.
 }
-
 async function announcePremiumPurchase(guild, member, entitlement) {
   const purchaseKey = `${member.id}:${entitlement.purchased_at || entitlement.updated_at || "unknown"}`;
   if (checkedPurchaseAnnouncements.has(purchaseKey) || processingPremiumPurchaseKeys.has(purchaseKey)) return;
@@ -696,7 +682,7 @@ client.once("ready", async () => {
           }),
         ]);
         await syncPremiumRole(guild, profiles, entitlements, gifts, revocations);
-        console.log(`[premium-fast-sync] loaded ${profiles.length} profiles, ${entitlements.length} active entitlements, ${gifts.filter(gift => gift.status === "completed" && !gift.announced_at).length} unannounced completed gifts, ${revocations.length} pending revocations`);
+        console.log(`[premium-fast-sync] loaded ${profiles.length} profiles, ${entitlements.length} active entitlements, ${gifts.filter(gift => gift.status === "completed" && !gift.award_announced_at && !gift.announced_at).length + gifts.filter(gift => gift.status === "revoked" && !gift.award_announced_at).length} unannounced completed gifts, ${revocations.length} pending revocations`);
         for (const gift of gifts) {
           try { await announcePremiumGift(guild, profiles, gift); }
           catch (error) { console.error("[premium-gift] fast announcement check failed:", error instanceof Error ? error.message : error); }
