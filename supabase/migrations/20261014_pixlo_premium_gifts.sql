@@ -19,3 +19,5 @@ create index if not exists pixlo_premium_gifts_giver_created_idx
 alter table public.pixlo_premium_gifts enable row level security;
 revoke all on public.pixlo_premium_gifts from anon, authenticated;
 grant all on public.pixlo_premium_gifts to service_role;
+
+alter table public.pixlo_premium_gifts add column if not exists announced_at timestamptz;
