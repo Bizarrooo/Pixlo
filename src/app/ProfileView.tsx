@@ -501,7 +501,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             {settings.badgePosition === "bottom" && profileBadges.some(badge => settings.activeBadgeIds.includes(badge.id)) && <section className={`pixlo-profile-badges pixlo-active-badges ${settings.badgeGlow ? "pixlo-badges-glow" : ""} ${settings.badgeUnderline ? "pixlo-double-underline" : ""} ${settings.badgeUnderlineGlow ? "pixlo-underline-glow" : ""} ${settings.badgeStyle === "icon" ? "pixlo-badges-icon-only" : ""}`} aria-label="Active badges" style={{ "--badge-colour": settings.badgeColour, "--badge-glow-intensity": settings.badgeGlowIntensity / 100, "--badge-scale": settings.badgeScale / 100 } as React.CSSProperties}><div className="pixlo-profile-badges-list">{[...profileBadges.filter(badge => settings.activeBadgeIds.includes(badge.id)).sort((a,b) => settings.activeBadgeOrder.indexOf(a.id)-settings.activeBadgeOrder.indexOf(b.id))].map(badge => <div className="pixlo-profile-badge" key={badge.id} data-badge-name={badge.name} aria-label={badge.name}>{badge.icon_url ? <span className="pixlo-badge-icon-tint" aria-hidden="true" style={{ maskImage: `url("${badge.icon_url}")`, WebkitMaskImage: `url("${badge.icon_url}")` } as React.CSSProperties} /> : <span>✦</span>}</div>)}</div></section>}
 
             {activeTrack && assets.musicAudio && (
-              (assets.musicMediaType.startsWith("video/") || musicVideoFallback) ? (
+              (activeTrack.source === "background-video" || assets.musicMediaType.startsWith("video/") || musicVideoFallback) ? (
                 <video
                   className="music-source-media"
                   ref={audioRef as React.RefObject<HTMLVideoElement>}
