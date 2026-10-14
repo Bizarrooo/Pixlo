@@ -208,6 +208,9 @@ export default function Dashboard() {
   const [premiumGiftUsername, setPremiumGiftUsername] = useState("");
   const [premiumGiftBusy, setPremiumGiftBusy] = useState(false);
   const [premiumGiftMessage, setPremiumGiftMessage] = useState("");
+  const [premiumRevokeUsername, setPremiumRevokeUsername] = useState("");
+  const [premiumRevokeBusy, setPremiumRevokeBusy] = useState(false);
+  const [premiumRevokeMessage, setPremiumRevokeMessage] = useState("");
   const [savedIdentity, setSavedIdentity] = useState({ username: "", displayName: "" });
   const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
   const [badgesHidden, setBadgesHidden] = useState(false);
@@ -541,6 +544,34 @@ export default function Dashboard() {
       setPremiumGiftMessage(error instanceof Error ? error.message : "Could not gift Premium.");
     } finally {
       setPremiumGiftBusy(false);
+    }
+  };
+
+  const revokePremium = async () => {
+    const username = premiumRevokeUsername.trim().toLowerCase();
+    if (!/^[a-z0-9._-]{3,24}$/.test(username)) {
+      setPremiumRevokeMessage("Enter a valid Pixlo username.");
+      return;
+    }
+    if (!window.confirm(`Revoke lifetime Pixlo Premium from @${username}? This will remove their Premium entitlement and Premium badge. No Discord announcement will be sent.`)) return;
+    setPremiumRevokeBusy(true);
+    setPremiumRevokeMessage("");
+    try {
+      const response = await fetch("/api/admin/premium-revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username }),
+        cache: "no-store",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Could not revoke Premium.");
+      setPremiumRevokeMessage(`Revoked lifetime Premium from @${data.recipient?.username || username}. No Discord announcement was sent.`);
+      setPremiumRevokeUsername("");
+    } catch (error) {
+      setPremiumRevokeMessage(error instanceof Error ? error.message : "Could not revoke Premium.");
+    } finally {
+      setPremiumRevokeBusy(false);
     }
   };
 
@@ -1331,6 +1362,12 @@ export default function Dashboard() {
               <Field label="Recipient username"><input value={premiumGiftUsername} onChange={event => setPremiumGiftUsername(event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 24))} placeholder="username" autoComplete="off" maxLength={24} /></Field>
               <div className="view-admin-actions"><button type="button" disabled={premiumGiftBusy || premiumGiftUsername.trim().length < 3} onClick={() => void giftFreePremium()}>{premiumGiftBusy ? "Granting Premium…" : "Gift free Premium"}</button></div>
               {premiumGiftMessage && <p className="view-admin-message" role="status">{premiumGiftMessage}</p>}
+            </div>
+            <div className="view-admin-tool">
+              <div><b>Revoke lifetime Premium</b><p>Remove a Pixlo account’s Premium entitlement and Premium badge. This action does not send a Discord announcement.</p></div>
+              <Field label="Account username"><input value={premiumRevokeUsername} onChange={event => setPremiumRevokeUsername(event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 24))} placeholder="username" autoComplete="off" maxLength={24} /></Field>
+              <div className="view-admin-actions"><button type="button" disabled={premiumRevokeBusy || premiumRevokeUsername.trim().length < 3} onClick={() => void revokePremium()}>{premiumRevokeBusy ? "Revoking Premium…" : "Revoke Premium"}</button></div>
+              {premiumRevokeMessage && <p className="view-admin-message" role="status">{premiumRevokeMessage}</p>}
             </div>
             <div className="view-admin-tool">
               <div><b>Profile view controls</b><p>Adjust the view total for a Pixlo profile.</p></div>
