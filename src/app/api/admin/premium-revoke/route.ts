@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not revoke the Premium entitlement." }, { status: 503 });
   }
   if (!Array.isArray(changed) || changed.length === 0) {
-    return NextResponse.json({ error: `@${"${recipient.username}"} does not have any active Premium entitlement in live or test mode.` }, { status: 404 });
+    return NextResponse.json({ error: `@${recipient.username} does not have any active Premium entitlement in live or test mode.` }, { status: 404 });
   }
 
   // Queue a durable revocation event so the bot announces it even if the Discord
