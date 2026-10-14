@@ -205,6 +205,9 @@ export default function Dashboard() {
   const [viewToolUsername, setViewToolUsername] = useState("");
   const [viewToolMessage, setViewToolMessage] = useState("");
   const [viewToolBusy, setViewToolBusy] = useState(false);
+  const [premiumGiftUsername, setPremiumGiftUsername] = useState("");
+  const [premiumGiftBusy, setPremiumGiftBusy] = useState(false);
+  const [premiumGiftMessage, setPremiumGiftMessage] = useState("");
   const [savedIdentity, setSavedIdentity] = useState({ username: "", displayName: "" });
   const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
   const [badgesHidden, setBadgesHidden] = useState(false);
@@ -512,6 +515,34 @@ export default function Dashboard() {
     finally { setPresetBusy(null); }
   };
 
+
+  const giftFreePremium = async () => {
+    const username = premiumGiftUsername.trim().toLowerCase();
+    if (!/^[a-z0-9._-]{3,24}$/.test(username)) {
+      setPremiumGiftMessage("Enter a valid Pixlo username (3–24 characters).");
+      return;
+    }
+    if (!window.confirm(`Gift lifetime Pixlo Premium to @${username} for free? This grants Premium and its badge.`)) return;
+    setPremiumGiftBusy(true);
+    setPremiumGiftMessage("");
+    try {
+      const response = await fetch("/api/admin/premium-gift", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username }),
+        cache: "no-store",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Could not gift Premium.");
+      setPremiumGiftMessage(`Successfully gifted lifetime Premium to @${data.recipient?.username || username}. The Discord announcement will appear after the bot syncs.`);
+      setPremiumGiftUsername("");
+    } catch (error) {
+      setPremiumGiftMessage(error instanceof Error ? error.message : "Could not gift Premium.");
+    } finally {
+      setPremiumGiftBusy(false);
+    }
+  };
 
   const adjustOwnViews = async (action: "add" | "remove") => {
     const amount = Number(viewToolAmount);
@@ -1295,6 +1326,12 @@ export default function Dashboard() {
             <SectionIntro title="Pixlo Admin" />
             <p className="hint">Owner-only controls for managing Pixlo. This button is hidden from every other account.</p>
             <a className="badge-admin-dashboard-link" href="/dashboard/badges">Manage Pixlo badges <span>→</span></a>
+            <div className="view-admin-tool">
+              <div><b>Gift lifetime Premium for free</b><p>Grant lifetime Premium and the Premium badge to any Pixlo account. This owner-only action does not open Stripe checkout.</p></div>
+              <Field label="Recipient username"><input value={premiumGiftUsername} onChange={event => setPremiumGiftUsername(event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 24))} placeholder="username" autoComplete="off" maxLength={24} /></Field>
+              <div className="view-admin-actions"><button type="button" disabled={premiumGiftBusy || premiumGiftUsername.trim().length < 3} onClick={() => void giftFreePremium()}>{premiumGiftBusy ? "Granting Premium…" : "Gift free Premium"}</button></div>
+              {premiumGiftMessage && <p className="view-admin-message" role="status">{premiumGiftMessage}</p>}
+            </div>
             <div className="view-admin-tool">
               <div><b>Profile view controls</b><p>Adjust the view total for a Pixlo profile.</p></div>
               <Field label="Target username" hint="Enter any Pixlo username, or leave blank to use your own profile."><input value={viewToolUsername} onChange={e => setViewToolUsername(e.target.value)} placeholder={settings.username || "username"} autoComplete="off" /></Field>
