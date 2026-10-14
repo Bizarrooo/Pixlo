@@ -9,6 +9,7 @@ export default function PremiumPage() {
   const [status, setStatus] = useState<PremiumStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState(false);
+  const [giftUsername, setGiftUsername] = useState("");
   const [message, setMessage] = useState("");
 
   async function refreshStatus() {
@@ -31,11 +32,11 @@ export default function PremiumPage() {
     void refreshStatus();
   }, []);
 
-  async function buyPremium() {
+  async function buyPremium(recipientUsername?: string) {
     setBuying(true);
     setMessage("");
     try {
-      const response = await fetch("/api/premium/checkout", { method: "POST", credentials: "include" });
+      const response = await fetch("/api/premium/checkout", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(recipientUsername ? { recipientUsername } : {}) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || typeof data.url !== "string") {
         if (response.status === 401) {
@@ -73,6 +74,15 @@ export default function PremiumPage() {
             <button type="button" onClick={buyPremium} disabled={buying} style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: 10, border: 0, borderRadius: 13, padding: "15px 22px", minHeight: 52, background: "linear-gradient(100deg, #ff4d5f, #ff824d)", color: "#fff", fontWeight: 750, fontSize: 15, cursor: buying ? "wait" : "pointer", opacity: buying ? .7 : 1 }}>
               {buying ? "Opening secure checkout…" : "Get lifetime Premium — £3.99"}
             </button>
+            <div style={{ marginTop: 24, padding: 20, border: "1px solid rgba(255,130,77,.24)", borderRadius: 16, background: "rgba(255,100,80,.045)" }}>
+              <strong style={{ display: "block", fontSize: 17 }}>🎁 Gift Premium to someone</strong>
+              <p style={{ color: "rgba(255,255,255,.6)", fontSize: 13, lineHeight: 1.6, margin: "7px 0 14px" }}>Enter their Pixlo username. They receive lifetime Premium and the Premium badge after Stripe confirms payment.</p>
+              <label htmlFor="premium-gift-username" style={{ display: "block", color: "rgba(255,255,255,.75)", fontSize: 12, marginBottom: 7 }}>Recipient's Pixlo username</label>
+              <input id="premium-gift-username" value={giftUsername} onChange={event => setGiftUsername(event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 24))} placeholder="username" autoComplete="off" maxLength={24} style={{ width: "100%", boxSizing: "border-box", padding: "13px 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,.14)", background: "rgba(0,0,0,.24)", color: "#fff", outline: "none", marginBottom: 12 }} />
+              <button type="button" onClick={() => { if (giftUsername.trim().length < 3) { setMessage("Enter a valid Pixlo username first."); return; } void buyPremium(giftUsername.trim()); }} disabled={buying || giftUsername.trim().length < 3} style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", gap: 10, border: "1px solid rgba(255,130,77,.42)", borderRadius: 11, padding: "12px 17px", minHeight: 46, background: "rgba(255,100,80,.1)", color: "#ffb08e", fontWeight: 700, fontSize: 14, cursor: buying ? "wait" : "pointer", opacity: buying || giftUsername.trim().length < 3 ? .6 : 1 }}>
+                {buying ? "Opening secure checkout…" : "Gift lifetime Premium — £3.99"}
+              </button>
+            </div>
           )}
           {message && <p role="status" style={{ color: "rgba(255,255,255,.75)", fontSize: 13, lineHeight: 1.6, marginTop: 16 }}>{message}</p>}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 12, marginTop: 30 }}>
