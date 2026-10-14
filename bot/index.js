@@ -83,6 +83,77 @@ async function getAllPremiumEntitlements() {
   return entitlements;
 }
 
+async function getAllPremiumGifts() {
+  const gifts = [];
+  let offset = 0;
+  const pageSize = 1000;
+  while (true) {
+    const page = await db(`pixlo_premium_gifts?select=id,giver_user_id,recipient_user_id,gift_type,value_pence,currency,status,created_at&status=eq.completed&order=created_at.asc&limit=${pageSize}&offset=${offset}`);
+    if (!Array.isArray(page) || page.length === 0) break;
+    gifts.push(...page);
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+  return gifts;
+}
+
+async function announcePremiumGift(guild, profiles, gift) {
+  const giverProfile = profiles.find(profile => String(profile.id) === String(gift.giver_user_id));
+  const recipientProfile = profiles.find(profile => String(profile.id) === String(gift.recipient_user_id));
+  const giverMember = giverProfile?.discord_id ? guild.members.cache.get(String(giverProfile.discord_id)) : null;
+  const recipientMember = recipientProfile?.discord_id ? guild.members.cache.get(String(recipientProfile.discord_id)) : null;
+  if (!recipientProfile) return;
+  const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
+  if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
+    console.error("[premium-gift] Missing or inaccessible gift announcement channel " + AWARD_CHANNEL_ID);
+    return;
+  }
+
+  try {
+    const recent = await channel.messages.fetch({ limit: 100 });
+    const alreadyAnnounced = recent.some(message =>
+      message.author.id === client.user.id &&
+      message.embeds.some(embed =>
+        embed.title === "💎 Pixlo Premium Gifted!" &&
+        (embed.fields || []).some(field => field.name === "🎁 Recipient" && field.value.includes(String(recipientMember?.id || recipientProfile.username))) &&
+        (embed.fields || []).some(field => field.name === "💝 Gifted By" && field.value.includes(String(giverMember?.id || giverProfile?.username || gift.giver_user_id)))
+      )
+    );
+    if (alreadyAnnounced) return;
+  } catch (error) {
+    console.warn("[premium-gift] Could not check existing gift announcements:", error instanceof Error ? error.message : error);
+  }
+
+  const giverText = giverMember ? `<@${giverMember.id}>` : `@${giverProfile?.username || "Pixlo"}`;
+  const recipientText = recipientMember ? `<@${recipientMember.id}>` : `@${recipientProfile.username}`;
+  const value = Number(gift.value_pence);
+  const currency = String(gift.currency || "gbp").toUpperCase();
+  const valueText = Number.isFinite(value)
+    ? new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(value / 100)
+    : "Value unavailable";
+  const giftDate = new Date(gift.created_at || Date.now());
+  const validDate = !Number.isNaN(giftDate.getTime());
+  const premiumBadgeEmoji = guild.emojis.cache.find(emoji => emoji.name === "White_Premium_Badge") || null;
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_ORANGE)
+    .setTitle("💎 Pixlo Premium Gifted!")
+    .setDescription(`🎁 ${giverText} has gifted ${recipientText} **lifetime Pixlo Premium**!`)
+    .addFields(
+      { name: "💝 Gifted By", value: giverText, inline: true },
+      { name: "🎁 Recipient", value: recipientText, inline: true },
+      { name: "✨ Gift Value", value: `${valueText} value`, inline: true },
+      { name: "♾️ Access", value: "Lifetime Premium", inline: true },
+      { name: "🎟️ Gift Type", value: gift.gift_type === "free" ? "Owner gift" : "Purchased gift", inline: true },
+    )
+    .setFooter({ text: "Pixlo • Keep earning, keep flexing." })
+    .setTimestamp(validDate ? giftDate : new Date());
+  if (premiumBadgeEmoji) embed.setThumbnail(premiumBadgeEmoji.imageURL({ extension: "png", size: 256 }));
+  else embed.setThumbnail("https://pixlo1.vercel.app/pixlo-premium-icon.svg");
+
+  await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+  console.log(`[premium-gift] posted ${gift.gift_type} Premium gift announcement for recipient ${recipientProfile.username}`);
+}
+
 async function announcePremiumPurchase(guild, member, entitlement) {
   const channel = await guild.channels.fetch(AWARD_CHANNEL_ID).catch(() => null);
   if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
@@ -140,7 +211,7 @@ async function announcePremiumPurchase(guild, member, entitlement) {
   console.log(`[premium-role] posted purchase confirmation for Discord user ${member.id}`);
 }
 
-async function syncPremiumRole(guild, profiles, entitlements) {
+async function syncPremiumRole(guild, profiles, entitlements, gifts = []) {
   const configuredRoleId = process.env.DISCORD_PREMIUM_ROLE_ID || "1558112636044836946";
   const role = guild.roles.cache.get(configuredRoleId) ||
     guild.roles.cache.find(item => item.name.trim().toLowerCase() === "premium") ||
@@ -153,6 +224,7 @@ async function syncPremiumRole(guild, profiles, entitlements) {
 
   const profileByDiscordId = new Map(profiles.filter(profile => profile.discord_id).map(profile => [String(profile.discord_id), profile]));
   const activeEntitlementByUserId = new Map(entitlements.filter(item => item.status === "active").map(item => [String(item.user_id), item]));
+  const giftedRecipientIds = new Set(gifts.filter(gift => gift.status === "completed").map(gift => String(gift.recipient_user_id)));
   let added = 0;
   let removed = 0;
   for (const member of guild.members.cache.values()) {
@@ -169,7 +241,7 @@ async function syncPremiumRole(guild, profiles, entitlements) {
         await member.roles.remove(role.id, "Pixlo Premium lifetime entitlement is not active or account is not linked");
         removed += 1;
       }
-      if (shouldHaveRole) {
+      if (shouldHaveRole && !giftedRecipientIds.has(String(profile?.id || ""))) {
         await announcePremiumPurchase(guild, member, entitlement);
       }
     } catch (error) {
@@ -325,8 +397,12 @@ async function syncBadges() {
     console.log(`[badge-sync] loaded ${mappings.length} role-to-badge mappings and ${linkedProfiles.length} Pixlo profiles linked to Discord; server member cache has ${guild.members.cache.size} members`);
 
     try {
-      const premiumEntitlements = await getAllPremiumEntitlements();
-      await syncPremiumRole(guild, linkedProfiles, premiumEntitlements);
+      const [premiumEntitlements, premiumGifts] = await Promise.all([getAllPremiumEntitlements(), getAllPremiumGifts()]);
+      await syncPremiumRole(guild, linkedProfiles, premiumEntitlements, premiumGifts);
+      for (const gift of premiumGifts) {
+        try { await announcePremiumGift(guild, linkedProfiles, gift); }
+        catch (error) { console.error("[premium-gift] announcement failed:", error instanceof Error ? error.message : error); }
+      }
     } catch (error) {
       console.error("[premium-role] entitlement sync failed:", error instanceof Error ? error.message : error);
     }
