@@ -23,13 +23,30 @@ export async function POST(request: Request) {
   const user = await authResponse.json().catch(() => null);
   if (typeof user?.id !== "string") return NextResponse.json({ error: "Could not verify your Pixlo account." }, { status: 401 });
 
+  const body = await request.json().catch(() => ({})) as { recipientUsername?: unknown };
+  const recipientUsername = typeof body.recipientUsername === "string" ? body.recipientUsername.trim().toLowerCase() : "";
+  const isGift = Boolean(recipientUsername);
+  let recipientId = user.id;
+  let recipientDisplayName = "";
+  if (isGift) {
+    if (!/^[a-z0-9._-]{3,24}$/.test(recipientUsername)) return NextResponse.json({ error: "Enter a valid Pixlo username (3–24 characters)." }, { status: 400 });
+    const recipientResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?select=id,username,display_name&username=ilike.${encodeURIComponent(recipientUsername)}&limit=1`, {
+      headers: { apikey: key, Authorization: `Bearer ${accessToken}` }, cache: "no-store",
+    });
+    const recipientRows = await recipientResponse.json().catch(() => []);
+    if (!recipientResponse.ok || !Array.isArray(recipientRows) || !recipientRows[0]?.id) return NextResponse.json({ error: "That Pixlo username could not be found." }, { status: 404 });
+    recipientId = String(recipientRows[0].id);
+    recipientDisplayName = String(recipientRows[0].username || recipientUsername);
+    if (recipientId === user.id) return NextResponse.json({ error: "You can't gift Premium to yourself. Use the normal purchase option instead." }, { status: 400 });
+  }
+
   const serviceKey = serverEnv("SUPABASE_SERVICE_ROLE_KEY");
   const stripeKey = serverEnv("STRIPE_SECRET_KEY");
   if (!serviceKey || !stripeKey) return NextResponse.json({ error: "Premium payments are not configured yet. Please try again later." }, { status: 503 });
 
   const liveMode = stripeKey.startsWith("sk_live_");
   const existing = await fetch(
-    `${supabaseUrl}/rest/v1/pixlo_premium_entitlements?select=status&user_id=eq.${encodeURIComponent(user.id)}&livemode=eq.${liveMode}&limit=1`,
+    `${supabaseUrl}/rest/v1/pixlo_premium_entitlements?select=status&user_id=eq.${encodeURIComponent(recipientId)}&livemode=eq.${liveMode}&limit=1`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
   );
   if (!existing.ok) {
@@ -41,7 +58,7 @@ export async function POST(request: Request) {
   }
   const entitlements = await existing.json().catch(() => []);
   if (Array.isArray(entitlements) && entitlements.some((entry: { status?: string }) => entry.status === "active")) {
-    return NextResponse.json({ error: "This Pixlo account already owns lifetime Premium." }, { status: 409 });
+    return NextResponse.json({ error: isGift ? "That Pixlo account already owns lifetime Premium." : "This Pixlo account already owns lifetime Premium." }, { status: 409 });
   }
 
   const configuredPrice = Number(serverEnv("PIXLO_PREMIUM_PRICE_GBP_PENCE") || "399");
@@ -53,15 +70,24 @@ export async function POST(request: Request) {
   form.set("success_url", `${origin}/premium?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
   form.set("cancel_url", `${origin}/premium?checkout=cancelled`);
   form.set("client_reference_id", user.id);
-  form.set("metadata[user_id]", user.id);
+  form.set("metadata[user_id]", recipientId);
   form.set("metadata[product]", "pixlo_premium_lifetime");
-  form.set("payment_intent_data[metadata][user_id]", user.id);
+  if (isGift) {
+    form.set("metadata[gift_type]", "paid");
+    form.set("metadata[gifted_by_user_id]", user.id);
+    form.set("metadata[recipient_username]", recipientDisplayName);
+  }
+  form.set("payment_intent_data[metadata][user_id]", recipientId);
   form.set("payment_intent_data[metadata][product]", "pixlo_premium_lifetime");
+  if (isGift) {
+    form.set("payment_intent_data[metadata][gift_type]", "paid");
+    form.set("payment_intent_data[metadata][gifted_by_user_id]", user.id);
+  }
   form.set("line_items[0][quantity]", "1");
   form.set("line_items[0][price_data][currency]", "gbp");
   form.set("line_items[0][price_data][unit_amount]", String(priceInPence));
-  form.set("line_items[0][price_data][product_data][name]", "Pixlo Premium — Lifetime");
-  form.set("line_items[0][price_data][product_data][description]", "One-time beta purchase. Lifetime Premium access for this Pixlo account, including future price increases.");
+  form.set("line_items[0][price_data][product_data][name]", isGift ? "Pixlo Premium — Lifetime Gift" : "Pixlo Premium — Lifetime");
+  form.set("line_items[0][price_data][product_data][description]", isGift ? `Lifetime Pixlo Premium gift for @${recipientDisplayName}.` : "One-time beta purchase. Lifetime Premium access for this Pixlo account, including future price increases.");
   if (typeof user.email === "string" && user.email.includes("@")) form.set("customer_email", user.email);
   form.set("billing_address_collection", "auto");
 
