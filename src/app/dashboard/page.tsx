@@ -185,6 +185,24 @@ function SectionIntro({ title }: { number?: string; title: string; text?: string
   return <div className="section-intro"><h2>{title}</h2></div>;
 }
 
+
+
+async function migratePresetAssets(settings: ProfileSettings): Promise<ProfileSettings> {
+  const migrate = async (value: string) => {
+    if (!value || !value.startsWith("idb:")) return value;
+    try { return await migrateAssetToCloud(value) || value; } catch { return value; }
+  };
+  const [avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo] = await Promise.all([
+    migrate(settings.avatar), migrate(settings.banner), migrate(settings.backgroundImage), migrate(settings.backgroundVideo),
+    migrate(settings.enterScreenBackgroundImage), migrate(settings.enterScreenBackgroundVideo),
+  ]);
+  const [musicTracks, customLinks] = await Promise.all([
+    Promise.all(settings.musicTracks.map(async track => ({ ...track, audio: await migrate(track.audio), cover: await migrate(track.cover) }))),
+    Promise.all(settings.customLinks.map(async link => ({ ...link, icon: await migrate(link.icon) }))),
+  ]);
+  return { ...settings, avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
+}
+
 export default function Dashboard() {
   const [active, setActive] = useState("General");
   const [premiumOpen, setPremiumOpen] = useState(false);
@@ -463,7 +481,7 @@ export default function Dashboard() {
       const existing = presets.find(item => item.slot_number === slot);
       const response = await fetch("/api/presets", {
         method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slot, name: (presetNames[slot] || existing?.name || `Preset ${slot}`).trim() || `Preset ${slot}`, settings }),
+        body: JSON.stringify({ slot, name: (presetNames[slot] || existing?.name || `Preset ${slot}`).trim() || `Preset ${slot}`, settings: await migratePresetAssets(settings) }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Could not save this preset.");
@@ -497,13 +515,31 @@ export default function Dashboard() {
     }
   };
 
-  const loadPresetSlot = (preset: { slot_number: number; name: string; settings: Partial<ProfileSettings> }) => {
-    const next = normaliseProfileSettings({ ...preset.settings, username: settings.username, displayName: preset.settings.displayName ?? settings.displayName }, { username: settings.username, displayName: settings.displayName });
-    setSettings(next);
-    if (profileUserId) saveSettingsToStorage(next, accountSettingsStorageKey(profileUserId));
-    setSaved(false);
-    setPresetMessage(`Equipped “${preset.name || `Preset ${preset.slot_number}`}” — preview updated.`);
-    setPreviewEntered(false); setPreviewEntering(false);
+  const loadPresetSlot = async (preset: { slot_number: number; name: string; settings: Partial<ProfileSettings> }) => {
+    setPresetBusy(preset.slot_number);
+    setPresetMessage("");
+    try {
+      // Keep the account username, but restore the preset's saved display name and all other settings.
+      const restored = normaliseProfileSettings({ ...preset.settings, username: settings.username, displayName: preset.settings.displayName ?? settings.displayName }, { username: settings.username });
+      const next = await migratePresetAssets(restored);
+      if (profileUserId) {
+        saveSettingsToStorage(next, accountSettingsStorageKey(profileUserId));
+        const response = await fetch("/api/account", {
+          method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ settings: next }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "The preset was applied locally but could not be synced to your profile.");
+      }
+      setSettings(next);
+      setSaved(true);
+      setPresetMessage(`Equipped “${preset.name || `Preset ${preset.slot_number}`}” — all saved settings restored.`);
+      setPreviewEntered(false); setPreviewEntering(false);
+    } catch (error) {
+      setPresetMessage(error instanceof Error ? error.message : "Could not equip this preset.");
+    } finally {
+      setPresetBusy(null);
+    }
   };
 
   const deletePresetSlot = async (slot: number) => {
