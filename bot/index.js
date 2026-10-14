@@ -259,30 +259,26 @@ async function announcePremiumPurchase(guild, member, entitlement) {
 
 async function announcePremiumRevocation(guild, member, profile) {
   const discordId = String(member?.id || profile?.discord_id || "");
-  if (!discordId) {
-    console.error("[premium-role] Cannot announce revocation because the recipient has no linked Discord account.");
-    return false;
-  }
   const channel = await guild.channels.fetch(REVOCATION_CHANNEL_ID).catch(() => null);
   if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
     console.error("[premium-role] Missing or inaccessible Premium revocation channel " + REVOCATION_CHANNEL_ID);
     return false;
   }
   const username = profile?.username ? `@${profile.username}` : (member?.user?.username || "Pixlo member");
-  const memberText = member ? `<@${discordId}>` : username;
+  const memberText = discordId ? `<@${discordId}>` : username;
   const embed = new EmbedBuilder()
     .setColor(0xE05A47)
     .setTitle("🚫 Pixlo Premium Revoked")
     .setDescription(`Premium access for ${memberText} (${username}) has been revoked. Their Pixlo Premium access is no longer active.`)
     .addFields(
-      { name: "👤 Member", value: member ? `<@${discordId}>` : username, inline: true },
+      { name: "👤 Member", value: discordId ? `<@${discordId}>` : username, inline: true },
       { name: "💎 Access", value: "Pixlo Premium — Lifetime", inline: true },
       { name: "📌 Status", value: "Revoked", inline: true },
     )
     .setFooter({ text: "Pixlo • Premium access update" })
     .setTimestamp();
   await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
-  console.log(`[premium-role] posted revocation announcement for Discord user ${discordId}`);
+  console.log(`[premium-role] posted revocation announcement for ${discordId ? `Discord user ${discordId}` : username}`);
   return true;
 }
 
