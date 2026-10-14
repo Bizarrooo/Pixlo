@@ -27,8 +27,9 @@ export async function POST(request: Request) {
   const stripeKey = serverEnv("STRIPE_SECRET_KEY");
   if (!serviceKey || !stripeKey) return NextResponse.json({ error: "Premium payments are not configured yet. Please try again later." }, { status: 503 });
 
+  const liveMode = stripeKey.startsWith("sk_live_");
   const existing = await fetch(
-    `${supabaseUrl}/rest/v1/pixlo_premium_entitlements?select=status&user_id=eq.${encodeURIComponent(user.id)}&limit=1`,
+    `${supabaseUrl}/rest/v1/pixlo_premium_entitlements?select=status&user_id=eq.${encodeURIComponent(user.id)}&livemode=eq.${liveMode}&limit=1`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
   );
   if (!existing.ok) {
