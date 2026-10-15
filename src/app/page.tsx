@@ -245,7 +245,7 @@ export default function Home() {
       <section className="revamp-hero">
         <div className="revamp-hero-main">
           
-          <h1>Your corner<br />of the internet<span className="revamp-title-period">.</span></h1>
+          <h1>Your identity,<br /><span className="revamp-title-gradient">beautifully linked</span><span className="revamp-title-period">.</span></h1>
           <div className="revamp-hero-bottom">
             <p>A profile that looks like <em>you</em>. Your links, music, socials and style — brought together in one space that feels unmistakably yours.</p>
             <div className="revamp-hero-actions">
