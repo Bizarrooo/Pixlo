@@ -374,3 +374,45 @@
   background-clip: text;
   color: transparent;
 }
+
+/* Performance + richer warm gradient balance, scoped to the homepage. */
+.pixlo-revamp-home {
+  background:
+    radial-gradient(ellipse at 100% 4%, rgba(255, 91, 35, .52) 0%, rgba(255, 125, 34, .28) 20%, transparent 43%),
+    radial-gradient(ellipse at 0% 32%, rgba(255, 65, 48, .32) 0%, rgba(255, 112, 31, .17) 22%, transparent 48%),
+    radial-gradient(ellipse at 78% 54%, rgba(255, 196, 40, .26) 0%, transparent 36%),
+    radial-gradient(ellipse at 16% 86%, rgba(255, 92, 40, .16) 0%, transparent 32%),
+    linear-gradient(135deg, #fff9f0 0%, #fff0df 24%, #fff8eb 47%, #ffe0c4 70%, #fff4e4 100%) !important;
+  background-attachment: scroll !important;
+}
+.pixlo-revamp-home .revamp-hero::before {
+  filter: blur(28px);
+  opacity: .95;
+}
+.pixlo-revamp-home .home-profile-stack::before {
+  filter: blur(18px);
+}
+.pixlo-revamp-home .home-profile-stack-card,
+.pixlo-revamp-home .home-profile-stack-empty {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.pixlo-revamp-home .home-profile-stack-card {
+  background: rgba(255, 249, 241, .96);
+  box-shadow: 0 16px 36px rgba(104, 61, 35, .12), 0 2px 7px rgba(104,61,35,.045);
+  transition: transform 680ms cubic-bezier(.2,.8,.2,1), box-shadow 300ms ease;
+  will-change: transform;
+}
+.pixlo-revamp-home .home-profile-stack-card:hover {
+  box-shadow: 0 20px 42px rgba(190, 76, 35, .18);
+}
+.pixlo-revamp-home .revamp-feature,
+.pixlo-revamp-home .revamp-button {
+  transition-duration: 180ms;
+}
+.pixlo-revamp-home .revamp-feature:hover { transform: translateY(-2px); }
+.pixlo-revamp-home .revamp-showcase-copy-card { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.pixlo-revamp-home .revamp-grid { opacity: .08; }
+@media (prefers-reduced-motion: reduce) {
+  .pixlo-revamp-home .home-profile-stack-card { transition: none; }
+}
