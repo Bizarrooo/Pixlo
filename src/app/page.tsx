@@ -116,22 +116,15 @@ function TopViewedProfiles() {
                 aria-label={`#${profile.rank} most viewed profile: ${profile.displayName || profile.username}, ${profile.views.toLocaleString()} views`}
                 style={{ zIndex: index + 1 }}
               >
-                <div className="home-profile-stack-preview">
-                  <div className="home-profile-stack-preview-cover">
-                    <span className="home-profile-stack-preview-orb" />
-                    <span className="home-profile-stack-preview-label">PIXLO / PROFILE</span>
-                  </div>
-                  <div className="home-profile-stack-preview-body">
-                    <span className="home-profile-stack-preview-avatar">{(profile.displayName || profile.username).trim().slice(0, 1).toUpperCase()}</span>
-                    <div className="home-profile-stack-preview-identity">
-                      <strong>{profile.displayName || profile.username}</strong>
-                      <span>@{profile.username}</span>
-                    </div>
-                    <span className="home-profile-stack-preview-arrow" aria-hidden="true">↗</span>
-                    <div className="home-profile-stack-preview-socials" aria-hidden="true"><i /><i /><i /><i /></div>
-                    <p>A little corner of the internet, made personal.</p>
-                  </div>
-                </div>
+                <iframe
+                  className="home-profile-stack-iframe"
+                  src={`/user/${encodeURIComponent(profile.username)}?embed=1`}
+                  title={`Live Pixlo profile for @${profile.username}`}
+                  loading={index === 2 ? "eager" : "lazy"}
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                />
                 <span className="home-profile-stack-rank">#{profile.rank} · {profile.views.toLocaleString()} views</span>
               </Link>
             );
