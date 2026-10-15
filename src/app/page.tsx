@@ -135,9 +135,8 @@ function TopViewedProfiles() {
       ) : (
         <div className="home-profile-stack-empty">
           <span className="home-profile-stack-empty-mark">P</span>
-          <strong>{loaded ? "Discover Pixlo profiles" : "Loading top profiles…"}</strong>
-          <span>{loaded ? "The views leaderboard will appear here when profile data is available." : "Finding the three most viewed profiles"}</span>
-          <Link href="/user">Explore profiles <Icon name="arrow" size={14} /></Link>
+          <strong>{loaded ? "Top profiles coming soon" : "Loading top profiles…"}</strong>
+          <span>{loaded ? "The most-viewed profile cards will appear here once profile data is available." : "Loading the most-viewed profile cards"}</span>
         </div>
       )}
     </div>
