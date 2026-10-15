@@ -379,3 +379,10 @@
   .pixlo-revamp-home .revamp-feature,
   .pixlo-revamp-home .revamp-nav a { transition: none; }
 }
+
+.pixlo-revamp-home .revamp-title-gradient {
+  background: linear-gradient(100deg, #f43c31 0%, #ff6b20 49%, #ffbd24 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
