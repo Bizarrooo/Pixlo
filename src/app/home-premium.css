@@ -74,19 +74,7 @@
   pointer-events: none;
 }
 .pixlo-revamp-home .revamp-hero-main { max-width: 670px; }
-.pixlo-revamp-home .revamp-hero-main::before {
-  content: "YOUR SPACE. YOUR STYLE.";
-  display: inline-flex;
-  align-items: center;
-  padding: 9px 13px;
-  margin-bottom: 22px;
-  border: 1px solid rgba(255, 112, 38, .18);
-  border-radius: 999px;
-  background: rgba(255, 241, 224, .82);
-  color: #d94a22;
-  font: 700 10px/1 var(--font-geist-mono), monospace;
-  letter-spacing: .14em;
-}
+.pixlo-revamp-home .revamp-hero-main::before { content: none; display: none; }
 .pixlo-revamp-home .revamp-hero h1 {
   max-width: 760px;
   margin: 0;
