@@ -433,3 +433,9 @@
 .pixlo-revamp-home .home-profile-stack-preview-socials i { width: 25px; height: 25px; border: 1px solid #f0d8ca; border-radius: 8px; background: linear-gradient(145deg,#fff,#ffe9da); }
 .pixlo-revamp-home .home-profile-stack-preview p { margin: 13px 0 0; color: #856b60; font-size: 11px; line-height: 1.5; }
 @media (max-width: 650px) { .pixlo-revamp-home .home-profile-stack-preview-cover { flex-basis: 105px; } .pixlo-revamp-home .home-profile-stack-preview-body { padding-right: 14px; padding-left: 14px; } }
+
+
+/* Real profile pages in the homepage stack; keep the embeds clipped and inexpensive to paint. */
+.pixlo-revamp-home .home-profile-stack-live { display: block; }
+.pixlo-revamp-home .home-profile-stack-iframe { display: block; width: 100%; height: 340px; border: 0; background: #fff6ee; pointer-events: none; }
+.pixlo-revamp-home .home-profile-stack-live .home-profile-stack-rank { display: block; padding: 10px 14px; }
