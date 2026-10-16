@@ -950,3 +950,14 @@
     transition: none !important;
   }
 }
+
+/* Give the homepage card a slow, natural ease-back after pointer exit. */
+.px-live-profile-card {
+  transition: transform 140ms cubic-bezier(.18,.72,.23,1), box-shadow 220ms ease !important;
+}
+.px-live-profile-card.is-returning {
+  transition: transform 820ms cubic-bezier(.16,1,.3,1), box-shadow 820ms cubic-bezier(.16,1,.3,1) !important;
+}
+.px-live-profile-card.is-returning::before {
+  transition: opacity 820ms ease !important;
+}
