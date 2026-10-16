@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -13,6 +13,11 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [emailAlreadyUsed, setEmailAlreadyUsed] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const requestedUsername = new URLSearchParams(window.location.search).get("username")?.trim().toLowerCase() || "";
+    if (/^[a-z0-9._-]{3,24}$/.test(requestedUsername)) setUsername(requestedUsername);
+  }, []);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
