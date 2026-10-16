@@ -120,8 +120,7 @@ export default function DashboardSidebar({
   return (
     <aside className={`sidebar dashboard-sidebar-organised ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand dashboard-brand">
-        <div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div>
-        <small>YOUR CREATIVE SPACE</small>
+        <div className="brand-logo-shell"><a href="/" className="dashboard-brand-home" aria-label="Go to Pixlo homepage"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></a></div>
       </div>
 
       <div className="dashboard-account-switcher">
