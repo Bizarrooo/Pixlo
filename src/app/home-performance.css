@@ -1,14 +1,20 @@
-/* Homepage responsiveness: keep content visible immediately and avoid blur-heavy entrance animations. */
+/* Keep the homepage static and responsive: no reveal observers, parallax, or transition work. */
+.pixlo-revamp-home,
+.pixlo-revamp-home * {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
 .pixlo-revamp-home .home-reveal-target,
 .pixlo-revamp-home.motion-ready .home-reveal-target,
 .pixlo-revamp-home.motion-ready .home-reveal-target.is-visible {
   opacity: 1 !important;
   filter: none !important;
-  transform: none !important;
-  animation: none !important;
-  transition: none !important;
 }
+
 .pixlo-revamp-home .home-profile-stack-card,
+.pixlo-revamp-home .home-profile-stack-live,
 .pixlo-revamp-home .home-profile-stack-iframe-shell,
 .pixlo-revamp-home .home-profile-stack-iframe,
 .pixlo-revamp-home .home-live-profile-card,
@@ -16,15 +22,26 @@
   filter: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-}
-.pixlo-revamp-home .home-profile-stack-card {
   will-change: auto !important;
-  transition: transform 180ms ease, box-shadow 180ms ease !important;
 }
+
+.pixlo-revamp-home .home-profile-stack:has(.home-profile-stack-live:hover) .home-profile-stack-live {
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 .pixlo-revamp-home .home-profile-stack::before,
 .pixlo-revamp-home .revamp-hero::before {
   filter: none !important;
 }
-@media (prefers-reduced-motion: reduce) {
-  .pixlo-revamp-home * { scroll-behavior: auto !important; }
+
+/* Keep header navigation legible even if a browser applies dark-page styling. */
+.pixlo-revamp-home .revamp-nav a {
+  color: #fffaf3 !important;
+  font-weight: 750 !important;
+  text-shadow: 0 1px 8px rgba(44, 20, 10, .55);
+}
+.pixlo-revamp-home .revamp-nav a:hover {
+  color: #ffd36b !important;
 }
