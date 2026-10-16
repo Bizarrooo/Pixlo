@@ -167,7 +167,8 @@ export default function SignupPage() {
           <i className="auth-rail auth-rail-br-bottom" /><i className="auth-rail auth-rail-br-side" />
         </div>
 
-        <div className="auth-card-meta">
+        <div className="auth-progress" aria-label={`Step ${step} of 4`}>
+          {[1, 2, 3, 4].map(index => <span key={index} className={index <= step ? "is-complete" : ""} />)}
         </div>
 
         <div className="auth-heading auth-heading-signup">
@@ -247,9 +248,6 @@ export default function SignupPage() {
           </div>
         </form>
 
-        <div className="auth-progress" aria-label={`Step ${step} of 4`}>
-          {[1, 2, 3, 4].map(index => <span key={index} className={index <= step ? "is-complete" : ""} />)}
-        </div>
 
         <div className="auth-card-footer auth-card-footer-signup">
           <p>Already have an account? <Link href="/login">Log in <span aria-hidden="true">→</span></Link></p>
