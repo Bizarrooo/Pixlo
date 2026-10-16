@@ -17,12 +17,13 @@
   overflow-x: clip;
   padding: 22px clamp(18px, 4.6vw, 78px) 17px;
   color: var(--auth-ink);
-  background-color: #f9f0e9;
+  background-color: #190907;
   background-image:
-    linear-gradient(180deg, rgba(255,250,247,.13) 0%, rgba(255,249,246,.18) 60%, rgba(255,248,241,.5) 100%),
-    url("/pixlo-auth-scene.svg");
+    linear-gradient(90deg, rgba(21,7,6,.86) 0%, rgba(32,8,6,.72) 42%, rgba(27,8,6,.43) 100%),
+    linear-gradient(180deg, rgba(16,5,5,.2) 0%, transparent 56%, rgba(24,7,5,.76) 100%),
+    url("/pixlo-ambient.svg");
   background-size: cover;
-  background-position: center top;
+  background-position: center center;
   background-repeat: no-repeat;
   font-family: var(--font-geist-sans), Inter, sans-serif;
 }
@@ -701,4 +702,158 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+
+/* Pixlo-specific finish: the homepage ember backdrop and restrained motion, without filler copy. */
+.auth-page {
+  color: #fff6ec;
+  background-color: #190907;
+  background-image:
+    linear-gradient(90deg, rgba(21,7,6,.86) 0%, rgba(32,8,6,.72) 42%, rgba(27,8,6,.43) 100%),
+    linear-gradient(180deg, rgba(16,5,5,.2) 0%, transparent 56%, rgba(24,7,5,.76) 100%),
+    url("/pixlo-ambient.svg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.auth-page::before {
+  position: absolute;
+  opacity: .20;
+  background:
+    linear-gradient(rgba(255,211,160,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,211,160,.045) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+.auth-page::after {
+  position: absolute;
+  background:
+    radial-gradient(ellipse 45% 40% at 50% 47%, rgba(255,111,54,.075), transparent 78%),
+    linear-gradient(180deg, rgba(12,4,4,.08), rgba(12,4,4,.22));
+}
+.auth-page .auth-glow-a { background: radial-gradient(circle, rgba(255,76,45,.12), transparent 70%); }
+.auth-page .auth-glow-b { background: radial-gradient(circle, rgba(255,166,65,.11), transparent 70%); }
+
+/* Dark warm glass: the card belongs with Pixlo's red, orange and gold palette. */
+.auth-card {
+  color: #fff4e9;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(255,119,61,.12), transparent 42%),
+    radial-gradient(ellipse at 0% 100%, rgba(255,76,49,.07), transparent 38%),
+    linear-gradient(145deg, rgba(43,16,12,.94), rgba(21,9,8,.93) 53%, rgba(29,11,8,.93));
+  border: 1px solid rgba(255,190,142,.16);
+  box-shadow: 0 30px 90px rgba(0,0,0,.40), 0 12px 38px rgba(22,6,4,.32), 0 0 44px rgba(255,93,48,.075), inset 0 1px rgba(255,230,202,.08);
+  backdrop-filter: blur(26px) saturate(1.1);
+  -webkit-backdrop-filter: blur(26px) saturate(1.1);
+}
+.auth-card::before {
+  background: linear-gradient(132deg, rgba(255,172,111,.42) 0%, rgba(255,155,105,.12) 26%, rgba(241,74,58,.25) 52%, rgba(255,194,98,.24) 79%, rgba(255,255,255,.12) 100%);
+}
+.auth-card-rails .auth-rail {
+  opacity: .56;
+  box-shadow: 0 0 7px rgba(255,91,56,.2), 0 0 16px rgba(255,112,61,.1);
+}
+.auth-heading h1 { color: #fff5ec; }
+.auth-heading h1 em {
+  background: linear-gradient(96deg, #ff6548 0%, #ff913f 62%, #ffd078 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.auth-heading-kicker { color: #ffb16b; }
+.auth-heading p { color: rgba(255,235,216,.67); }
+.auth-step-pill {
+  border-color: rgba(255,149,92,.25);
+  color: rgba(255,235,216,.68);
+  background: rgba(255,244,232,.055);
+}
+.auth-step-pill > i {
+  background: linear-gradient(135deg, #ff5b43, #ffc766);
+  box-shadow: 0 0 0 4px rgba(255,110,58,.1);
+}
+.auth-field, .auth-field-label { color: rgba(255,238,222,.88); }
+.auth-label-row > a { color: #ffb366 !important; }
+.auth-label-row > a:hover { color: #ffd082 !important; }
+.auth-input-shell {
+  border-color: rgba(255,206,174,.15);
+  color: rgba(255,231,211,.62);
+  background: rgba(8,4,4,.28);
+  box-shadow: inset 0 1px rgba(255,255,255,.035), 0 5px 15px rgba(0,0,0,.06);
+}
+.auth-input-shell:hover { border-color: rgba(255,167,105,.37); background: rgba(12,5,4,.48); }
+.auth-input-shell:focus-within {
+  border-color: rgba(255,130,66,.63);
+  background: rgba(8,4,4,.43);
+  box-shadow: 0 0 0 4px rgba(255,111,54,.1), 0 7px 17px rgba(0,0,0,.12);
+}
+.auth-input-icon { color: rgba(255,207,172,.57); }
+.auth-input-shell input { color: #fff2e7; }
+.auth-input-shell input::placeholder { color: rgba(255,224,204,.34); }
+.auth-password-toggle { color: rgba(255,223,201,.47); }
+.auth-password-toggle:hover { color: #ffc16e; background: rgba(255,120,58,.1); }
+.auth-input-prefix { color: rgba(255,219,197,.48); }
+.auth-username-shell.is-available { border-color: rgba(70,220,144,.68); box-shadow: 0 0 0 3px rgba(70,220,144,.07); }
+.auth-username-shell.is-unavailable { border-color: rgba(255,89,78,.74); box-shadow: 0 0 0 3px rgba(255,89,78,.07); }
+.auth-username-status { color: rgba(255,214,190,.54); }
+.auth-field-hint { color: rgba(255,219,197,.47); }
+.auth-review-card { border-color: rgba(255,190,142,.14); background: rgba(255,245,231,.045); box-shadow: inset 0 1px rgba(255,255,255,.045); }
+.auth-review-copy b { color: #ffedde; }
+.auth-review-copy small { color: rgba(255,219,197,.49); }
+.auth-back-button { border-color: rgba(255,193,151,.18); color: rgba(255,223,201,.66); background: rgba(255,244,232,.045); }
+.auth-back-button:hover { color: #ffc06e; border-color: rgba(255,134,69,.4); background: rgba(255,244,232,.08); }
+.auth-progress > span { background: rgba(255,224,203,.13); }
+.auth-progress > span.is-complete { background: linear-gradient(90deg, #ff5a43, #ff9a40 65%, #ffd078); box-shadow: 0 0 9px rgba(255,99,57,.2); }
+.auth-card-footer > p { color: rgba(255,226,206,.53); }
+.auth-card-footer > p a { color: #ffb269 !important; }
+.auth-card-footer > p a:hover { color: #ffd087 !important; }
+.auth-error { color: #ffbcb5; border-color: rgba(255,100,84,.23); background: rgba(143,31,22,.22); }
+.auth-error a { color: #ffd0a0; }
+.auth-success { color: #9be9bd; border-color: rgba(53,203,130,.2); background: rgba(30,122,77,.18); }
+.auth-success .auth-message-icon { color: #1a422e; background: #b3f3cb; }
+.auth-error .auth-message-icon { color: #64251f; background: #ffbdb2; }
+.auth-switching-account { color: rgba(255,224,201,.76); border-color: rgba(255,143,72,.2); background: rgba(255,115,52,.075); }
+.auth-switching-account b { color: #ffd09b; }
+
+/* Low-opacity glowing line sweeps around the existing clipped card frame. */
+@property --auth-orbit-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.auth-card::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  padding: 1.6px;
+  pointer-events: none;
+  opacity: .27;
+  background: conic-gradient(
+    from var(--auth-orbit-angle),
+    transparent 0deg 218deg,
+    rgba(255,104,60,.05) 236deg,
+    rgba(255,139,62,.35) 260deg,
+    rgba(255,207,112,.68) 278deg,
+    rgba(255,92,57,.26) 298deg,
+    transparent 326deg 360deg
+  );
+  filter: blur(.45px);
+  clip-path: inherit;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: authOrbitSweep 9.5s linear infinite;
+}
+@keyframes authOrbitSweep {
+  from { --auth-orbit-angle: 0deg; }
+  to { --auth-orbit-angle: 360deg; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-card::after { animation: none !important; opacity: .13; }
+}
+@media (max-width: 760px) { .auth-page { background-position: 55% center; } }
+@media (max-width: 480px) {
+  .auth-page { background-position: 45% center; }
+  .auth-card { box-shadow: 0 22px 60px rgba(0,0,0,.38), 0 0 30px rgba(255,93,48,.06), inset 0 1px rgba(255,230,202,.08); }
 }
