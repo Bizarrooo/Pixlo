@@ -1091,80 +1091,235 @@
 }
 
 
-/* Scroll recovery: dashboard content must grow with every settings panel. */
+
+/* Fixed dashboard shell: the document never scrolls; the active content pane does. */
 html:has(.dashboard.dashboard-revamp),
 body:has(.dashboard.dashboard-revamp) {
-  height: auto !important;
-  min-height: 100% !important;
-  max-height: none !important;
-  overflow-x: clip !important;
-  overflow-y: auto !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
 }
 .dashboard.dashboard-revamp {
   display: grid !important;
-  grid-template-rows: auto !important;
-  align-items: start !important;
-  height: auto !important;
-  min-height: 100vh !important;
-  max-height: none !important;
-  overflow-x: clip !important;
-  overflow-y: visible !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+.dashboard.dashboard-revamp .sidebar.dashboard-sidebar-organised {
+  position: relative !important;
+  top: 0 !important;
+  align-self: stretch !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+}
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-width: thin !important;
 }
 .dashboard.dashboard-revamp .dashboard-main {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-direction: column !important;
   align-self: stretch !important;
-  height: auto !important;
-  min-height: 100vh !important;
-  max-height: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+}
+.dashboard.dashboard-revamp .dashboard-main > .dash-header {
+  position: relative !important;
+  top: auto !important;
+  flex: 0 0 82px !important;
+  height: 82px !important;
+  min-height: 82px !important;
+  max-height: 82px !important;
   overflow: visible !important;
 }
-.dashboard.dashboard-revamp .editor-grid {
-  align-items: start !important;
-  height: auto !important;
-  min-height: calc(100vh - 82px) !important;
-  max-height: none !important;
-  overflow: visible !important;
+.dashboard.dashboard-revamp .dashboard-customize-tabs,
+.dashboard.dashboard-revamp .dashboard-optimise-tabs {
+  position: relative !important;
+  top: auto !important;
+  z-index: 25 !important;
+  flex: 0 0 53px !important;
+  height: 53px !important;
+  min-height: 53px !important;
+  max-height: 53px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  overscroll-behavior-x: contain !important;
+  scrollbar-width: thin !important;
 }
-.dashboard.dashboard-revamp .editor {
-  align-self: start !important;
+.dashboard.dashboard-revamp .dashboard-main > .editor-grid {
+  position: relative !important;
+  display: grid !important;
+  flex: 1 1 0 !important;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 39%) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+.dashboard.dashboard-revamp .dashboard-main > .editor-grid > .editor {
+  align-self: stretch !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 22px clamp(16px, 2vw, 28px) 34px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 143, 88, .48) rgba(255,255,255,.035) !important;
+}
+.dashboard.dashboard-revamp .dashboard-main > .editor-grid > .editor::-webkit-scrollbar,
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+.dashboard.dashboard-revamp .dashboard-main > .editor-grid > .editor::-webkit-scrollbar-thumb,
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 143, 88, .4);
+  background-clip: padding-box;
+}
+.dashboard.dashboard-revamp .dashboard-main > .editor-grid > .editor > .form-stack {
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
   overflow: visible !important;
+  padding-bottom: 10px;
 }
-.dashboard.dashboard-revamp .editor > .form-stack {
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-.dashboard.dashboard-revamp .preview-panel {
+.dashboard.dashboard-revamp .dashboard-main > .editor-grid > .preview-panel {
+  position: relative !important;
+  align-self: stretch !important;
+  top: auto !important;
+  height: 100% !important;
   min-height: 0 !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+  overflow: hidden !important;
 }
-.dashboard.dashboard-revamp .premium-nav-items {
-  max-height: 180px !important;
+.dashboard.dashboard-revamp .dashboard-main > .editor-grid > .preview-panel .preview-frame {
+  height: calc(100% - 42px) !important;
+  min-height: 0 !important;
+  max-height: none !important;
 }
+
+/* Optimise stays visible for every account; its individual panels show the Premium upsell when locked. */
 .dashboard.dashboard-revamp .premium-optimise-nav-button {
   display: grid !important;
-  grid-template-columns: 17px minmax(0,1fr) auto !important;
+  grid-template-columns: 17px minmax(0, 1fr) auto !important;
   align-items: center !important;
 }
 .dashboard.dashboard-revamp .premium-optimise-nav-button .dashboard-nav-badge {
   padding: 3px 5px !important;
   color: #2b150d !important;
-  background: linear-gradient(110deg,#ffbf71,#ff7547) !important;
+  background: linear-gradient(110deg, #ffbf71, #ff7547) !important;
   border: 0 !important;
+}
+
+/* Smaller desktops/tablets keep the editor and preview as separate contained scroll areas. */
+@media (max-width: 900px) {
+  .dashboard.dashboard-revamp .dashboard-main > .editor-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) minmax(0, .72fr) !important;
+  }
+  .dashboard.dashboard-revamp .dashboard-main > .editor-grid > .editor {
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(255, 175, 130, .1) !important;
+    padding: 18px 18px 24px !important;
+  }
+  .dashboard.dashboard-revamp .dashboard-main > .editor-grid > .preview-panel {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    padding: 15px 18px !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+  }
+  .dashboard.dashboard-revamp .dashboard-main > .editor-grid > .preview-panel .preview-frame {
+    height: 520px !important;
+    min-height: 520px !important;
+  }
 }
 @media (max-width: 760px) {
   .dashboard.dashboard-revamp {
     display: block !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
-  }
-  .dashboard.dashboard-revamp .dashboard-main,
-  .dashboard.dashboard-revamp .editor-grid,
-  .dashboard.dashboard-revamp .editor {
-    height: auto !important;
+    height: 100vh !important;
+    height: 100dvh !important;
     min-height: 0 !important;
-    max-height: none !important;
-    overflow: visible !important;
+  }
+  .dashboard.dashboard-revamp .sidebar.dashboard-sidebar-organised {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: min(286px, 88vw) !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    transform: translateX(-105%);
+    transition: transform .22s ease;
+    z-index: 100 !important;
+  }
+  .dashboard.dashboard-revamp .sidebar.dashboard-sidebar-organised.mobile-open {
+    transform: translateX(0);
+  }
+  .dashboard.dashboard-revamp .dashboard-main {
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+  }
+  .dashboard.dashboard-revamp .dashboard-main > .dash-header {
+    flex-basis: 70px !important;
+    height: 70px !important;
+    min-height: 70px !important;
+    max-height: 70px !important;
+    padding: 10px 12px !important;
+  }
+  .dashboard.dashboard-revamp .dashboard-customize-tabs,
+  .dashboard.dashboard-revamp .dashboard-optimise-tabs {
+    flex-basis: 49px !important;
+    height: 49px !important;
+    min-height: 49px !important;
+    max-height: 49px !important;
+    padding-inline: 10px !important;
+  }
+  .dashboard.dashboard-revamp .dashboard-main > .editor-grid {
+    grid-template-rows: minmax(0, 1fr) minmax(0, .68fr) !important;
+  }
+  .dashboard.dashboard-revamp .dashboard-main > .editor-grid > .editor {
+    padding: 15px 12px 20px !important;
+  }
+  .dashboard.dashboard-revamp .dashboard-main > .editor-grid > .preview-panel {
+    padding: 12px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard.dashboard-revamp .sidebar.dashboard-sidebar-organised {
+    transition: none !important;
   }
 }
