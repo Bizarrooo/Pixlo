@@ -1284,3 +1284,40 @@
   .auth-page-discord-gate .auth-discord-emblem { margin-bottom: 19px !important; }
   .auth-page-discord-gate .auth-gate-actions { margin-top: 21px !important; }
 }
+
+
+/* Registration progress belongs at the top of the setup card, like the step-based reference. */
+.auth-page-signup .auth-progress {
+  position: relative !important;
+  order: 0 !important;
+  width: 100% !important;
+  grid-template-columns: repeat(4, minmax(0,1fr)) !important;
+  gap: 7px !important;
+  margin: 0 0 28px !important;
+}
+.auth-page-signup .auth-card-meta { display: none !important; }
+.auth-page-signup .auth-heading-signup { order: 1; }
+.auth-page-signup .auth-signup-form { order: 2; }
+.auth-page-signup .auth-card-footer-signup { order: 3; }
+.auth-page-signup .auth-progress > span { height: 4px !important; }
+
+/* Auth logo itself must remain unboxed; only the surrounding card gets glass styling. */
+.auth-page .auth-brand,
+.auth-page .auth-brand:hover {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  filter: none !important;
+}
+.auth-page .auth-brand::before,
+.auth-page .auth-brand::after { display: none !important; content: none !important; }
+.auth-page .auth-brand-logo {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  filter: none !important;
+}
