@@ -395,9 +395,6 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const font = fontFamily(settings.customFont);
   const position = `${settings.backgroundPositionX}% ${settings.backgroundPositionY}%`;
   const scale = `${settings.backgroundScale}%`;
-  const parallaxPower = settings.parallax && settings.parallaxStrength > 0
-    ? Math.pow(Math.min(35, Math.max(0, settings.parallaxStrength)) / 35, 0.72)
-    : 0;
   const style = {
     "--background": settings.backgroundColour,
     "--accent": settings.accentColour,
@@ -570,7 +567,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   return (
     <main ref={profilePageRef} className={`profile-page ${isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername ? "has-extras" : ""} ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
-      {forcedUsername && profileStatus === "found" && !presetPreviewMode && !embedMode && (
+      {forcedUsername && profileStatus === "found" && !presetPreviewMode && !embedMode && typeof document !== "undefined" && createPortal(
         <button
           type="button"
           className={`pixlo-share-profile-button ${shareCopied ? "is-copied" : ""}`}
@@ -583,7 +580,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M16 8V5.8A1.8 1.8 0 0 0 14.2 4H5.8A1.8 1.8 0 0 0 4 5.8v8.4A1.8 1.8 0 0 0 5.8 16H8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
           )}
           <span aria-live="polite">{shareCopied ? "Link copied!" : "Share profile"}</span>
-        </button>
+        </button>,
+        document.body
       )}
       {isPremium && settings.cursorTrailEnabled && !presetPreviewMode && !embedMode && forcedUsername && typeof document !== "undefined" && createPortal(
         <div ref={cursorTrailLayerRef} className="pixlo-cursor-trail-layer" aria-hidden="true" />,
