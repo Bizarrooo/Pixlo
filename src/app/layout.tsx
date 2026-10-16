@@ -6,6 +6,7 @@ import "./home-premium.css";
 import "./home-performance.css";
 import "./home-rebuild.css";
 import "./auth-refresh.css";
+import "./dashboard-reorg.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
