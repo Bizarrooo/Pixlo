@@ -1353,7 +1353,7 @@ export default function Dashboard() {
         <p>A small trail of glowing stars follows the cursor, matching your chosen colour and intensity. It only appears on the public profile for Premium members.</p>
       </div>
       <span className="cursor-sparkles-premium-pill"><DashboardNavIcon name="sparkles" /> PREMIUM</span>
-      <div className="cursor-sparkles-demo" style={{ "--cursor-sparkle-colour": settings.cursorSparklesColour, "--cursor-sparkle-glow": (settings.cursorSparklesGlow / 7) + "px", "--cursor-sparkle-scale": settings.cursorSparklesSize / 100, "--cursor-sparkle-demo-speed": Math.max(0.45, 1.5 - settings.cursorSparklesSpeed / 150) + "s" } as React.CSSProperties} aria-label="Sparkle cursor effect preview">
+      <div className="cursor-sparkles-demo" style={{ position: "relative", "--cursor-sparkle-colour": settings.cursorSparklesColour, "--cursor-sparkle-glow": (settings.cursorSparklesGlow / 7) + "px", "--cursor-sparkle-scale": settings.cursorSparklesSize / 100, "--cursor-sparkle-demo-speed": Math.max(0.45, 1.5 - settings.cursorSparklesSpeed / 150) + "s" } as React.CSSProperties} aria-label="Sparkle cursor effect preview">
         <span className="cursor-sparkles-demo-label">LIVE PREVIEW</span>
         <span className="cursor-sparkle-demo-star star-one">✦</span>
         <span className="cursor-sparkle-demo-star star-two">✧</span>
