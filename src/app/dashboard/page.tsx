@@ -342,7 +342,7 @@ export default function Dashboard() {
   const [discordCheckingMembership, setDiscordCheckingMembership] = useState(false);
 
   useEffect(() => {
-    if (discordSetupStep !== 2 || !discordCheckingMembership || discordUser) return;
+    if (discordSetupStep !== 2 || discordUser) return;
 
     let active = true;
     let inFlight = false;
@@ -360,10 +360,12 @@ export default function Dashboard() {
         const data = await response.json().catch(() => ({}));
         if (!active) return;
         if (response.ok && data.verified === true) {
+          window.sessionStorage.removeItem("pixlo-discord-pending-join");
           window.location.assign("/dashboard");
           return;
         }
         if (response.status === 401 && data.code === "pending-expired") {
+          window.sessionStorage.removeItem("pixlo-discord-pending-join");
           setDiscordCheckingMembership(false);
           setDiscordSetupStep(1);
           setDiscordNotice("error");
@@ -382,7 +384,7 @@ export default function Dashboard() {
       if (document.visibilityState === "visible") void verifyMembership();
     };
     void verifyMembership();
-    const interval = window.setInterval(() => void verifyMembership(), 6000);
+    const interval = window.setInterval(() => void verifyMembership(), 4000);
     window.addEventListener("focus", onReturn);
     document.addEventListener("visibilitychange", onReturn);
     return () => {
@@ -391,15 +393,25 @@ export default function Dashboard() {
       window.removeEventListener("focus", onReturn);
       document.removeEventListener("visibilitychange", onReturn);
     };
-  }, [discordSetupStep, discordCheckingMembership, discordUser]);
+  }, [discordSetupStep, discordUser]);
 
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const discordStatus = params.get("discord");
     const detail = params.get("discord_detail");
+    const pendingJoinKey = "pixlo-discord-pending-join";
+    const savedPendingJoin = window.sessionStorage.getItem(pendingJoinKey) === "1";
+    const resumeJoinStep = discordStatus === "not-member" || (!discordStatus && savedPendingJoin);
+
     if (["connected", "error", "already-linked", "not-member", "cancelled"].includes(discordStatus || "")) setDiscordNotice(discordStatus as "connected" | "error" | "already-linked" | "not-member" | "cancelled");
-    setDiscordSetupStep(discordStatus === "not-member" ? 2 : 1);
+    setDiscordSetupStep(resumeJoinStep ? 2 : 1);
+    setDiscordCheckingMembership(resumeJoinStep);
+    if (resumeJoinStep) {
+      window.sessionStorage.setItem(pendingJoinKey, "1");
+    } else if (discordStatus) {
+      window.sessionStorage.removeItem(pendingJoinKey);
+    }
     if (detail) setDiscordDetail(detail);
     if (discordStatus) window.history.replaceState({}, "", "/dashboard");
 
@@ -446,6 +458,10 @@ export default function Dashboard() {
         ]);
         loaded = { ...loaded, avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
         const linkedDiscord = accountData.user?.discordId ? accountData.user : null;
+        if (linkedDiscord) {
+          window.sessionStorage.removeItem("pixlo-discord-pending-join");
+          setDiscordCheckingMembership(false);
+        }
         if (accountData.discordUnlinkedForMembership) {
           setDiscordSetupStep(1);
           setDiscordNotice("not-member");
