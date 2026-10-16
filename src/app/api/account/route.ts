@@ -35,6 +35,7 @@ export async function GET(request: Request) {
     let profile = session.profile;
     let refreshTokens: DiscordOAuthTokens | null = null;
     let unlinkDiscord = false;
+    let membershipVerifiedForRequest = false;
 
     // When a linked Discord session exists in this browser, re-check membership
     // whenever the account/profile endpoint is loaded. This clears a link if the
@@ -75,9 +76,12 @@ export async function GET(request: Request) {
             }
             if (membership.ok && membership.isMember === false) {
               shouldUnlink = true;
-            } else if (membership.ok && membership.isMember === true && !profile.discord_membership_verified) {
-              const verifiedProfile = await updatePixloDiscordProfile(session.accessToken, session.authUser.id, { discordMembershipVerified: true });
-              if (verifiedProfile) profile = verifiedProfile;
+            } else if (membership.ok && membership.isMember === true) {
+              membershipVerifiedForRequest = true;
+              if (!profile.discord_membership_verified) {
+                const verifiedProfile = await updatePixloDiscordProfile(session.accessToken, session.authUser.id, { discordMembershipVerified: true });
+                if (verifiedProfile) profile = verifiedProfile;
+              }
             }
           }
         }
@@ -101,7 +105,7 @@ export async function GET(request: Request) {
       }
     }
     const payload = profileToDashboardUser(profile);
-    const isDiscordLinked = Boolean(profile.discord_id && profile.discord_membership_verified);
+    const isDiscordLinked = Boolean(profile.discord_id && profile.discord_membership_verified && membershipVerifiedForRequest);
     const response = NextResponse.json({ profile: payload, user: isDiscordLinked ? payload : null, discordUnlinkedForMembership: unlinkDiscord });
     const secure = process.env.NODE_ENV === "production";
     if (unlinkDiscord) {
