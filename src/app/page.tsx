@@ -49,7 +49,7 @@ function ProfileArtwork() {
         <div className="px-live-profile-footer"><span>@BIZARRO</span><span>OPEN PROFILE <ArrowIcon diagonal /></span></div>
       </div>
       <span className="px-live-profile-caption-bottom"><i /> YOUR REAL PAGE. YOUR REAL STYLE. <b>↗</b></span>
-    </Link>
+    </a>
   );
 }
 
