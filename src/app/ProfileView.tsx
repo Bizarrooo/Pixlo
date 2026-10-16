@@ -134,14 +134,19 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     let lastY = -100;
     let lastSpawnAt = 0;
     const density = Math.min(100, Math.max(20, settings.cursorTrailDensity));
-    const particleCount = Math.min(4, Math.max(1, Math.round(density / 30)));
+    // Use a lighter trail whenever card parallax is active so particles do not compete
+    // with the high-frequency pointer updates and 3D transforms.
+    const parallaxActive = settings.parallax;
+    const particleCount = parallaxActive ? 1 : Math.min(4, Math.max(1, Math.round(density / 30)));
+    const spawnInterval = parallaxActive ? 32 : 18;
+    const maxParticles = parallaxActive ? 32 : 84;
 
     const handleCursorMove = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
       const now = performance.now();
       const distance = Math.hypot(event.clientX - lastX, event.clientY - lastY);
-      const minDistance = Math.max(3, 13 - density * 0.1);
-      if (now - lastSpawnAt < 18 || distance < minDistance) return;
+      const minDistance = parallaxActive ? Math.max(7, 18 - density * 0.08) : Math.max(3, 13 - density * 0.1);
+      if (now - lastSpawnAt < spawnInterval || distance < minDistance) return;
 
       lastSpawnAt = now;
       lastX = event.clientX;
@@ -168,7 +173,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         layer.appendChild(particle);
       }
 
-      while (layer.childElementCount > 84) layer.firstElementChild?.remove();
+      while (layer.childElementCount > maxParticles) layer.firstElementChild?.remove();
     };
 
     window.addEventListener("pointermove", handleCursorMove, { passive: true });
