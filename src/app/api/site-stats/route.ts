@@ -57,22 +57,22 @@ export async function GET() {
     if (serviceKey) {
       const liveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
       const premiumResponse = await fetch(
-        `${url}/rest/v1/pixlo_premium_entitlements?select=user_id&status=eq.active&livemode=eq.${liveMode}&limit=10000`,
+        `${url}/rest/v1/pixlo_premium_entitlements?select=user_id&user_id=neq.${OWNER_USER_ID}&status=eq.active&livemode=eq.${liveMode}&limit=1`,
         {
           headers: {
             apikey: serviceKey,
             Authorization: `Bearer ${serviceKey}`,
             Prefer: "count=exact",
-            Range: "0-9999",
+            Range: "0-0",
           },
           next: { revalidate: 300 },
         },
       );
       if (premiumResponse.ok) {
-        const entries = (await premiumResponse.json()) as Array<{ user_id?: string }>;
-        const users = new Set(entries.map(entry => entry.user_id).filter((id): id is string => typeof id === "string"));
-        users.add(OWNER_USER_ID);
-        premiumMembers = users.size;
+        await premiumResponse.json().catch(() => []);
+        // Entitlements are unique by user_id; exclude the always-Premium owner above,
+        // then add them once to the count without fetching the whole entitlement table.
+        premiumMembers = (totalFromContentRange(premiumResponse.headers.get("content-range")) ?? 0) + 1;
       }
     }
 
