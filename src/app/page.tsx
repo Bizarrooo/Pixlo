@@ -27,7 +27,7 @@ function FeatureIcon({ kind }: { kind: "style" | "links" | "music" | "badge" }) 
 
 function ProfileArtwork() {
   return (
-    <Link href="/user/biz" className="px-live-profile-card" aria-label="Open Bizarro's real Pixlo profile">
+    <a href="/user/biz" className="px-live-profile-card" aria-label="Open Bizarro's real Pixlo profile">
       <span className="px-live-profile-orbit px-live-profile-orbit-one" aria-hidden="true" />
       <span className="px-live-profile-orbit px-live-profile-orbit-two" aria-hidden="true" />
       <div className="px-live-profile-frame">
