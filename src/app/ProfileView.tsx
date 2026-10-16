@@ -520,11 +520,22 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     root.style.setProperty("--parallax-shadow-x", `${x * -10 * power}px`);
     root.style.setProperty("--parallax-shadow-y", `${y * -8 * power}px`);
   };
-  const updateCardPointer = (event: React.PointerEvent<HTMLDivElement>) => {
+  const updateCardPointer = (event: React.PointerEvent<HTMLElement>) => {
     if (!settings.parallax || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const bounds = pointerBoundsRef.current;
+    if (!bounds) return;
+    const trackingMargin = 72;
+    if (
+      event.clientX < bounds.left - trackingMargin ||
+      event.clientX > bounds.right + trackingMargin ||
+      event.clientY < bounds.top - trackingMargin ||
+      event.clientY > bounds.bottom + trackingMargin
+    ) {
+      resetCardPointer();
+      return;
+    }
     if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
     parallaxReturnTimerRef.current = null;
-    const bounds = pointerBoundsRef.current || event.currentTarget.getBoundingClientRect();
     parallaxTargetRef.current = {
       x: Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2)),
       y: Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2)),
@@ -541,7 +552,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
     parallaxReturnTimerRef.current = null;
     setParallaxReturning(false);
-    pointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
+    if (!pointerBoundsRef.current) pointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
   };
   const handleCardPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" || !settings.parallax) return;
@@ -563,7 +574,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       parallaxReturnTimerRef.current = null;
     }, 700);
   };
-  const handleCardPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handleCardPointerUp = (event: React.PointerEvent<HTMLElement>) => {
     if (event.pointerType === "touch" || event.type === "pointercancel") resetCardPointer();
   };
 
@@ -616,16 +627,18 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           <span style={{ position: "absolute", zIndex: 2, left: `${settings.enterScreenCardPositionX}%`, top: `${settings.enterScreenCardPositionY}%`, transform: "translate(-50%, -50%)", display: "block", width: `min(90%, ${settings.enterScreenCardWidth}px)`, boxSizing: "border-box", padding: `${settings.enterScreenCardPadding}px`, borderRadius: settings.enterScreenCardRadius, border: `1px solid ${settings.enterScreenCardBorderColour}${Math.round(settings.enterScreenCardBorderOpacity*2.55).toString(16).padStart(2,"0")}`, background: `${settings.enterScreenCardBackgroundColour}${Math.round(settings.enterScreenCardOpacity*2.55).toString(16).padStart(2,"0")}`, color: settings.enterScreenTextColour,  fontSize: "clamp(1.2rem, 3vw, 2.2rem)", fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
         </button>
       )}
-      <section className={`profile-wrap ${presetPreviewMode ? "preset-preview-mode" : ""}`}>
+      <section
+        className={`profile-wrap ${presetPreviewMode ? "preset-preview-mode" : ""}`}
+        onPointerMove={updateCardPointer}
+        onPointerLeave={resetCardPointer}
+        onPointerUp={handleCardPointerUp}
+        onPointerCancel={resetCardPointer}
+      >
         <div
           className={`profile-card ${settings.glow ? "glow-enabled" : ""} ${settings.alignment === "left" ? "text-left" : ""}`}
           style={{ boxShadow: shadow, "--glow-strength": settings.glowIntensity } as React.CSSProperties}
           onPointerEnter={handleCardPointerEnter}
-          onPointerMove={updateCardPointer}
           onPointerDown={handleCardPointerDown}
-          onPointerUp={handleCardPointerUp}
-          onPointerCancel={resetCardPointer}
-          onPointerLeave={resetCardPointer}
         >
           {assets.banner && settings.bannerHeight > 0 && <div className="profile-banner"><img src={assets.banner} alt="" /></div>}
           <div className="profile-inner">
