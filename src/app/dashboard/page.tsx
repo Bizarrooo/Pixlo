@@ -1250,6 +1250,7 @@ export default function Dashboard() {
       displayName={settings.displayName}
       avatar={settings.avatar}
       isOwner={profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f"}
+      premiumIcon={previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url || ""}
       onNavigate={navigateDashboard}
       onReset={reset}
 />
@@ -1651,7 +1652,20 @@ export default function Dashboard() {
             <Field label="Custom cursor image URL" hint="Optional"><input value={settings.customCursor} onChange={e => set("customCursor", e.target.value)} placeholder="https://..." /></Field>
             <Setting label="Keep the browser-native cursor" text="Leave this enabled by clearing the custom cursor URL."><span className="info-pill">AUTO</span></Setting>
           </div>}
-          {activePrimary === "optimise" && active === "Extras" && <div className="form-stack extras-page">
+          {activePrimary === "optimise" && active === "Layouts" && <div className="form-stack optimise-layouts-page">
+  <SectionIntro title="Layouts" text="Choose how visitors move between the widgets and extra content on your public profile." />
+  {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>Premium feature</h3><p>Custom profile layouts are available to Pixlo Premium members.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <>
+    <div className="extras-settings-card">
+                <div className="extras-card-heading"><div><h3>Profile layouts</h3><p>Choose how visitors move between your profile extras. The selected layout is used on your public page.</p></div></div>
+                <div className="extras-layout-options">
+                  <button type="button" className={settings.extrasLayout === "pages" ? "chosen" : ""} onClick={() => set("extrasLayout", "pages")}><span className="extras-layout-preview extras-pages-preview"><i /><i /><i /></span><b>Pages</b><small>Animated page transitions</small></button>
+                  <button type="button" className={settings.extrasLayout === "horizontal" ? "chosen" : ""} onClick={() => set("extrasLayout", "horizontal")}><span className="extras-layout-preview extras-horizontal-preview"><i /><i /><i /></span><b>Side scroll</b><small>Swipe or scroll sideways</small></button>
+                  <button type="button" className={settings.extrasLayout === "vertical" ? "chosen" : ""} onClick={() => set("extrasLayout", "vertical")}><span className="extras-layout-preview extras-vertical-preview"><i /><i /><i /></span><b>Scroll down</b><small>Stacked widget cards</small></button>
+                </div>
+              </div>
+  </>}
+</div>}
+{activePrimary === "optimise" && active === "Extras" && <div className="form-stack extras-page">
             <SectionIntro number="14" title="Extra" text="Premium-only widgets and little details that make your Pixlo page feel alive." />
             {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>✦ Extra is a Premium feature</h3><p>Unlock live timezone widgets, animated layouts, and future profile extras with Pixlo Premium.</p><button type="button" onClick={() => setPremiumOpen(true)}>Premium features</button></div> : <>
               <div className="extras-hero-card">
@@ -1666,14 +1680,7 @@ export default function Dashboard() {
                 </select></Field>
                 <Field label="Place timezone on page" hint="Page 1 is intentionally reserved for the Extra intro — timezone can never be placed there."><select value={String(settings.timezonePage)} onChange={e => set("timezonePage", Math.max(2, Number(e.target.value)))} className="extras-select">{Array.from({length: 11}, (_, i) => i + 2).map(page => <option key={page} value={page}>Page {page}</option>)}</select></Field>
               </div>
-              <div className="extras-settings-card">
-                <div className="extras-card-heading"><div><h3>Extra layout</h3><p>Choose how visitors move between this and future widgets. All transitions replay on every change.</p></div></div>
-                <div className="extras-layout-options">
-                  <button type="button" className={settings.extrasLayout === "pages" ? "chosen" : ""} onClick={() => set("extrasLayout", "pages")}><span className="extras-layout-preview extras-pages-preview"><i /><i /><i /></span><b>Pages</b><small>Animated page transitions</small></button>
-                  <button type="button" className={settings.extrasLayout === "horizontal" ? "chosen" : ""} onClick={() => set("extrasLayout", "horizontal")}><span className="extras-layout-preview extras-horizontal-preview"><i /><i /><i /></span><b>Side scroll</b><small>Swipe or scroll sideways</small></button>
-                  <button type="button" className={settings.extrasLayout === "vertical" ? "chosen" : ""} onClick={() => set("extrasLayout", "vertical")}><span className="extras-layout-preview extras-vertical-preview"><i /><i /><i /></span><b>Scroll down</b><small>Stacked widget cards</small></button>
-                </div>
-              </div>
+              
 
             </>}
           </div>}
