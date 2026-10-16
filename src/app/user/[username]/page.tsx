@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import ProfileView from "../../ProfileView";
 import { getPublicProfileShareData, PIXLO_PUBLIC_ORIGIN } from "../../../lib/public-profile-share";
 
+export const dynamic = "force-dynamic";
+
 type PageProps = { params: Promise<{ username: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -20,7 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       type: "profile",
       siteName: "Pixlo",
-      title: displayName,
+      title: `${displayName} | Pixlo`,
       description,
       url: profileUrl,
       images: [{
@@ -32,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title: displayName,
+      title: `${displayName} | Pixlo`,
       description,
       images: [imageUrl],
     },
