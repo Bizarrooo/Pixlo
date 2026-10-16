@@ -10,11 +10,12 @@ function LoginContent() {
   const params = useSearchParams();
   const [email, setEmail] = useState(() => params.get("email") || "");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const verified = params.get("verified") === "1";
 
-  async function submit(event: FormEvent) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setLoading(true);
@@ -55,54 +56,98 @@ function LoginContent() {
   }
 
   return (
-    <main className="auth-page">
-      <div className="auth-glow auth-glow-a" />
-      <div className="auth-glow auth-glow-b" />
+    <main className="auth-page auth-page-login">
+      <div className="auth-glow auth-glow-a" aria-hidden="true" />
+      <div className="auth-glow auth-glow-b" aria-hidden="true" />
+      <div className="auth-world-label auth-world-label-left" aria-hidden="true"><span /> YOUR SPACE ON THE WEB <i> / </i> EST. PIXLO</div>
+      <div className="auth-world-label auth-world-label-right" aria-hidden="true">MADE TO BE YOURS <span>✳</span></div>
+
       <header className="auth-topbar">
         <Link href="/" className="auth-brand" aria-label="Pixlo home">
           <img className="auth-brand-logo" src="/pixlo-logo.png" alt="Pixlo" />
         </Link>
         <nav className="auth-tabs" aria-label="Account access">
           <Link href="/login" className="auth-tab is-active" aria-current="page">Log in</Link>
-          <Link href="/signup" className="auth-tab">Register</Link>
+          <Link href="/signup" className="auth-tab">Register <span aria-hidden="true">↗</span></Link>
         </nav>
+        <Link className="auth-home-link" href="/">Back to home <span aria-hidden="true">↗</span></Link>
       </header>
-      <section className="auth-card">
-        <div className="auth-heading">
-          <span>WELCOME BACK</span>
-          <h1>Log in to Pixlo.</h1>
-          <p>Your profile, your links, your space.</p>
+
+      <section className="auth-card auth-card-login" aria-labelledby="auth-title">
+        <div className="auth-card-rails" aria-hidden="true">
+          <i className="auth-rail auth-rail-tl-top" /><i className="auth-rail auth-rail-tl-side" />
+          <i className="auth-rail auth-rail-tr-top" /><i className="auth-rail auth-rail-tr-side" />
+          <i className="auth-rail auth-rail-bl-side" /><i className="auth-rail auth-rail-bl-bottom" />
+          <i className="auth-rail auth-rail-br-bottom" /><i className="auth-rail auth-rail-br-side" />
         </div>
-        {verified && <div className="auth-success">Email verified. You can log in now.</div>}
-        {params.get("email") && (
-          <div className="auth-switching-account">
-            Switching accounts? Enter the password for <b>{params.get("email")}</b>.
-          </div>
+
+        <div className="auth-card-meta">
+          <span className="auth-step-pill"><i /> SECURE SIGN-IN</span>
+          <span className="auth-meta-code">PX <b>/</b> ACCOUNT 001</span>
+        </div>
+
+        <div className="auth-heading auth-heading-login">
+          <span className="auth-heading-kicker">GOOD TO HAVE YOU BACK</span>
+          <h1 id="auth-title">Your space is<br />waiting <em>for you.</em></h1>
+          <p>Sign in and pick up right where your corner of the internet left off.</p>
+        </div>
+
+        <div className="auth-card-divider"><span /><small>YOUR PIXLO ACCOUNT</small><span /></div>
+
+        {verified && (
+          <div className="auth-success"><span className="auth-message-icon">✓</span><span><b>Email verified.</b> You're all set to log in.</span></div>
         )}
-        <form onSubmit={submit} className="auth-form">
-          <label>
-            Email
-            <input value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" type="email" autoComplete="username" required />
+        {params.get("email") && (
+          <div className="auth-switching-account">Switching accounts? Enter the password for <b>{params.get("email")}</b>.</div>
+        )}
+
+        <form onSubmit={submit} className="auth-form auth-login-form">
+          <label className="auth-field">
+            <span className="auth-field-label">Email address</span>
+            <span className="auth-input-shell">
+              <svg className="auth-input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.3" y="5.1" width="17.4" height="13.8" rx="3" stroke="currentColor" strokeWidth="1.6"/><path d="m5.2 7.4 6.8 5.1 6.8-5.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <input value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" type="email" autoComplete="username" required />
+            </span>
           </label>
-          <label>
-            Password
-            <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Your password" type="password" autoComplete="current-password" required />
+
+          <label className="auth-field">
+            <span className="auth-label-row"><span className="auth-field-label">Password</span><Link href="/forgot-password">Forgot password?</Link></span>
+            <span className="auth-input-shell">
+              <svg className="auth-input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4.4" y="10" width="15.2" height="10.5" rx="2.7" stroke="currentColor" strokeWidth="1.6"/><path d="M8 10V7.1a4 4 0 0 1 8 0V10M12 14.1v2.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
+              <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter your password" type={showPassword ? "text" : "password"} autoComplete="current-password" required />
+              <button type="button" className="auth-password-toggle" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(value => !value)}>
+                {showPassword ? (
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3 21 21M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 5.2A10.6 10.6 0 0 1 12 5c5.3 0 8.5 4.2 9.5 6.1a1.8 1.8 0 0 1 0 1.8 15 15 0 0 1-3.1 3.7M6.2 6.3A15.4 15.4 0 0 0 2.5 11a1.8 1.8 0 0 0 0 1.8C3.5 14.7 6.7 19 12 19c1 0 1.9-.2 2.7-.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.3-6.2 9.5-6.2 9.5 6.2 9.5 6.2-3.3 6.2-9.5 6.2S2.5 12 2.5 12Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><circle cx="12" cy="12" r="2.7" stroke="currentColor" strokeWidth="1.6"/></svg>
+                )}
+              </button>
+            </span>
           </label>
-          {error && <div className="auth-error">{error}</div>}
-          <button className="auth-submit" disabled={loading}>
-            {loading ? "Signing in..." : "Log in"}
+
+          {error && <div className="auth-error" role="alert"><span className="auth-message-icon">!</span><span>{error}</span></div>}
+
+          <button className="auth-submit auth-login-submit" disabled={loading}>
+            <span>{loading ? "Signing you in…" : "Continue to Pixlo"}</span>
+            <span className="auth-submit-arrow" aria-hidden="true">{loading ? "…" : "↗"}</span>
           </button>
+          <div className="auth-submit-note"><span /> Secure account access <b>·</b> No password shared publicly</div>
         </form>
-        <div className="auth-links"><Link href="/forgot-password">Forgot password?</Link></div>
-        <p className="auth-switch">New to Pixlo? <Link href="/signup">Create an account</Link></p>
+
+        <div className="auth-card-footer">
+          <p>New to Pixlo? <Link href="/signup">Create your account <span aria-hidden="true">→</span></Link></p>
+          <div><span className="auth-footer-mark">P</span><span>YOUR NAME. YOUR LINKS.<br /><b>YOUR PIXLO.</b></span><span className="auth-footer-orbit">✳</span></div>
+        </div>
       </section>
+
+      <footer className="auth-page-footer"><span>© PIXLO</span><span>YOUR LITTLE CORNER OF THE INTERNET.</span><span>BUILT TO BE YOURS <i>✳</i></span></footer>
     </main>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<main className="auth-page" />}>
+    <Suspense fallback={<main className="auth-page auth-page-login" />}>
       <LoginContent />
     </Suspense>
   );
