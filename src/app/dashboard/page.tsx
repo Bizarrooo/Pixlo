@@ -938,6 +938,7 @@ export default function Dashboard() {
   const profileUrl = settingsReady && settings.username.trim() ? `https://pixlo1.vercel.app/user/${encodeURIComponent(settings.username.trim().toLowerCase())}` : "/dashboard";
   const profileShareKey = (() => {
     const parts = [
+      "share-cover-v2-no-video-glow",
       settings.displayName,
       settings.shareCoverImage,
       String(settings.shareCoverNameSize),
