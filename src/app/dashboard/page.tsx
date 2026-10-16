@@ -1043,7 +1043,7 @@ export default function Dashboard() {
   };
   const handlePreviewPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" || !settings.parallax) return;
-    previewPointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
+    previewPointerBoundsRef.current = event.currentTarget.parentElement?.getBoundingClientRect() || event.currentTarget.getBoundingClientRect();
     updatePreviewPointer(event);
   };
   const resetPreviewPointer = () => {
