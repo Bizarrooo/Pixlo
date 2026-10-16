@@ -39,8 +39,8 @@ function ProfileArtwork() {
     const pointerX = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
     const pointerY = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
     setTilt({
-      x: (0.5 - pointerY) * 44,
-      y: (pointerX - 0.5) * 52,
+      x: (0.5 - pointerY) * 32,
+      y: (pointerX - 0.5) * 40,
       pointerX: pointerX * 100,
       pointerY: pointerY * 100,
     });
