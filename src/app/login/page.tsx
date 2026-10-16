@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
@@ -58,10 +58,16 @@ function LoginContent() {
     <main className="auth-page">
       <div className="auth-glow auth-glow-a" />
       <div className="auth-glow auth-glow-b" />
-      <section className="auth-card">
+      <header className="auth-topbar">
         <Link href="/" className="auth-brand" aria-label="Pixlo home">
           <img className="auth-brand-logo" src="/pixlo-logo.png" alt="Pixlo" />
         </Link>
+        <nav className="auth-tabs" aria-label="Account access">
+          <Link href="/login" className="auth-tab is-active" aria-current="page">Log in</Link>
+          <Link href="/signup" className="auth-tab">Register</Link>
+        </nav>
+      </header>
+      <section className="auth-card">
         <div className="auth-heading">
           <span>WELCOME BACK</span>
           <h1>Log in to Pixlo.</h1>
