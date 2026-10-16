@@ -4,7 +4,7 @@ import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { accountSettingsStorageKey, defaultSettings, loadSettingsForAccount, normaliseProfileSettings, saveSettingsToStorage, type CustomLink, type MusicTrack, type ProfileFont, type ProfileSettings, type SocialKey, type TextAnimation } from "../profile";
 import { deleteAsset, loadAsset, migrateAssetToCloud, saveAsset } from "../assetStore";
 import { rememberPixloAccount } from "../accountSwitcher";
-import DashboardSidebar, { DashboardNavIcon, customizeTabs, type DashboardPrimarySection } from "./DashboardSidebar";
+import DashboardSidebar, { DashboardNavIcon, customizeTabs, optimiseTabs, type DashboardPrimarySection } from "./DashboardSidebar";
 
 type DashboardBadge = { id: string; name: string; description: string; icon_url: string | null };
 
@@ -1211,6 +1211,7 @@ export default function Dashboard() {
       displayName={settings.displayName}
       avatar={settings.avatar}
       isOwner={profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f"}
+      isPremium={presetsPremiumReady && presetsPremium}
       onNavigate={navigateDashboard}
       onReset={reset}
 />
@@ -1218,12 +1219,15 @@ export default function Dashboard() {
     <div className="dashboard-main">
       <header className="dash-header">
         <button type="button" className="mobile-menu-button" onClick={() => setMobileMenu(v => !v)}>☰</button>
-        <div className="header-copy"><h1>{activePrimary === "customize" ? "Customize" : activePrimary === "links" ? "Links" : active === "Stats" && activePrimary === "account" ? "Analytics" : active === "General" && activePrimary === "account" ? "Settings" : active === "Dashboard" ? "Workspace theme" : active === "Extras" ? "Widgets" : active}</h1><p>{activePrimary === "customize" ? "Fine-tune the look and feel of your public profile." : activePrimary === "links" ? "Manage your social URLs and custom profile links." : active === "Overview" ? "Your profile, account and quick actions in one place." : active === "Connections" ? "Your linked accounts and connected services." : ""}</p></div>
+        <div className="header-copy"><h1>{activePrimary === "customize" ? "Customize" : activePrimary === "optimise" ? "Optimise" : activePrimary === "links" ? "Links" : active === "Stats" && activePrimary === "account" ? "Analytics" : active === "General" && activePrimary === "account" ? "Settings" : active === "Dashboard" ? "Workspace theme" : active === "Extras" ? "Widgets" : active}</h1><p>{activePrimary === "customize" ? "Fine-tune the look and feel of your public profile." : activePrimary === "optimise" ? "Advanced tools for your Pixlo profile, exclusive to Premium." : activePrimary === "links" ? "Manage your social URLs and custom profile links." : active === "Overview" ? "Your profile, account and quick actions in one place." : active === "Connections" ? "Your linked accounts and connected services." : ""}</p></div>
         <div className="header-actions"><a className="view-button view-button-primary" href={profileUrl} target="_blank" rel="noreferrer">View live profile ↗</a><button type="button" className="save-button" onClick={save}>{saved ? "✓ Saved" : "Save changes"}</button></div>
       </header>
 
       {activePrimary === "customize" && <nav className="dashboard-customize-tabs" aria-label="Customize profile settings">
         {customizeTabs.map(tab => <button key={tab.value} type="button" className={active === tab.value ? "active" : ""} onClick={() => { setActive(tab.value); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><DashboardNavIcon name={tab.icon} className="dashboard-nav-icon" /><span>{tab.label}</span></button>)}
+      </nav>}
+      {activePrimary === "optimise" && <nav className="dashboard-optimise-tabs" aria-label="Premium optimisation settings">
+        {optimiseTabs.map(tab => <button key={tab.value} type="button" className={active === tab.value ? "active" : ""} onClick={() => { setActive(tab.value); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><DashboardNavIcon name={tab.icon} className="dashboard-nav-icon" /><span>{tab.label}</span></button>)}
       </nav>}
 
       <div className="editor-grid" style={{ position: "relative" }}>
@@ -1252,7 +1256,7 @@ export default function Dashboard() {
           </section>
           <div className="dashboard-connection-help"><DashboardNavIcon name="shield" /><p>Pixlo checks official server membership when you access the dashboard. If you leave the server, dashboard access is locked again.</p></div>
         </div>}
-        {active === "Dashboard" && <div className="form-stack dashboard-theme-page">
+        {activePrimary === "optimise" && active === "Dashboard" && <div className="form-stack dashboard-theme-page">
             <SectionIntro title="Dashboard appearance" text="Make your Pixlo workspace feel like yours. These settings change the dashboard only, not your public profile." />
             {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>Premium dashboard themes</h3><p>Custom dashboard backgrounds and animated interface text are included with Pixlo Premium.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <>
               <section className="dashboard-theme-master">
@@ -1338,7 +1342,43 @@ export default function Dashboard() {
             </>}
           </div>}
 
-          {active === "Gradients" && <div className="form-stack">
+          
+{activePrimary === "optimise" && active === "Cursor Effects" && <div className="form-stack cursor-sparkles-page">
+  <SectionIntro title="Cursor effects" text="Add a subtle sparkle trail that follows visitors' cursors on your public Pixlo profile." />
+  {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>Premium cursor effects</h3><p>The sparkle trail and its colour, glow and motion controls are included with Pixlo Premium.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <>
+    <section className="cursor-sparkles-hero">
+      <div className="cursor-sparkles-hero-copy">
+        <span className="cursor-sparkles-eyebrow">PIXLO / OPTIMISE</span>
+        <h3>Sparkle trail</h3>
+        <p>A small trail of glowing stars follows the cursor, matching your chosen colour and intensity. It only appears on the public profile for Premium members.</p>
+      </div>
+      <span className="cursor-sparkles-premium-pill"><DashboardNavIcon name="sparkles" /> PREMIUM</span>
+      <div className="cursor-sparkles-demo" style={{ "--cursor-sparkle-colour": settings.cursorSparklesColour, "--cursor-sparkle-glow": (settings.cursorSparklesGlow / 7) + "px", "--cursor-sparkle-scale": settings.cursorSparklesSize / 100, "--cursor-sparkle-demo-speed": Math.max(0.45, 1.5 - settings.cursorSparklesSpeed / 150) + "s" } as React.CSSProperties} aria-label="Sparkle cursor effect preview">
+        <span className="cursor-sparkles-demo-label">LIVE PREVIEW</span>
+        <span className="cursor-sparkle-demo-star star-one">✦</span>
+        <span className="cursor-sparkle-demo-star star-two">✧</span>
+        <span className="cursor-sparkle-demo-star star-three">✦</span>
+        <span className="cursor-sparkle-demo-star star-four">✧</span>
+        <span className="cursor-sparkle-demo-star star-five">✦</span>
+        <span className="cursor-sparkles-demo-pointer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 3.5 19 13l-6 .8-3 5.7L5 3.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg></span>
+        <span className="cursor-sparkles-demo-hint">Move through the page to leave a glowing trail</span>
+      </div>
+    </section>
+    <section className="cursor-sparkles-settings-card">
+      <div className="cursor-sparkles-card-heading"><div><h3>Effect settings</h3><p>Changes are saved to your profile automatically.</p></div><span className={settings.cursorSparklesEnabled ? "cursor-sparkles-state is-enabled" : "cursor-sparkles-state"}><i />{settings.cursorSparklesEnabled ? "ENABLED" : "DISABLED"}</span></div>
+      <Setting label="Enable sparkle cursor" text="Show a sparkle trail for mouse users visiting your public profile."><Toggle value={settings.cursorSparklesEnabled} onChange={v => set("cursorSparklesEnabled", v)} /></Setting>
+      <div className="cursor-sparkles-control-grid">
+        <div className="cursor-sparkles-colour-control"><Colour label="Sparkle colour" value={settings.cursorSparklesColour} onChange={v => set("cursorSparklesColour", v)} /></div>
+        <Range label="Glow intensity" value={settings.cursorSparklesGlow} min={0} max={100} suffix="%" onChange={v => set("cursorSparklesGlow", v)} />
+        <Range label="Sparkle size" value={settings.cursorSparklesSize} min={50} max={180} suffix="%" onChange={v => set("cursorSparklesSize", v)} />
+        <Range label="Trail density" value={settings.cursorSparklesDensity} min={20} max={100} suffix="%" onChange={v => set("cursorSparklesDensity", v)} />
+        <Range label="Animation speed" value={settings.cursorSparklesSpeed} min={50} max={150} suffix="%" onChange={v => set("cursorSparklesSpeed", v)} />
+      </div>
+      <p className="cursor-sparkles-footnote">The trail is hidden in embedded previews, does not intercept clicks, and respects visitors' reduced-motion settings.</p>
+    </section>
+  </>}
+</div>}
+{activePrimary === "optimise" && active === "Gradients" && <div className="form-stack">
             <SectionIntro title="Animated gradients" text="Create smoothly looping gradients for your profile text, socials and badges." />
             {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>✦ Premium feature</h3><p>Animated gradients are available to Pixlo Premium members.</p><button type="button" className="save-button" onClick={() => navigateDashboard("premium", "Presets")}>View Premium</button></div> : <>
               <div className="premium-gradient-note">When enabled, each gradient overrides that category’s regular colours. Disable it to restore your existing colours. Animation loops smoothly and continuously.</div>
@@ -1587,7 +1627,7 @@ export default function Dashboard() {
             <Field label="Custom cursor image URL" hint="Optional"><input value={settings.customCursor} onChange={e => set("customCursor", e.target.value)} placeholder="https://..." /></Field>
             <Setting label="Keep the browser-native cursor" text="Leave this enabled by clearing the custom cursor URL."><span className="info-pill">AUTO</span></Setting>
           </div>}
-          {active === "Extras" && <div className="form-stack extras-page">
+          {activePrimary === "optimise" && active === "Extras" && <div className="form-stack extras-page">
             <SectionIntro number="14" title="Extra" text="Premium-only widgets and little details that make your Pixlo page feel alive." />
             {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>✦ Extra is a Premium feature</h3><p>Unlock live timezone widgets, animated layouts, and future profile extras with Pixlo Premium.</p><button type="button" onClick={() => setPremiumOpen(true)}>Premium features</button></div> : <>
               <div className="extras-hero-card">
