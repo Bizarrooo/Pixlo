@@ -549,6 +549,12 @@ export default function Dashboard() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const layer = previewCursorTrailLayerRef.current;
     if (!layer) return;
+    // Match the public page: the trail yields entirely while the pointer is over
+    // the profile card, so it cannot compete with the live-preview parallax.
+    if (settings.parallax && event.target instanceof Element && event.target.closest(".preview-card")) {
+      layer.replaceChildren();
+      return;
+    }
 
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - bounds.left;
