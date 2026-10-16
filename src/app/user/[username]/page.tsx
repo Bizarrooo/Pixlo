@@ -39,6 +39,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     profile?.backgroundVideoUrl || "",
   ]);
   const shareUrl = shareKey ? `${profileUrl}?share=${encodeURIComponent(shareKey)}` : profileUrl;
+  // Keep still previews on Next's standard OG image route; animated GIFs need the dedicated GIF response route.
   const coverAssetUrl = profile?.shareCoverImageUrl || profile?.backgroundImageUrl || "";
   const isGifCover = (() => { try { return new URL(coverAssetUrl).pathname.toLowerCase().endsWith(".gif"); } catch { return false; } })();
   const staticImageUrl = `${profileUrl}/opengraph-image?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
