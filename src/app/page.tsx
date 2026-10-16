@@ -116,15 +116,16 @@ function TopViewedProfiles() {
                 aria-label={`#${profile.rank} most viewed profile: ${profile.displayName || profile.username}, ${profile.views.toLocaleString()} views`}
                 style={{ zIndex: index + 1 }}
               >
-                <iframe
-                  className="home-profile-stack-iframe"
-                  src={`/user/${encodeURIComponent(profile.username)}?embed=1`}
-                  title={`Live Pixlo profile for @${profile.username}`}
-                  loading={index === 2 ? "eager" : "lazy"}
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                />
+                <div className="home-profile-stack-iframe-shell">
+                  <iframe
+                    className="home-profile-stack-iframe"
+                    src={`/user/${encodeURIComponent(profile.username)}?embed=1`}
+                    title={`${profile.displayName || profile.username} Pixlo profile`}
+                    loading="lazy"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  />
+                </div>
                 <span className="home-profile-stack-rank">#{profile.rank} · {profile.views.toLocaleString()} views</span>
               </Link>
             );
