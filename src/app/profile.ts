@@ -142,6 +142,12 @@ export type ProfileSettings = {
   locationAnimation: TextAnimation;
   socialsAnimation: TextAnimation;
   customCursor: string;
+  cursorSparklesEnabled: boolean;
+  cursorSparklesColour: string;
+  cursorSparklesGlow: number;
+  cursorSparklesSize: number;
+  cursorSparklesDensity: number;
+  cursorSparklesSpeed: number;
   enterScreenEnabled: boolean;
   enterScreenMessage: string;
   enterScreenBackgroundColour: string;
@@ -298,6 +304,12 @@ export const defaultSettings: ProfileSettings = {
   locationAnimation: "fade-up",
   socialsAnimation: "fade-up",
   customCursor: "",
+  cursorSparklesEnabled: false,
+  cursorSparklesColour: "#ff9b52",
+  cursorSparklesGlow: 72,
+  cursorSparklesSize: 100,
+  cursorSparklesDensity: 62,
+  cursorSparklesSpeed: 100,
   enterScreenEnabled: true,
   enterScreenMessage: "Click to enter",
   enterScreenBackgroundColour: "#050505",
@@ -428,6 +440,12 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     descriptionAnimation: TEXT_ANIMATIONS.includes(parsed.descriptionAnimation) ? parsed.descriptionAnimation : defaultSettings.descriptionAnimation,
     locationAnimation: TEXT_ANIMATIONS.includes(parsed.locationAnimation) ? parsed.locationAnimation : defaultSettings.locationAnimation,
     socialsAnimation: TEXT_ANIMATIONS.includes(parsed.socialsAnimation) ? parsed.socialsAnimation : defaultSettings.socialsAnimation,
+    cursorSparklesEnabled: typeof parsed.cursorSparklesEnabled === "boolean" ? parsed.cursorSparklesEnabled : defaultSettings.cursorSparklesEnabled,
+    cursorSparklesColour: typeof parsed.cursorSparklesColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.cursorSparklesColour) ? parsed.cursorSparklesColour : defaultSettings.cursorSparklesColour,
+    cursorSparklesGlow: typeof parsed.cursorSparklesGlow === "number" && Number.isFinite(parsed.cursorSparklesGlow) ? Math.min(100, Math.max(0, parsed.cursorSparklesGlow)) : defaultSettings.cursorSparklesGlow,
+    cursorSparklesSize: typeof parsed.cursorSparklesSize === "number" && Number.isFinite(parsed.cursorSparklesSize) ? Math.min(180, Math.max(50, Math.round(parsed.cursorSparklesSize))) : defaultSettings.cursorSparklesSize,
+    cursorSparklesDensity: typeof parsed.cursorSparklesDensity === "number" && Number.isFinite(parsed.cursorSparklesDensity) ? Math.min(100, Math.max(20, parsed.cursorSparklesDensity)) : defaultSettings.cursorSparklesDensity,
+    cursorSparklesSpeed: typeof parsed.cursorSparklesSpeed === "number" && Number.isFinite(parsed.cursorSparklesSpeed) ? Math.min(150, Math.max(50, parsed.cursorSparklesSpeed)) : defaultSettings.cursorSparklesSpeed,
     nameGlow: typeof parsed.nameGlow === "boolean" ? parsed.nameGlow : Boolean(parsed.textGlow),
     descriptionGlow: typeof parsed.descriptionGlow === "boolean" ? parsed.descriptionGlow : false,
     locationGlow: typeof parsed.locationGlow === "boolean" ? parsed.locationGlow : false,
