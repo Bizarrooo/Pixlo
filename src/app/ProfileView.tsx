@@ -127,7 +127,10 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
 
   useEffect(() => {
-    if (!isPremium || !settings.cursorTrailEnabled || presetPreviewMode || embedMode || !forcedUsername) return;
+    // Keep cursor particles and 3D card parallax mutually exclusive: both listen to
+    // pointer movement, and the particle layer can otherwise make the card feel jittery.
+    // The trail resumes automatically when parallax is switched off.
+    if (!isPremium || !settings.cursorTrailEnabled || settings.parallax || presetPreviewMode || embedMode || !forcedUsername) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (!window.matchMedia("(pointer: fine)").matches) return;
 
