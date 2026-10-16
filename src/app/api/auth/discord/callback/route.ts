@@ -127,11 +127,30 @@ export async function GET(request: Request) {
         const detail = unlinkError instanceof Error ? unlinkError.message : "Unknown profile error.";
         return cleanup(dashboardRedirect(baseUrl, "error", `You're not in the required Discord server, and the previous link could not be cleared: ${detail.slice(0, 180)}`));
       }
-      const response = cleanup(dashboardRedirect(baseUrl, "not-member", "You must join the official Pixlo Discord server before linking your account: https://discord.gg/Bkz4P9gVy7. Any previous Discord link on this Pixlo account has been disconnected."));
+      const response = cleanup(dashboardRedirect(baseUrl, "not-member", "Join the official Pixlo Discord server to finish setup."));
       response.cookies.delete(`pixlo_discord_access_${authUser.id}`);
       response.cookies.delete(`pixlo_discord_refresh_${authUser.id}`);
       response.cookies.delete("pixlo_discord_access_token");
       response.cookies.delete("pixlo_discord_refresh_token");
+
+      // Keep a short-lived HTTP-only OAuth session so Pixlo can verify membership
+      // after the person joins without exposing Discord tokens to client JS.
+      const pendingCookie = {
+        httpOnly: true,
+        sameSite: "lax" as const,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+      };
+      response.cookies.set(`pixlo_discord_pending_access_${authUser.id}`, token.access_token, {
+        ...pendingCookie,
+        maxAge: Math.max(60, Math.min(Number(token.expires_in) || 3600, 3600)),
+      });
+      if (token.refresh_token) {
+        response.cookies.set(`pixlo_discord_pending_refresh_${authUser.id}`, token.refresh_token, {
+          ...pendingCookie,
+          maxAge: 3600,
+        });
+      }
       return response;
     }
 
@@ -153,6 +172,8 @@ export async function GET(request: Request) {
     }
 
     const response = cleanup(dashboardRedirect(baseUrl, "connected"));
+    response.cookies.delete(`pixlo_discord_pending_access_${authUser.id}`);
+    response.cookies.delete(`pixlo_discord_pending_refresh_${authUser.id}`);
     const secure = process.env.NODE_ENV === "production";
     const tokenCookie = { httpOnly: true, sameSite: "lax" as const, secure, path: "/" };
     response.cookies.set(`pixlo_discord_access_${authUser.id}`, token.access_token, {
