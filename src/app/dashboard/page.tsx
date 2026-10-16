@@ -1000,8 +1000,8 @@ export default function Dashboard() {
       : 0;
     card.style.setProperty("--preview-parallax-x", `${x * strength}px`);
     card.style.setProperty("--preview-parallax-y", `${y * strength}px`);
-    card.style.setProperty("--preview-parallax-rotate-x", `${y * -16 * power}deg`);
-    card.style.setProperty("--preview-parallax-rotate-y", `${x * 19 * power}deg`);
+    card.style.setProperty("--preview-parallax-rotate-x", `${y * -10 * power}deg`);
+    card.style.setProperty("--preview-parallax-rotate-y", `${x * 12 * power}deg`);
     card.style.setProperty("--preview-parallax-light-x", `${50 + x * 45 * power}%`);
     card.style.setProperty("--preview-parallax-light-y", `${50 + y * 45 * power}%`);
     card.style.setProperty("--preview-parallax-shadow-x", `${x * -10 * power}px`);
