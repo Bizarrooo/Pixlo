@@ -7505,3 +7505,14 @@ html { scroll-behavior:smooth; }
     padding: 0 15px !important;
   }
 }
+
+
+/* Share control belongs to the signed-in dashboard, never the public profile. */
+.dashboard .pixlo-dashboard-share-button { position: fixed !important; left: max(18px, env(safe-area-inset-left)) !important; bottom: max(18px, env(safe-area-inset-bottom)) !important; }
+/* Keep trail particles visible above the card while never capturing pointer input. */
+.pixlo-cursor-trail-layer { z-index: 100000 !important; pointer-events: none !important; overflow: visible !important; }
+.pixlo-cursor-trail-layer .pixlo-cursor-trail { pointer-events: none !important; }
+/* Give the 3D card breathing room so its rotated corners and shadow don't clip. */
+.profile-page.parallax-on .profile-wrap { perspective: 1400px; transform-style: preserve-3d; overflow: visible !important; }
+.profile-page.parallax-on .profile-card { transform-origin: center center; backface-visibility: hidden; outline: 1px solid transparent; }
+.profile-page.parallax-on .profile-card::after { border-radius: inherit; overflow: hidden; }
