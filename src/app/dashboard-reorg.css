@@ -1299,3 +1299,77 @@ body:has(.dashboard.dashboard-revamp) {
 @media (prefers-reduced-motion: reduce) {
   .pixlo-cursor-trail { display: none !important; }
 }
+
+
+/* Premium badge treatment: the real badge icon glows purple; nav buttons stay Pixlo orange. */
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button .presets-premium-mark {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 19px !important;
+  width: 19px !important;
+  height: 19px !important;
+  min-width: 19px !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  color: #c084fc !important;
+  filter: drop-shadow(0 0 5px rgba(168,85,247,.72)) drop-shadow(0 0 10px rgba(139,92,246,.38)) !important;
+}
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button .presets-premium-mark img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  filter: brightness(0) saturate(100%) invert(68%) sepia(31%) saturate(1177%) hue-rotate(219deg) brightness(103%) contrast(101%) !important;
+}
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button .presets-premium-mark svg {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  fill: #c084fc !important;
+  stroke: #e9d5ff !important;
+  stroke-width: .6 !important;
+}
+
+/* Cancel the legacy purple active/hover treatment on Presets itself. */
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button.premium-presets-nav-button,
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button.premium-presets-nav-button b {
+  color: rgba(255, 229, 213, .68) !important;
+}
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button.premium-presets-nav-button {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button.premium-presets-nav-button:hover:not(.active) {
+  color: #fff4eb !important;
+  border-color: rgba(255, 155, 97, .13) !important;
+  background: rgba(255, 135, 62, .07) !important;
+  box-shadow: none !important;
+}
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button.premium-presets-nav-button.active,
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button.premium-presets-nav-button.active:hover {
+  color: #fff7f0 !important;
+  border-color: rgba(255, 130, 75, .19) !important;
+  background: linear-gradient(105deg, rgba(255, 98, 63, .15), rgba(255, 177, 82, .055)) !important;
+  box-shadow: inset 2px 0 #ff7045 !important;
+  text-shadow: none !important;
+}
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button.premium-presets-nav-button.active b {
+  color: #fff7f0 !important;
+}
+.dashboard.dashboard-revamp .dashboard-sidebar-organised-nav .premium-nav-items > button.premium-presets-nav-button .dashboard-nav-icon {
+  color: #ff9c66 !important;
+}
+
+/* Layouts is a separate Optimise destination; keep its original choice cards tidy. */
+.dashboard.dashboard-revamp .optimise-layouts-page .extras-settings-card {
+  margin-top: 0 !important;
+}
+.dashboard.dashboard-revamp .optimise-layouts-page .extras-layout-options {
+  margin-top: 4px;
+}
+.dashboard.dashboard-revamp .optimise-layouts-page .extras-card-heading h3 {
+  color: #fff2e8 !important;
+}
