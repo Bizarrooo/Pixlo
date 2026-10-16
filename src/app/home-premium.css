@@ -416,26 +416,3 @@
 @media (prefers-reduced-motion: reduce) {
   .pixlo-revamp-home .home-profile-stack-card { transition: none; }
 }
-
-/* Lightweight homepage profile cards: do not boot three complete profile apps inside iframes. */
-.pixlo-revamp-home .home-profile-stack-preview { height: 100%; min-height: 300px; display: flex; flex-direction: column; overflow: hidden; background: #fffaf5; color: #30221e; }
-.pixlo-revamp-home .home-profile-stack-preview-cover { position: relative; flex: 0 0 126px; overflow: hidden; background: linear-gradient(120deg,#ff5a43 0%,#ff8b42 47%,#ffd16c 100%); }
-.pixlo-revamp-home .home-profile-stack-preview-cover::before { content: ""; position: absolute; inset: 0; opacity: .25; background-image: linear-gradient(rgba(255,255,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.28) 1px,transparent 1px); background-size: 22px 22px; }
-.pixlo-revamp-home .home-profile-stack-preview-orb { position: absolute; width: 180px; height: 180px; right: -18px; top: -92px; border-radius: 50%; background: rgba(255,255,255,.3); box-shadow: 0 0 0 24px rgba(255,255,255,.1),0 0 0 48px rgba(255,255,255,.07); }
-.pixlo-revamp-home .home-profile-stack-preview-label { position: absolute; left: 17px; bottom: 14px; font-size: 9px; font-weight: 850; letter-spacing: .2em; color: rgba(76,36,24,.72); }
-.pixlo-revamp-home .home-profile-stack-preview-body { position: relative; flex: 1; padding: 39px 20px 20px; }
-.pixlo-revamp-home .home-profile-stack-preview-avatar { position: absolute; top: -28px; left: 18px; display: grid; place-items: center; width: 56px; height: 56px; border: 4px solid #fffaf5; border-radius: 50%; background: linear-gradient(145deg,#33231f,#7c4132); color: #fff; font-size: 22px; font-weight: 850; box-shadow: 0 5px 15px rgba(83,42,26,.15); }
-.pixlo-revamp-home .home-profile-stack-preview-identity { display: flex; flex-direction: column; gap: 4px; padding-right: 30px; }
-.pixlo-revamp-home .home-profile-stack-preview-identity strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 21px; line-height: 1.15; letter-spacing: -.045em; }
-.pixlo-revamp-home .home-profile-stack-preview-identity span { color: #92766b; font-size: 12px; }
-.pixlo-revamp-home .home-profile-stack-preview-arrow { position: absolute; right: 19px; top: 45px; display: grid; place-items: center; width: 31px; height: 31px; border-radius: 50%; background: #fff0e5; color: #d94e31; font-size: 17px; }
-.pixlo-revamp-home .home-profile-stack-preview-socials { display: flex; gap: 7px; margin-top: 17px; }
-.pixlo-revamp-home .home-profile-stack-preview-socials i { width: 25px; height: 25px; border: 1px solid #f0d8ca; border-radius: 8px; background: linear-gradient(145deg,#fff,#ffe9da); }
-.pixlo-revamp-home .home-profile-stack-preview p { margin: 13px 0 0; color: #856b60; font-size: 11px; line-height: 1.5; }
-@media (max-width: 650px) { .pixlo-revamp-home .home-profile-stack-preview-cover { flex-basis: 105px; } .pixlo-revamp-home .home-profile-stack-preview-body { padding-right: 14px; padding-left: 14px; } }
-
-
-/* Real profile pages in the homepage stack; keep the embeds clipped and inexpensive to paint. */
-.pixlo-revamp-home .home-profile-stack-live { display: block; }
-.pixlo-revamp-home .home-profile-stack-iframe { display: block; width: 100%; height: 340px; border: 0; background: #fff6ee; pointer-events: none; }
-.pixlo-revamp-home .home-profile-stack-live .home-profile-stack-rank { display: block; padding: 10px 14px; }
