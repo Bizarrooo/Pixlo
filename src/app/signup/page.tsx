@@ -68,8 +68,14 @@ export default function SignupPage() {
 
   return <main className="auth-page">
     <div className="auth-glow auth-glow-a" /><div className="auth-glow auth-glow-b" />
-    <section className="auth-card">
+    <header className="auth-topbar">
       <Link href="/" className="auth-brand" aria-label="Pixlo home"><img className="auth-brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></Link>
+      <nav className="auth-tabs" aria-label="Account access">
+        <Link href="/login" className="auth-tab">Log in</Link>
+        <Link href="/signup" className="auth-tab is-active" aria-current="page">Register</Link>
+      </nav>
+    </header>
+    <section className="auth-card">
       <div className="auth-heading"><span>CREATE YOUR PIXLO</span><h1>Build your identity.</h1><p>Make your own profile, customise it, and share it anywhere.</p></div>
       <form onSubmit={submit} className="auth-form">
         <label>Username<input value={username} onChange={e => setUsername(e.target.value)} placeholder="bizarro" autoComplete="username" minLength={3} maxLength={24} required /></label>
