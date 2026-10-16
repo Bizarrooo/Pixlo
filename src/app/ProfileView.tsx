@@ -127,10 +127,9 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
 
   useEffect(() => {
-    // Keep cursor particles and 3D card parallax mutually exclusive: both listen to
-    // pointer movement, and the particle layer can otherwise make the card feel jittery.
-    // The trail resumes automatically when parallax is switched off.
-    if (!isPremium || !settings.cursorTrailEnabled || settings.parallax || presetPreviewMode || embedMode || !forcedUsername) return;
+    // The trail is visual-only (pointer-events are disabled in CSS), so it can remain
+    // visible over the card without intercepting pointer input used by parallax.
+    if (!isPremium || !settings.cursorTrailEnabled || presetPreviewMode || embedMode || !forcedUsername) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (!window.matchMedia("(pointer: fine)").matches) return;
 
@@ -150,12 +149,6 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
     const handleCursorMove = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
-      // Prioritise card tracking: don't create/animate particles while the pointer is
-      // interacting with the parallax card. This keeps the mouse coordinates stable.
-      if (settings.parallax && event.target instanceof Element && event.target.closest(".profile-card")) {
-        layer.replaceChildren();
-        return;
-      }
       const now = performance.now();
       const distance = Math.hypot(event.clientX - lastX, event.clientY - lastY);
       const minDistance = parallaxActive ? Math.max(12, 23 - density * 0.08) : Math.max(3, 13 - density * 0.1);
@@ -576,22 +569,6 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   return (
     <main ref={profilePageRef} className={`profile-page ${isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername ? "has-extras" : ""} ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
-      {forcedUsername && profileStatus === "found" && !presetPreviewMode && !embedMode && typeof document !== "undefined" && createPortal(
-        <button
-          type="button"
-          className={`pixlo-share-profile-button ${shareCopied ? "is-copied" : ""}`}
-          onClick={copyProfileLink}
-          aria-label={shareCopied ? "Profile link copied" : "Share your profile link"}
-        >
-          {shareCopied ? (
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19.5 6.8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          ) : (
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M16 8V5.8A1.8 1.8 0 0 0 14.2 4H5.8A1.8 1.8 0 0 0 4 5.8v8.4A1.8 1.8 0 0 0 5.8 16H8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
-          )}
-          <span aria-live="polite">{shareCopied ? "Link copied!" : "Share your profile"}</span>
-        </button>,
-        document.body
-      )}
       {isPremium && settings.cursorTrailEnabled && !presetPreviewMode && !embedMode && forcedUsername && typeof document !== "undefined" && createPortal(
         <div ref={cursorTrailLayerRef} className={`pixlo-cursor-trail-layer ${settings.parallax ? "parallax-lite" : ""}`} aria-hidden="true" />,
         document.body
