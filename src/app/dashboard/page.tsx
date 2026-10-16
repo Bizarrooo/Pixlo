@@ -980,6 +980,17 @@ export default function Dashboard() {
             <i className="auth-rail auth-rail-br-bottom" /><i className="auth-rail auth-rail-br-side" />
           </div>
 
+          <div className="auth-discord-steps" aria-label="Discord setup: step 1 join the server, step 2 link your account">
+            <div className="auth-discord-progress" aria-hidden="true">
+              <span className={discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked" ? "is-complete" : "is-active"} />
+              <span className={discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked" ? "is-active" : ""} />
+            </div>
+            <div className="auth-discord-step-labels">
+              <span className={discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked" ? "is-complete" : "is-active"}><i>01</i><b>Join server</b></span>
+              <span className={discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked" ? "is-active" : ""}><i>02</i><b>Link account</b></span>
+            </div>
+          </div>
+
           <div className="auth-discord-emblem" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M19.54 5.12a16.9 16.9 0 0 0-3.98-1.25l-.52 1.06a15.4 15.4 0 0 0-6.08 0L8.44 3.87a16.9 16.9 0 0 0-3.98 1.25C1.94 8.86 1.24 12.5 1.59 16.08a16.98 16.98 0 0 0 5.05 2.55l1.22-1.67c-.68-.25-1.33-.56-1.94-.94l.48-.37a12.35 12.35 0 0 0 11.2 0l.49.37c-.61.38-1.26.69-1.94.94l1.22 1.67a16.98 16.98 0 0 0 5.05-2.55c.41-4.15-.7-7.76-2.88-10.96ZM8.4 14.1c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Zm7.2 0c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Z" />
