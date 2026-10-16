@@ -857,3 +857,160 @@
   .auth-page { background-position: 45% center; }
   .auth-card { box-shadow: 0 22px 60px rgba(0,0,0,.38), 0 0 30px rgba(255,93,48,.06), inset 0 1px rgba(255,230,202,.08); }
 }
+
+
+/* Discord onboarding gate — shares the redesigned Pixlo auth system rather than inline default styles. */
+.auth-page-discord-gate {
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-top: 23px;
+}
+.auth-gate-topbar { justify-content: flex-start; }
+.auth-gate-topbar .auth-brand { pointer-events: auto; }
+.auth-card-discord {
+  width: min(100%, 538px);
+  min-height: 0 !important;
+  margin-top: clamp(54px, 8vh, 86px);
+  margin-bottom: 44px;
+  padding: 36px 39px 28px;
+  overflow: visible;
+}
+.auth-discord-emblem {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  margin: 1px auto 22px;
+  border: 1px solid rgba(255,184,121,.25);
+  border-radius: 22px;
+  color: #ffc16e;
+  background: linear-gradient(145deg, rgba(255,136,66,.13), rgba(120,37,22,.20));
+  box-shadow: 0 12px 28px rgba(0,0,0,.15), inset 0 1px rgba(255,226,194,.09), 0 0 26px rgba(255,111,54,.07);
+}
+.auth-discord-emblem::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 1px solid rgba(255,157,92,.11);
+  border-radius: 27px;
+  pointer-events: none;
+}
+.auth-discord-emblem svg { width: 34px; height: 34px; filter: drop-shadow(0 4px 9px rgba(255,117,65,.13)); }
+.auth-heading-discord { text-align: center; }
+.auth-heading-discord h1 {
+  max-width: 430px;
+  margin: 0 auto 13px;
+  font-size: clamp(30px, 4.2vw, 39px);
+  line-height: 1.08;
+}
+.auth-heading-discord h1 em {
+  display: inline;
+  background: linear-gradient(100deg, #ff6548 0%, #ff913f 58%, #ffd078 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: normal;
+}
+.auth-heading-discord p {
+  max-width: 400px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.75;
+}
+.auth-gate-actions { display: grid; gap: 11px; margin-top: 28px; }
+.auth-gate-join {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  padding: 13px 15px;
+  border: 1px solid rgba(255,205,167,.16);
+  border-radius: 15px;
+  color: #fff0e3 !important;
+  background: linear-gradient(120deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+  text-decoration: none !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease !important;
+}
+.auth-gate-join:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,168,107,.38);
+  background: rgba(255,134,67,.065);
+  box-shadow: 0 8px 24px rgba(0,0,0,.13), inset 0 1px rgba(255,255,255,.045);
+}
+.auth-gate-action-icon {
+  display: grid;
+  flex: 0 0 38px;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255,157,96,.18);
+  border-radius: 12px;
+  color: #ffb46b;
+  background: rgba(255,125,59,.085);
+}
+.auth-gate-action-icon svg { width: 18px; height: 18px; }
+.auth-gate-action-copy { display: grid; flex: 1 1 auto; min-width: 0; gap: 4px; text-align: left; }
+.auth-gate-action-copy b { color: #fff0e3; font-size: 12px; font-weight: 800; }
+.auth-gate-action-copy small { color: rgba(255,222,200,.47); font-size: 10px; line-height: 1.4; }
+.auth-gate-arrow { color: rgba(255,193,133,.76); font-size: 18px; }
+.auth-gate-connect {
+  justify-content: space-between;
+  min-height: 53px;
+  margin: 0;
+  padding: 11px 15px 11px 21px;
+  border: 1px solid rgba(255,210,158,.3);
+  border-radius: 15px;
+  color: #29130b !important;
+  background: linear-gradient(105deg, #ff8f43 0%, #ff7540 58%, #ffad4b 100%);
+  box-shadow: 0 12px 28px rgba(244,86,43,.2), inset 0 1px rgba(255,255,255,.24);
+  text-decoration: none !important;
+}
+.auth-gate-connect:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(244,86,43,.28), inset 0 1px rgba(255,255,255,.28);
+}
+.auth-gate-connect .auth-submit-arrow {
+  color: #fff6ee;
+  background: rgba(66,22,10,.17);
+  border-color: rgba(255,255,255,.22);
+}
+.auth-gate-note {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  margin: 19px auto 0;
+  max-width: 420px;
+  color: rgba(255,222,200,.43);
+  font-size: 10px;
+  line-height: 1.6;
+  text-align: center;
+}
+.auth-gate-note-dot {
+  display: inline-block;
+  flex: 0 0 5px;
+  width: 5px;
+  height: 5px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #ffad62;
+  box-shadow: 0 0 9px rgba(255,133,67,.33);
+}
+.auth-gate-message { margin-top: 18px; text-align: left; }
+@media (min-width: 761px) {
+  .auth-card-discord { padding-top: 38px; padding-bottom: 32px; }
+}
+@media (max-width: 760px) {
+  .auth-page-discord-gate { padding-top: 17px; }
+  .auth-card-discord { margin-top: 72px; padding: 30px 28px 25px; }
+}
+@media (max-width: 480px) {
+  .auth-card-discord { margin-top: 70px; padding: 27px 20px 22px; }
+  .auth-discord-emblem { width: 62px; height: 62px; border-radius: 19px; margin-bottom: 19px; }
+  .auth-heading-discord h1 { font-size: 30px; }
+  .auth-heading-discord p { font-size: 12px; }
+  .auth-gate-join { gap: 10px; padding: 12px; }
+  .auth-gate-action-copy b { font-size: 11px; }
+}
