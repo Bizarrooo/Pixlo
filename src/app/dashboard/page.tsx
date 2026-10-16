@@ -111,9 +111,9 @@ function Setting({ label, text, children }: { label: string; text: string; child
   return <div className="setting"><div><b>{label}</b><span>{text}</span></div>{children}</div>;
 }
 
-function Range({ label, value, min, max, suffix = "", onChange }: { label: string; value: number; min: number; max: number; suffix?: string; onChange: (v: number) => void }) {
+function Range({ label, value, min, max, suffix = "", step = 1, displayValue, onChange }: { label: string; value: number; min: number; max: number; suffix?: string; step?: number; displayValue?: string; onChange: (v: number) => void }) {
   const progress = max > min ? ((value - min) / (max - min)) * 100 : 0;
-  return <div className="range"><div><span>{label}</span><b>{value}{suffix}</b></div><input type="range" min={min} max={max} value={value} style={{ "--range-progress": `${progress}%` } as React.CSSProperties} onChange={e => onChange(Number(e.target.value))} /></div>;
+  return <div className="range"><div><span>{label}</span><b>{displayValue ?? `${value}${suffix}`}</b></div><input type="range" min={min} max={max} step={step} value={value} style={{ "--range-progress": `${progress}%` } as React.CSSProperties} onChange={e => onChange(Number(e.target.value))} /></div>;
 }
 
 function Colour({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
@@ -191,6 +191,8 @@ export default function Dashboard() {
   const [previewParallaxReturning, setPreviewParallaxReturning] = useState(false);
   const previewParallaxReturnTimerRef = useRef<number | null>(null);
   const previewPointerBoundsRef = useRef<DOMRect | null>(null);
+  const previewCursorTrailLayerRef = useRef<HTMLDivElement>(null);
+  const previewCursorTrailLastSpawnRef = useRef({ x: -100, y: -100, at: 0 });
   const previewAssetsLoadedRef = useRef(false);
   const [profileUserId, setProfileUserId] = useState("");
   const [viewToolAmount, setViewToolAmount] = useState("100");
@@ -540,6 +542,43 @@ export default function Dashboard() {
   }, [settingsReady, settings.avatar, settings.banner, settings.backgroundImage, settings.backgroundVideo, settings.enterScreenBackgroundImage, settings.enterScreenBackgroundVideo, settings.customLinks, settings.musicTracks, settings.activeMusicId]);
 
   const set = <K extends keyof ProfileSettings>(key: K, value: ProfileSettings[K]) => { setSettings(s => ({ ...s, [key]: value })); setSaved(false); };
+  const handlePreviewCursorTrail = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!presetsPremiumReady || !presetsPremium || !settings.cursorTrailEnabled || event.pointerType === "touch") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const layer = previewCursorTrailLayerRef.current;
+    if (!layer) return;
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - bounds.left;
+    const y = event.clientY - bounds.top;
+    const now = performance.now();
+    const previous = previewCursorTrailLastSpawnRef.current;
+    const distance = Math.hypot(x - previous.x, y - previous.y);
+    const density = Math.min(100, Math.max(20, settings.cursorTrailDensity));
+    if (now - previous.at < 18 || distance < Math.max(3, 13 - density * 0.1)) return;
+    previewCursorTrailLastSpawnRef.current = { x, y, at: now };
+
+    const count = Math.min(4, Math.max(1, Math.round(density / 30)));
+    const lifetime = Math.min(4000, Math.max(300, settings.cursorTrailLifetime));
+    for (let index = 0; index < count; index += 1) {
+      const particle = document.createElement("span");
+      particle.className = "pixlo-cursor-trail";
+      particle.textContent = Math.random() > 0.7 ? "✧" : "✦";
+      const size = Math.max(4, (6 + Math.random() * 9) * settings.cursorTrailSize / 100);
+      particle.style.left = (x + (Math.random() - 0.5) * 18) + "px";
+      particle.style.top = (y + (Math.random() - 0.5) * 18) + "px";
+      particle.style.setProperty("--cursor-trail-particle-size", size + "px");
+      particle.style.setProperty("--cursor-trail-colour", settings.cursorTrailColour);
+      particle.style.setProperty("--cursor-trail-glow", (settings.cursorTrailGlow / 8) + "px");
+      particle.style.setProperty("--cursor-trail-drift-x", (((Math.random() - 0.5) * 34) * settings.cursorTrailSpeed / 100) + "px");
+      particle.style.setProperty("--cursor-trail-drift-y", (((Math.random() - 0.8) * 36) * settings.cursorTrailSpeed / 100) + "px");
+      particle.style.setProperty("--cursor-trail-duration", lifetime + "ms");
+      particle.addEventListener("animationend", () => particle.remove(), { once: true });
+      layer.appendChild(particle);
+    }
+    while (layer.childElementCount > 84) layer.firstElementChild?.remove();
+  };
+
   const navigateDashboard = (primary: DashboardPrimarySection, destination: string) => {
     setActivePrimary(primary);
     setActive(destination);
@@ -1342,38 +1381,24 @@ export default function Dashboard() {
           </div>}
 
           
-{activePrimary === "optimise" && active === "Cursor Effects" && <div className="form-stack cursor-sparkles-page">
-  <SectionIntro title="Cursor effects" text="Add a subtle sparkle trail that follows visitors' cursors on your public Pixlo profile." />
-  {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>Premium cursor effects</h3><p>The sparkle trail and its colour, glow and motion controls are included with Pixlo Premium.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <>
-    <section className="cursor-sparkles-hero">
-      <div className="cursor-sparkles-hero-copy">
-        <span className="cursor-sparkles-eyebrow">PIXLO / OPTIMISE</span>
-        <h3>Sparkle trail</h3>
-        <p>A small trail of glowing stars follows the cursor, matching your chosen colour and intensity. It only appears on the public profile for Premium members.</p>
+{activePrimary === "optimise" && active === "Cursor Trail" && <div className="form-stack cursor-trail-page">
+  <SectionIntro title="Cursor trail" text="Customise how your trail looks. Move your cursor over the live profile preview to test it." />
+  {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>Premium feature</h3><p>Cursor trails and their custom colour, glow, movement and lifetime settings are available to Pixlo Premium members.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <>
+    <section className="cursor-trail-settings-card">
+      <div className="cursor-trail-card-heading">
+        <div><h3>Trail settings</h3><p>Settings update the live preview and your public profile.</p></div>
+        <span className={settings.cursorTrailEnabled ? "cursor-trail-state is-enabled" : "cursor-trail-state"}><i />{settings.cursorTrailEnabled ? "ENABLED" : "DISABLED"}</span>
       </div>
-      <span className="cursor-sparkles-premium-pill"><DashboardNavIcon name="sparkles" /> PREMIUM</span>
-      <div className="cursor-sparkles-demo" style={{ position: "relative", "--cursor-sparkle-colour": settings.cursorSparklesColour, "--cursor-sparkle-glow": (settings.cursorSparklesGlow / 7) + "px", "--cursor-sparkle-scale": settings.cursorSparklesSize / 100, "--cursor-sparkle-demo-speed": Math.max(0.45, 1.5 - settings.cursorSparklesSpeed / 150) + "s" } as React.CSSProperties} aria-label="Sparkle cursor effect preview">
-        <span className="cursor-sparkles-demo-label">LIVE PREVIEW</span>
-        <span className="cursor-sparkle-demo-star star-one">✦</span>
-        <span className="cursor-sparkle-demo-star star-two">✧</span>
-        <span className="cursor-sparkle-demo-star star-three">✦</span>
-        <span className="cursor-sparkle-demo-star star-four">✧</span>
-        <span className="cursor-sparkle-demo-star star-five">✦</span>
-        <span className="cursor-sparkles-demo-pointer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 3.5 19 13l-6 .8-3 5.7L5 3.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg></span>
-        <span className="cursor-sparkles-demo-hint">Move through the page to leave a glowing trail</span>
+      <Setting label="Enable cursor trail" text="Show the trail in the live preview and on your public profile."><Toggle value={settings.cursorTrailEnabled} onChange={v => set("cursorTrailEnabled", v)} /></Setting>
+      <div className="cursor-trail-control-grid">
+        <div className="cursor-trail-colour-control"><Colour label="Trail colour" value={settings.cursorTrailColour} onChange={v => set("cursorTrailColour", v)} /></div>
+        <Range label="Glow intensity" value={settings.cursorTrailGlow} min={0} max={100} suffix="%" onChange={v => set("cursorTrailGlow", v)} />
+        <Range label="Trail size" value={settings.cursorTrailSize} min={50} max={180} suffix="%" onChange={v => set("cursorTrailSize", v)} />
+        <Range label="Trail density" value={settings.cursorTrailDensity} min={20} max={100} suffix="%" onChange={v => set("cursorTrailDensity", v)} />
+        <Range label="Trail speed" value={settings.cursorTrailSpeed} min={50} max={150} suffix="%" onChange={v => set("cursorTrailSpeed", v)} />
+        <Range label="Trail lifetime" value={settings.cursorTrailLifetime} min={300} max={4000} step={100} displayValue={(settings.cursorTrailLifetime / 1000).toFixed(1) + "s"} onChange={v => set("cursorTrailLifetime", v)} />
       </div>
-    </section>
-    <section className="cursor-sparkles-settings-card">
-      <div className="cursor-sparkles-card-heading"><div><h3>Effect settings</h3><p>Changes are saved to your profile automatically.</p></div><span className={settings.cursorSparklesEnabled ? "cursor-sparkles-state is-enabled" : "cursor-sparkles-state"}><i />{settings.cursorSparklesEnabled ? "ENABLED" : "DISABLED"}</span></div>
-      <Setting label="Enable sparkle cursor" text="Show a sparkle trail for mouse users visiting your public profile."><Toggle value={settings.cursorSparklesEnabled} onChange={v => set("cursorSparklesEnabled", v)} /></Setting>
-      <div className="cursor-sparkles-control-grid">
-        <div className="cursor-sparkles-colour-control"><Colour label="Sparkle colour" value={settings.cursorSparklesColour} onChange={v => set("cursorSparklesColour", v)} /></div>
-        <Range label="Glow intensity" value={settings.cursorSparklesGlow} min={0} max={100} suffix="%" onChange={v => set("cursorSparklesGlow", v)} />
-        <Range label="Sparkle size" value={settings.cursorSparklesSize} min={50} max={180} suffix="%" onChange={v => set("cursorSparklesSize", v)} />
-        <Range label="Trail density" value={settings.cursorSparklesDensity} min={20} max={100} suffix="%" onChange={v => set("cursorSparklesDensity", v)} />
-        <Range label="Animation speed" value={settings.cursorSparklesSpeed} min={50} max={150} suffix="%" onChange={v => set("cursorSparklesSpeed", v)} />
-      </div>
-      <p className="cursor-sparkles-footnote">The trail is hidden in embedded previews, does not intercept clicks, and respects visitors' reduced-motion settings.</p>
+      <p className="cursor-trail-footnote">The trail is drawn directly over the live profile preview, does not block clicks, and respects reduced-motion settings.</p>
     </section>
   </>}
 </div>}
@@ -1694,7 +1719,7 @@ export default function Dashboard() {
         <aside className={`preview-panel ${previewVisible ? "" : "preview-panel-loading"}`} aria-hidden={!previewVisible}>
           {previewVisible && <>
           <div className="preview-label"><div><span>Live preview</span><small>updates instantly</small></div><a href={profileUrl} target="_blank" rel="noreferrer">Open ↗</a></div>
-          <div className={`preview-frame preview-layout-${settings.layout.toLowerCase().replace(/\s+/g, "-")} ${settings.parallax ? "preview-parallax-on" : ""} ${previewParallaxReturning ? "preview-parallax-returning" : ""} ${settings.animated ? "preview-animated" : ""} ${settings.glow ? "preview-glow" : ""} ${settings.floating ? "preview-float" : ""} ${settings.particles ? "preview-particles-on" : ""} ${settings.grain ? "preview-grain-on" : ""} ${settings.scanlines ? "preview-scanlines-on" : ""} ${settings.textGlow ? "preview-text-glow" : ""}`} style={previewStyle}>
+          <div className={`preview-frame preview-layout-${settings.layout.toLowerCase().replace(/\s+/g, "-")} ${settings.parallax ? "preview-parallax-on" : ""} ${previewParallaxReturning ? "preview-parallax-returning" : ""} ${settings.animated ? "preview-animated" : ""} ${settings.glow ? "preview-glow" : ""} ${settings.floating ? "preview-float" : ""} ${settings.particles ? "preview-particles-on" : ""} ${settings.grain ? "preview-grain-on" : ""} ${settings.scanlines ? "preview-scanlines-on" : ""} ${settings.textGlow ? "preview-text-glow" : ""}`} style={previewStyle} onPointerMove={handlePreviewCursorTrail}>
             {previewAssets.backgroundVideo && <video key={previewAssets.backgroundVideo} className="preview-media" src={previewAssets.backgroundVideo} autoPlay={active !== "Enter Screen" || previewEntered} muted loop playsInline preload="auto" onLoadedData={event => { const video = event.currentTarget; if (active === "Enter Screen" && !previewEntered) { video.pause(); video.currentTime = 0; } else { void video.play().catch(() => {}); } }} onCanPlay={event => { if (active === "Enter Screen" && !previewEntered) { event.currentTarget.pause(); event.currentTarget.currentTime = 0; } }} />}
             {previewAssets.backgroundImage && <div className="preview-bg" style={{ backgroundImage: `url("${previewAssets.backgroundImage}")`, filter: `blur(${settings.backgroundBlur}px)`, transform: `scale(${Math.max(1, settings.backgroundScale / 100)})`, backgroundPosition: `${settings.backgroundPositionX}% ${settings.backgroundPositionY}%`, backgroundSize: `${settings.backgroundScale}% auto` }} />}
             <div className="preview-overlay" />
@@ -1745,6 +1770,7 @@ export default function Dashboard() {
             {active === "Enter Screen" && !previewEntered && <button type="button" onClick={() => setPreviewEntering(true)} onTransitionEnd={() => { if (previewEntering) { setPreviewEntered(true); setPreviewEntering(false); } }} style={{ position: "absolute", inset: 0, zIndex: 20, width: "100%", height: "100%", padding: 16, border: 0, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", cursor: "pointer", backgroundColor: `rgba(${parseInt(settings.enterScreenBackgroundColour.slice(1,3),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(3,5),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(5,7),16)||0},${previewAssets.backgroundVideo ? Math.min(settings.enterScreenBackgroundOpacity / 100, 0.28) : settings.enterScreenBackgroundOpacity / 100})`, backdropFilter: `blur(${settings.enterScreenCardBlur}px)`, WebkitBackdropFilter: `blur(${settings.enterScreenCardBlur}px)`, color: settings.enterScreenTextColour, textAlign: "center", fontFamily: fontFamily(settings.enterScreenFont), opacity: previewEntering ? 0 : 1, transition: "opacity 450ms ease" }}>
               <span style={{ position: "absolute", zIndex: 2, left: `${settings.enterScreenCardPositionX}%`, top: `${settings.enterScreenCardPositionY}%`, transform: "translate(-50%, -50%)", display: "block", width: `min(90%, ${settings.enterScreenCardWidth}px)`, boxSizing: "border-box", padding: `${settings.enterScreenCardPadding}px`, borderRadius: settings.enterScreenCardRadius, border: `1px solid ${settings.enterScreenCardBorderColour}${Math.round(settings.enterScreenCardBorderOpacity*2.55).toString(16).padStart(2,"0")}`, background: `${settings.enterScreenCardBackgroundColour}${Math.round(settings.enterScreenCardOpacity*2.55).toString(16).padStart(2,"0")}`, color: settings.enterScreenTextColour, fontSize: "clamp(12px, 2.5vw, 20px)", fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
             </button>}
+            <div ref={previewCursorTrailLayerRef} className="pixlo-cursor-trail-layer preview-cursor-trail-layer" aria-hidden="true" />
             <div className="preview-badge"><i /> LIVE</div>
           </div>
           </>}
