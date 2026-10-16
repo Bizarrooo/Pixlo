@@ -2,6 +2,8 @@ import { ImageResponse } from "next/og";
 import { getPublicProfileShareData } from "../../../lib/public-profile-share";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export const alt = "Profile avatar, display name and custom share cover — Made with Pixlo";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -16,8 +18,10 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ use
   const backgroundImageUrl = profile?.shareCoverImageUrl || profile?.backgroundImageUrl || "";
   const preferredNameSize = profile?.shareCoverNameSize ?? 66;
   const displayFontSize = displayName.length > 30 ? Math.min(58, preferredNameSize) : displayName.length > 21 ? Math.min(76, preferredNameSize) : preferredNameSize;
+  const nameColour = profile?.shareCoverNameColour || "#ffffff";
+  const creditColour = profile?.shareCoverCreditColour || "#e3dcd8";
   const nameGlowIntensity = profile?.shareCoverNameGlowIntensity ?? 65;
-  const glowHex = profile?.shareCoverNameGlowColour || "#ff6946";
+  const glowHex = nameColour;
   const glowRed = Number.parseInt(glowHex.slice(1,3), 16);
   const glowGreen = Number.parseInt(glowHex.slice(3,5), 16);
   const glowBlue = Number.parseInt(glowHex.slice(5,7), 16);
@@ -63,10 +67,10 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ use
             </div>
             {avatarDecorationUrl && <img src={avatarDecorationUrl} width="264" height="264" style={{ position: "absolute", inset: 0, width: 264, height: 264, objectFit: "contain", pointerEvents: "none" }} />}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1000, marginTop: 8, color: "#ffffff", fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.12, overflowWrap: "anywhere", textShadow: nameTextShadow }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1000, marginTop: 8, color: nameColour, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.12, overflowWrap: "anywhere", textShadow: nameTextShadow }}>
             {displayName}
           </div>
-          <div style={{ display: "flex", marginTop: 12, alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.88)", fontSize: 18, fontWeight: 500 }}>
+          <div style={{ display: "flex", marginTop: 12, alignItems: "center", justifyContent: "center", color: creditColour, fontSize: 18, fontWeight: 500 }}>
             Made with Pixlo
           </div>
         </div>

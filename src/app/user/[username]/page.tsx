@@ -4,7 +4,7 @@ import { getPublicProfileShareData, PIXLO_PUBLIC_ORIGIN } from "../../../lib/pub
 
 export const dynamic = "force-dynamic";
 
-type PageProps = { params: Promise<{ username: string }> };
+type PageProps = { params: Promise<{ username: string }>; searchParams?: Promise<{ share?: string | string[] }> };
 
 function shareVersion(parts: string[]) {
   let hash = 2166136261;
@@ -14,8 +14,11 @@ function shareVersion(parts: string[]) {
   return hash.toString(36);
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { username: rawUsername } = await params;
+  const query = searchParams ? await searchParams : {};
+  const requestedShareKey = Array.isArray(query.share) ? query.share[0] : query.share;
+  const shareKey = typeof requestedShareKey === "string" && /^[a-z0-9_-]{1,32}$/i.test(requestedShareKey) ? requestedShareKey : "";
   const username = rawUsername.trim().toLowerCase();
   const profile = await getPublicProfileShareData(username);
   const displayName = profile?.displayName || username || "Pixlo Profile";
@@ -26,13 +29,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     profile?.avatarDecorationUrl || "",
     profile?.shareCoverImageUrl || "",
     String(profile?.shareCoverNameSize ?? 66),
+    profile?.shareCoverNameColour || "",
+    profile?.shareCoverCreditColour || "",
     String(profile?.shareCoverNameGlow ?? false),
     String(profile?.shareCoverNameGlowIntensity ?? 65),
     profile?.shareCoverNameGlowColour || "",
     profile?.backgroundImageUrl || "",
     profile?.backgroundVideoUrl || "",
   ]);
-  const imageUrl = `${profileUrl}/opengraph-image?v=${version}`;
+  const shareUrl = shareKey ? `${profileUrl}?share=${encodeURIComponent(shareKey)}` : profileUrl;
+  const imageUrl = `${profileUrl}/opengraph-image?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
   const description = "Made with Pixlo";
   const backgroundVideoUrl = profile?.backgroundVideoUrl || "";
   const videoPath = backgroundVideoUrl.split("?")[0].toLowerCase();
@@ -41,13 +47,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: displayName,
     description,
-    alternates: { canonical: profileUrl },
+    alternates: { canonical: shareKey ? shareUrl : profileUrl },
     openGraph: {
       type: "profile",
       siteName: "Pixlo",
       title: displayName,
       description,
-      url: profileUrl,
+      url: shareUrl,
       images: [{
         url: imageUrl,
         width: 1200,

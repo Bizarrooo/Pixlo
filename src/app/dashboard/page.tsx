@@ -936,13 +936,32 @@ export default function Dashboard() {
     ? `Username locked until ${new Date(usernameChangeAvailableAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}. You can change it once every 24 hours.`
     : "Usernames can be changed once every 24 hours. Changing it updates your profile URL.";
   const profileUrl = settingsReady && settings.username.trim() ? `https://pixlo1.vercel.app/user/${encodeURIComponent(settings.username.trim().toLowerCase())}` : "/dashboard";
+  const profileShareKey = (() => {
+    const parts = [
+      settings.displayName,
+      settings.shareCoverImage,
+      String(settings.shareCoverNameSize),
+      settings.shareCoverNameColour,
+      settings.shareCoverCreditColour,
+      String(settings.shareCoverNameGlow),
+      String(settings.shareCoverNameGlowIntensity),
+      settings.useDiscordAvatar ? settings.discordAvatarUrl : settings.avatar,
+      settings.useDiscordDecoration ? settings.discordAvatarDecorationUrl : "",
+      settings.backgroundImage,
+      settings.backgroundVideo,
+    ];
+    let hash = 2166136261;
+    for (const character of parts.join("|")) hash = Math.imul(hash ^ character.charCodeAt(0), 16777619) >>> 0;
+    return hash.toString(36);
+  })();
+  const shareProfileUrl = profileUrl === "/dashboard" ? profileUrl : `${profileUrl}?share=${profileShareKey}`;
   const copyProfileUrl = async () => {
     try {
-      await navigator.clipboard.writeText(profileUrl);
+      await navigator.clipboard.writeText(shareProfileUrl);
       setProfileCopied(true);
       window.setTimeout(() => setProfileCopied(false), 1800);
     } catch {
-      window.prompt("Copy your Pixlo profile link:", profileUrl);
+      window.prompt("Copy your Pixlo profile link:", shareProfileUrl);
     }
   };
   const previewAvatar = settings.useDiscordAvatar && settings.discordAvatarUrl ? settings.discordAvatarUrl : previewAssets.avatar;
@@ -1313,7 +1332,11 @@ export default function Dashboard() {
       {activePrimary === "customize" && <nav className="dashboard-customize-tabs" aria-label="Customize profile settings">
         {customizeTabs.map(tab => <button key={tab.value} type="button" className={active === tab.value ? "active" : ""} onClick={() => { setActive(tab.value); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><DashboardNavIcon name={tab.icon} className="dashboard-nav-icon" /><span>{tab.label}</span></button>)}
       </nav>}
-      {activePrimary === "optimise" && <nav className="dashboard-optimise-tabs" aria-label="Premium optimisation settings">
+      {(activePrimary === "premium" || activePrimary === "optimise") && <nav className="dashboard-premium-tabs" aria-label="Premium sections">
+        <button type="button" className={activePrimary === "premium" ? "active" : ""} onClick={() => navigateDashboard("premium", "Presets")}>Premium presets</button>
+        <button type="button" className={activePrimary === "optimise" ? "active" : ""} onClick={() => navigateDashboard("optimise", "Cursor Trail")}>Optimise</button>
+      </nav>}
+      {activePrimary === "optimise" && <nav className="dashboard-optimise-tabs" aria-label="Optimise settings">
         {optimiseTabs.map(tab => <button key={tab.value} type="button" className={active === tab.value ? "active" : ""} onClick={() => { setActive(tab.value); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><DashboardNavIcon name={tab.icon} className="dashboard-nav-icon" /><span>{tab.label}</span></button>)}
       </nav>}
 
@@ -1576,7 +1599,7 @@ export default function Dashboard() {
 
 
           {activePrimary === "links" && active === "Share cover" && <div className="form-stack share-cover-page">
-            <SectionIntro title="Shared profile cover" text="Customize the image people see when your profile link is shared. The display name and Pixlo credit stay fixed; you can adjust the name size and glow." />
+            <SectionIntro title="Shared profile cover" text="Design the cover people see when your Pixlo profile is shared. The wording stays fixed, while both text colours and the display-name styling are yours to control." />
             <div className="share-cover-editor-layout">
               <section className="share-cover-preview-panel" aria-label="Live shared-link cover preview">
                 <div className="share-cover-preview">
@@ -1588,18 +1611,21 @@ export default function Dashboard() {
                       {previewDecoration && <img className="share-cover-preview-decoration" src={previewDecoration} alt="" aria-hidden="true" />}
                     </div>
                     <div className="share-cover-preview-name" style={{
+                      color: settings.shareCoverNameColour,
                       fontSize: `${(settings.shareCoverNameSize / 1200) * 100}cqw`,
-                      textShadow: settings.shareCoverNameGlow ? `0 0 ${Math.max(1, settings.shareCoverNameGlowIntensity * 0.55)}px ${rgbaFromHex(settings.accentColour, Math.min(0.95, settings.shareCoverNameGlowIntensity / 100))}, 0 0 ${settings.shareCoverNameGlowIntensity}px ${rgbaFromHex(settings.accentColour, Math.min(0.45, settings.shareCoverNameGlowIntensity / 300))}` : "none",
+                      textShadow: settings.shareCoverNameGlow ? `0 0 ${Math.max(1, settings.shareCoverNameGlowIntensity * 0.55)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(0.95, settings.shareCoverNameGlowIntensity / 100))}, 0 0 ${settings.shareCoverNameGlowIntensity}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(0.45, settings.shareCoverNameGlowIntensity / 300))}` : "none",
                     }}>{settings.displayName || settings.username}</div>
-                    <div className="share-cover-preview-credit">Made with Pixlo</div>
+                    <div className="share-cover-preview-credit" style={{ color: settings.shareCoverCreditColour }}>Made with Pixlo</div>
                   </div>
                 </div>
                 <p className="share-cover-preview-help">Live 1200 × 630 preview of the image used by Discord and other apps when this profile URL is shared.</p>
               </section>
               <div className="share-cover-controls">
                 <FileUpload label="Cover image" value={settings.shareCoverImage} accept="image/*" type="image" note="Import an image for your shared-link cover." onChange={v => { set("shareCoverImage", v); setSaved(false); }} />
+                <Colour label="Display name colour" value={settings.shareCoverNameColour} onChange={v => { set("shareCoverNameColour", v); setSaved(false); }} />
+                <Colour label="Made with Pixlo colour" value={settings.shareCoverCreditColour} onChange={v => { set("shareCoverCreditColour", v); setSaved(false); }} />
                 <Range label="Display name size" value={settings.shareCoverNameSize} min={28} max={110} suffix="px" onChange={v => { set("shareCoverNameSize", v); setSaved(false); }} />
-                <Setting label="Display name glow" text="Add a soft glow around the display name in the shared image."><Toggle value={settings.shareCoverNameGlow} onChange={v => { set("shareCoverNameGlow", v); setSaved(false); }} /></Setting>
+                <Setting label="Display name glow" text="Add a glow that matches the display-name colour."><Toggle value={settings.shareCoverNameGlow} onChange={v => { set("shareCoverNameGlow", v); setSaved(false); }} /></Setting>
                 {settings.shareCoverNameGlow && <Range label="Name glow intensity" value={settings.shareCoverNameGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("shareCoverNameGlowIntensity", v); setSaved(false); }} />}
               </div>
             </div>

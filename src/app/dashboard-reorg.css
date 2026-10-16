@@ -1464,3 +1464,56 @@ body:has(.dashboard.dashboard-revamp) {
 .dashboard.dashboard-revamp .share-cover-preview-help { margin:12px 0 0; color:#a9a09b; font-size:11px; line-height:1.6; }
 .dashboard.dashboard-revamp .share-cover-controls { display:flex; flex-direction:column; gap:15px; min-width:0; padding:16px; border:1px solid rgba(255,255,255,.1); border-radius:16px; background:rgba(13,11,12,.68); }
 @media (max-width:940px) { .dashboard.dashboard-revamp .share-cover-editor-layout { grid-template-columns:minmax(0,1fr); } .dashboard.dashboard-revamp .share-cover-preview-panel { padding:10px; } }
+
+
+/* One shared rounded tab design across Links, Customize, Premium and Optimise. */
+.dashboard.dashboard-revamp .dashboard-links-tabs,
+.dashboard.dashboard-revamp .dashboard-customize-tabs,
+.dashboard.dashboard-revamp .dashboard-premium-tabs,
+.dashboard.dashboard-revamp .dashboard-optimise-tabs {
+  position: sticky !important; top: 82px !important; z-index: 26 !important;
+  display: flex !important; align-items: center !important; gap: 8px !important;
+  width: 100% !important; min-width: 0 !important; overflow-x: auto !important;
+  padding: 13px clamp(22px, 3vw, 42px) 12px !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  background: rgba(13,11,12,.94) !important; backdrop-filter: blur(16px) saturate(125%) !important;
+  scrollbar-width: thin !important;
+}
+.dashboard.dashboard-revamp .dashboard-links-tabs > button,
+.dashboard.dashboard-revamp .dashboard-customize-tabs > button,
+.dashboard.dashboard-revamp .dashboard-premium-tabs > button,
+.dashboard.dashboard-revamp .dashboard-optimise-tabs > button {
+  display: inline-flex !important; flex: 0 0 auto !important; align-items: center !important; justify-content: center !important;
+  gap: 7px !important; min-height: 39px !important; padding: 9px 14px !important;
+  border: 1px solid transparent !important; border-radius: 10px !important;
+  color: #aaa09b !important; background: transparent !important; box-shadow: none !important;
+  font: inherit !important; font-size: 11px !important; font-weight: 750 !important; white-space: nowrap !important;
+  cursor: pointer !important;
+  transition: color .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease !important;
+}
+.dashboard.dashboard-revamp .dashboard-links-tabs > button:hover,
+.dashboard.dashboard-revamp .dashboard-customize-tabs > button:hover,
+.dashboard.dashboard-revamp .dashboard-premium-tabs > button:hover,
+.dashboard.dashboard-revamp .dashboard-optimise-tabs > button:hover {
+  color: #fff2e8 !important; border-color: rgba(255,140,91,.16) !important; background: rgba(255,132,82,.07) !important;
+}
+.dashboard.dashboard-revamp .dashboard-links-tabs > button.active,
+.dashboard.dashboard-revamp .dashboard-customize-tabs > button.active,
+.dashboard.dashboard-revamp .dashboard-premium-tabs > button.active,
+.dashboard.dashboard-revamp .dashboard-optimise-tabs > button.active {
+  color: #fff7f0 !important; border-color: rgba(255,126,76,.25) !important;
+  background: linear-gradient(110deg, rgba(255,100,62,.16), rgba(255,174,95,.07)) !important;
+  box-shadow: inset 0 -2px #ff7147, 0 6px 22px rgba(255,100,62,.045) !important;
+}
+.dashboard.dashboard-revamp .dashboard-links-tabs > button .dashboard-nav-icon,
+.dashboard.dashboard-revamp .dashboard-customize-tabs > button .dashboard-nav-icon,
+.dashboard.dashboard-revamp .dashboard-premium-tabs > button .dashboard-nav-icon,
+.dashboard.dashboard-revamp .dashboard-optimise-tabs > button .dashboard-nav-icon {
+  width: 15px !important; height: 15px !important; color: currentColor !important;
+}
+@media (max-width: 700px) {
+  .dashboard.dashboard-revamp .dashboard-links-tabs,
+  .dashboard.dashboard-revamp .dashboard-customize-tabs,
+  .dashboard.dashboard-revamp .dashboard-premium-tabs,
+  .dashboard.dashboard-revamp .dashboard-optimise-tabs { padding-inline: 12px !important; }
+}

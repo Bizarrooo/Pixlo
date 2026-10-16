@@ -9,6 +9,8 @@ export type PublicProfileShareData = {
   avatarDecorationUrl: string;
   shareCoverImageUrl: string;
   shareCoverNameSize: number;
+  shareCoverNameColour: string;
+  shareCoverCreditColour: string;
   shareCoverNameGlow: boolean;
   shareCoverNameGlowIntensity: number;
   shareCoverNameGlowColour: string;
@@ -65,13 +67,16 @@ export async function getPublicProfileShareData(usernameInput: string): Promise<
     const shareCoverNameSize = typeof settings.shareCoverNameSize === "number" && Number.isFinite(settings.shareCoverNameSize)
       ? Math.min(110, Math.max(28, Math.round(settings.shareCoverNameSize)))
       : 66;
+    const shareCoverNameColour = typeof settings.shareCoverNameColour === "string" && /^#[0-9a-f]{6}$/i.test(settings.shareCoverNameColour)
+      ? settings.shareCoverNameColour
+      : "#ffffff";
+    const shareCoverCreditColour = typeof settings.shareCoverCreditColour === "string" && /^#[0-9a-f]{6}$/i.test(settings.shareCoverCreditColour)
+      ? settings.shareCoverCreditColour
+      : "#e3dcd8";
     const shareCoverNameGlow = settings.shareCoverNameGlow === true;
     const shareCoverNameGlowIntensity = typeof settings.shareCoverNameGlowIntensity === "number" && Number.isFinite(settings.shareCoverNameGlowIntensity)
       ? Math.min(200, Math.max(0, settings.shareCoverNameGlowIntensity))
       : 65;
-    const shareCoverNameGlowColour = typeof settings.accentColour === "string" && /^#[0-9a-f]{6}$/i.test(settings.accentColour)
-      ? settings.accentColour
-      : "#ff6946";
 
     return {
       username: String(row.username || username).trim().toLowerCase(),
@@ -80,6 +85,8 @@ export async function getPublicProfileShareData(usernameInput: string): Promise<
       avatarDecorationUrl,
       shareCoverImageUrl: publicAssetUrl(settings.shareCoverImage),
       shareCoverNameSize,
+      shareCoverNameColour,
+      shareCoverCreditColour,
       shareCoverNameGlow,
       shareCoverNameGlowIntensity,
       shareCoverNameGlowColour,

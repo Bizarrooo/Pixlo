@@ -25,6 +25,8 @@ export type ProfileSettings = {
   banner: string;
   shareCoverImage: string;
   shareCoverNameSize: number;
+  shareCoverNameColour: string;
+  shareCoverCreditColour: string;
   shareCoverNameGlow: boolean;
   shareCoverNameGlowIntensity: number;
   backgroundImage: string;
@@ -192,6 +194,8 @@ export const defaultSettings: ProfileSettings = {
   banner: "",
   shareCoverImage: "",
   shareCoverNameSize: 66,
+  shareCoverNameColour: "#ffffff",
+  shareCoverCreditColour: "#e3dcd8",
   shareCoverNameGlow: false,
   shareCoverNameGlowIntensity: 65,
   backgroundImage: "",
@@ -412,6 +416,8 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     socialIconSize: typeof parsed.socialIconSize === "number" && Number.isFinite(parsed.socialIconSize) ? Math.min(96, Math.max(16, Math.round(parsed.socialIconSize))) : defaultSettings.socialIconSize,
     shareCoverImage: typeof parsed.shareCoverImage === "string" ? parsed.shareCoverImage : defaultSettings.shareCoverImage,
     shareCoverNameSize: typeof parsed.shareCoverNameSize === "number" && Number.isFinite(parsed.shareCoverNameSize) ? Math.min(110, Math.max(28, Math.round(parsed.shareCoverNameSize))) : defaultSettings.shareCoverNameSize,
+    shareCoverNameColour: typeof parsed.shareCoverNameColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.shareCoverNameColour) ? parsed.shareCoverNameColour : defaultSettings.shareCoverNameColour,
+    shareCoverCreditColour: typeof parsed.shareCoverCreditColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.shareCoverCreditColour) ? parsed.shareCoverCreditColour : defaultSettings.shareCoverCreditColour,
     shareCoverNameGlow: typeof parsed.shareCoverNameGlow === "boolean" ? parsed.shareCoverNameGlow : defaultSettings.shareCoverNameGlow,
     shareCoverNameGlowIntensity: typeof parsed.shareCoverNameGlowIntensity === "number" && Number.isFinite(parsed.shareCoverNameGlowIntensity) ? Math.min(200, Math.max(0, parsed.shareCoverNameGlowIntensity)) : defaultSettings.shareCoverNameGlowIntensity,
     customLinks: Array.isArray(parsed.customLinks) ? parsed.customLinks.filter((item: any) => item && typeof item.id === "string" && typeof item.url === "string" && typeof item.icon === "string") : [],
