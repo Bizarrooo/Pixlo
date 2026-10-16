@@ -38,7 +38,7 @@ export async function getPublicProfileShareData(usernameInput: string): Promise<
       ? settings.discordAvatarUrl.trim()
       : "";
     const ordinaryAvatar = typeof settings.avatar === "string" ? settings.avatar.trim() : "";
-    const candidate = discordAvatar || ordinaryAvatar;
+    const candidate = discordAvatar || ordinaryAvatar;\n    const rawBackground = typeof settings.backgroundImage === "string" ? settings.backgroundImage.trim() : "";\n    let backgroundImageUrl = "";\n    if (rawBackground && !rawBackground.startsWith("idb:") && !rawBackground.startsWith("blob:") && !rawBackground.startsWith("data:")) {\n      try { const parsedBackground = new URL(rawBackground, PIXLO_PUBLIC_ORIGIN); if (parsedBackground.protocol === "https:" || parsedBackground.protocol === "http:") backgroundImageUrl = parsedBackground.toString(); } catch {}\n    }
     let avatarUrl = "";
 
     if (candidate && !candidate.startsWith("idb:") && !candidate.startsWith("blob:") && !candidate.startsWith("data:")) {
