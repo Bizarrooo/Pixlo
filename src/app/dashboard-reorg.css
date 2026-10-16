@@ -1379,3 +1379,65 @@ body:has(.dashboard.dashboard-revamp) {
 .preview-cursor-trail-layer.parallax-lite .pixlo-cursor-trail {
   text-shadow: 0 0 4px currentColor !important;
 }
+
+
+/* Final parallax stability overrides: only the card moves; backdrops stay locked. */
+.profile-page.parallax-on,
+.profile-page.parallax-on .profile-wrap {
+  overflow: visible !important;
+}
+.profile-page.parallax-on .background-image,
+.profile-page.parallax-on .background-media,
+.profile-page.parallax-on .ambient-one,
+.profile-page.parallax-on .ambient-two {
+  transform: none !important;
+  translate: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
+.profile-page.parallax-on .profile-card {
+  transform: perspective(1150px)
+    rotateX(var(--parallax-rotate-x, 0deg))
+    rotateY(var(--parallax-rotate-y, 0deg))
+    translate3d(calc(var(--mouse-x, 0px) * .30), calc(var(--mouse-y, 0px) * .30), 0)
+    scale3d(1.02, 1.02, 1) !important;
+  transform-origin: center center !important;
+  transform-style: preserve-3d !important;
+  backface-visibility: hidden !important;
+  overflow: visible !important;
+  transition: transform 150ms cubic-bezier(.2,.7,.2,1), box-shadow 180ms ease !important;
+}
+.profile-page.parallax-on .profile-card::after {
+  border-radius: inherit !important;
+  pointer-events: none !important;
+}
+
+.preview-frame.preview-parallax-on .preview-bg,
+.preview-frame.preview-parallax-on .preview-media {
+  transform: none !important;
+  translate: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
+.preview-frame.preview-parallax-on {
+  box-sizing: border-box !important;
+  padding: 24px !important;
+}
+.preview-frame.preview-parallax-on .preview-card {
+  transform: perspective(1100px)
+    rotateX(var(--preview-parallax-rotate-x, 0deg))
+    rotateY(var(--preview-parallax-rotate-y, 0deg))
+    translate3d(calc(var(--preview-parallax-x, 0px) * .30), calc(var(--preview-parallax-y, 0px) * .30), 0)
+    scale3d(1.02, 1.02, 1) !important;
+  transform-origin: center center !important;
+  transform-style: preserve-3d !important;
+  backface-visibility: hidden !important;
+  max-width: calc(100% - 42px) !important;
+  margin: 20px auto !important;
+  transition: transform 150ms cubic-bezier(.2,.7,.2,1), box-shadow 180ms ease !important;
+}
+.preview-frame.preview-parallax-on > .preview-cursor-trail-layer {
+  z-index: 100 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
