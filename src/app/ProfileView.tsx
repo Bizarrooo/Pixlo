@@ -69,10 +69,14 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const extrasPageRefs = useRef<Record<number, HTMLElement | null>>({});
   const [trackIndex, setTrackIndex] = useState(0);
   const [musicVideoFallback, setMusicVideoFallback] = useState(false);
-  const [pointer, setPointer] = useState({ x: 0, y: 0 });
   const [parallaxReturning, setParallaxReturning] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const parallaxReturnTimerRef = useRef<number | null>(null);
   const pointerBoundsRef = useRef<DOMRect | null>(null);
+  const profilePageRef = useRef<HTMLElement | null>(null);
+  const parallaxTargetRef = useRef({ x: 0, y: 0 });
+  const parallaxFrameRef = useRef<number | null>(null);
+  const shareCopiedTimerRef = useRef<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLMediaElement>(null);
   const cursorTrailLayerRef = useRef<HTMLDivElement>(null);
@@ -430,14 +434,14 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     "--vignette": settings.vignette / 100,
     "--background-overlay": settings.backgroundOverlay / 100,
     "--font-profile": font,
-    "--mouse-x": `${settings.parallax ? pointer.x * settings.parallaxStrength : 0}px`,
-    "--mouse-y": `${settings.parallax ? pointer.y * settings.parallaxStrength : 0}px`,
-    "--parallax-rotate-x": `${pointer.y * -16 * parallaxPower}deg`,
-    "--parallax-rotate-y": `${pointer.x * 19 * parallaxPower}deg`,
-    "--parallax-light-x": `${50 + pointer.x * 45 * parallaxPower}%`,
-    "--parallax-light-y": `${50 + pointer.y * 45 * parallaxPower}%`,
-    "--parallax-shadow-x": `${pointer.x * -10 * parallaxPower}px`,
-    "--parallax-shadow-y": `${pointer.y * -8 * parallaxPower}px`,
+    "--mouse-x": "0px",
+    "--mouse-y": "0px",
+    "--parallax-rotate-x": "0deg",
+    "--parallax-rotate-y": "0deg",
+    "--parallax-light-x": "50%",
+    "--parallax-light-y": "50%",
+    "--parallax-shadow-x": "0px",
+    "--parallax-shadow-y": "0px",
   } as React.CSSProperties;
 
   const selectTrack = (index: number) => {
@@ -449,6 +453,42 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   const nextTrack = () => selectTrack(activeTrackIndex + 1);
   const previousTrack = () => selectTrack(activeTrackIndex - 1);
+
+  const copyProfileLink = async () => {
+    const username = (forcedUsername || "").trim().toLowerCase();
+    if (!username) return;
+    const profileUrl = new URL(`/user/${encodeURIComponent(username)}`, window.location.origin).toString();
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+      copied = true;
+    } catch {
+      try {
+        const temporary = document.createElement("textarea");
+        temporary.value = profileUrl;
+        temporary.setAttribute("readonly", "");
+        temporary.style.position = "fixed";
+        temporary.style.opacity = "0";
+        temporary.style.pointerEvents = "none";
+        document.body.appendChild(temporary);
+        temporary.select();
+        copied = document.execCommand("copy");
+        temporary.remove();
+      } catch {
+        copied = false;
+      }
+    }
+    if (!copied) {
+      window.prompt("Copy your Pixlo profile link:", profileUrl);
+      return;
+    }
+    setShareCopied(true);
+    if (shareCopiedTimerRef.current !== null) window.clearTimeout(shareCopiedTimerRef.current);
+    shareCopiedTimerRef.current = window.setTimeout(() => {
+      setShareCopied(false);
+      shareCopiedTimerRef.current = null;
+    }, 2000);
+  };
 
   const toggleMusic = async () => {
     const audio = audioRef.current;
@@ -465,18 +505,38 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     }
   };
 
+  const applyCardParallax = (x: number, y: number) => {
+    const root = profilePageRef.current;
+    if (!root) return;
+    const strength = settings.parallax ? settings.parallaxStrength : 0;
+    const power = settings.parallax && strength > 0
+      ? Math.pow(Math.min(35, Math.max(0, strength)) / 35, 0.72)
+      : 0;
+    root.style.setProperty("--mouse-x", `${x * strength}px`);
+    root.style.setProperty("--mouse-y", `${y * strength}px`);
+    root.style.setProperty("--parallax-rotate-x", `${y * -16 * power}deg`);
+    root.style.setProperty("--parallax-rotate-y", `${x * 19 * power}deg`);
+    root.style.setProperty("--parallax-light-x", `${50 + x * 45 * power}%`);
+    root.style.setProperty("--parallax-light-y", `${50 + y * 45 * power}%`);
+    root.style.setProperty("--parallax-shadow-x", `${x * -10 * power}px`);
+    root.style.setProperty("--parallax-shadow-y", `${y * -8 * power}px`);
+  };
   const updateCardPointer = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!settings.parallax || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
     parallaxReturnTimerRef.current = null;
-    setParallaxReturning(false);
     const bounds = pointerBoundsRef.current || event.currentTarget.getBoundingClientRect();
-    const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2));
-    const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2));
-    setPointer(previous => {
-      if (Math.abs(previous.x - x) < 0.002 && Math.abs(previous.y - y) < 0.002) return previous;
-      return { x, y };
-    });
+    parallaxTargetRef.current = {
+      x: Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2)),
+      y: Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2)),
+    };
+    if (parallaxFrameRef.current === null) {
+      parallaxFrameRef.current = window.requestAnimationFrame(() => {
+        parallaxFrameRef.current = null;
+        const target = parallaxTargetRef.current;
+        applyCardParallax(target.x, target.y);
+      });
+    }
   };
   const handleCardPointerEnter = (event: React.PointerEvent<HTMLDivElement>) => {
     if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
@@ -491,8 +551,13 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   };
   const resetCardPointer = () => {
     pointerBoundsRef.current = null;
+    parallaxTargetRef.current = { x: 0, y: 0 };
+    if (parallaxFrameRef.current !== null) {
+      window.cancelAnimationFrame(parallaxFrameRef.current);
+      parallaxFrameRef.current = null;
+    }
+    applyCardParallax(0, 0);
     setParallaxReturning(true);
-    setPointer({ x: 0, y: 0 });
     if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
     parallaxReturnTimerRef.current = window.setTimeout(() => {
       setParallaxReturning(false);
@@ -504,7 +569,22 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   };
 
   return (
-    <main className={`profile-page ${isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername ? "has-extras" : ""} ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
+    <main ref={profilePageRef} className={`profile-page ${isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername ? "has-extras" : ""} ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
+      {forcedUsername && profileStatus === "found" && !presetPreviewMode && !embedMode && (
+        <button
+          type="button"
+          className={`pixlo-share-profile-button ${shareCopied ? "is-copied" : ""}`}
+          onClick={copyProfileLink}
+          aria-label={shareCopied ? "Profile link copied" : "Copy your profile link"}
+        >
+          {shareCopied ? (
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19.5 6.8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          ) : (
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M16 8V5.8A1.8 1.8 0 0 0 14.2 4H5.8A1.8 1.8 0 0 0 4 5.8v8.4A1.8 1.8 0 0 0 5.8 16H8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+          )}
+          <span aria-live="polite">{shareCopied ? "Link copied!" : "Share profile"}</span>
+        </button>
+      )}
       {isPremium && settings.cursorTrailEnabled && !presetPreviewMode && !embedMode && forcedUsername && typeof document !== "undefined" && createPortal(
         <div ref={cursorTrailLayerRef} className="pixlo-cursor-trail-layer" aria-hidden="true" />,
         document.body
