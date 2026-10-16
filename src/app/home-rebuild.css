@@ -961,3 +961,36 @@
 .px-live-profile-card.is-returning::before {
   transition: opacity 820ms ease !important;
 }
+
+
+/* Default pose intentionally matches the angled homepage profile reference.
+   Pointer movement adds to this baseline; pointer exit returns to the same pose. */
+.px-live-profile-card {
+  --px-tilt-x: 0deg;
+  --px-tilt-y: 0deg;
+  --px-pointer-x: 50%;
+  --px-pointer-y: 50%;
+  transform: perspective(1050px) rotateX(calc(3deg + var(--px-tilt-x))) rotateY(calc(-10deg + var(--px-tilt-y))) rotateZ(-3deg) scale(1.025) !important;
+  animation: none !important;
+  transition: transform 160ms cubic-bezier(.2,.75,.25,1), box-shadow 180ms ease !important;
+}
+.px-live-profile-card.is-returning {
+  transform: perspective(1050px) rotateX(3deg) rotateY(-10deg) rotateZ(-3deg) scale(1.025) !important;
+  transition: transform 900ms cubic-bezier(.16,1,.3,1), box-shadow 820ms cubic-bezier(.16,1,.3,1) !important;
+}
+@media (max-width: 800px) {
+  .px-live-profile-card {
+    transform: perspective(1050px) rotateX(2deg) rotateY(-6deg) rotateZ(-1.7deg) scale(1.012) !important;
+  }
+  .px-live-profile-card.is-returning {
+    transform: perspective(1050px) rotateX(2deg) rotateY(-6deg) rotateZ(-1.7deg) scale(1.012) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .px-live-profile-card,
+  .px-live-profile-card.is-returning {
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
