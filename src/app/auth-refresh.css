@@ -1442,3 +1442,37 @@
   .auth-page-discord-gate .auth-gate-step-two { grid-template-columns: minmax(0,1fr) !important; }
   .auth-page-discord-gate .auth-gate-back { justify-content: center !important; min-height: 40px !important; }
 }
+
+
+/* Discord onboarding: one primary orange button per step; no outlined duplicate join action. */
+.auth-page-discord-gate .auth-gate-step-one,
+.auth-page-discord-gate .auth-gate-step-two {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: 100% !important;
+  margin-top: 25px !important;
+}
+.auth-page-discord-gate .auth-gate-step-one .auth-gate-connect,
+.auth-page-discord-gate .auth-gate-step-two .auth-gate-connect,
+.auth-page-discord-gate .auth-gate-join-server {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  min-height: 53px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+.auth-page-discord-gate .auth-gate-membership-note {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 16px auto 0 !important;
+  color: rgba(255,222,200,.62) !important;
+  font-size: 10px !important;
+  line-height: 1.55 !important;
+  text-align: center !important;
+}
+.auth-page-discord-gate .auth-gate-membership-note .auth-gate-note-dot { flex: 0 0 5px !important; }
