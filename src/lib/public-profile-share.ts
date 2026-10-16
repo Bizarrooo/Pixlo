@@ -77,6 +77,9 @@ export async function getPublicProfileShareData(usernameInput: string): Promise<
     const shareCoverNameGlowIntensity = typeof settings.shareCoverNameGlowIntensity === "number" && Number.isFinite(settings.shareCoverNameGlowIntensity)
       ? Math.min(200, Math.max(0, settings.shareCoverNameGlowIntensity))
       : 65;
+    const shareCoverNameGlowColour = typeof settings.accentColour === "string" && /^#[0-9a-f]{6}$/i.test(settings.accentColour)
+      ? settings.accentColour
+      : "#ff6946";
 
     return {
       username: String(row.username || username).trim().toLowerCase(),
