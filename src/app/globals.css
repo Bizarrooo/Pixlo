@@ -7423,14 +7423,14 @@ html { scroll-behavior:smooth; }
 
 
 /* Keep cursor particles strictly visual so pointer tracking always reaches parallax handlers. */
-.profile-page .pixlo-cursor-trail-layer,
-.profile-page .pixlo-cursor-trail-layer *,
+.pixlo-cursor-trail-layer,
+.pixlo-cursor-trail-layer *,
 .preview-frame .preview-cursor-trail-layer,
 .preview-frame .preview-cursor-trail-layer * {
   pointer-events: none !important;
 }
-.profile-page.parallax-on .pixlo-cursor-trail-layer,
-.preview-frame.preview-parallax-on .preview-cursor-trail-layer {
+.pixlo-cursor-trail-layer,
+.preview-frame .preview-cursor-trail-layer {
   contain: strict !important;
   isolation: isolate !important;
 }
