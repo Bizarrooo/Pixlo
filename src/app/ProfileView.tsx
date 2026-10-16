@@ -75,7 +75,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const pointerBoundsRef = useRef<DOMRect | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLMediaElement>(null);
-  const cursorSparkleLayerRef = useRef<HTMLDivElement>(null);
+  const cursorTrailLayerRef = useRef<HTMLDivElement>(null);
   const unlockedRef = useRef(false);
   const manualPauseRef = useRef(false);
   const lastSettingsRawRef = useRef("");
@@ -127,7 +127,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (!window.matchMedia("(pointer: fine)").matches) return;
 
-    const layer = cursorSparkleLayerRef.current;
+    const layer = cursorTrailLayerRef.current;
     if (!layer) return;
 
     let lastX = -100;
@@ -500,7 +500,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   return (
     <main className={`profile-page ${isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername ? "has-extras" : ""} ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
       {isPremium && settings.cursorTrailEnabled && !presetPreviewMode && !embedMode && forcedUsername && typeof document !== "undefined" && createPortal(
-        <div ref={cursorSparkleLayerRef} className="pixlo-cursor-trail-layer" aria-hidden="true" />,
+        <div ref={cursorTrailLayerRef} className="pixlo-cursor-trail-layer" aria-hidden="true" />,
         document.body
       )}
       <svg className="pixlo-gradient-defs" aria-hidden="true" width="0" height="0" style={{position:"absolute",width:0,height:0,overflow:"hidden"}}><defs><linearGradient id="pixlo-social-gradient" x1="0%" y1="0%" x2="100%" y2="0%" spreadMethod="repeat"><stop offset="0%" stopColor={settings.gradientSocialsColours[0]} /><stop offset="33.333%" stopColor={settings.gradientSocialsColours[1]} /><stop offset="66.666%" stopColor={settings.gradientSocialsColours[2]} /><stop offset="100%" stopColor={settings.gradientSocialsColours[0]} /><animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="-1 0" dur="8s" repeatCount="indefinite" /></linearGradient></defs></svg>
