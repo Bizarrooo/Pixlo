@@ -4,224 +4,173 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import HomeAccountNav from "./HomeAccountNav";
 
-function Icon({ name, size = 20 }: { name: "spark" | "arrow" | "play" | "palette" | "music" | "link" | "bolt" | "shield" | "chevron" | "discord" | "youtube" | "github" | "roblox" | "twitch" | "instagram"; size?: number }) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.8,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  };
+type SiteStats = {
+  totalProfileViews: number;
+  members: number;
+  premiumMembers: number | null;
+};
 
-  if (name === "spark") {
-    return <svg {...common}><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z" /><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z" /></svg>;
-  }
-  if (name === "arrow") return <svg {...common}><path d="M5 12h13" /><path d="m13 6 6 6-6 6" /></svg>;
-  if (name === "play") return <svg {...common} fill="currentColor" stroke="none"><path d="M8 5.7v12.6a1 1 0 0 0 1.52.86l9.6-6.3a1 1 0 0 0 0-1.72l-9.6-6.3A1 1 0 0 0 8 5.7Z" /></svg>;
-  if (name === "palette") return <svg {...common}><path d="M12 3.5a8.5 8.5 0 0 0 0 17h1.1a2 2 0 0 0 0-4H12a2 2 0 0 1 0-4h3.5a4.5 4.5 0 0 0 4.5-4.5A8.5 8.5 0 0 0 12 3.5Z" /><circle cx="7.7" cy="9" r="1" fill="currentColor" stroke="none" /><circle cx="10.2" cy="6.7" r="1" fill="currentColor" stroke="none" /><circle cx="14.2" cy="6.7" r="1" fill="currentColor" stroke="none" /></svg>;
-  if (name === "music") return <svg {...common}><path d="M9 18V6l10-2v12" /><circle cx="6.5" cy="18.5" r="3.5" /><circle cx="16.5" cy="16.5" r="3.5" /></svg>;
-  if (name === "link") return <svg {...common}><path d="M10 13.8 8.7 15a3.4 3.4 0 0 1-4.8-4.8l3-3A3.4 3.4 0 0 1 11.7 7" /><path d="m14 10.2 1.3-1.3a3.4 3.4 0 0 1 4.8 4.8l-3 3A3.4 3.4 0 0 1 12.3 17" /><path d="m8.8 15.2 6.4-6.4" /></svg>;
-  if (name === "bolt") return <svg {...common}><path d="m13.2 2.8-8 10.1h6.2l-.7 8.3 8.1-11h-6.2l.6-7.4Z" /></svg>;
-  if (name === "shield") return <svg {...common}><path d="M12 3 20 6v5.7c0 4.5-3.1 7.7-8 9.3-4.9-1.6-8-4.8-8-9.3V6l8-3Z" /><path d="m8.7 12 2.1 2.1 4.7-4.7" /></svg>;
-  if (name === "discord") return <svg {...common} fill="currentColor" stroke="none"><path d="M19.54 5.12a16.9 16.9 0 0 0-3.98-1.25l-.52 1.06a15.4 15.4 0 0 0-6.08 0L8.44 3.87a16.9 16.9 0 0 0-3.98 1.25C1.94 8.86 1.24 12.5 1.59 16.08a16.98 16.98 0 0 0 5.05 2.55l1.22-1.67c-.68-.25-1.33-.56-1.94-.94l.48-.37a12.35 12.35 0 0 0 11.2 0l.49.37c-.61.38-1.26.69-1.94.94l1.22 1.67a16.98 16.98 0 0 0 5.05-2.55c.41-4.15-.7-7.76-2.88-10.96ZM8.4 14.1c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Zm7.2 0c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Z" /></svg>;
-  if (name === "youtube") return <svg {...common} fill="currentColor" stroke="none"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.6 3.5 12 3.5 12 3.5s-7.6 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.9V8.1l6.8 3.9-6.8 3.9Z" /></svg>;
-  if (name === "roblox") return <svg {...common} fill="currentColor" stroke="none"><path d="M18.926 23.998 0 18.892 5.075.002 24 5.108ZM15.348 10.09l-5.282-1.453-1.414 5.273 5.282 1.453z" /></svg>;
-  if (name === "github") return <svg {...common} fill="currentColor" stroke="none"><path d="M12 2.1a9.9 9.9 0 0 0-3.13 19.3c.5.1.68-.22.68-.48v-1.69c-2.78.61-3.37-1.18-3.37-1.18-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.02 1.53 1.02.9 1.53 2.36 1.09 2.94.83.09-.65.35-1.09.64-1.34-2.22-.25-4.55-1.11-4.55-4.95 0-1.09.39-1.98 1.02-2.68-.1-.25-.44-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.54 1.37.2 2.39.1 2.64.63.7.68 1.24.68 1.85v2.74c0 .26.18.58.69.48A9.9 9.9 0 0 0 12 2.1Z" /></svg>;
-  if (name === "twitch") return <svg {...common} fill="currentColor" stroke="none"><path d="M4 3h17v12.2l-5.3 5.3h-4.1L8 24v-3.5H4V3Zm2 2v13.5h3v1.9l2.1-1.9h3.8l4.1-4.1V5H6Zm4 3h2v5h-2V8Zm4 0h2v5h-2V8Z" /></svg>;
-  if (name === "instagram") return <svg {...common}><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>;
-  return <svg {...common}><path d="m9 18 6-6-6-6" /></svg>;
-}
-
-function MiniSocials() {
-  const socials = ["discord", "youtube", "github", "roblox", "instagram"] as const;
-  return (
-    <div className="home-mini-socials" aria-label="Social platforms">
-      {socials.map(name => <span key={name} title={name}><Icon name={name} size={17} /></span>)}
-    </div>
+function ArrowIcon({ diagonal = false }: { diagonal?: boolean }) {
+  return diagonal ? (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M7 17 17 7M8 7h9v9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  ) : (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M4.5 12h14M12.5 5.5 19 12l-6.5 6.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
   );
 }
 
-function VerifiedIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true" className="home-verified-icon"><path fill="currentColor" d="M12 1.5 14.7 3l3.1-.1 1.4 2.8 2.6 1.7-.5 3.1 1 3-2.2 2.2-.8 3-3 .8-2.2 2.2-3-1-3.1.5-1.7-2.6-2.8-1.4.1-3.1-1.5-2.7 1.5-2.7-.1-3.1 2.8-1.4 1.7-2.6 3.1.5Z" /><path d="m7.6 12.2 2.8 2.8 6.1-6.1" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+function FeatureIcon({ kind }: { kind: "style" | "links" | "music" | "badge" }) {
+  if (kind === "style") return <svg viewBox="0 0 32 32" aria-hidden="true" fill="none"><path d="M16 3.5 19.4 12.6 28.5 16 19.4 19.4 16 28.5 12.6 19.4 3.5 16 12.6 12.6 16 3.5Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="m25 3 .9 3.1L29 7l-3.1.9L25 11l-.9-3.1L21 7l3.1-.9L25 3Z" fill="currentColor"/></svg>;
+  if (kind === "links") return <svg viewBox="0 0 32 32" aria-hidden="true" fill="none"><path d="M13.1 19.3 10 22.4a5.1 5.1 0 0 1-7.2-7.2l5.1-5.1a5.1 5.1 0 0 1 7.2 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="m18.9 12.7 3.1-3.1a5.1 5.1 0 0 1 7.2 7.2l-5.1 5.1a5.1 5.1 0 0 1-7.2 0M11 21l10-10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>;
+  if (kind === "music") return <svg viewBox="0 0 32 32" aria-hidden="true" fill="none"><path d="M19 22V5l10-2v16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="22" r="5" stroke="currentColor" strokeWidth="1.8"/><circle cx="24" cy="19" r="5" stroke="currentColor" strokeWidth="1.8"/></svg>;
+  return <svg viewBox="0 0 32 32" aria-hidden="true" fill="none"><path d="M16 3 26 7v7.2c0 6-4 10.2-10 12.8C10 24.4 6 20.2 6 14.2V7l10-4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="m11.5 15.5 3.1 3.1 6.2-6.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
 }
 
-function ProfileMockup({ variant = "main" }: { variant?: "main" | "alt" }) {
-  const [demoPlaying, setDemoPlaying] = useState(false);
+function ProfileArtwork() {
   return (
-    <div className={`home-profile-mock ${variant === "alt" ? "home-profile-mock-alt" : ""}`}>
-      <div className="home-profile-glow" />
-      <div className="home-profile-cover">
-        <div className="home-cover-grid" />
-        <span className="home-cover-orb" />
+    <div className="px-artwork" aria-label="Illustrated preview of a Pixlo profile">
+      <div className="px-artwork-orbit px-artwork-orbit-one" />
+      <div className="px-artwork-orbit px-artwork-orbit-two" />
+      <div className="px-artwork-window">
+        <div className="px-window-bar"><span /><span /><span /><small>PIXLO / YOUR SPACE</small><i><ArrowIcon diagonal /></i></div>
+        <div className="px-window-cover">
+          <span className="px-cover-word">MAKE IT</span>
+          <span className="px-cover-word px-cover-word-big">YOURS.</span>
+          <span className="px-cover-shape" />
+        </div>
+        <div className="px-window-profile">
+          <span className="px-window-avatar">y</span>
+          <div className="px-window-identity"><strong>yourname</strong><span>@yourname · your corner of the internet</span></div>
+          <span className="px-window-verified">✦</span>
+        </div>
+        <div className="px-window-pills"><span>Instagram ↗</span><span>Discord ↗</span><span>My links ↗</span></div>
+        <div className="px-window-music"><span className="px-music-cover">♫</span><span><b>A little more you</b><small>YOUR PROFILE SOUNDTRACK</small></span><span className="px-music-play">▶</span></div>
       </div>
-      <div className="home-profile-body">
-        <div className="home-profile-avatar">{variant === "alt" ? "P" : "B"}</div>
-        <div className="home-profile-title">
-          <strong>{variant === "alt" ? "Pixlo" : "Bizarro"}</strong>
-          <span className="home-verified"><VerifiedIcon /></span>
-        </div>
-        <span className="home-profile-handle">@{variant === "alt" ? "pixlo" : "bizarro"}</span>
-        <p>{variant === "alt" ? "Your profile. Your identity. Your space." : "building cool things on the internet ✦"}</p>
-        <MiniSocials />
-        <div className="home-profile-link">Explore my world <Icon name="arrow" size={15} /></div>
-        <div className="home-profile-link muted-link">Latest project <Icon name="arrow" size={15} /></div>
-        <div className="home-profile-music">
-          <div className="home-music-art"><Icon name="music" size={15} /></div>
-          <div><b>now playing</b><span>your favourite track</span></div>
-          <button type="button" className="home-music-play" aria-label={demoPlaying ? "Pause music preview control" : "Play music preview control"} aria-pressed={demoPlaying} onClick={() => setDemoPlaying(value => !value)}>{demoPlaying ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM15 5h4v14h-4z" fill="currentColor" /></svg> : <Icon name="play" size={14} />}</button>
-        </div>
-      </div>
+      <div className="px-artwork-sticker"><span>✳</span><b>MADE<br />BY YOU</b></div>
+      <div className="px-artwork-caption"><span className="px-caption-dot" /> YOUR SPACE ON THE WEB <span>— 01 / PX</span></div>
     </div>
   );
 }
 
-
-type ViewedProfile = { username: string; displayName: string; views: number; rank: number };
-
-function TopViewedProfiles() {
-  const [profiles, setProfiles] = useState<ViewedProfile[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/profile-stats?username=pixlo", { cache: "no-store" })
-      .then(response => response.ok ? response.json() : Promise.reject(new Error("Leaderboard unavailable")))
-      .then(data => {
-        if (cancelled) return;
-        const ranked = Array.isArray(data?.leaderboard) ? data.leaderboard : [];
-        setProfiles(ranked.slice(0, 3).filter((profile: Partial<ViewedProfile>) =>
-          typeof profile.username === "string" && /^[a-z0-9._-]{3,24}$/i.test(profile.username)
-        ));
-        setLoaded(true);
-      })
-      .catch(() => { if (!cancelled) setLoaded(true); });
-    return () => { cancelled = true; };
-  }, []);
-
+function StatCard({ label, value, kind, note }: { label: string; value: string; kind: "views" | "members" | "premium"; note: string }) {
+  const symbol = kind === "views" ? "↗" : kind === "members" ? "✳" : "✦";
   return (
-    <div className="home-profile-stack" aria-label="Pixlo's three most viewed profiles">
-      {profiles.length === 3 ? (
-        <>
-          {[profiles[2], profiles[1], profiles[0]].map((profile, index) => {
-            const layer = index === 0 ? "third" : index === 1 ? "second" : "front";
-            return (
-              <Link
-                key={profile.username}
-                href={`/${encodeURIComponent(profile.username)}`}
-                className={`home-profile-stack-card home-profile-stack-${layer} home-profile-stack-live`}
-                aria-label={`#${profile.rank} most viewed profile: ${profile.displayName || profile.username}, ${profile.views.toLocaleString()} views`}
-                style={{ zIndex: index + 1 }}
-              >
-                <div className="home-profile-stack-iframe-shell">
-                  <iframe
-                    className="home-profile-stack-iframe"
-                    src={`/user/${encodeURIComponent(profile.username)}?embed=1`}
-                    title={`${profile.displayName || profile.username} Pixlo profile`}
-                    loading="lazy"
-                    tabIndex={-1}
-                    aria-hidden="true"
-                  />
-                </div>
-                <span className="home-profile-stack-rank">#{profile.rank} · {profile.views.toLocaleString()} views</span>
-              </Link>
-            );
-          })}
-          <span className="home-profile-stack-glow" aria-hidden="true" />
-        </>
-      ) : (
-        <div className="home-profile-stack-empty">
-          <span className="home-profile-stack-empty-mark">P</span>
-          <strong>{loaded ? "Top profiles coming soon" : "Loading top profiles…"}</strong>
-          <span>{loaded ? "The most-viewed profile cards will appear here once profile data is available." : "Loading the most-viewed profile cards"}</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-
-function LiveProfileCard() {
-  return (
-    <div className="home-live-profile-card" aria-label="Live Pixlo profile preview">
-      <iframe
-        className="home-live-profile-iframe"
-        src="/user/biz?embed=1"
-        title="Live Pixlo profile for @biz"
-        loading="eager"
-        referrerPolicy="strict-origin-when-cross-origin"
-        tabIndex={-1}
-        aria-hidden="true"
-      />
-    </div>
+    <article className={`px-stat-card px-stat-${kind}`}>
+      <div className="px-stat-top"><span className="px-stat-symbol">{symbol}</span><span className="px-stat-note">{note}</span></div>
+      <strong className="px-stat-value">{value}</strong>
+      <span className="px-stat-label">{label}</span>
+      <span className="px-stat-rule" />
+    </article>
   );
 }
 
 export default function Home() {
+  const [stats, setStats] = useState<SiteStats | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/site-stats", { signal: controller.signal })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error("Stats unavailable")))
+      .then((data: SiteStats) => {
+        if (Number.isFinite(data.totalProfileViews) && Number.isFinite(data.members)) {
+          setStats(data);
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
+
+  const number = (value: number | null | undefined) => value == null ? "—" : value.toLocaleString("en-GB");
+
   return (
-    <main className="pixlo-home pixlo-revamp-home">
-      <div className="revamp-grain" aria-hidden="true" />
-      <div className="revamp-grid" aria-hidden="true" />
-      <header className="revamp-header">
-        <Link href="/" className="revamp-logo" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
-        <nav className="revamp-nav" aria-label="Main navigation">
-          <a href="#features">Platform</a><a href="#showcase">Showcase</a><a href="#showcase">About</a><a href="#pricing">Premium</a>
-        </nav>
-        <div className="revamp-account"><HomeAccountNav /></div>
-      </header>
+    <main className="px-home">
+      <section className="px-hero">
+        <div className="px-hero-art" aria-hidden="true" />
+        <div className="px-hero-shade" aria-hidden="true" />
+        <header className="px-header">
+          <Link href="/" className="px-logo" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
+          <nav className="px-nav" aria-label="Main navigation">
+            <a href="#platform">Platform</a>
+            <a href="#community">Community</a>
+            <a href="#premium">Premium</a>
+          </nav>
+          <div className="revamp-account px-account"><HomeAccountNav /></div>
+        </header>
 
-      <section className="revamp-hero">
-        <div className="revamp-hero-main">
-          
-          <h1>Your identity,<br /><span className="revamp-title-gradient">beautifully linked</span><span className="revamp-title-period">.</span></h1>
-          <div className="revamp-hero-bottom">
-            <p>A profile that looks like <em>you</em>. Your links, music, socials and style — brought together in one space that feels unmistakably yours.</p>
-            <div className="revamp-hero-actions">
-              <Link href="/dashboard" className="revamp-button revamp-button-hot">Build your Pixlo <Icon name="arrow" size={17} /></Link>
-              <a href="#showcase" className="revamp-quiet-link">Explore the platform <span>↘</span></a>
+        <div className="px-hero-content">
+          <div className="px-hero-copy">
+            <div className="px-eyebrow"><span /> MORE THAN A LINK PAGE <i> / </i> PIXLO</div>
+            <h1>Your internet.<br /><span>Your identity.</span><b> Your Pixlo.</b></h1>
+            <p className="px-hero-description">Bring your links, music, socials and style into one place that feels unmistakably yours. Make a little corner of the internet worth visiting.</p>
+            <div className="px-hero-actions">
+              <Link href="/dashboard" className="px-button px-button-primary">Build your Pixlo <ArrowIcon /></Link>
+              <a href="#platform" className="px-button px-button-ghost">Take a look <span>↓</span></a>
             </div>
+            <div className="px-hero-footnote"><span className="px-footnote-mark">✳</span><span>YOUR PAGE. YOUR RULES.<br /><b>BUILT TO BE YOURS.</b></span><span className="px-footnote-line" /></div>
           </div>
-          
+          <div className="px-hero-visual"><ProfileArtwork /></div>
         </div>
-        <div className="revamp-hero-side">
-          <TopViewedProfiles />
+        <div className="px-hero-bottomline"><span>PERSONAL PROFILE PAGES</span><span>LINKS / MUSIC / STYLE</span><span>THE INTERNET, MADE PERSONAL <b>↘</b></span></div>
+      </section>
+
+      <section className="px-community" id="community">
+        <div className="px-section-kicker"><span>01</span> THE PIXLO COMMUNITY</div>
+        <div className="px-community-heading">
+          <div><h2>Join the people<br />already using <em>Pixlo.</em></h2></div>
+          <p>Real people. Real pages. One place to bring your whole online world together.</p>
         </div>
-        <div className="revamp-hero-index" aria-hidden="true">P</div>
+        <div className="px-stats-grid" aria-live="polite">
+          <StatCard kind="views" label="Total profile views" value={number(stats?.totalProfileViews)} note="ALL-TIME" />
+          <StatCard kind="members" label="Members" value={number(stats?.members)} note="THE COMMUNITY" />
+          <StatCard kind="premium" label="Premium members" value={number(stats?.premiumMembers)} note="PIXLO PREMIUM" />
+        </div>
+        <div className="px-community-foot"><span>THE NUMBERS SPEAK FOR THEMSELVES.</span><span>UPDATED FROM PIXLO DATA <i>✳</i></span></div>
       </section>
 
-      <section className="revamp-platform" id="features">
-        <div className="revamp-section-intro"><div><h2>All of you.<br /><em>In one place.</em></h2></div><p>Start simple. Get specific. Shape every detail until your page feels like an extension of you — not a preset someone else made.</p></div>
-        <div className="revamp-feature-layout">
-          <article className="revamp-feature revamp-feature-custom">
-            <span className="revamp-feature-no">CUSTOMISE</span><div className="revamp-feature-art revamp-art-controls"><div className="revamp-control-window"><div className="revamp-control-head"><i /><i /><i /><span>APPEARANCE.SYS</span></div><div className="revamp-control-body"><div className="revamp-control-sidebar"><i /><i /><i /><i /></div><div className="revamp-control-content"><b>Make it yours.</b><span /><span /><div><i /><i /><i /></div></div></div></div></div>
-            <h3>Every detail, under your control.</h3><p>Colours, fonts, backgrounds, layouts, motion and effects — no code needed.</p>
+      <section className="px-platform" id="platform">
+        <div className="px-section-kicker"><span>02</span> YOUR SPACE, YOUR WAY</div>
+        <div className="px-platform-heading"><h2>Everything you are.<br /><em>In one place.</em></h2><p>Start with a link. Make it a world. Every part of your page is a chance to show a little more of yourself.</p></div>
+        <div className="px-feature-grid">
+          <article className="px-feature px-feature-style">
+            <div className="px-feature-top"><span>01 / PERSONALISE</span><span className="px-feature-icon"><FeatureIcon kind="style" /></span></div>
+            <div className="px-feature-art px-art-style"><div className="px-color-orbit" /><div className="px-palette-card"><span /><span /><span /><span /></div><div className="px-type-sample">Aa</div></div>
+            <h3>Make it feel like you.</h3><p>Colours, backgrounds, fonts, layouts and effects. Not someone else’s template—your own signature.</p>
+            <a href="#showcase" className="px-feature-link">See what you can make <ArrowIcon diagonal /></a>
           </article>
-          <article className="revamp-feature revamp-feature-links">
-            <span className="revamp-feature-no">CONNECT</span><div className="revamp-social-art"><div>in</div><div>▶</div><div>◈</div><div>◎</div><div>⌘</div><span>ALL YOUR PLACES<br />ONE PROFILE ↗</span></div><h3>Your internet, connected.</h3><p>Socials, custom links and the places people can find you.</p>
+          <article className="px-feature px-feature-links">
+            <div className="px-feature-top"><span>02 / CONNECT</span><span className="px-feature-icon"><FeatureIcon kind="links" /></span></div>
+            <div className="px-feature-art px-art-links"><div className="px-link-orb px-link-orb-a">◎</div><div className="px-link-orb px-link-orb-b">▶</div><div className="px-link-orb px-link-orb-c">⌘</div><div className="px-link-line px-link-line-a" /><div className="px-link-line px-link-line-b" /><div className="px-link-line px-link-line-c" /></div>
+            <h3>Your whole world, linked.</h3><p>Socials, custom links and the places people can find you, together in one clean page.</p>
+            <a href="#showcase" className="px-feature-link">Bring it all together <ArrowIcon diagonal /></a>
           </article>
-          <article className="revamp-feature revamp-feature-music">
-            <span className="revamp-feature-no">ATMOSPHERE</span><div className="revamp-music-art"><div className="revamp-disc"><i /></div><div className="revamp-wave"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div><span>PRESS PLAY. SET THE MOOD.</span></div><h3>Give your page a pulse.</h3><p>Music, artwork and subtle movement make your space feel alive.</p>
+          <article className="px-feature px-feature-music">
+            <div className="px-feature-top"><span>03 / SET THE MOOD</span><span className="px-feature-icon"><FeatureIcon kind="music" /></span></div>
+            <div className="px-feature-art px-art-music"><div className="px-record"><span /></div><div className="px-sound-wave"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div><small>YOUR SOUNDTRACK. YOUR SCENE.</small></div>
+            <h3>Give your page a pulse.</h3><p>Add music and ambient details that make your profile feel alive before anyone clicks a link.</p>
+            <a href="#showcase" className="px-feature-link">Set your atmosphere <ArrowIcon diagonal /></a>
           </article>
-          <article className="revamp-feature revamp-feature-badges">
-            <span className="revamp-feature-no">RECOGNITION</span><div className="revamp-badge-art"><div>✦</div><div>✓</div><div>↗</div><span>BUILT AROUND<br />YOUR IDENTITY</span></div><h3>Show what makes you, you.</h3><p>Discord integration, profile badges and Premium tools when you want more.</p>
+          <article className="px-feature px-feature-badges">
+            <div className="px-feature-top"><span>04 / RECOGNITION</span><span className="px-feature-icon"><FeatureIcon kind="badge" /></span></div>
+            <div className="px-feature-art px-art-badges"><div className="px-badge-large">✦</div><div className="px-badge-small">✓</div><div className="px-badge-stamp">PIXLO<br />VERIFIED</div></div>
+            <h3>A page with personality.</h3><p>Show off your badges, connect Discord and bring your Pixlo identity along wherever you share it.</p>
+            <Link href="/premium" className="px-feature-link">Explore the extras <ArrowIcon diagonal /></Link>
           </article>
         </div>
       </section>
 
-      <section className="revamp-showcase" id="showcase">
-        <div className="revamp-showcase-art"><div className="revamp-showcase-grid" /><div className="revamp-showcase-stamp">PX</div><div className="revamp-showcase-copy-card"><span>YOUR PROFILE, YOUR RULES</span><b>Make a first<br />impression.</b></div><div className="revamp-showcase-line" /></div>
-        <div className="revamp-showcase-text"><h2>Make it feel<br />like <em>your world.</em></h2><p>Minimal or expressive. Quiet or unapologetically loud. Build the profile you want people to remember, then share it with one clean link.</p><Link href="/dashboard" className="revamp-text-link">Open your dashboard <Icon name="arrow" size={16} /></Link></div>
+      <section className="px-showcase" id="showcase">
+        <div className="px-showcase-art"><div className="px-showcase-ring px-showcase-ring-one" /><div className="px-showcase-ring px-showcase-ring-two" /><span className="px-showcase-stamp">PX<br /><i>✳</i></span><div className="px-showcase-quote"><small>THE PIXLO IDEA / 001</small><strong>It should feel<br />like <em>your world.</em></strong><span>PERSONAL BY DESIGN.</span></div></div>
+        <div className="px-showcase-copy"><div className="px-section-kicker"><span>03</span> NOT JUST ANOTHER LINK</div><h2>A little corner<br />of the internet.<br /><em>All yours.</em></h2><p>Keep it simple or turn every detail up. Build a page that fits your mood, connects your people and gives your online identity a place to live.</p><div className="px-showcase-points"><span><b>✳</b> No-code customisation</span><span><b>✳</b> Your links, music and socials</span><span><b>✳</b> One profile to share everywhere</span></div><Link href="/dashboard" className="px-button px-button-dark">Make yours <ArrowIcon /></Link></div>
       </section>
 
-      <section className="revamp-support" id="donate">
-        <div className="revamp-support-main"><h2>Help us build<br /><em>what comes next.</em></h2><p>Pixlo is growing. Optional donations help cover running costs, improve the platform and bring us closer to our own custom domain.</p><a href="https://buy.stripe.com/7sYaEY7DJbSigko0Nj9EI00" target="_blank" rel="noopener noreferrer" className="revamp-button revamp-button-outline">Support Pixlo with Stripe <Icon name="arrow" size={16} /></a></div>
-        <div className="revamp-premium-panel" id="pricing"><div className="revamp-premium-top"><span>Premium</span><span className="revamp-premium-mark">✳</span></div><span className="revamp-premium-kicker">BETA ACCESS</span><h3>More room<br />to make it yours.</h3><p>Get lifetime Pixlo Premium for £3.99 during beta. Pay once, no subscription, and keep your access.</p><Link href="/premium" className="revamp-button revamp-button-premium">Get lifetime Premium <Icon name="arrow" size={16} /></Link></div>
+      <section className="px-premium" id="premium">
+        <div className="px-premium-background" aria-hidden="true" />
+        <div className="px-premium-copy"><div className="px-premium-kicker"><span>✳</span> PIXLO / PREMIUM</div><h2>More room<br />to make it <em>yours.</em></h2><p>Take your profile further with the extra customisation and tools that make Pixlo uniquely yours. Pay once during beta and keep your access.</p><Link href="/premium" className="px-button px-button-light">Get lifetime Premium <ArrowIcon /></Link><small>ONE PAYMENT · NO SUBSCRIPTION</small></div>
+        <div className="px-premium-price"><span className="px-price-label">BETA ACCESS</span><div>£3<span>.99</span></div><span className="px-price-note">LIFETIME ACCESS</span><span className="px-price-spark">✳</span></div>
       </section>
 
-      <footer className="revamp-footer"><Link href="/" className="revamp-logo"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span><div><a href="#features">Platform</a><a href="#showcase">Showcase</a><a href="#donate">Support</a><Link href="/dashboard">Dashboard ↗</Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
+      <section className="px-final-cta"><div><span className="px-section-kicker"><span>04</span> YOUR NEXT CHAPTER</span><h2>Your name. Your links.<br /><em>Your Pixlo.</em></h2></div><Link href="/dashboard" className="px-button px-button-primary">Create your profile <ArrowIcon /></Link></section>
+
+      <footer className="px-footer"><div className="px-footer-brand"><Link href="/" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span></div><div className="px-footer-links"><a href="#platform">Platform</a><a href="#community">Community</a><Link href="/premium">Premium</Link><Link href="/dashboard">Dashboard <ArrowIcon diagonal /></Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
     </main>
   );
 }
