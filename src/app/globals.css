@@ -1019,13 +1019,29 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 /* Premium-inspired polish: cinematic depth, restrained glow, and cursor-reactive layers. */
-.profile-page.parallax-on .background-image,
-.profile-page.parallax-on .background-media { transform: translate3d(calc(var(--mouse-x, 0px) * -0.35), calc(var(--mouse-y, 0px) * -0.35), 0) scale(1.09); transition: transform 450ms cubic-bezier(.2,.7,.2,1); will-change: transform; }
-.profile-page.parallax-on .ambient-one { transform: translate3d(calc(var(--mouse-x, 0px) * .7), calc(var(--mouse-y, 0px) * .7), 0); }
-.profile-page.parallax-on .ambient-two { transform: translate3d(calc(var(--mouse-x, 0px) * -.45), calc(var(--mouse-y, 0px) * -.45), 0); }
-.profile-page.parallax-on .profile-card { transform: perspective(1200px) rotateX(calc(var(--mouse-y, 0px) * -.035)) rotateY(calc(var(--mouse-x, 0px) * .035)) translate3d(calc(var(--mouse-x, 0px) * .18), calc(var(--mouse-y, 0px) * .18), 0); transition: transform 220ms ease-out, box-shadow 300ms ease; transform-style: preserve-3d; }
-.profile-page.parallax-on .profile-card::after { content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit; background:radial-gradient(circle at calc(50% + var(--mouse-x, 0px) * 2) calc(50% + var(--mouse-y, 0px) * 2),rgba(255,255,255,.075),transparent 38%); opacity:.65; }
-.profile-page .background-image { transition:transform 450ms ease-out; }
+/* Parallax is intentionally limited to the profile card; the background stays fixed. */
+.profile-page.parallax-on .profile-card {
+  transform: perspective(1200px)
+    rotateX(calc(var(--parallax-rotate-x, 0deg)))
+    rotateY(calc(var(--parallax-rotate-y, 0deg)))
+    translate3d(calc(var(--mouse-x, 0px) * .18), calc(var(--mouse-y, 0px) * .18), 0);
+  transition: transform 220ms ease-out, box-shadow 300ms ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.profile-page.parallax-on .profile-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at var(--parallax-light-x, 50%) var(--parallax-light-y, 50%),
+    rgba(255,255,255,.075),
+    transparent 38%
+  );
+  opacity: .65;
+}
 .dashboard { background-color:#08090c; }
 .dashboard .editor-grid { grid-template-columns:minmax(0,1fr) minmax(300px,380px); }
 .dashboard .editor { max-width:none!important; }
