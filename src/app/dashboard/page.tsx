@@ -1211,7 +1211,6 @@ export default function Dashboard() {
       displayName={settings.displayName}
       avatar={settings.avatar}
       isOwner={profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f"}
-      isPremium={presetsPremiumReady && presetsPremium}
       onNavigate={navigateDashboard}
       onReset={reset}
 />
