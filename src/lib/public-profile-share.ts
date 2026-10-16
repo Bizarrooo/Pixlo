@@ -33,7 +33,7 @@ export async function getPublicProfileShareData(usernameInput: string): Promise<
       : {};
     const rowName = typeof row.display_name === "string" ? row.display_name.trim() : "";
     const settingsName = typeof settings.displayName === "string" ? settings.displayName.trim() : "";
-    const displayName = (rowName || settingsName || String(row.username || username)).slice(0, 100);
+    const displayName = (settingsName || rowName || String(row.username || username)).slice(0, 100);
     const discordAvatar = settings.useDiscordAvatar === true && typeof settings.discordAvatarUrl === "string"
       ? settings.discordAvatarUrl.trim()
       : "";
