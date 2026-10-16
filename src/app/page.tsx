@@ -226,17 +226,30 @@ export default function Home() {
 
   useEffect(() => {
     const cacheKey = "pixlo:site-stats:v1";
+    let latestStats: SiteStats | null = null;
+    let latestFileUploads: number | null = null;
+
+    const persistStats = (value: SiteStats) => {
+      try {
+        window.localStorage.setItem(cacheKey, JSON.stringify(value));
+      } catch {
+        // Storage may be disabled or full; live stats still render.
+      }
+    };
+
     try {
       const cachedText = window.localStorage.getItem(cacheKey);
       if (cachedText) {
         const cached = JSON.parse(cachedText) as Partial<SiteStats>;
         if (Number.isFinite(cached.totalProfileViews) && Number.isFinite(cached.members)) {
-          setStats({
+          latestStats = {
             totalProfileViews: Number(cached.totalProfileViews),
             members: Number(cached.members),
             premiumMembers: Number.isFinite(cached.premiumMembers) ? Number(cached.premiumMembers) : null,
             fileUploads: Number.isFinite(cached.fileUploads) ? Number(cached.fileUploads) : null,
-          });
+          };
+          latestFileUploads = latestStats.fileUploads;
+          setStats(latestStats);
         }
       }
     } catch {
@@ -248,15 +261,34 @@ export default function Home() {
       .then(response => response.ok ? response.json() : Promise.reject(new Error("Stats unavailable")))
       .then((data: SiteStats) => {
         if (Number.isFinite(data.totalProfileViews) && Number.isFinite(data.members)) {
-          setStats(data);
-          try {
-            window.localStorage.setItem(cacheKey, JSON.stringify(data));
-          } catch {
-            // Storage may be disabled or full; live stats still render.
-          }
+          const nextStats: SiteStats = {
+            ...data,
+            fileUploads: Number.isFinite(data.fileUploads)
+              ? data.fileUploads
+              : (latestFileUploads ?? latestStats?.fileUploads ?? null),
+          };
+          latestStats = nextStats;
+          setStats(nextStats);
+          persistStats(nextStats);
         }
       })
       .catch(() => {});
+
+    // The storage walk can be slower, so never make it block the other three statistics.
+    fetch("/api/site-stats/file-uploads", { signal: controller.signal })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error("Upload stats unavailable")))
+      .then((data: { fileUploads: number | null }) => {
+        if (!Number.isFinite(data.fileUploads)) return;
+        latestFileUploads = Number(data.fileUploads);
+        if (latestStats) {
+          const nextStats = { ...latestStats, fileUploads: latestFileUploads };
+          latestStats = nextStats;
+          setStats(nextStats);
+          persistStats(nextStats);
+        }
+      })
+      .catch(() => {});
+
     return () => controller.abort();
   }, []);
 
