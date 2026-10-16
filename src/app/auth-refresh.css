@@ -1321,3 +1321,88 @@
   padding: 0 !important;
   filter: none !important;
 }
+
+
+/* Two-stage Discord setup progress, matching the signup card's segmented bars. */
+.auth-page-discord-gate .auth-discord-steps {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 0 30px !important;
+}
+.auth-page-discord-gate .auth-discord-progress {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+  gap: 7px !important;
+  width: 100% !important;
+  margin: 0 0 11px !important;
+}
+.auth-page-discord-gate .auth-discord-progress > span {
+  display: block !important;
+  min-width: 0 !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: rgba(255,224,203,.14) !important;
+  box-shadow: none !important;
+  transition: background .25s ease, box-shadow .25s ease !important;
+}
+.auth-page-discord-gate .auth-discord-progress > span.is-active,
+.auth-page-discord-gate .auth-discord-progress > span.is-complete {
+  background: linear-gradient(90deg, #ff5a43, #ff9a40 65%, #ffd078) !important;
+  box-shadow: 0 0 9px rgba(255,99,57,.2) !important;
+}
+.auth-page-discord-gate .auth-discord-step-labels {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+.auth-page-discord-gate .auth-discord-step-labels > span {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+  color: rgba(255,224,203,.38) !important;
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+  white-space: nowrap !important;
+  transition: color .2s ease !important;
+}
+.auth-page-discord-gate .auth-discord-step-labels > span.is-active,
+.auth-page-discord-gate .auth-discord-step-labels > span.is-complete {
+  color: rgba(255,235,216,.88) !important;
+}
+.auth-page-discord-gate .auth-discord-step-labels i {
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: 0 0 21px !important;
+  width: 21px !important;
+  height: 21px !important;
+  min-width: 21px !important;
+  max-width: 21px !important;
+  border: 1px solid rgba(255,193,151,.16) !important;
+  border-radius: 7px !important;
+  color: rgba(255,224,203,.45) !important;
+  background: rgba(255,244,232,.035) !important;
+  font-style: normal !important;
+  font-size: 8px !important;
+  font-weight: 850 !important;
+}
+.auth-page-discord-gate .auth-discord-step-labels > span.is-active i,
+.auth-page-discord-gate .auth-discord-step-labels > span.is-complete i {
+  color: #2c150d !important;
+  border-color: rgba(255,196,123,.45) !important;
+  background: linear-gradient(135deg, #ff8f43, #ffd078) !important;
+}
+.auth-page-discord-gate .auth-discord-step-labels b {
+  overflow: hidden !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  text-overflow: ellipsis !important;
+}
+@media (max-width: 480px) {
+  .auth-page-discord-gate .auth-discord-steps { margin-bottom: 25px !important; }
+  .auth-page-discord-gate .auth-discord-step-labels { gap: 8px !important; }
+  .auth-page-discord-gate .auth-discord-step-labels > span { gap: 5px !important; font-size: 9px !important; }
+  .auth-page-discord-gate .auth-discord-step-labels b { font-size: 9px !important; }
+}
