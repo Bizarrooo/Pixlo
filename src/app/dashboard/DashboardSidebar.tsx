@@ -3,7 +3,7 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { readSavedPixloAccounts, type SavedPixloAccount } from "../accountSwitcher";
 
-export type DashboardPrimarySection = "account" | "customize" | "links" | "premium" | "admin";
+export type DashboardPrimarySection = "account" | "customize" | "optimise" | "links" | "premium" | "admin";
 
 type DashboardNavIconName = "user" | "overview" | "chart" | "badge" | "profile" | "settings" | "connections" | "palette" | "link" | "crown" | "sparkles" | "layers" | "music" | "image" | "layout" | "shield" | "chevron" | "plus" | "external" | "clock";
 
@@ -46,6 +46,14 @@ export const customizeTabs = [
   { value: "Enter Screen", label: "Intro", icon: "external" },
 ] as const;
 
+export const optimiseTabs = [
+  { value: "Gradients", label: "Gradients", icon: "sparkles" },
+  { value: "Dashboard", label: "Workspace theme", icon: "settings" },
+  { value: "Extras", label: "Widgets", icon: "clock" },
+  { value: "Cursor Effects", label: "Cursor effects", icon: "sparkles" },
+] as const;
+
+
 type Props = {
   active: string;
   activePrimary: DashboardPrimarySection;
@@ -60,6 +68,7 @@ type Props = {
   displayName: string;
   avatar: string;
   isOwner: boolean;
+  isPremium: boolean;
   onNavigate: (primary: DashboardPrimarySection, destination: string) => void;
   onReset: () => void;
 };
@@ -153,6 +162,7 @@ export default function DashboardSidebar({
         </div>
 
         <button type="button" className={`dashboard-nav-item ${activePrimary === "customize" ? "active" : ""}`} onClick={() => select("customize", "General")}><DashboardNavIcon name="palette" className="dashboard-nav-icon" /><b>Customize</b></button>
+        {isPremium && <button type="button" className={`dashboard-nav-item dashboard-optimise-entry ${activePrimary === "optimise" ? "active" : ""}`} onClick={() => select("optimise", "Cursor Effects")}><DashboardNavIcon name="sparkles" className="dashboard-nav-icon" /><b>Optimise</b><span className="dashboard-nav-badge">PRO</span></button>}
         <button type="button" className={`dashboard-nav-item ${activePrimary === "links" ? "active" : ""}`} onClick={() => select("links", "Socials")}><DashboardNavIcon name="link" className="dashboard-nav-icon" /><b>Links</b></button>
 
         <div className={`premium-nav-group ${premiumOpen || activePrimary === "premium" ? "premium-nav-group-open" : ""}`}>
@@ -162,9 +172,6 @@ export default function DashboardSidebar({
           }}><DashboardNavIcon name="crown" className="dashboard-nav-icon" /><b>Premium</b><DashboardNavIcon name="chevron" className={`dashboard-nav-caret ${premiumOpen || activePrimary === "premium" ? "is-open" : ""}`} /></button>
           <div className="premium-nav-items">
             <button type="button" className={active === "Presets" ? "active premium-nav-button premium-presets-nav-button" : "premium-nav-button premium-presets-nav-button"} onClick={() => select("premium", "Presets")}><DashboardNavIcon name="layers" className="dashboard-nav-icon" /><b>Presets</b></button>
-            <button type="button" className={active === "Gradients" ? "active premium-nav-button premium-gradient-nav-button" : "premium-nav-button premium-gradient-nav-button"} onClick={() => select("premium", "Gradients")}><DashboardNavIcon name="sparkles" className="dashboard-nav-icon" /><b>Gradients</b></button>
-            <button type="button" className={active === "Dashboard" ? "active premium-nav-button premium-dashboard-nav-button" : "premium-nav-button premium-dashboard-nav-button"} onClick={() => select("premium", "Dashboard")}><DashboardNavIcon name="settings" className="dashboard-nav-icon" /><b>Workspace theme</b></button>
-            <button type="button" className={active === "Extras" ? "active premium-nav-button premium-extras-nav-button" : "premium-nav-button premium-extras-nav-button"} onClick={() => select("premium", "Extras")}><DashboardNavIcon name="clock" className="dashboard-nav-icon" /><b>Widgets</b></button>
           </div>
         </div>
 
