@@ -513,8 +513,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       : 0;
     root.style.setProperty("--mouse-x", `${x * strength}px`);
     root.style.setProperty("--mouse-y", `${y * strength}px`);
-    root.style.setProperty("--parallax-rotate-x", `${y * -16 * power}deg`);
-    root.style.setProperty("--parallax-rotate-y", `${x * 19 * power}deg`);
+    root.style.setProperty("--parallax-rotate-x", `${y * -10 * power}deg`);
+    root.style.setProperty("--parallax-rotate-y", `${x * 12 * power}deg`);
     root.style.setProperty("--parallax-light-x", `${50 + x * 45 * power}%`);
     root.style.setProperty("--parallax-light-y", `${50 + y * 45 * power}%`);
     root.style.setProperty("--parallax-shadow-x", `${x * -10 * power}px`);
