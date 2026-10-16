@@ -382,3 +382,193 @@
   .px-footer-brand { width: 100%; }
   .px-footer-links { margin-left: 0; gap: 15px; }
 }
+
+
+/* Hero artwork dissolves into the warm paper section, with tiny Pixlo-colour cubes. */
+.px-hero {
+  background: #fffaf5;
+}
+.px-hero-art,
+.px-hero-shade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.88) 68%, rgba(0,0,0,.42) 83%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.88) 68%, rgba(0,0,0,.42) 83%, transparent 100%);
+}
+.px-header,
+.px-hero-content,
+.px-hero-bottomline {
+  position: relative;
+  z-index: 2;
+}
+.px-hero-bottomline {
+  border-top-color: rgba(91, 55, 39, .14);
+  color: rgba(93, 66, 53, .72);
+}
+.px-hero-bottomline b { color: #dc5c37; }
+.px-cube-fade {
+  position: absolute;
+  z-index: 0;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 290px;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 60%, rgba(0,0,0,.64) 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 60%, rgba(0,0,0,.64) 76%, transparent 100%);
+}
+.px-cube {
+  position: absolute;
+  display: block;
+  color: #ff7938;
+  opacity: .84;
+  transform: rotate(-8deg);
+  filter: drop-shadow(0 7px 12px rgba(255, 91, 42, .14));
+}
+.px-cube:nth-child(3n) { opacity: .68; transform: rotate(9deg) scale(.9); }
+.px-cube:nth-child(4n) { opacity: .58; transform: rotate(-13deg) scale(.82); }
+.px-cube-top,
+.px-cube-front,
+.px-cube-side {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.px-cube-top {
+  background: color-mix(in srgb, currentColor 54%, #fff2d5);
+  clip-path: polygon(50% 0, 100% 25%, 50% 50%, 0 25%);
+}
+.px-cube-front {
+  background: color-mix(in srgb, currentColor 86%, #672015);
+  clip-path: polygon(0 25%, 50% 50%, 50% 100%, 0 75%);
+}
+.px-cube-side {
+  background: color-mix(in srgb, currentColor 64%, #2e100b);
+  clip-path: polygon(100% 25%, 50% 50%, 50% 100%, 100% 75%);
+}
+.px-cube:nth-child(3n + 1) { color: #ff4e39; }
+.px-cube:nth-child(3n + 2) { color: #ff963e; }
+.px-cube:nth-child(3n) { color: #ffc35d; }
+
+/* Real profile embed: one live account page, not a fabricated homepage mockup. */
+.px-live-profile-card {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(100%, 440px);
+  margin: 0 auto;
+  color: #fff5e8;
+  text-decoration: none;
+  transform-origin: 50% 50%;
+  animation: px-profile-float 8s ease-in-out infinite !important;
+}
+.px-live-profile-card:focus-visible {
+  outline: 3px solid #ffc35d;
+  outline-offset: 8px;
+  border-radius: 21px;
+}
+.px-live-profile-orbit {
+  position: absolute;
+  z-index: -1;
+  top: 14%;
+  left: 8%;
+  width: 84%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 170, 88, .28);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.px-live-profile-orbit-one { transform: scaleX(1.24) scaleY(.75) rotate(-23deg); }
+.px-live-profile-orbit-two {
+  top: 22%;
+  left: 17%;
+  width: 68%;
+  border-color: rgba(255, 79, 50, .25);
+  transform: scaleX(1.45) scaleY(.66) rotate(31deg);
+}
+.px-live-profile-frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 218, 187, .38);
+  border-radius: 17px;
+  background: #170a08;
+  box-shadow: 0 29px 85px rgba(20, 7, 5, .3), 0 0 0 5px rgba(255, 180, 100, .045), inset 0 1px rgba(255,255,255,.13);
+  transform: perspective(1200px) rotateY(-3deg) rotateX(1deg);
+}
+.px-live-profile-chrome {
+  position: relative;
+  z-index: 2;
+  min-height: 34px;
+  padding: 0 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 224, 203, .15);
+  background: linear-gradient(100deg, rgba(34, 12, 9, .98), rgba(72, 20, 10, .95));
+}
+.px-window-dot { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; }
+.px-window-dot-red { background: #ff5b45; }
+.px-window-dot-orange { background: #ff9b43; }
+.px-window-dot-gold { background: #ffd078; }
+.px-live-profile-caption { margin-left: 5px; color: rgba(255, 237, 220, .64); font-size: 8px; font-weight: 850; letter-spacing: .17em; }
+.px-live-indicator { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; color: #ffd2a2; font-size: 7px; font-weight: 850; letter-spacing: .11em; }
+.px-live-indicator i { width: 5px; height: 5px; border-radius: 50%; background: #ff8650; box-shadow: 0 0 9px rgba(255, 106, 52, .48); }
+.px-live-profile-frame iframe {
+  display: block;
+  width: 100%;
+  height: 485px;
+  border: 0;
+  background: #140907;
+  pointer-events: none;
+}
+.px-live-profile-footer {
+  min-height: 34px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid rgba(255, 224, 203, .15);
+  background: #1b0b08;
+  color: rgba(255, 234, 215, .64);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .16em;
+}
+.px-live-profile-footer > span:last-child { display: inline-flex; align-items: center; gap: 5px; color: #ffc46b; }
+.px-live-profile-footer svg { width: 12px; height: 12px; }
+.px-live-profile-caption-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 17px 0 0 9px;
+  color: rgba(255, 238, 220, .67);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .16em;
+}
+.px-live-profile-caption-bottom i { width: 5px; height: 5px; background: #ffc56b; border-radius: 50%; }
+.px-live-profile-caption-bottom b { margin-left: auto; color: #ffc56b; }
+@keyframes px-profile-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(.5deg); }
+  50% { transform: translate3d(0, -7px, 0) rotate(-.4deg); }
+}
+@media (max-width: 1100px) {
+  .px-live-profile-card { width: min(100%, 415px); }
+  .px-live-profile-frame iframe { height: 445px; }
+}
+@media (max-width: 800px) {
+  .px-cube-fade { height: 230px; }
+  .px-hero-bottomline { color: rgba(93, 66, 53, .75); }
+  .px-live-profile-card { width: min(100%, 490px); }
+  .px-live-profile-frame iframe { height: 465px; }
+}
+@media (max-width: 560px) {
+  .px-cube-fade { height: 175px; }
+  .px-live-profile-frame { border-radius: 13px; transform: none; }
+  .px-live-profile-frame iframe { height: 385px; }
+  .px-live-profile-caption { font-size: 7px; }
+  .px-live-profile-caption-bottom { font-size: 7px; letter-spacing: .11em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .px-live-profile-card { animation: none !important; }
+}
