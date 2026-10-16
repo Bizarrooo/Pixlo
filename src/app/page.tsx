@@ -27,26 +27,53 @@ function FeatureIcon({ kind }: { kind: "style" | "links" | "music" | "badge" }) 
 
 function ProfileArtwork() {
   return (
-    <div className="px-artwork" aria-label="Illustrated preview of a Pixlo profile">
-      <div className="px-artwork-orbit px-artwork-orbit-one" />
-      <div className="px-artwork-orbit px-artwork-orbit-two" />
-      <div className="px-artwork-window">
-        <div className="px-window-bar"><span /><span /><span /><small>PIXLO / YOUR SPACE</small><i><ArrowIcon diagonal /></i></div>
-        <div className="px-window-cover">
-          <span className="px-cover-word">MAKE IT</span>
-          <span className="px-cover-word px-cover-word-big">YOURS.</span>
-          <span className="px-cover-shape" />
+    <Link href="/user/biz" className="px-live-profile-card" aria-label="Open Bizarro's real Pixlo profile">
+      <span className="px-live-profile-orbit px-live-profile-orbit-one" aria-hidden="true" />
+      <span className="px-live-profile-orbit px-live-profile-orbit-two" aria-hidden="true" />
+      <div className="px-live-profile-frame">
+        <div className="px-live-profile-chrome">
+          <span className="px-window-dot px-window-dot-red" />
+          <span className="px-window-dot px-window-dot-orange" />
+          <span className="px-window-dot px-window-dot-gold" />
+          <span className="px-live-profile-caption">PIXLO / BIZARRO</span>
+          <span className="px-live-indicator"><i /> LIVE PAGE</span>
         </div>
-        <div className="px-window-profile">
-          <span className="px-window-avatar">y</span>
-          <div className="px-window-identity"><strong>yourname</strong><span>@yourname · your corner of the internet</span></div>
-          <span className="px-window-verified">✦</span>
-        </div>
-        <div className="px-window-pills"><span>Instagram ↗</span><span>Discord ↗</span><span>My links ↗</span></div>
-        <div className="px-window-music"><span className="px-music-cover">♫</span><span><b>A little more you</b><small>YOUR PROFILE SOUNDTRACK</small></span><span className="px-music-play">▶</span></div>
+        <iframe
+          src="/user/biz?embed=1"
+          title="Bizarro's real Pixlo profile"
+          loading="eager"
+          referrerPolicy="strict-origin-when-cross-origin"
+          tabIndex={-1}
+          aria-hidden="true"
+        />
+        <div className="px-live-profile-footer"><span>@BIZARRO</span><span>OPEN PROFILE <ArrowIcon diagonal /></span></div>
       </div>
-      <div className="px-artwork-sticker"><span>✳</span><b>MADE<br />BY YOU</b></div>
-      <div className="px-artwork-caption"><span className="px-caption-dot" /> YOUR SPACE ON THE WEB <span>— 01 / PX</span></div>
+      <span className="px-live-profile-caption-bottom"><i /> YOUR REAL PAGE. YOUR REAL STYLE. <b>↗</b></span>
+    </Link>
+  );
+}
+
+function CubeFade() {
+  const cubes = [
+    { left: 5, bottom: 28, size: 25, color: "#ff5b3f" },
+    { left: 12, bottom: 114, size: 19, color: "#ff9a3d" },
+    { left: 19, bottom: 54, size: 33, color: "#ffc55f" },
+    { left: 28, bottom: 143, size: 22, color: "#ff6a35" },
+    { left: 37, bottom: 17, size: 26, color: "#ffad46" },
+    { left: 46, bottom: 94, size: 30, color: "#f74739" },
+    { left: 58, bottom: 38, size: 18, color: "#ffcc6a" },
+    { left: 67, bottom: 127, size: 27, color: "#ff7b35" },
+    { left: 77, bottom: 21, size: 31, color: "#ff553a" },
+    { left: 86, bottom: 88, size: 20, color: "#ffc45a" },
+    { left: 94, bottom: 39, size: 24, color: "#ff8a39" },
+  ];
+  return (
+    <div className="px-cube-fade" aria-hidden="true">
+      {cubes.map((cube, index) => (
+        <span key={index} className="px-cube" style={{ left: `${cube.left}%`, bottom: cube.bottom, width: cube.size, height: cube.size, color: cube.color }}>
+          <i className="px-cube-top" /><i className="px-cube-front" /><i className="px-cube-side" />
+        </span>
+      ))}
     </div>
   );
 }
@@ -86,6 +113,7 @@ export default function Home() {
       <section className="px-hero">
         <div className="px-hero-art" aria-hidden="true" />
         <div className="px-hero-shade" aria-hidden="true" />
+        <CubeFade />
         <header className="px-header">
           <Link href="/" className="px-logo" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
           <nav className="px-nav" aria-label="Main navigation">
