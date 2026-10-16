@@ -7434,3 +7434,58 @@ html { scroll-behavior:smooth; }
   contain: strict !important;
   isolation: isolate !important;
 }
+
+
+/* Floating public-profile share control: branded, compact, and always reachable. */
+.pixlo-share-profile-button {
+  position: fixed !important;
+  left: max(18px, env(safe-area-inset-left)) !important;
+  bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  z-index: 10020 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  min-height: 46px !important;
+  padding: 0 18px !important;
+  border: 1px solid rgba(255,255,255,.23) !important;
+  border-radius: 14px !important;
+  color: #fff !important;
+  background: linear-gradient(115deg, #f04432 0%, #ff642e 48%, #ff9a38 100%) !important;
+  box-shadow: 0 9px 30px rgba(244, 73, 43, .28), inset 0 1px 0 rgba(255,255,255,.2) !important;
+  font: 700 13px/1.1 var(--font-geist-sans), Arial, sans-serif !important;
+  letter-spacing: .01em !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease !important;
+}
+.pixlo-share-profile-button svg {
+  width: 17px !important;
+  height: 17px !important;
+  flex: 0 0 17px !important;
+}
+.pixlo-share-profile-button:hover {
+  transform: translateY(-2px) !important;
+  filter: brightness(1.08) saturate(1.04) !important;
+  box-shadow: 0 13px 34px rgba(244, 73, 43, .38), inset 0 1px 0 rgba(255,255,255,.25) !important;
+}
+.pixlo-share-profile-button:active {
+  transform: translateY(0) scale(.98) !important;
+}
+.pixlo-share-profile-button:focus-visible {
+  outline: 2px solid rgba(255,255,255,.95) !important;
+  outline-offset: 3px !important;
+}
+.pixlo-share-profile-button.is-copied {
+  background: linear-gradient(115deg, #e94b32 0%, #f27c31 100%) !important;
+}
+@media (max-width: 540px) {
+  .pixlo-share-profile-button {
+    left: max(12px, env(safe-area-inset-left)) !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    min-height: 44px !important;
+    padding: 0 15px !important;
+  }
+}
