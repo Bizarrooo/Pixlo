@@ -187,10 +187,12 @@ export default function Dashboard() {
   const [previewEntered, setPreviewEntered] = useState(false);
   const [presetPreviewResetKey, setPresetPreviewResetKey] = useState(0);
   const [previewEntering, setPreviewEntering] = useState(false);
-  const [previewPointer, setPreviewPointer] = useState({ x: 0, y: 0 });
   const [previewParallaxReturning, setPreviewParallaxReturning] = useState(false);
   const previewParallaxReturnTimerRef = useRef<number | null>(null);
   const previewPointerBoundsRef = useRef<DOMRect | null>(null);
+  const previewCardRef = useRef<HTMLDivElement>(null);
+  const previewParallaxTargetRef = useRef({ x: 0, y: 0 });
+  const previewParallaxFrameRef = useRef<number | null>(null);
   const previewCursorTrailLayerRef = useRef<HTMLDivElement>(null);
   const previewCursorTrailLastSpawnRef = useRef({ x: -100, y: -100, at: 0 });
   const previewAssetsLoadedRef = useRef(false);
@@ -948,9 +950,6 @@ export default function Dashboard() {
   const previewDecoration = settings.useDiscordDecoration && settings.discordAvatarDecorationUrl ? settings.discordAvatarDecorationUrl : "";
   const activeTrack = settings.musicTracks.find(t => t.id === settings.activeMusicId) || settings.musicTracks[0];
   const previewVisible = settingsReady && previewReady;
-  const previewParallaxPower = settings.parallax && settings.parallaxStrength > 0
-    ? Math.pow(Math.min(35, Math.max(0, settings.parallaxStrength)) / 35, 0.72)
-    : 0;
   const previewGlowRadius = settings.glowIntensity * 1.8;
   const previewGlowAlpha = Math.min(0.8, Math.max(0, settings.glowIntensity / 100));
   const previewShadow = settings.glow && settings.glowIntensity > 0
@@ -982,26 +981,49 @@ export default function Dashboard() {
     "--preview-vignette": `${settings.vignette / 100}`,
     "--preview-glow": `${Math.max(0, settings.glowIntensity * 0.8)}px`,
     "--preview-font": fontFamily(settings.customFont),
-    "--preview-parallax-x": `${settings.parallax ? previewPointer.x * settings.parallaxStrength : 0}px`,
-    "--preview-parallax-y": `${settings.parallax ? previewPointer.y * settings.parallaxStrength : 0}px`,
-    "--preview-parallax-rotate-x": `${previewPointer.y * -16 * previewParallaxPower}deg`,
-    "--preview-parallax-rotate-y": `${previewPointer.x * 19 * previewParallaxPower}deg`,
-    "--preview-parallax-light-x": `${50 + previewPointer.x * 45 * previewParallaxPower}%`,
-    "--preview-parallax-light-y": `${50 + previewPointer.y * 45 * previewParallaxPower}%`,
-    "--preview-parallax-shadow-x": `${previewPointer.x * -10 * previewParallaxPower}px`,
-    "--preview-parallax-shadow-y": `${previewPointer.y * -8 * previewParallaxPower}px`,
+    "--preview-parallax-x": "0px",
+    "--preview-parallax-y": "0px",
+    "--preview-parallax-rotate-x": "0deg",
+    "--preview-parallax-rotate-y": "0deg",
+    "--preview-parallax-light-x": "50%",
+    "--preview-parallax-light-y": "50%",
+    "--preview-parallax-shadow-x": "0px",
+    "--preview-parallax-shadow-y": "0px",
     backgroundColor: settings.backgroundColour,
-  } as React.CSSProperties), [settings, previewPointer, previewParallaxPower, previewShadow]);
+  } as React.CSSProperties), [settings, previewShadow]);
 
+  const applyPreviewParallax = (x: number, y: number) => {
+    const card = previewCardRef.current;
+    if (!card) return;
+    const strength = settings.parallax ? settings.parallaxStrength : 0;
+    const power = settings.parallax && strength > 0
+      ? Math.pow(Math.min(35, Math.max(0, strength)) / 35, 0.72)
+      : 0;
+    card.style.setProperty("--preview-parallax-x", `${x * strength}px`);
+    card.style.setProperty("--preview-parallax-y", `${y * strength}px`);
+    card.style.setProperty("--preview-parallax-rotate-x", `${y * -16 * power}deg`);
+    card.style.setProperty("--preview-parallax-rotate-y", `${x * 19 * power}deg`);
+    card.style.setProperty("--preview-parallax-light-x", `${50 + x * 45 * power}%`);
+    card.style.setProperty("--preview-parallax-light-y", `${50 + y * 45 * power}%`);
+    card.style.setProperty("--preview-parallax-shadow-x", `${x * -10 * power}px`);
+    card.style.setProperty("--preview-parallax-shadow-y", `${y * -8 * power}px`);
+  };
   const updatePreviewPointer = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!settings.parallax || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (previewParallaxReturnTimerRef.current !== null) window.clearTimeout(previewParallaxReturnTimerRef.current);
     previewParallaxReturnTimerRef.current = null;
-    setPreviewParallaxReturning(false);
     const bounds = previewPointerBoundsRef.current || event.currentTarget.getBoundingClientRect();
-    const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2));
-    const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2));
-    setPreviewPointer(previous => Math.abs(previous.x - x) < 0.002 && Math.abs(previous.y - y) < 0.002 ? previous : { x, y });
+    previewParallaxTargetRef.current = {
+      x: Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2)),
+      y: Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2)),
+    };
+    if (previewParallaxFrameRef.current === null) {
+      previewParallaxFrameRef.current = window.requestAnimationFrame(() => {
+        previewParallaxFrameRef.current = null;
+        const target = previewParallaxTargetRef.current;
+        applyPreviewParallax(target.x, target.y);
+      });
+    }
   };
   const handlePreviewPointerEnter = (event: React.PointerEvent<HTMLDivElement>) => {
     if (previewParallaxReturnTimerRef.current !== null) window.clearTimeout(previewParallaxReturnTimerRef.current);
@@ -1016,8 +1038,13 @@ export default function Dashboard() {
   };
   const resetPreviewPointer = () => {
     previewPointerBoundsRef.current = null;
+    previewParallaxTargetRef.current = { x: 0, y: 0 };
+    if (previewParallaxFrameRef.current !== null) {
+      window.cancelAnimationFrame(previewParallaxFrameRef.current);
+      previewParallaxFrameRef.current = null;
+    }
+    applyPreviewParallax(0, 0);
     setPreviewParallaxReturning(true);
-    setPreviewPointer({ x: 0, y: 0 });
     if (previewParallaxReturnTimerRef.current !== null) window.clearTimeout(previewParallaxReturnTimerRef.current);
     previewParallaxReturnTimerRef.current = window.setTimeout(() => {
       setPreviewParallaxReturning(false);
@@ -1740,6 +1767,7 @@ export default function Dashboard() {
             {settings.grain && <div className="preview-effect-grain" aria-hidden="true" />}
             {settings.scanlines && <div className="preview-effect-scanlines" aria-hidden="true" />}
             <div
+              ref={previewCardRef}
               className={`preview-card ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.glow ? "effects-glow" : ""} ${settings.layout === "Minimal" ? "layout-minimal" : ""} ${settings.layout === "Modern" ? "layout-modern" : ""} ${settings.layout === "Sleek" ? "layout-sleek" : ""} ${settings.layout === "Text Only" ? "layout-text-only" : ""} ${settings.alignment === "left" ? "text-left" : ""}`}
               style={{ borderRadius: settings.layout === "Text Only" ? 0 : settings.borderRadius, fontFamily: "var(--preview-font)", background: settings.layout === "Text Only" ? "transparent" : "var(--preview-card-bg)", color: "var(--preview-text-color)", opacity: 1, boxShadow: settings.layout === "Text Only" ? "none" : previewShadow, border: settings.layout === "Text Only" ? "none" : undefined, backdropFilter: settings.layout === "Text Only" ? "none" : undefined, WebkitBackdropFilter: settings.layout === "Text Only" ? "none" : undefined, "--preview-card-shadow": settings.layout === "Text Only" ? "none" : previewShadow, "--gradient-text": `linear-gradient(110deg, ${settings.gradientTextColours.join(", ")}, ${settings.gradientTextColours[0]}, ${settings.gradientTextColours.slice(1).join(", ")}, ${settings.gradientTextColours[0]})`, "--gradient-socials": `linear-gradient(110deg, ${settings.gradientSocialsColours.join(", ")}, ${settings.gradientSocialsColours[0]}, ${settings.gradientSocialsColours.slice(1).join(", ")}, ${settings.gradientSocialsColours[0]})`, "--gradient-badges": `linear-gradient(110deg, ${settings.gradientBadgesColours.join(", ")}, ${settings.gradientBadgesColours[0]}, ${settings.gradientBadgesColours.slice(1).join(", ")}, ${settings.gradientBadgesColours[0]})` } as React.CSSProperties}
               onPointerEnter={handlePreviewPointerEnter}
