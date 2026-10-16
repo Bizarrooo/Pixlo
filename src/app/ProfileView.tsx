@@ -157,12 +157,12 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         particle.textContent = Math.random() > 0.7 ? "✧" : "✦";
         particle.style.left = (event.clientX + offsetX) + "px";
         particle.style.top = (event.clientY + offsetY) + "px";
-        particle.style.setProperty("--cursor-sparkle-particle-size", size + "px");
-        particle.style.setProperty("--cursor-sparkle-colour", settings.cursorTrailColour);
-        particle.style.setProperty("--cursor-sparkle-glow", (settings.cursorTrailGlow / 8) + "px");
-        particle.style.setProperty("--cursor-sparkle-drift-x", (((Math.random() - 0.5) * 34) * settings.cursorTrailSpeed / 100) + "px");
-        particle.style.setProperty("--cursor-sparkle-drift-y", (((Math.random() - 0.8) * 36) * settings.cursorTrailSpeed / 100) + "px");
-        particle.style.setProperty("--cursor-sparkle-duration", lifetime + "ms");
+        particle.style.setProperty("--cursor-trail-particle-size", size + "px");
+        particle.style.setProperty("--cursor-trail-colour", settings.cursorTrailColour);
+        particle.style.setProperty("--cursor-trail-glow", (settings.cursorTrailGlow / 8) + "px");
+        particle.style.setProperty("--cursor-trail-drift-x", (((Math.random() - 0.5) * 34) * settings.cursorTrailSpeed / 100) + "px");
+        particle.style.setProperty("--cursor-trail-drift-y", (((Math.random() - 0.8) * 36) * settings.cursorTrailSpeed / 100) + "px");
+        particle.style.setProperty("--cursor-trail-duration", lifetime + "ms");
         particle.style.opacity = String(0.55 + Math.random() * 0.45);
         particle.addEventListener("animationend", () => particle.remove(), { once: true });
         layer.appendChild(particle);
@@ -184,6 +184,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     settings.cursorTrailSize,
     settings.cursorTrailDensity,
     settings.cursorTrailSpeed,
+    settings.cursorTrailLifetime,
     presetPreviewMode,
     embedMode,
     forcedUsername,
