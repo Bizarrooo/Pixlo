@@ -637,7 +637,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
               )
             )}
 
-            {settings.showFooter && <div className="profile-footer"><span><i className="online-dot" /> Online</span>{settings.showViews && <span>{settings.views || 0} views</span>}</div>}
+            {settings.showFooter && <div className="profile-footer"><span><i className="online-dot" /> Online</span>{settings.showViews && <span className="profile-view-count" aria-label={Number(settings.views || 0).toLocaleString() + " profile views"} title="Profile views"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="2.7" /></svg>{Number(settings.views || 0).toLocaleString()}</span>}</div>}
 
           </div>
         </div>
