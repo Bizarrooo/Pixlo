@@ -30,11 +30,20 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ use
           overflow: "hidden",
           color: "#ffffff",
           fontFamily: "Arial, sans-serif",
-          background: backgroundImageUrl
-            ? `linear-gradient(rgba(7,7,9,0.35), rgba(7,7,9,0.60)), url("${backgroundImageUrl}") center / cover no-repeat`
-            : "linear-gradient(135deg, #09090b 0%, #21100d 55%, #41180f 100%)",
+          background: "linear-gradient(135deg, #09090b 0%, #21100d 55%, #41180f 100%)",
         }}
       >
+        {backgroundImageUrl && (
+          <img
+            src={backgroundImageUrl}
+            width="1200"
+            height="630"
+            style={{ position: "absolute", inset: 0, width: 1200, height: 630, objectFit: "cover" }}
+          />
+        )}
+        {backgroundImageUrl && (
+          <div style={{ position: "absolute", inset: 0, display: "flex", background: "linear-gradient(rgba(7,7,9,0.35), rgba(7,7,9,0.60))" }} />
+        )}
         <div style={{ position: "absolute", inset: 0, display: "flex", background: "radial-gradient(circle at 50% 35%, rgba(255,95,48,0.17), transparent 54%)" }} />
         <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", padding: "42px 90px" }}>
           <div style={{ width: 218, height: 218, borderRadius: 109, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(20,15,15,0.8)", color: "#fff", fontSize: 86, fontWeight: 700 }}>
