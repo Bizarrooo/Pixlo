@@ -40,9 +40,6 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const shareUrl = shareKey ? `${profileUrl}?share=${encodeURIComponent(shareKey)}` : profileUrl;
   const imageUrl = `${profileUrl}/opengraph-image?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
   const description = "Made with Pixlo";
-  const backgroundVideoUrl = profile?.backgroundVideoUrl || "";
-  const videoPath = backgroundVideoUrl.split("?")[0].toLowerCase();
-  const videoType = videoPath.endsWith(".webm") ? "video/webm" : videoPath.endsWith(".mov") ? "video/quicktime" : "video/mp4";
 
   return {
     title: displayName,
@@ -60,7 +57,6 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
         height: 630,
         alt: `${displayName} — Made with Pixlo`,
       }],
-      ...(backgroundVideoUrl ? { videos: [{ url: backgroundVideoUrl, secureUrl: backgroundVideoUrl, type: videoType, width: 1200, height: 630 }] } : {}),
     },
     twitter: {
       card: "summary_large_image",

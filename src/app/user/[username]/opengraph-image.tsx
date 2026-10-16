@@ -20,13 +20,16 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ use
   const displayFontSize = displayName.length > 30 ? Math.min(58, preferredNameSize) : displayName.length > 21 ? Math.min(76, preferredNameSize) : preferredNameSize;
   const nameColour = profile?.shareCoverNameColour || "#ffffff";
   const creditColour = profile?.shareCoverCreditColour || "#e3dcd8";
-  const nameGlowIntensity = profile?.shareCoverNameGlowIntensity ?? 65;
-  const glowHex = nameColour;
+  const nameGlowIntensity = Math.max(20, profile?.shareCoverNameGlowIntensity ?? 65);
+  const glowHex = /^#[0-9a-f]{6}$/i.test(nameColour) ? nameColour : "#ffffff";
   const glowRed = Number.parseInt(glowHex.slice(1,3), 16);
   const glowGreen = Number.parseInt(glowHex.slice(3,5), 16);
   const glowBlue = Number.parseInt(glowHex.slice(5,7), 16);
   const nameTextShadow = profile?.shareCoverNameGlow
-    ? `0 0 ${Math.max(1, nameGlowIntensity * 0.55)}px rgba(${glowRed}, ${glowGreen}, ${glowBlue}, ${Math.min(0.95, nameGlowIntensity / 100)}), 0 0 ${nameGlowIntensity}px rgba(${glowRed}, ${glowGreen}, ${glowBlue}, ${Math.min(0.45, nameGlowIntensity / 300)})`
+    ? `0 0 ${Math.max(8, nameGlowIntensity * 0.2)}px rgba(${glowRed}, ${glowGreen}, ${glowBlue}, ${Math.min(1, Math.max(0.6, nameGlowIntensity / 100))}), 0 0 ${Math.max(16, nameGlowIntensity * 0.48)}px rgba(${glowRed}, ${glowGreen}, ${glowBlue}, ${Math.min(0.85, Math.max(0.4, nameGlowIntensity / 140))}), 0 0 ${Math.max(28, nameGlowIntensity * 0.82)}px rgba(${glowRed}, ${glowGreen}, ${glowBlue}, ${Math.min(0.6, Math.max(0.22, nameGlowIntensity / 320))})`
+    : "none";
+  const nameGlowFilter = profile?.shareCoverNameGlow
+    ? `drop-shadow(0 0 ${Math.max(10, nameGlowIntensity * 0.22)}px rgba(${glowRed}, ${glowGreen}, ${glowBlue}, 0.9)) drop-shadow(0 0 ${Math.max(18, nameGlowIntensity * 0.42)}px rgba(${glowRed}, ${glowGreen}, ${glowBlue}, 0.55))`
     : "none";
   const initial = (displayName || username || "P").slice(0, 1).toUpperCase();
 
@@ -67,7 +70,7 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ use
             </div>
             {avatarDecorationUrl && <img src={avatarDecorationUrl} width="264" height="264" style={{ position: "absolute", inset: 0, width: 264, height: 264, objectFit: "contain", pointerEvents: "none" }} />}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1000, marginTop: 8, color: nameColour, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.12, overflowWrap: "anywhere", textShadow: nameTextShadow }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1000, marginTop: 8, color: nameColour, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.12, overflowWrap: "anywhere", textShadow: nameTextShadow, filter: nameGlowFilter }}>
             {displayName}
           </div>
           <div style={{ display: "flex", marginTop: 12, alignItems: "center", justifyContent: "center", color: creditColour, fontSize: 18, fontWeight: 500 }}>
