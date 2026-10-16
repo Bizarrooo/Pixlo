@@ -1039,7 +1039,7 @@ export default function Dashboard() {
     if (previewParallaxReturnTimerRef.current !== null) window.clearTimeout(previewParallaxReturnTimerRef.current);
     previewParallaxReturnTimerRef.current = null;
     setPreviewParallaxReturning(false);
-    if (!previewPointerBoundsRef.current) previewPointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
+    if (!previewPointerBoundsRef.current) previewPointerBoundsRef.current = event.currentTarget.parentElement?.getBoundingClientRect() || event.currentTarget.getBoundingClientRect();
   };
   const handlePreviewPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" || !settings.parallax) return;
