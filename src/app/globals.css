@@ -7441,7 +7441,7 @@ html { scroll-behavior:smooth; }
   position: fixed !important;
   left: max(18px, env(safe-area-inset-left)) !important;
   bottom: max(18px, env(safe-area-inset-bottom)) !important;
-  z-index: 10020 !important;
+  z-index: 100100 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
