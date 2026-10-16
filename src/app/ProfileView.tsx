@@ -584,7 +584,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         document.body
       )}
       {isPremium && settings.cursorTrailEnabled && !presetPreviewMode && !embedMode && forcedUsername && typeof document !== "undefined" && createPortal(
-        <div ref={cursorTrailLayerRef} className="pixlo-cursor-trail-layer" aria-hidden="true" />,
+        <div ref={cursorTrailLayerRef} className={`pixlo-cursor-trail-layer ${settings.parallax ? "parallax-lite" : ""}`} aria-hidden="true" />,
         document.body
       )}
       <svg className="pixlo-gradient-defs" aria-hidden="true" width="0" height="0" style={{position:"absolute",width:0,height:0,overflow:"hidden"}}><defs><linearGradient id="pixlo-social-gradient" x1="0%" y1="0%" x2="100%" y2="0%" spreadMethod="repeat"><stop offset="0%" stopColor={settings.gradientSocialsColours[0]} /><stop offset="33.333%" stopColor={settings.gradientSocialsColours[1]} /><stop offset="66.666%" stopColor={settings.gradientSocialsColours[2]} /><stop offset="100%" stopColor={settings.gradientSocialsColours[0]} /><animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="-1 0" dur="8s" repeatCount="indefinite" /></linearGradient></defs></svg>
