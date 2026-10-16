@@ -3,39 +3,8 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { accountSettingsStorageKey, defaultSettings, loadSettingsForAccount, normaliseProfileSettings, saveSettingsToStorage, type CustomLink, type MusicTrack, type ProfileFont, type ProfileSettings, type SocialKey, type TextAnimation } from "../profile";
 import { deleteAsset, loadAsset, migrateAssetToCloud, saveAsset } from "../assetStore";
-
-const sections = [
-  ["General", "Identity & basics", "01"],
-  ["Appearance", "Colours & transparency", "02"],
-  ["Fonts", "Typography & text styles", "03"],
-  ["Background", "Image, video & backdrop", "04"],
-  ["Profile", "Avatar, banner & card", "05"],
-  ["Socials", "Links & icon layout", "06"],
-  ["Badges", "Discord rewards & profile badges", "13"],
-  ["Music", "Tracks, covers & player", "07"],
-  ["Effects", "Motion, glow & atmosphere", "08"],
-  ["Layout", "Structure & alignment", "09"],
-  ["Admin", "Pixlo owner controls", "10"],
-  ["Enter Screen", "Intro & click-to-enter", "11"],
-  ["Stats", "Views & profile activity", "12"],
-] as const;
-
-const sectionLabels: Record<string, string> = {
-  General: "Basics",
-  Appearance: "Colours",
-  Fonts: "Typography",
-  Background: "Backdrop",
-  Profile: "Profile",
-  Socials: "Social links",
-  Badges: "Badges",
-  Music: "Music",
-  Effects: "Effects",
-  Layout: "Layout",
-  Admin: "Admin",
-  "Enter Screen": "Intro screen",
-  Stats: "Analytics",
-  Extras: "Extra",
-};
+import { rememberPixloAccount } from "../accountSwitcher";
+import DashboardSidebar, { DashboardNavIcon, customizeTabs, type DashboardPrimarySection } from "./DashboardSidebar";
 
 type DashboardBadge = { id: string; name: string; description: string; icon_url: string | null };
 
@@ -206,7 +175,10 @@ async function migratePresetAssets(settings: ProfileSettings): Promise<ProfileSe
 }
 
 export default function Dashboard() {
-  const [active, setActive] = useState("General");
+  const [active, setActive] = useState("Overview");
+  const [activePrimary, setActivePrimary] = useState<DashboardPrimarySection>("account");
+  const [accountNavOpen, setAccountNavOpen] = useState(true);
+  const [currentAccountEmail, setCurrentAccountEmail] = useState("");
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [settings, setSettings] = useState<ProfileSettings>(defaultSettings);
@@ -438,6 +410,8 @@ export default function Dashboard() {
         const profile = accountData.profile as { id?: string; username?: string; displayName?: string; usernameChangeAvailableAt?: string | null };
         const username = String(profile.username || authUser.user_metadata?.username || authUser.email?.split("@")[0] || "user").trim().toLowerCase();
         const displayName = String(profile.displayName || authUser.user_metadata?.display_name || authUser.user_metadata?.full_name || username).trim() || username;
+        const accountEmail = String(authUser.email || "").trim().toLowerCase();
+        setCurrentAccountEmail(accountEmail);
         const localSettings = loadSettingsForAccount(authUser.id, { username, displayName });
         const cloudSettings = accountData.profile.settings && typeof accountData.profile.settings === "object" ? accountData.profile.settings as Partial<ProfileSettings> : {};
         const cloudHasSettings = Object.keys(cloudSettings).length > 0;
@@ -457,6 +431,10 @@ export default function Dashboard() {
           Promise.all(loaded.customLinks.map(async link => ({ ...link, icon: await migrate(link.icon) }))),
         ]);
         loaded = { ...loaded, avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
+        if (accountEmail) rememberPixloAccount({
+          email: accountEmail, username, userId: authUser.id, displayName,
+          ...(typeof avatar === "string" && /^https?:\/\//i.test(avatar) ? { avatar } : {}),
+        });
         const linkedDiscord = accountData.user?.discordId ? accountData.user : null;
         if (linkedDiscord) {
           window.sessionStorage.removeItem("pixlo-discord-pending-join");
@@ -562,6 +540,15 @@ export default function Dashboard() {
   }, [settingsReady, settings.avatar, settings.banner, settings.backgroundImage, settings.backgroundVideo, settings.enterScreenBackgroundImage, settings.enterScreenBackgroundVideo, settings.customLinks, settings.musicTracks, settings.activeMusicId]);
 
   const set = <K extends keyof ProfileSettings>(key: K, value: ProfileSettings[K]) => { setSettings(s => ({ ...s, [key]: value })); setSaved(false); };
+  const navigateDashboard = (primary: DashboardPrimarySection, destination: string) => {
+    setActivePrimary(primary);
+    setActive(destination);
+    setPremiumOpen(primary === "premium");
+    setMobileMenu(false);
+    setPreviewEntered(false);
+    setPreviewEntering(false);
+  };
+
   const savePresetSlot = async (slot: number) => {
     setPresetBusy(slot); setPresetMessage("");
     try {
@@ -1210,38 +1197,62 @@ export default function Dashboard() {
     </section>
   </div>}
     <main className={`dashboard dashboard-revamp ${settings.dashboardCustomisationEnabled ? "dashboard-customisation-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardBackgroundGradientEnabled ? "dashboard-bg-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardTextGradientEnabled ? "dashboard-text-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && !settings.dashboardTextGradientEnabled ? "dashboard-text-solid-on" : ""}`} style={{ "--dashboard-bg-gradient": `linear-gradient(125deg, ${settings.dashboardBackgroundGradientColours[0]}, ${settings.dashboardBackgroundGradientColours[1]}, ${settings.dashboardBackgroundGradientColours[2]})`, "--dashboard-text-gradient": `linear-gradient(90deg, ${settings.dashboardTextGradientColours[0]} 0%, ${settings.dashboardTextGradientColours[1]} 16.666%, ${settings.dashboardTextGradientColours[2]} 33.333%, ${settings.dashboardTextGradientColours[0]} 50%, ${settings.dashboardTextGradientColours[1]} 66.666%, ${settings.dashboardTextGradientColours[2]} 83.333%, ${settings.dashboardTextGradientColours[0]} 100%)`, "--dashboard-text-solid": settings.dashboardTextSolidColour } as React.CSSProperties} onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
-    <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
-      <div className="brand"><div className="brand-logo-shell"><img className="brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></div><small>Make it yours</small></div>
-      <nav className="dashboard-sidebar-nav">
-        {sections.filter(([name]) => name !== "Admin").map(([name]) => <button type="button" key={name} className={active === name ? "active" : ""} onClick={() => { setActive(name); setPremiumOpen(false); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>{sectionLabels[name] || name}</b></button>)}
-        {profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f" && <button type="button" key="Admin" className={`admin-nav-button ${active === "Admin" ? "active" : ""}`} onClick={() => { setActive("Admin"); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="admin-nav-icon" aria-hidden="true">✦</span><b>Admin</b><span className="admin-nav-owner">OWNER</span></button>}
-        <div className={`premium-nav-group ${premiumOpen || ["Presets", "Gradients", "Dashboard", "Extras"].includes(active) ? "premium-nav-group-open" : ""}`}>
-          <button type="button" className={`premium-nav-heading premium-nav-toggle ${["Presets", "Gradients", "Dashboard", "Extras"].includes(active) ? "active" : ""}`} aria-expanded={premiumOpen || ["Presets", "Gradients", "Dashboard", "Extras"].includes(active)} onClick={() => setPremiumOpen(value => !value)}>
-            <span className="premium-heading-mark" aria-hidden="true">✦</span><b>Premium</b><span className="premium-heading-chevron" aria-hidden="true">⌄</span>
-          </button>
-          <div className="premium-nav-items">
-            <button type="button" className={active === "Presets" ? "active premium-nav-button premium-presets-nav-button" : "premium-nav-button premium-presets-nav-button"} onClick={() => { setActive("Presets"); setPremiumOpen(true); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}>
-              <span className="nav-dot" /><b>Presets</b>{(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}
-            </button>
-            <button type="button" className={active === "Gradients" ? "active premium-nav-button premium-gradient-nav-button" : "premium-nav-button premium-gradient-nav-button"} onClick={() => { setActive("Gradients"); setPremiumOpen(true); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>Gradients</b>{(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}</button>
-            <button type="button" className={active === "Dashboard" ? "active premium-nav-button premium-dashboard-nav-button" : "premium-nav-button premium-dashboard-nav-button"} onClick={() => { setActive("Dashboard"); setPremiumOpen(true); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>Dashboard</b>{(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}</button>
-            <button type="button" className={active === "Extras" ? "active premium-nav-button premium-extras-nav-button" : "premium-nav-button premium-extras-nav-button"} onClick={() => { setActive("Extras"); setPremiumOpen(true); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><span className="nav-dot" /><b>Extra</b>{(() => { const premiumIcon = previewBadges.find(badge => badge.name.trim().toLowerCase() === "premium")?.icon_url; return <span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span>; })()}</button>
-          </div>
-        </div>
-      </nav>
-      <div className="sidebar-bottom"><button type="button" className="reset-button" style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff" }} onClick={reset}>Reset to default</button></div>
-    </aside>
+    <DashboardSidebar
+      active={active}
+      activePrimary={activePrimary}
+      accountNavOpen={accountNavOpen}
+      setAccountNavOpen={setAccountNavOpen}
+      premiumOpen={premiumOpen}
+      setPremiumOpen={setPremiumOpen}
+      mobileMenu={mobileMenu}
+      profileUserId={profileUserId}
+      currentAccountEmail={currentAccountEmail}
+      username={settings.username}
+      displayName={settings.displayName}
+      avatar={settings.avatar}
+      isOwner={profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f"}
+      onNavigate={navigateDashboard}
+      onReset={reset}
+/>
 
     <div className="dashboard-main">
       <header className="dash-header">
         <button type="button" className="mobile-menu-button" onClick={() => setMobileMenu(v => !v)}>☰</button>
-        <div className="header-copy"><h1>{active}</h1></div>
+        <div className="header-copy"><h1>{activePrimary === "customize" ? "Customize" : activePrimary === "links" ? "Links" : active === "Stats" && activePrimary === "account" ? "Analytics" : active === "General" && activePrimary === "account" ? "Settings" : active === "Dashboard" ? "Workspace theme" : active === "Extras" ? "Widgets" : active}</h1><p>{activePrimary === "customize" ? "Fine-tune the look and feel of your public profile." : activePrimary === "links" ? "Manage your social URLs and custom profile links." : active === "Overview" ? "Your profile, account and quick actions in one place." : active === "Connections" ? "Your linked accounts and connected services." : ""}</p></div>
         <div className="header-actions"><a className="view-button view-button-primary" href={profileUrl} target="_blank" rel="noreferrer">View live profile ↗</a><button type="button" className="save-button" onClick={save}>{saved ? "✓ Saved" : "Save changes"}</button></div>
       </header>
 
+      {activePrimary === "customize" && <nav className="dashboard-customize-tabs" aria-label="Customize profile settings">
+        {customizeTabs.map(tab => <button key={tab.value} type="button" className={active === tab.value ? "active" : ""} onClick={() => { setActive(tab.value); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><DashboardNavIcon name={tab.icon} className="dashboard-nav-icon" /><span>{tab.label}</span></button>)}
+      </nav>}
+
       <div className="editor-grid" style={{ position: "relative" }}>
         <section className="editor">
-          {active === "Dashboard" && <div className="form-stack dashboard-theme-page">
+        {active === "Overview" && <div className="form-stack dashboard-overview-page">
+          <div className="dashboard-overview-hero"><span className="dashboard-overview-kicker">YOUR PIXLO WORKSPACE</span><h2>Welcome back, {settings.displayName || settings.username || "creator"}.</h2><p>Everything you need to manage your profile, links and style—organised into one workspace.</p></div>
+          <section className="dashboard-overview-profile">
+            <span className="dashboard-overview-avatar">{typeof settings.avatar === "string" && /^https?:\/\//i.test(settings.avatar) ? <img src={settings.avatar} alt="" /> : <span>{(settings.displayName || settings.username || "P").slice(0,1).toUpperCase()}</span>}</span>
+            <div className="dashboard-overview-profile-copy"><b>{settings.displayName || settings.username || "Your profile"}</b><span>@{settings.username || "username"}</span><small>{currentAccountEmail || "Signed-in Pixlo account"}</small></div>
+            <a className="dashboard-overview-open" href={profileUrl} target="_blank" rel="noreferrer"><DashboardNavIcon name="external" />View profile</a>
+          </section>
+          <div className="dashboard-overview-grid">
+            <button type="button" className="dashboard-overview-card" onClick={() => navigateDashboard("customize", "General")}><span className="dashboard-overview-card-icon"><DashboardNavIcon name="palette" /></span><b>Customize profile</b><small>Colours, avatar, backgrounds, fonts and effects.</small><span className="dashboard-overview-card-action">Open customization <i>↗</i></span></button>
+            <button type="button" className="dashboard-overview-card" onClick={() => navigateDashboard("links", "Socials")}><span className="dashboard-overview-card-icon"><DashboardNavIcon name="link" /></span><b>Manage links</b><small>Edit social URLs and arrange your profile links.</small><span className="dashboard-overview-card-action">Open links <i>↗</i></span></button>
+            <button type="button" className="dashboard-overview-card" onClick={() => navigateDashboard("account", "Stats")}><span className="dashboard-overview-card-icon"><DashboardNavIcon name="chart" /></span><b>Analytics</b><small>Check profile activity and your place in the community.</small><span className="dashboard-overview-card-action">View analytics <i>↗</i></span></button>
+            <button type="button" className="dashboard-overview-card" onClick={() => navigateDashboard("account", "Badges")}><span className="dashboard-overview-card-icon"><DashboardNavIcon name="badge" /></span><b>Badges</b><small>Choose which earned Pixlo badges appear on your page.</small><span className="dashboard-overview-card-action">Manage badges <i>↗</i></span></button>
+          </div>
+          <div className="dashboard-overview-bottom"><div><span className="dashboard-overview-status-dot" /><span><b>Discord connected</b><small>Your account is linked and server membership is verified.</small></span></div><button type="button" onClick={() => navigateDashboard("account", "Connections")}>View connections <i>→</i></button></div>
+        </div>}
+
+          {active === "Connections" && <div className="form-stack dashboard-connections-page">
+          <SectionIntro title="Connected accounts" text="Manage the services linked to your Pixlo account." />
+          <section className="dashboard-connection-card"><span className="dashboard-connection-brand"><DashboardNavIcon name="connections" /></span>
+            <div className="dashboard-connection-copy"><div><b>Discord</b><span className="dashboard-connection-status"><i /> Connected</span></div><p>{discordUser?.discordDisplayName || discordUser?.discordUsername || "Your Discord account"} is linked to Pixlo. Server membership is required to keep dashboard access.</p>{discordUser?.discordUsername && <small>@{discordUser.discordUsername}</small>}</div>
+            {discordUser?.discordAvatar && <img className="dashboard-connection-avatar" src={discordUser.discordAvatar} alt="Discord avatar" />}
+          </section>
+          <div className="dashboard-connection-help"><DashboardNavIcon name="shield" /><p>Pixlo checks official server membership when you access the dashboard. If you leave the server, dashboard access is locked again.</p></div>
+        </div>}
+        {active === "Dashboard" && <div className="form-stack dashboard-theme-page">
             <SectionIntro title="Dashboard appearance" text="Make your Pixlo workspace feel like yours. These settings change the dashboard only, not your public profile." />
             {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>Premium dashboard themes</h3><p>Custom dashboard backgrounds and animated interface text are included with Pixlo Premium.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <>
               <section className="dashboard-theme-master">
@@ -1329,7 +1340,7 @@ export default function Dashboard() {
 
           {active === "Gradients" && <div className="form-stack">
             <SectionIntro title="Animated gradients" text="Create smoothly looping gradients for your profile text, socials and badges." />
-            {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>✦ Premium feature</h3><p>Animated gradients are available to Pixlo Premium members.</p><button type="button" className="save-button" onClick={() => setActive("Presets")}>View Premium</button></div> : <>
+            {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>✦ Premium feature</h3><p>Animated gradients are available to Pixlo Premium members.</p><button type="button" className="save-button" onClick={() => navigateDashboard("premium", "Presets")}>View Premium</button></div> : <>
               <div className="premium-gradient-note">When enabled, each gradient overrides that category’s regular colours. Disable it to restore your existing colours. Animation loops smoothly and continuously.</div>
               {([{key:"Text",enabled:"gradientTextEnabled",colours:"gradientTextColours",description:"Display name, username, description and location"},{key:"Socials",enabled:"gradientSocialsEnabled",colours:"gradientSocialsColours",description:"Social icons and custom-link icons"},{key:"Badges",enabled:"gradientBadgesEnabled",colours:"gradientBadgesColours",description:"Profile badges and badge icons"}] as const).map(group => <div className="premium-gradient-card" key={group.key}><div className="premium-gradient-card-head"><div><h3>{group.key} gradient</h3><p>{group.description}</p></div><Toggle value={Boolean(settings[group.enabled])} onChange={value => set(group.enabled, value)} /></div><div className="premium-gradient-swatch" style={{background: `linear-gradient(110deg, ${settings[group.colours][0]}, ${settings[group.colours][1]}, ${settings[group.colours][2]}, ${settings[group.colours][0]})`}} /><div className="premium-gradient-colours">{([0,1,2] as const).map(index => <Colour key={index} label={`Colour ${index+1}`} value={settings[group.colours][index]} onChange={value => set(group.colours, settings[group.colours].map((colour, i) => i === index ? value : colour) as [string,string,string])} />)}</div></div>)}
             </>}
