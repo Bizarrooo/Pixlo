@@ -58,7 +58,7 @@ async function loadGoogleFont(family: string, sample: string): Promise<ArrayBuff
       });
       if (!cssResponse.ok) return null;
       const css = await cssResponse.text();
-      const resource = css.match(/src:\s*url\((https:\/\/[^)]+)\)\s*format\('(truetype|opentype)'\)/i);
+      const resource = css.match(/src:\s*url\((https:\/\/[^)]+)\)\s*format\('(truetype|opentype|woff)'\)/i);
       if (!resource?.[1]) return null;
       const fontResponse = await fetch(resource[1], {
         cache: "force-cache",
@@ -173,7 +173,7 @@ export async function renderShareCoverImage(
     : "none";
   const selectedFont = profileFontName(profile);
   const googleFont = FONT_ALIASES[selectedFont] || "Inter";
-  const fontData = await loadGoogleFont(googleFont, displayName);
+  const fontData = await loadGoogleFont(googleFont, displayName + " Made with Pixlo");
   const renderedFontFamily = fontData ? "PixloShareName" : "Arial, sans-serif";
   const fontOptions = fontData
     ? [{ name: "PixloShareName", data: fontData, weight: 800 as const, style: "normal" as const }]
