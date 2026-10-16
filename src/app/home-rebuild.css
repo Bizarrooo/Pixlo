@@ -572,3 +572,72 @@
 @media (prefers-reduced-motion: reduce) {
   .px-live-profile-card { animation: none !important; }
 }
+
+
+/* Pixel-mosaic fade: flat squares, larger at the artwork edge and smaller as they dissolve. */
+.px-cube-fade {
+  height: 265px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.12) 8%, #000 29%, #000 64%, rgba(0,0,0,.72) 79%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.12) 8%, #000 29%, #000 64%, rgba(0,0,0,.72) 79%, transparent 100%);
+}
+.px-pixel-square {
+  position: absolute;
+  display: block;
+  border-radius: 1px;
+  box-shadow: none;
+  transform: none;
+}
+.px-pixel-square:nth-child(3n) { border-radius: 0; }
+.px-pixel-square:nth-child(2n) { filter: none; }
+
+/* Keep the hero showcase as the plain, real profile page — no fake browser chrome,
+   orbit graphics, labels, or extra card decorations around it. */
+.px-live-profile-card {
+  width: min(100%, 440px);
+  margin: 0 auto;
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: 0 24px 70px rgba(20, 7, 5, .24);
+  animation: px-profile-float 8s ease-in-out infinite !important;
+}
+.px-live-profile-card .px-live-profile-orbit,
+.px-live-profile-card .px-live-profile-chrome,
+.px-live-profile-card .px-live-profile-footer,
+.px-live-profile-card .px-live-profile-caption-bottom { display: none !important; }
+.px-live-profile-card .px-live-profile-frame {
+  overflow: hidden;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.px-live-profile-card .px-live-profile-iframe,
+.px-live-profile-frame .px-live-profile-iframe {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  pointer-events: none;
+}
+@media (max-width: 1100px) {
+  .px-live-profile-card { width: min(100%, 415px); }
+  .px-live-profile-card .px-live-profile-iframe { height: 475px; }
+}
+@media (max-width: 800px) {
+  .px-cube-fade { height: 220px; }
+  .px-live-profile-card { width: min(100%, 490px); }
+  .px-live-profile-card .px-live-profile-iframe { height: 490px; }
+}
+@media (max-width: 560px) {
+  .px-cube-fade { height: 170px; }
+  .px-live-profile-card { border-radius: 10px; }
+  .px-live-profile-card .px-live-profile-iframe { height: 405px; border-radius: 10px; }
+}
