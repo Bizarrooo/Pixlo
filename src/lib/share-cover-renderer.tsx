@@ -54,7 +54,7 @@ async function loadGoogleFont(family: string, sample: string): Promise<ArrayBuff
           "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:27.0) Gecko/20100101 Firefox/27.0",
         },
         cache: "force-cache",
-        signal: AbortSignal.timeout(2800),
+        signal: AbortSignal.timeout(1400),
       });
       if (!cssResponse.ok) return null;
       const css = await cssResponse.text();
@@ -62,7 +62,7 @@ async function loadGoogleFont(family: string, sample: string): Promise<ArrayBuff
       if (!resource?.[1]) return null;
       const fontResponse = await fetch(resource[1], {
         cache: "force-cache",
-        signal: AbortSignal.timeout(2800),
+        signal: AbortSignal.timeout(1400),
       });
       if (!fontResponse.ok) return null;
       const fontData = await fontResponse.arrayBuffer();
@@ -95,7 +95,7 @@ export async function fetchStoredGifAsset(value: string): Promise<{ bytes: Buffe
     }
     const response = await fetch(assetUrl.toString(), {
       cache: "no-store",
-      signal: AbortSignal.timeout(6500),
+      signal: AbortSignal.timeout(4200),
     });
     if (!response.ok) return null;
     const contentType = (response.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
@@ -152,7 +152,7 @@ export async function renderShareCoverImage(
   const backgroundImageUrl = mode === "full"
     ? profile?.shareCoverImageUrl || profile?.backgroundImageUrl || ""
     : "";
-  const backgroundImageSource = await embedStoredCoverImage(backgroundImageUrl);
+  const backgroundImageSourcePromise = embedStoredCoverImage(backgroundImageUrl);
   const baseNameSize = Math.min(130, (profile?.shareCoverNameSize ?? 66) * 1.18);
   const displayFontSize = displayName.length > 30
     ? Math.min(78, baseNameSize)
@@ -173,7 +173,10 @@ export async function renderShareCoverImage(
     : "none";
   const selectedFont = profileFontName(profile);
   const googleFont = FONT_ALIASES[selectedFont] || "Inter";
-  const fontData = await loadGoogleFont(googleFont, displayName + " Made with Pixlo");
+  const [backgroundImageSource, fontData] = await Promise.all([
+    backgroundImageSourcePromise,
+    loadGoogleFont(googleFont, displayName + " Made with Pixlo"),
+  ]);
   const renderedFontFamily = fontData ? "PixloShareName" : "Arial, sans-serif";
   const fontOptions = fontData
     ? [{ name: "PixloShareName", data: fontData, weight: 800 as const, style: "normal" as const }]

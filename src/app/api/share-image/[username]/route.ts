@@ -1,4 +1,3 @@
-import sharp from "sharp";
 import { getPublicProfileShareData } from "../../../../lib/public-profile-share";
 import {
   fetchStoredGifAsset,
@@ -26,8 +25,14 @@ export async function GET(
 
   if (coverUrl && isAnimatedGifAsset(coverUrl)) {
     const gif = await fetchStoredGifAsset(coverUrl);
-    if (gif) {
-      try {
+    if (!gif) {
+      return new Response(null, {
+        status: 302,
+        headers: { ...responseHeaders, Location: coverUrl },
+      });
+    }
+    try {
+        const { default: sharp } = await import("sharp");
         const input = sharp(gif.bytes, { animated: true, failOn: "none", limitInputPixels: 100_000_000 });
         const metadata = await input.metadata();
         // Extremely long/large animations are passed through intact instead of exhausting the image function.
@@ -44,9 +49,8 @@ export async function GET(
             headers: { ...responseHeaders, "Content-Type": "image/gif" },
           });
         }
-      } catch {
-        // If this particular animation cannot be composited, still show its animation instead of a blank card.
-      }
+    } catch {
+      // If this particular animation cannot be composited, still show its animation instead of a blank card.
       return new Response(null, {
         status: 302,
         headers: { ...responseHeaders, Location: coverUrl },

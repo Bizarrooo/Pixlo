@@ -565,9 +565,11 @@ export default function Dashboard() {
 
     // Keep the preview trail lighter while pointer-driven parallax is re-rendering the card.
     const count = parallaxActive ? 1 : Math.min(6, Math.max(1, Math.round(density / 30)));
-    const maxParticles = parallaxActive ? 20 : 120;
+    const maxParticles = parallaxActive ? 32 : 180;
     const lifetime = Math.min(15000, Math.max(300, settings.cursorTrailLifetime));
-    for (let index = 0; index < count; index += 1) {
+    const availableParticleSlots = Math.max(0, maxParticles - layer.childElementCount);
+    const spawnCount = Math.min(count, availableParticleSlots);
+    for (let index = 0; index < spawnCount; index += 1) {
       const particle = document.createElement("span");
       particle.className = "pixlo-cursor-trail";
       particle.textContent = Math.random() > 0.7 ? "✧" : "✦";
@@ -583,7 +585,7 @@ export default function Dashboard() {
       particle.addEventListener("animationend", () => particle.remove(), { once: true });
       layer.appendChild(particle);
     }
-    while (layer.childElementCount > maxParticles) layer.firstElementChild?.remove();
+    // Never trim live particles here: animationend removes each one only after it has faded to opacity 0.
   };
 
   const navigateDashboard = (primary: DashboardPrimarySection, destination: string) => {
@@ -939,7 +941,7 @@ export default function Dashboard() {
   const profileUrl = settingsReady && settings.username.trim() ? `https://pixlo1.vercel.app/user/${encodeURIComponent(settings.username.trim().toLowerCase())}` : "/dashboard";
   const profileShareKey = (() => {
     const parts = [
-      "share-cover-v4-animated-gif-fonts-bigger",
+      "share-cover-v5-preview-fallback-fade-cap",
       settings.displayName,
       settings.nameFont,
       settings.shareCoverImage,

@@ -39,9 +39,11 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     profile?.backgroundVideoUrl || "",
   ]);
   const shareUrl = shareKey ? `${profileUrl}?share=${encodeURIComponent(shareKey)}` : profileUrl;
-  const imageUrl = `${PIXLO_PUBLIC_ORIGIN}/api/share-image/${encodeURIComponent(username)}?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
   const coverAssetUrl = profile?.shareCoverImageUrl || profile?.backgroundImageUrl || "";
   const isGifCover = (() => { try { return new URL(coverAssetUrl).pathname.toLowerCase().endsWith(".gif"); } catch { return false; } })();
+  const staticImageUrl = `${profileUrl}/opengraph-image?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
+  const animatedImageUrl = `${PIXLO_PUBLIC_ORIGIN}/api/share-image/${encodeURIComponent(username)}?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
+  const imageUrl = isGifCover ? animatedImageUrl : staticImageUrl;
   const imageType = isGifCover ? "image/gif" : "image/png";
   const description = "Made with Pixlo";
 
