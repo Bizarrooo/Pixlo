@@ -28,6 +28,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     profile?.avatarUrl || "",
     profile?.avatarDecorationUrl || "",
     profile?.shareCoverImageUrl || "",
+    profile?.nameFont || "Inter",
     String(profile?.shareCoverNameSize ?? 66),
     profile?.shareCoverNameColour || "",
     profile?.shareCoverCreditColour || "",
@@ -38,7 +39,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     profile?.backgroundVideoUrl || "",
   ]);
   const shareUrl = shareKey ? `${profileUrl}?share=${encodeURIComponent(shareKey)}` : profileUrl;
-  const imageUrl = `${profileUrl}/opengraph-image?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
+  const imageUrl = `${PIXLO_PUBLIC_ORIGIN}/api/share-image/${encodeURIComponent(username)}?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
+  const coverAssetUrl = profile?.shareCoverImageUrl || profile?.backgroundImageUrl || "";
+  const isGifCover = (() => { try { return new URL(coverAssetUrl).pathname.toLowerCase().endsWith(".gif"); } catch { return false; } })();
+  const imageType = isGifCover ? "image/gif" : "image/png";
   const description = "Made with Pixlo";
 
   return {
@@ -55,6 +59,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
         url: imageUrl,
         width: 1200,
         height: 630,
+        type: imageType,
         alt: `${displayName} — Made with Pixlo`,
       }],
     },

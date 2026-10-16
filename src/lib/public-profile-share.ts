@@ -8,6 +8,7 @@ export type PublicProfileShareData = {
   avatarUrl: string;
   avatarDecorationUrl: string;
   shareCoverImageUrl: string;
+  nameFont: string;
   shareCoverNameSize: number;
   shareCoverNameColour: string;
   shareCoverCreditColour: string;
@@ -87,6 +88,7 @@ export async function getPublicProfileShareData(usernameInput: string): Promise<
       avatarUrl,
       avatarDecorationUrl,
       shareCoverImageUrl: publicAssetUrl(settings.shareCoverImage),
+      nameFont: typeof settings.nameFont === "string" && settings.nameFont.trim() ? settings.nameFont.trim() : "Inter",
       shareCoverNameSize,
       shareCoverNameColour,
       shareCoverCreditColour,
