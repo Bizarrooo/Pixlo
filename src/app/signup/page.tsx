@@ -150,8 +150,6 @@ export default function SignupPage() {
     <main className="auth-page auth-page-signup">
       <div className="auth-glow auth-glow-a" aria-hidden="true" />
       <div className="auth-glow auth-glow-b" aria-hidden="true" />
-      <div className="auth-world-label auth-world-label-left" aria-hidden="true"><span /> YOUR SPACE ON THE WEB <i> / </i> EST. PIXLO</div>
-      <div className="auth-world-label auth-world-label-right" aria-hidden="true">MADE TO BE YOURS <span>✳</span></div>
 
       <header className="auth-topbar">
         <Link href="/" className="auth-brand" aria-label="Pixlo home"><img className="auth-brand-logo" src="/pixlo-logo.png" alt="Pixlo" /></Link>
@@ -159,7 +157,6 @@ export default function SignupPage() {
           <Link href="/login" className="auth-tab">Log in</Link>
           <Link href="/signup" className="auth-tab is-active" aria-current="page">Register <span aria-hidden="true">↗</span></Link>
         </nav>
-        <Link className="auth-home-link" href="/">Back to home <span aria-hidden="true">↗</span></Link>
       </header>
 
       <section className="auth-card auth-card-signup" aria-labelledby="auth-title">
@@ -172,7 +169,6 @@ export default function SignupPage() {
 
         <div className="auth-card-meta">
           <span className="auth-step-pill"><i /> STEP {step} OF 4</span>
-          <span className="auth-meta-code">CREATE ACCOUNT <b>/</b> 0{step}</span>
         </div>
 
         <div className="auth-heading auth-heading-signup">
@@ -259,11 +255,9 @@ export default function SignupPage() {
 
         <div className="auth-card-footer auth-card-footer-signup">
           <p>Already have an account? <Link href="/login">Log in <span aria-hidden="true">→</span></Link></p>
-          <div><span className="auth-footer-mark">P</span><span>ONE PROFILE.<br /><b>ENDLESS POSSIBILITIES.</b></span><span className="auth-footer-orbit">✳</span></div>
         </div>
       </section>
 
-      <footer className="auth-page-footer"><span>© PIXLO</span><span>YOUR LITTLE CORNER OF THE INTERNET.</span><span>BUILT TO BE YOURS <i>✳</i></span></footer>
     </main>
   );
 }
