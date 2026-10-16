@@ -26,33 +26,44 @@ async function countStorageFiles(url: string, serviceKey: string): Promise<numbe
     let totalFiles = 0;
     let requests = 0;
 
+    // List separate asset folders concurrently instead of waiting on every folder one by one.
     while (pendingPrefixes.length) {
-      const prefix = pendingPrefixes.shift()!;
-      let offset = 0;
-      while (true) {
-        requests += 1;
-        // Avoid holding the public homepage stats request open indefinitely on a very large bucket.
-        if (requests > 250) return null;
+      const batch = pendingPrefixes.splice(0, 8);
+      const results = await Promise.all(batch.map(async prefix => {
+        const entriesForPrefix: StorageEntry[] = [];
+        let offset = 0;
+        while (true) {
+          requests += 1;
+          if (requests > 250) return null;
 
-        const response = await fetch(`${url}/storage/v1/object/list/pixlo-assets`, {
-          method: "POST",
-          headers: {
-            apikey: serviceKey,
-            Authorization: `Bearer ${serviceKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ prefix, limit: 1000, offset, sortBy: { column: "name", order: "asc" } }),
-          cache: "no-store",
-        });
-        if (!response.ok) return null;
-        const entries = await response.json().catch(() => null);
-        if (!Array.isArray(entries)) return null;
+          const response = await fetch(`${url}/storage/v1/object/list/pixlo-assets`, {
+            method: "POST",
+            headers: {
+              apikey: serviceKey,
+              Authorization: `Bearer ${serviceKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ prefix, limit: 1000, offset, sortBy: { column: "name", order: "asc" } }),
+            cache: "no-store",
+          });
+          if (!response.ok) return null;
+          const entries: unknown = await response.json().catch(() => null);
+          if (!Array.isArray(entries)) return null;
+          entriesForPrefix.push(...entries as StorageEntry[]);
+          if (entries.length < 1000) break;
+          offset += entries.length;
+        }
+        return { prefix, entries: entriesForPrefix };
+      }));
 
-        for (const entry of entries as StorageEntry[]) {
+      if (results.some(result => result === null)) return null;
+      for (const result of results) {
+        if (!result) continue;
+        for (const entry of result.entries) {
           if (!entry || typeof entry.name !== "string" || !entry.name) continue;
           const isFolder = entry.id == null && entry.metadata == null;
           if (isFolder) {
-            const childPrefix = `${prefix}${entry.name}/`;
+            const childPrefix = `${result.prefix}${entry.name}/`;
             if (!seenPrefixes.has(childPrefix)) {
               seenPrefixes.add(childPrefix);
               pendingPrefixes.push(childPrefix);
@@ -61,9 +72,6 @@ async function countStorageFiles(url: string, serviceKey: string): Promise<numbe
             totalFiles += 1;
           }
         }
-
-        if (entries.length < 1000) break;
-        offset += entries.length;
       }
     }
     return totalFiles;
@@ -72,12 +80,35 @@ async function countStorageFiles(url: string, serviceKey: string): Promise<numbe
   }
 }
 
+async function countPremiumMembers(url: string, serviceKey: string): Promise<number | null> {
+  try {
+    const liveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
+    const response = await fetch(
+      `${url}/rest/v1/pixlo_premium_entitlements?select=user_id&user_id=neq.${OWNER_USER_ID}&status=eq.active&livemode=eq.${liveMode}&limit=1`,
+      {
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+          Prefer: "count=exact",
+          Range: "0-0",
+        },
+        next: { revalidate: 300 },
+      },
+    );
+    if (!response.ok) return null;
+    await response.json().catch(() => []);
+    return (totalFromContentRange(response.headers.get("content-range")) ?? 0) + 1;
+  } catch {
+    return null;
+  }
+}
 export async function GET() {
   try {
     const { url } = supabaseConfig();
     const publicHeaders = { ...authHeaders(), Prefer: "count=exact" };
     const serviceKey = serverEnv("SUPABASE_SERVICE_ROLE_KEY");
     const fileUploadsPromise = serviceKey ? countStorageFiles(url, serviceKey) : Promise.resolve(null);
+    const premiumMembersPromise = serviceKey ? countPremiumMembers(url, serviceKey) : Promise.resolve(null);
 
     let offset = 0;
     let members: number | null = null;
@@ -110,29 +141,7 @@ export async function GET() {
       offset += PAGE_SIZE;
     }
 
-    const fileUploads = await fileUploadsPromise;
-    let premiumMembers: number | null = null;
-    if (serviceKey) {
-      const liveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
-      const premiumResponse = await fetch(
-        `${url}/rest/v1/pixlo_premium_entitlements?select=user_id&user_id=neq.${OWNER_USER_ID}&status=eq.active&livemode=eq.${liveMode}&limit=1`,
-        {
-          headers: {
-            apikey: serviceKey,
-            Authorization: `Bearer ${serviceKey}`,
-            Prefer: "count=exact",
-            Range: "0-0",
-          },
-          next: { revalidate: 300 },
-        },
-      );
-      if (premiumResponse.ok) {
-        await premiumResponse.json().catch(() => []);
-        // Entitlements are unique by user_id; exclude the always-Premium owner above,
-        // then add them once to the count without fetching the whole entitlement table.
-        premiumMembers = (totalFromContentRange(premiumResponse.headers.get("content-range")) ?? 0) + 1;
-      }
-    }
+    const [fileUploads, premiumMembers] = await Promise.all([fileUploadsPromise, premiumMembersPromise]);
 
     return NextResponse.json(
       {
