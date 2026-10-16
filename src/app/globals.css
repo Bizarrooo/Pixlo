@@ -7374,3 +7374,49 @@ html { scroll-behavior:smooth; }
                 .extras-hero-card{display:flex;align-items:center;justify-content:space-between;gap:24px;overflow:hidden}.extras-eyebrow{font-size:10px;letter-spacing:.19em;color:#ff986b;font-weight:800}.extras-hero-card h3{font-size:27px;letter-spacing:-.045em;margin:9px 0}.extras-hero-card p,.extras-card-heading p{color:rgba(255,255,255,.58);font-size:13px;line-height:1.6;margin:0;max-width:540px}.extras-clock-mark{font-variant-numeric:tabular-nums;font-size:24px;font-weight:800;letter-spacing:-.07em;display:flex;align-items:center;gap:5px;color:#fff;flex-shrink:0}.extras-clock-mark i{color:#ff795b;font-style:normal;animation:extrasBlink 1s steps(2,end) infinite}@keyframes extrasBlink{to{opacity:.25}}
                 .extras-settings-card{display:flex;flex-direction:column;gap:17px}.extras-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.extras-card-heading h3{margin:0 0 6px;font-size:17px}.extras-live-pill{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:.12em;color:#ffab7b;padding:7px 9px;border:1px solid rgba(255,137,95,.22);background:rgba(255,109,77,.07);border-radius:99px}.extras-live-pill i{width:5px;height:5px;background:#ff8c63;border-radius:50%;box-shadow:0 0 9px #ff8c63}.extras-select{width:100%;padding:12px 13px;border-radius:11px;background:#151417;color:#fff;border:1px solid rgba(255,255,255,.12);font:inherit}.extras-layout-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.extras-layout-options button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:7px;padding:13px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.09);color:#fff;cursor:pointer;transition:transform .24s cubic-bezier(.2,.8,.2,1),border-color .24s,background .24s}.extras-layout-options button:hover{transform:translateY(-3px);border-color:rgba(255,135,93,.45)}.extras-layout-options button.chosen{border-color:rgba(255,126,83,.75);background:linear-gradient(135deg,rgba(255,86,66,.12),rgba(255,150,70,.07));box-shadow:0 0 0 1px rgba(255,120,80,.08),0 10px 28px rgba(255,85,50,.06)}.extras-layout-options b{font-size:13px}.extras-layout-options small{font-size:11px;color:rgba(255,255,255,.52)}.extras-layout-preview{height:57px;width:100%;display:flex;gap:5px;align-items:center;padding:6px;border-radius:9px;background:rgba(0,0,0,.2);overflow:hidden}.extras-layout-preview i{display:block;border:1px solid rgba(255,255,255,.15);background:linear-gradient(145deg,rgba(255,95,67,.32),rgba(255,160,79,.08));border-radius:5px;height:75%;flex:1}.extras-pages-preview{justify-content:center}.extras-pages-preview i{height:80%;max-width:22px}.extras-horizontal-preview i{min-width:30px}.extras-vertical-preview{flex-direction:column;align-items:stretch}.extras-vertical-preview i{width:100%;height:9px;flex:none}.extras-page .field{margin-top:0}@media(max-width:700px){.extras-hero-card{align-items:flex-start}.extras-clock-mark{display:none}.extras-layout-options{grid-template-columns:1fr}.extras-layout-preview{height:42px}}
 
+
+
+/* Pixlo gradient + glow compatibility: keep both effects active together. */
+/* Gradient text keeps its animated paint, while filter-based shadows provide the glow.
+   Reassert the gradient paint here because older glow overrides may clear background-image. */
+.profile-page.gradient-text-on .profile-name-row h1.element-glow-name,
+.preview-card.gradient-text-on .preview-name-row b.element-glow-name,
+.profile-page.gradient-text-on .element-glow-description,
+.profile-page.gradient-text-on .element-glow-location,
+.preview-card.gradient-text-on .element-glow-description,
+.preview-card.gradient-text-on .element-glow-location {
+  background-image: var(--gradient-text, linear-gradient(90deg, #ff4d5f, #a855f7, #3b82f6, #ff4d5f)) !important;
+  background-size: 200% 100% !important;
+  background-position: 0% 50%;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  filter:
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .08px) color-mix(in srgb, var(--accent, #ff784c) 95%, transparent))
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .22px) color-mix(in srgb, var(--accent, #ff784c) 72%, transparent))
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .40px) color-mix(in srgb, var(--accent, #ff784c) 45%, transparent)) !important;
+}
+
+/* Social gradients only repaint the icons; preserve the socials glow on their links. */
+.profile-page.gradient-socials-on .element-glow-socials .social,
+.preview-card.gradient-socials-on .element-glow-socials .social-preview-link {
+  filter:
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .08px) color-mix(in srgb, var(--accent, #ff784c) 90%, transparent))
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .22px) color-mix(in srgb, var(--accent, #ff784c) 70%, transparent))
+    drop-shadow(0 0 calc(var(--glow-strength, 18) * .44px) color-mix(in srgb, var(--accent, #ff784c) 45%, transparent)) !important;
+}
+
+/* Keep badge glyph glow while the glyph's own fill animates through the gradient. */
+.profile-page.gradient-badges-on .pixlo-badges-glow .pixlo-badge-icon-tint,
+.preview-card.gradient-badges-on .pixlo-badges-glow .pixlo-badge-icon-tint {
+  filter:
+    drop-shadow(0 0 5px var(--badge-colour, #fff))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--badge-colour, #fff) 78%, transparent)) !important;
+}
+.profile-page.gradient-badges-on .pixlo-badges-glow .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint),
+.preview-card.gradient-badges-on .pixlo-badges-glow .pixlo-profile-badge > span:not(.pixlo-badge-icon-tint) {
+  filter:
+    drop-shadow(0 0 5px var(--badge-colour, #fff))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--badge-colour, #fff) 78%, transparent)) !important;
+}
