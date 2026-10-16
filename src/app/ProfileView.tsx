@@ -142,14 +142,14 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     // with the high-frequency pointer updates and 3D transforms.
     const parallaxActive = settings.parallax;
     const particleCount = parallaxActive ? 1 : Math.min(4, Math.max(1, Math.round(density / 30)));
-    const spawnInterval = parallaxActive ? 32 : 18;
-    const maxParticles = parallaxActive ? 32 : 84;
+    const spawnInterval = parallaxActive ? 48 : 18;
+    const maxParticles = parallaxActive ? 16 : 84;
 
     const handleCursorMove = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
       const now = performance.now();
       const distance = Math.hypot(event.clientX - lastX, event.clientY - lastY);
-      const minDistance = parallaxActive ? Math.max(7, 18 - density * 0.08) : Math.max(3, 13 - density * 0.1);
+      const minDistance = parallaxActive ? Math.max(12, 23 - density * 0.08) : Math.max(3, 13 - density * 0.1);
       if (now - lastSpawnAt < spawnInterval || distance < minDistance) return;
 
       lastSpawnAt = now;
