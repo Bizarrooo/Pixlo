@@ -59,8 +59,6 @@ function LoginContent() {
     <main className="auth-page auth-page-login">
       <div className="auth-glow auth-glow-a" aria-hidden="true" />
       <div className="auth-glow auth-glow-b" aria-hidden="true" />
-      <div className="auth-world-label auth-world-label-left" aria-hidden="true"><span /> YOUR SPACE ON THE WEB <i> / </i> EST. PIXLO</div>
-      <div className="auth-world-label auth-world-label-right" aria-hidden="true">MADE TO BE YOURS <span>✳</span></div>
 
       <header className="auth-topbar">
         <Link href="/" className="auth-brand" aria-label="Pixlo home">
@@ -70,7 +68,6 @@ function LoginContent() {
           <Link href="/login" className="auth-tab is-active" aria-current="page">Log in</Link>
           <Link href="/signup" className="auth-tab">Register <span aria-hidden="true">↗</span></Link>
         </nav>
-        <Link className="auth-home-link" href="/">Back to home <span aria-hidden="true">↗</span></Link>
       </header>
 
       <section className="auth-card auth-card-login" aria-labelledby="auth-title">
@@ -83,7 +80,6 @@ function LoginContent() {
 
         <div className="auth-card-meta">
           <span className="auth-step-pill"><i /> SECURE SIGN-IN</span>
-          <span className="auth-meta-code">PX <b>/</b> ACCOUNT 001</span>
         </div>
 
         <div className="auth-heading auth-heading-login">
@@ -91,8 +87,6 @@ function LoginContent() {
           <h1 id="auth-title">Your space is<br />waiting <em>for you.</em></h1>
           <p>Sign in and pick up right where your corner of the internet left off.</p>
         </div>
-
-        <div className="auth-card-divider"><span /><small>YOUR PIXLO ACCOUNT</small><span /></div>
 
         {verified && (
           <div className="auth-success"><span className="auth-message-icon">✓</span><span><b>Email verified.</b> You're all set to log in.</span></div>
@@ -136,11 +130,9 @@ function LoginContent() {
 
         <div className="auth-card-footer">
           <p>New to Pixlo? <Link href="/signup">Create your account <span aria-hidden="true">→</span></Link></p>
-          <div><span className="auth-footer-mark">P</span><span>YOUR NAME. YOUR LINKS.<br /><b>YOUR PIXLO.</b></span><span className="auth-footer-orbit">✳</span></div>
         </div>
       </section>
 
-      <footer className="auth-page-footer"><span>© PIXLO</span><span>YOUR LITTLE CORNER OF THE INTERNET.</span><span>BUILT TO BE YOURS <i>✳</i></span></footer>
     </main>
   );
 }
