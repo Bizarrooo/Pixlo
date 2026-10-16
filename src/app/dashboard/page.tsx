@@ -152,8 +152,8 @@ function FileUpload({ label, value, accept, type, onChange, note }: { label: str
   const fallbackNote = type === "video" ? "MP4 / WebM · up to 50MB" : type === "audio" ? "MP3 only · up to 50MB" : "Choose a file";
   return <div className="upload-row"><div><b>{label}</b><span>{value ? "File selected" : note || fallbackNote}</span></div><label className={`upload-button ${busy ? "upload-busy" : ""}`}>{busy ? "Saving…" : "Browse"}<input type="file" accept={accept} onChange={handle} disabled={busy} /></label>{value && <button type="button" className="clear-button" onClick={async () => { await deleteAsset(value); onChange(""); }}>Clear</button>}</div>;
 }
-function SectionIntro({ title }: { number?: string; title: string; text?: string }) {
-  return <div className="section-intro"><h2>{title}</h2></div>;
+function SectionIntro({ title, text }: { number?: string; title: string; text?: string }) {
+  return <div className="section-intro"><h2>{title}</h2>{text && <p>{text}</p>}</div>;
 }
 
 
