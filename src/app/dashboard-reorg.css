@@ -1455,12 +1455,12 @@ body:has(.dashboard.dashboard-revamp) {
 .dashboard.dashboard-revamp .share-cover-preview-background { object-fit:cover; z-index:-2; }
 .dashboard.dashboard-revamp .share-cover-preview-overlay { z-index:-1; background:linear-gradient(rgba(7,7,9,.25),rgba(7,7,9,.62)); pointer-events:none; }
 .dashboard.dashboard-revamp .share-cover-preview-content { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:3.5% 7%; text-align:center; }
-.dashboard.dashboard-revamp .share-cover-preview-avatar-wrap { position:relative; width:clamp(64px,22cqw,264px); aspect-ratio:1; display:flex; align-items:center; justify-content:center; margin-bottom:2%; overflow:visible; }
+.dashboard.dashboard-revamp .share-cover-preview-avatar-wrap { position:relative; width:clamp(64px,24cqw,288px); aspect-ratio:1; display:flex; align-items:center; justify-content:center; margin-bottom:2%; overflow:visible; }
 .dashboard.dashboard-revamp .share-cover-preview-avatar,.dashboard.dashboard-revamp .share-cover-preview-avatar-fallback { display:flex; align-items:center; justify-content:center; width:82.5%; height:82.5%; border-radius:50%; object-fit:cover; border:none !important; outline:none !important; box-shadow:none !important; background:transparent; }
 .dashboard.dashboard-revamp .share-cover-preview-avatar-fallback { color:#fff; font-size:3.2rem; font-weight:800; }
 .dashboard.dashboard-revamp .share-cover-preview-decoration { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none; }
 .dashboard.dashboard-revamp .share-cover-preview-name { max-width:100%; color:#fff; font-weight:800; line-height:1.1; overflow-wrap:anywhere; }
-.dashboard.dashboard-revamp .share-cover-preview-credit { margin-top:1cqw; color:rgba(255,255,255,.83); font-size:1.5cqw; font-weight:500; }
+.dashboard.dashboard-revamp .share-cover-preview-credit { margin-top:1cqw; color:rgba(255,255,255,.83); font-size:1.7cqw; font-weight:500; }
 .dashboard.dashboard-revamp .share-cover-preview-help { margin:12px 0 0; color:#a9a09b; font-size:11px; line-height:1.6; }
 .dashboard.dashboard-revamp .share-cover-controls { display:flex; flex-direction:column; gap:15px; min-width:0; padding:16px; border:1px solid rgba(255,255,255,.1); border-radius:16px; background:rgba(13,11,12,.68); }
 @media (max-width:940px) { .dashboard.dashboard-revamp .share-cover-editor-layout { grid-template-columns:minmax(0,1fr); } .dashboard.dashboard-revamp .share-cover-preview-panel { padding:10px; } }

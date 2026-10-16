@@ -424,9 +424,10 @@ export default function Dashboard() {
           if (!value.startsWith("idb:")) return value;
           try { return await migrateAssetToCloud(value) || value; } catch { return value; }
         };
-        const [avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks] = await Promise.all([
+        const [avatar, banner, shareCoverImage, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks] = await Promise.all([
           migrate(loaded.avatar),
           migrate(loaded.banner),
+          migrate(loaded.shareCoverImage),
           migrate(loaded.backgroundImage),
           migrate(loaded.backgroundVideo),
           migrate(loaded.enterScreenBackgroundImage),
@@ -434,7 +435,7 @@ export default function Dashboard() {
           Promise.all(loaded.musicTracks.map(async track => ({ ...track, cover: await migrate(track.cover), audio: await migrate(track.audio) }))),
           Promise.all(loaded.customLinks.map(async link => ({ ...link, icon: await migrate(link.icon) }))),
         ]);
-        loaded = { ...loaded, avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
+        loaded = { ...loaded, avatar, banner, shareCoverImage, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
         if (accountEmail) rememberPixloAccount({
           email: accountEmail, username, userId: authUser.id, displayName,
           ...(typeof avatar === "string" && /^https?:\/\//i.test(avatar) ? { avatar } : {}),
@@ -938,7 +939,7 @@ export default function Dashboard() {
   const profileUrl = settingsReady && settings.username.trim() ? `https://pixlo1.vercel.app/user/${encodeURIComponent(settings.username.trim().toLowerCase())}` : "/dashboard";
   const profileShareKey = (() => {
     const parts = [
-      "share-cover-v2-no-video-glow",
+      "share-cover-v3-cover-image-glow-size",
       settings.displayName,
       settings.shareCoverImage,
       String(settings.shareCoverNameSize),
@@ -1613,7 +1614,7 @@ export default function Dashboard() {
                     </div>
                     <div className="share-cover-preview-name" style={{
                       color: settings.shareCoverNameColour,
-                      fontSize: `${(settings.shareCoverNameSize / 1200) * 100}cqw`,
+                      fontSize: `${(settings.shareCoverNameSize * 1.08 / 1200) * 100}cqw`,
                       textShadow: settings.shareCoverNameGlow ? `0 0 ${Math.max(8, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.2)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(1, Math.max(0.6, Math.max(20, settings.shareCoverNameGlowIntensity) / 100)))}, 0 0 ${Math.max(16, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.48)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(0.85, Math.max(0.4, Math.max(20, settings.shareCoverNameGlowIntensity) / 140)))} , 0 0 ${Math.max(28, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.82)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(0.6, Math.max(0.22, Math.max(20, settings.shareCoverNameGlowIntensity) / 320)))}` : "none",
                       filter: settings.shareCoverNameGlow ? `drop-shadow(0 0 ${Math.max(10, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.22)}px ${rgbaFromHex(settings.shareCoverNameColour, 0.9)}) drop-shadow(0 0 ${Math.max(18, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.42)}px ${rgbaFromHex(settings.shareCoverNameColour, 0.55)})` : "none",
                     }}>{settings.displayName || settings.username}</div>
