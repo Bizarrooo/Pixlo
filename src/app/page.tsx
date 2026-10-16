@@ -30,8 +30,10 @@ function FeatureIcon({ kind }: { kind: "style" | "links" | "music" | "badge" }) 
 
 function ProfileArtwork() {
   const [tilt, setTilt] = useState({ x: 0, y: 0, pointerX: 50, pointerY: 50 });
+  const [returning, setReturning] = useState(false);
 
   function moveCard(event: ReactPointerEvent<HTMLAnchorElement>) {
+    setReturning(false);
     const bounds = event.currentTarget.getBoundingClientRect();
     if (!bounds.width || !bounds.height) return;
     const pointerX = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
@@ -45,6 +47,7 @@ function ProfileArtwork() {
   }
 
   function resetCard() {
+    setReturning(true);
     setTilt({ x: 0, y: 0, pointerX: 50, pointerY: 50 });
   }
 
@@ -58,7 +61,7 @@ function ProfileArtwork() {
   return (
     <a
       href="/user/biz"
-      className="px-live-profile-card"
+      className={`px-live-profile-card ${returning ? "is-returning" : ""}`}
       aria-label="Open Bizarro's real Pixlo profile"
       style={parallaxStyle}
       onPointerMove={moveCard}
