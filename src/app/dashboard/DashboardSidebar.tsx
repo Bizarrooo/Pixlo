@@ -162,16 +162,16 @@ export default function DashboardSidebar({
         </div>
 
         <button type="button" className={`dashboard-nav-item ${activePrimary === "customize" ? "active" : ""}`} onClick={() => select("customize", "General")}><DashboardNavIcon name="palette" className="dashboard-nav-icon" /><b>Customize</b></button>
-        {isPremium && <button type="button" className={`dashboard-nav-item dashboard-optimise-entry ${activePrimary === "optimise" ? "active" : ""}`} onClick={() => select("optimise", "Cursor Effects")}><DashboardNavIcon name="sparkles" className="dashboard-nav-icon" /><b>Optimise</b><span className="dashboard-nav-badge">PRO</span></button>}
         <button type="button" className={`dashboard-nav-item ${activePrimary === "links" ? "active" : ""}`} onClick={() => select("links", "Socials")}><DashboardNavIcon name="link" className="dashboard-nav-icon" /><b>Links</b></button>
 
-        <div className={`premium-nav-group ${premiumOpen || activePrimary === "premium" ? "premium-nav-group-open" : ""}`}>
-          <button type="button" className={`dashboard-nav-item dashboard-nav-group-trigger premium-nav-heading premium-nav-toggle ${activePrimary === "premium" ? "active" : ""}`} aria-expanded={premiumOpen || activePrimary === "premium"} onClick={() => {
+        <div className={`premium-nav-group ${premiumOpen || activePrimary === "premium" || activePrimary === "optimise" ? "premium-nav-group-open" : ""}`}>
+          <button type="button" className={`dashboard-nav-item dashboard-nav-group-trigger premium-nav-heading premium-nav-toggle ${activePrimary === "premium" ? "active" : ""}`} aria-expanded={premiumOpen || activePrimary === "premium" || activePrimary === "optimise"} onClick={() => {
             if (activePrimary !== "premium") { select("premium", "Presets"); setPremiumOpen(true); }
             else setPremiumOpen(value => !value);
           }}><DashboardNavIcon name="crown" className="dashboard-nav-icon" /><b>Premium</b><DashboardNavIcon name="chevron" className={`dashboard-nav-caret ${premiumOpen || activePrimary === "premium" ? "is-open" : ""}`} /></button>
           <div className="premium-nav-items">
             <button type="button" className={active === "Presets" ? "active premium-nav-button premium-presets-nav-button" : "premium-nav-button premium-presets-nav-button"} onClick={() => select("premium", "Presets")}><DashboardNavIcon name="layers" className="dashboard-nav-icon" /><b>Presets</b></button>
+            {isPremium && <button type="button" className={activePrimary === "optimise" ? "active premium-nav-button premium-optimise-nav-button" : "premium-nav-button premium-optimise-nav-button"} onClick={() => select("optimise", "Cursor Effects")}><DashboardNavIcon name="sparkles" className="dashboard-nav-icon" /><b>Optimise</b><span className="dashboard-nav-badge">PRO</span></button>}
           </div>
         </div>
 
