@@ -558,14 +558,14 @@ export default function Dashboard() {
     const distance = Math.hypot(x - previous.x, y - previous.y);
     const density = Math.min(100, Math.max(20, settings.cursorTrailDensity));
     const parallaxActive = settings.parallax;
-    const spawnInterval = parallaxActive ? 32 : 18;
-    const minDistance = parallaxActive ? Math.max(7, 18 - density * 0.08) : Math.max(3, 13 - density * 0.1);
+    const spawnInterval = parallaxActive ? 48 : 18;
+    const minDistance = parallaxActive ? Math.max(12, 23 - density * 0.08) : Math.max(3, 13 - density * 0.1);
     if (now - previous.at < spawnInterval || distance < minDistance) return;
     previewCursorTrailLastSpawnRef.current = { x, y, at: now };
 
     // Keep the preview trail lighter while pointer-driven parallax is re-rendering the card.
     const count = parallaxActive ? 1 : Math.min(4, Math.max(1, Math.round(density / 30)));
-    const maxParticles = parallaxActive ? 32 : 84;
+    const maxParticles = parallaxActive ? 16 : 84;
     const lifetime = Math.min(4000, Math.max(300, settings.cursorTrailLifetime));
     for (let index = 0; index < count; index += 1) {
       const particle = document.createElement("span");
