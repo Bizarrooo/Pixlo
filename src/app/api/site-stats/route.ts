@@ -16,10 +16,68 @@ function totalFromContentRange(value: string | null): number | null {
   return match ? Number(match[1]) : null;
 }
 
+
+type StorageEntry = { name?: unknown; id?: unknown; metadata?: unknown };
+
+async function countStorageFiles(url: string, serviceKey: string): Promise<number | null> {
+  try {
+    const pendingPrefixes = [""];
+    const seenPrefixes = new Set<string>([""]);
+    let totalFiles = 0;
+    let requests = 0;
+
+    while (pendingPrefixes.length) {
+      const prefix = pendingPrefixes.shift()!;
+      let offset = 0;
+      while (true) {
+        requests += 1;
+        // Avoid holding the public homepage stats request open indefinitely on a very large bucket.
+        if (requests > 250) return null;
+
+        const response = await fetch(`${url}/storage/v1/object/list/pixlo-assets`, {
+          method: "POST",
+          headers: {
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prefix, limit: 1000, offset, sortBy: { column: "name", order: "asc" } }),
+          cache: "no-store",
+        });
+        if (!response.ok) return null;
+        const entries = await response.json().catch(() => null);
+        if (!Array.isArray(entries)) return null;
+
+        for (const entry of entries as StorageEntry[]) {
+          if (!entry || typeof entry.name !== "string" || !entry.name) continue;
+          const isFolder = entry.id == null && entry.metadata == null;
+          if (isFolder) {
+            const childPrefix = `${prefix}${entry.name}/`;
+            if (!seenPrefixes.has(childPrefix)) {
+              seenPrefixes.add(childPrefix);
+              pendingPrefixes.push(childPrefix);
+            }
+          } else {
+            totalFiles += 1;
+          }
+        }
+
+        if (entries.length < 1000) break;
+        offset += entries.length;
+      }
+    }
+    return totalFiles;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET() {
   try {
     const { url } = supabaseConfig();
     const publicHeaders = { ...authHeaders(), Prefer: "count=exact" };
+    const serviceKey = serverEnv("SUPABASE_SERVICE_ROLE_KEY");
+    const fileUploadsPromise = serviceKey ? countStorageFiles(url, serviceKey) : Promise.resolve(null);
 
     let offset = 0;
     let members: number | null = null;
@@ -52,8 +110,8 @@ export async function GET() {
       offset += PAGE_SIZE;
     }
 
+    const fileUploads = await fileUploadsPromise;
     let premiumMembers: number | null = null;
-    const serviceKey = serverEnv("SUPABASE_SERVICE_ROLE_KEY");
     if (serviceKey) {
       const liveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
       const premiumResponse = await fetch(
@@ -81,6 +139,7 @@ export async function GET() {
         totalProfileViews,
         members: members ?? totalRows,
         premiumMembers,
+        fileUploads,
         updatedAt: new Date().toISOString(),
       },
       { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } },
