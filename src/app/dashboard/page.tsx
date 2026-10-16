@@ -962,21 +962,66 @@ export default function Dashboard() {
   }
 
   if (!discordUser) {
-    return <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "radial-gradient(ellipse at top, rgba(255,155,74,.14), transparent 55%), #09090d", color: "#fff", fontFamily: "Inter, system-ui, sans-serif" }}>
-      <section style={{ width: "min(100%, 520px)", padding: "clamp(24px, 5vw, 42px)", borderRadius: 24, border: "1px solid rgba(255,255,255,.12)", background: "rgba(19,19,25,.92)", boxShadow: "0 28px 100px rgba(0,0,0,.45)", textAlign: "center" }}>
-        <div style={{ width: 64, height: 64, margin: "0 auto 22px", display: "grid", placeItems: "center", borderRadius: 20, background: "rgba(88,101,242,.16)", color: "#9da8ff" }}><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.54 5.12a16.9 16.9 0 0 0-3.98-1.25l-.52 1.06a15.4 15.4 0 0 0-6.08 0L8.44 3.87a16.9 16.9 0 0 0-3.98 1.25C1.94 8.86 1.24 12.5 1.59 16.08a16.98 16.98 0 0 0 5.05 2.55l1.22-1.67c-.68-.25-1.33-.56-1.94-.94l.48-.37a12.35 12.35 0 0 0 11.2 0l.49.37c-.61.38-1.26.69-1.94.94l1.22 1.67a16.98 16.98 0 0 0 5.05-2.55c.41-4.15-.7-7.76-2.88-10.96ZM8.4 14.1c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Zm7.2 0c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Z"/></svg></div>
-        <p style={{ margin: "0 0 10px", color: "#ffbd79", fontSize: 12, fontWeight: 800, letterSpacing: ".16em", textTransform: "uppercase" }}>One quick setup step</p>
-        <h1 style={{ margin: "0 0 12px", fontSize: "clamp(26px, 5vw, 34px)", letterSpacing: "-.04em" }}>Link Discord to use Pixlo</h1>
-        <p style={{ margin: "0 auto 24px", maxWidth: 390, color: "rgba(255,255,255,.72)", lineHeight: 1.7 }}>To use your dashboard, first join the official Pixlo Discord server and connect your Discord account. This also unlocks your Discord-linked badges and rewards.</p>
-        {discordNotice === "not-member" && <p role="alert" style={{ margin: "0 0 18px", padding: 12, borderRadius: 12, background: "rgba(255,170,70,.1)", color: "#ffd09b", lineHeight: 1.55 }}>{discordDetail || "Join the official Pixlo Discord server first, then link your account."}</p>}
-        {(discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked") && <p role="alert" style={{ margin: "0 0 18px", padding: 12, borderRadius: 12, background: "rgba(255,80,80,.1)", color: "#ffb0b0", lineHeight: 1.55 }}>{discordDetail || (discordNotice === "cancelled" ? "Discord linking was cancelled. Link Discord to continue." : discordNotice === "already-linked" ? "That Discord account is already linked to another Pixlo account. Use the correct Discord account to continue." : "Discord could not be linked. Please try again.")}</p>}
-        <div style={{ display: "grid", gap: 12 }}>
-          <a href="https://discord.gg/Bkz4P9gVy7" target="_blank" rel="noreferrer" style={{ display: "block", padding: "14px 18px", borderRadius: 12, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.13)", color: "#fff", textDecoration: "none", fontWeight: 700 }}>1. Join the official Pixlo server ↗</a>
-          <a href="/api/auth/discord" style={{ display: "block", padding: "14px 18px", borderRadius: 12, background: "linear-gradient(100deg,#ff9c4a,#ff6c52)", color: "#17110d", textDecoration: "none", fontWeight: 800 }}>2. Link Discord to continue ↗</a>
-        </div>
-        <p style={{ margin: "18px 0 0", color: "rgba(255,255,255,.45)", fontSize: 12 }}>Your dashboard stays locked until Discord is linked and server membership is confirmed.</p>
-      </section>
-    </main>;
+    return (
+      <main className="auth-page auth-page-discord-gate">
+        <div className="auth-glow auth-glow-a" aria-hidden="true" />
+        <div className="auth-glow auth-glow-b" aria-hidden="true" />
+        <header className="auth-topbar auth-gate-topbar">
+          <a href="/" className="auth-brand" aria-label="Pixlo home">
+            <img className="auth-brand-logo" src="/pixlo-logo.png" alt="Pixlo" />
+          </a>
+        </header>
+
+        <section className="auth-card auth-card-discord" aria-labelledby="discord-gate-title">
+          <div className="auth-card-rails" aria-hidden="true">
+            <i className="auth-rail auth-rail-tl-top" /><i className="auth-rail auth-rail-tl-side" />
+            <i className="auth-rail auth-rail-tr-top" /><i className="auth-rail auth-rail-tr-side" />
+            <i className="auth-rail auth-rail-bl-side" /><i className="auth-rail auth-rail-bl-bottom" />
+            <i className="auth-rail auth-rail-br-bottom" /><i className="auth-rail auth-rail-br-side" />
+          </div>
+
+          <div className="auth-discord-emblem" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.54 5.12a16.9 16.9 0 0 0-3.98-1.25l-.52 1.06a15.4 15.4 0 0 0-6.08 0L8.44 3.87a16.9 16.9 0 0 0-3.98 1.25C1.94 8.86 1.24 12.5 1.59 16.08a16.98 16.98 0 0 0 5.05 2.55l1.22-1.67c-.68-.25-1.33-.56-1.94-.94l.48-.37a12.35 12.35 0 0 0 11.2 0l.49.37c-.61.38-1.26.69-1.94.94l1.22 1.67a16.98 16.98 0 0 0 5.05-2.55c.41-4.15-.7-7.76-2.88-10.96ZM8.4 14.1c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Zm7.2 0c-1.05 0-1.9-.98-1.9-2.19s.84-2.19 1.9-2.19 1.92.98 1.9 2.19c0 1.21-.85 2.19-1.9 2.19Z" />
+            </svg>
+          </div>
+
+          <div className="auth-heading auth-heading-discord">
+            <h1 id="discord-gate-title">Unlock your <em>Pixlo dashboard.</em></h1>
+            <p>Join the official Pixlo Discord and connect your account to continue. Your linked badges and rewards come with it.</p>
+          </div>
+
+          {discordNotice === "not-member" && (
+            <div className="auth-error auth-gate-message" role="alert">
+              <span className="auth-message-icon">!</span>
+              <span>{discordDetail || "Join the official Pixlo Discord server first, then link your account."}</span>
+            </div>
+          )}
+          {(discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked") && (
+            <div className="auth-error auth-gate-message" role="alert">
+              <span className="auth-message-icon">!</span>
+              <span>{discordDetail || (discordNotice === "cancelled" ? "Discord linking was cancelled. Try again when you're ready." : discordNotice === "already-linked" ? "That Discord account is already linked to another Pixlo account. Use the correct Discord account to continue." : "Discord could not be linked. Please try again.")}</span>
+            </div>
+          )}
+
+          <div className="auth-gate-actions">
+            <a href="https://discord.gg/Bkz4P9gVy7" target="_blank" rel="noreferrer" className="auth-gate-join">
+              <span className="auth-gate-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </span>
+              <span className="auth-gate-action-copy"><b>Join the Pixlo Discord</b><small>Become a server member first</small></span>
+              <span className="auth-gate-arrow" aria-hidden="true">↗</span>
+            </a>
+            <a href="/api/auth/discord" className="auth-submit auth-gate-connect">
+              <span>Connect Discord</span>
+              <span className="auth-submit-arrow" aria-hidden="true">↗</span>
+            </a>
+          </div>
+
+          <div className="auth-gate-note"><span className="auth-gate-note-dot" /> Your dashboard unlocks once your Discord link and server membership are verified.</div>
+        </section>
+      </main>
+    );
   }
 
   return <>
