@@ -147,6 +147,12 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
     const handleCursorMove = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
+      // Prioritise card tracking: don't create/animate particles while the pointer is
+      // interacting with the parallax card. This keeps the mouse coordinates stable.
+      if (settings.parallax && event.target instanceof Element && event.target.closest(".profile-card")) {
+        layer.replaceChildren();
+        return;
+      }
       const now = performance.now();
       const distance = Math.hypot(event.clientX - lastX, event.clientY - lastY);
       const minDistance = parallaxActive ? Math.max(12, 23 - density * 0.08) : Math.max(3, 13 - density * 0.1);
@@ -572,14 +578,14 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           type="button"
           className={`pixlo-share-profile-button ${shareCopied ? "is-copied" : ""}`}
           onClick={copyProfileLink}
-          aria-label={shareCopied ? "Profile link copied" : "Copy your profile link"}
+          aria-label={shareCopied ? "Profile link copied" : "Share your profile link"}
         >
           {shareCopied ? (
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19.5 6.8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           ) : (
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M16 8V5.8A1.8 1.8 0 0 0 14.2 4H5.8A1.8 1.8 0 0 0 4 5.8v8.4A1.8 1.8 0 0 0 5.8 16H8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
           )}
-          <span aria-live="polite">{shareCopied ? "Link copied!" : "Share profile"}</span>
+          <span aria-live="polite">{shareCopied ? "Link copied!" : "Share your profile"}</span>
         </button>,
         document.body
       )}
