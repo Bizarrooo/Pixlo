@@ -1014,3 +1014,273 @@
   .auth-gate-join { gap: 10px; padding: 12px; }
   .auth-gate-action-copy b { font-size: 11px; }
 }
+
+
+/* Hotfix: keep Pixlo's supplied logo transparent and prevent global SVG rules from stretching gate icons. */
+.auth-page .auth-brand,
+.auth-page .auth-brand:hover {
+  display: inline-flex !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+.auth-page .auth-brand::before,
+.auth-page .auth-brand::after {
+  content: none !important;
+  display: none !important;
+}
+.auth-page .auth-brand-logo {
+  display: block !important;
+  width: 116px !important;
+  height: 49px !important;
+  max-width: min(116px, 42vw) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  object-fit: contain !important;
+  filter: none !important;
+}
+
+/* Make the Discord gate compact, orderly and isolated from app-wide element rules. */
+.auth-page-discord-gate {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  min-height: 100vh !important;
+  min-height: 100svh !important;
+  overflow-x: clip !important;
+}
+.auth-page-discord-gate .auth-gate-topbar {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: min(100%, 1280px) !important;
+  min-height: 54px !important;
+}
+.auth-page-discord-gate .auth-card-discord {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: column !important;
+  width: min(100%, 500px) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: clamp(56px, 9vh, 82px) auto 36px !important;
+  padding: 34px 32px 27px !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+}
+.auth-page-discord-gate .auth-discord-emblem {
+  display: grid !important;
+  flex: 0 0 60px !important;
+  place-items: center !important;
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+  height: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
+  margin: 0 auto 22px !important;
+  padding: 0 !important;
+  border-radius: 18px !important;
+}
+.auth-page-discord-gate .auth-discord-emblem::before {
+  inset: -5px !important;
+}
+.auth-page-discord-gate .auth-discord-emblem svg {
+  display: block !important;
+  flex: 0 0 29px !important;
+  width: 29px !important;
+  min-width: 29px !important;
+  max-width: 29px !important;
+  height: 29px !important;
+  min-height: 29px !important;
+  max-height: 29px !important;
+  overflow: visible !important;
+}
+.auth-page-discord-gate .auth-heading-discord {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+.auth-page-discord-gate .auth-heading-discord h1 {
+  margin: 0 auto 12px !important;
+  max-width: 410px !important;
+  font-size: clamp(29px, 4vw, 37px) !important;
+  line-height: 1.1 !important;
+  overflow-wrap: normal !important;
+}
+.auth-page-discord-gate .auth-heading-discord p {
+  display: block !important;
+  width: 100% !important;
+  max-width: 390px !important;
+  margin: 0 auto !important;
+  color: rgba(255,235,216,.67) !important;
+  font-size: 12px !important;
+  line-height: 1.7 !important;
+}
+.auth-page-discord-gate .auth-gate-actions {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  gap: 10px !important;
+  margin-top: 24px !important;
+}
+.auth-page-discord-gate .auth-gate-join {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 62px !important;
+  box-sizing: border-box !important;
+  gap: 12px !important;
+  padding: 11px 13px !important;
+  white-space: normal !important;
+  line-height: normal !important;
+}
+.auth-page-discord-gate .auth-gate-action-icon {
+  display: grid !important;
+  flex: 0 0 36px !important;
+  place-items: center !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+}
+.auth-page-discord-gate .auth-gate-action-icon svg {
+  display: block !important;
+  flex: 0 0 16px !important;
+  width: 16px !important;
+  min-width: 16px !important;
+  max-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  max-height: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  transform: none !important;
+}
+.auth-page-discord-gate .auth-gate-action-copy {
+  display: grid !important;
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  gap: 4px !important;
+  text-align: left !important;
+  white-space: normal !important;
+}
+.auth-page-discord-gate .auth-gate-action-copy b {
+  display: block !important;
+  margin: 0 !important;
+  color: #fff0e3 !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+}
+.auth-page-discord-gate .auth-gate-action-copy small {
+  display: block !important;
+  margin: 0 !important;
+  color: rgba(255,222,200,.52) !important;
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+}
+.auth-page-discord-gate .auth-gate-arrow {
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  height: auto !important;
+  margin-left: auto !important;
+  font-size: 17px !important;
+  line-height: 1 !important;
+}
+.auth-page-discord-gate a.auth-gate-connect {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 51px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 10px 13px 10px 18px !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+}
+.auth-page-discord-gate .auth-gate-connect > span:first-child {
+  display: block !important;
+  min-width: 0 !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  color: #29130b !important;
+}
+.auth-page-discord-gate .auth-gate-connect .auth-submit-arrow {
+  display: grid !important;
+  flex: 0 0 27px !important;
+  place-items: center !important;
+  width: 27px !important;
+  min-width: 27px !important;
+  max-width: 27px !important;
+  height: 27px !important;
+  min-height: 27px !important;
+  max-height: 27px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
+}
+.auth-page-discord-gate .auth-gate-note {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 390px !important;
+  gap: 8px !important;
+  margin: 16px auto 0 !important;
+  color: rgba(255,222,200,.48) !important;
+  font-size: 10px !important;
+  line-height: 1.6 !important;
+  text-align: center !important;
+}
+.auth-page-discord-gate .auth-gate-message {
+  display: flex !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 16px 0 0 !important;
+}
+@media (max-width: 480px) {
+  .auth-page-discord-gate .auth-card-discord {
+    width: min(100%, 500px) !important;
+    margin-top: 55px !important;
+    margin-bottom: 20px !important;
+    padding: 29px 20px 23px !important;
+  }
+  .auth-page-discord-gate .auth-discord-emblem { margin-bottom: 19px !important; }
+  .auth-page-discord-gate .auth-gate-actions { margin-top: 21px !important; }
+}
