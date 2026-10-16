@@ -28,51 +28,43 @@ function FeatureIcon({ kind }: { kind: "style" | "links" | "music" | "badge" }) 
 function ProfileArtwork() {
   return (
     <a href="/user/biz" className="px-live-profile-card" aria-label="Open Bizarro's real Pixlo profile">
-      <span className="px-live-profile-orbit px-live-profile-orbit-one" aria-hidden="true" />
-      <span className="px-live-profile-orbit px-live-profile-orbit-two" aria-hidden="true" />
-      <div className="px-live-profile-frame">
-        <div className="px-live-profile-chrome">
-          <span className="px-window-dot px-window-dot-red" />
-          <span className="px-window-dot px-window-dot-orange" />
-          <span className="px-window-dot px-window-dot-gold" />
-          <span className="px-live-profile-caption">PIXLO / BIZARRO</span>
-          <span className="px-live-indicator"><i /> LIVE PAGE</span>
-        </div>
-        <iframe
-          src="/user/biz?embed=1"
-          title="Bizarro's real Pixlo profile"
-          loading="eager"
-          referrerPolicy="strict-origin-when-cross-origin"
-          tabIndex={-1}
-          aria-hidden="true"
-        />
-        <div className="px-live-profile-footer"><span>@BIZARRO</span><span>OPEN PROFILE <ArrowIcon diagonal /></span></div>
-      </div>
-      <span className="px-live-profile-caption-bottom"><i /> YOUR REAL PAGE. YOUR REAL STYLE. <b>↗</b></span>
+      <iframe
+        className="px-live-profile-iframe"
+        src="/user/biz?embed=1"
+        title="Bizarro's real Pixlo profile"
+        loading="eager"
+        referrerPolicy="strict-origin-when-cross-origin"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
     </a>
   );
 }
 
 function CubeFade() {
-  const cubes = [
-    { left: 5, bottom: 28, size: 25, color: "#ff5b3f" },
-    { left: 12, bottom: 114, size: 19, color: "#ff9a3d" },
-    { left: 19, bottom: 54, size: 33, color: "#ffc55f" },
-    { left: 28, bottom: 143, size: 22, color: "#ff6a35" },
-    { left: 37, bottom: 17, size: 26, color: "#ffad46" },
-    { left: 46, bottom: 94, size: 30, color: "#f74739" },
-    { left: 58, bottom: 38, size: 18, color: "#ffcc6a" },
-    { left: 67, bottom: 127, size: 27, color: "#ff7b35" },
-    { left: 77, bottom: 21, size: 31, color: "#ff553a" },
-    { left: 86, bottom: 88, size: 20, color: "#ffc45a" },
-    { left: 94, bottom: 39, size: 24, color: "#ff8a39" },
+  const squares = [
+    { left: 2, bottom: 4, size: 64, color: "#ff4e39", opacity: .9 },
+    { left: 9, bottom: 35, size: 43, color: "#ff8a35", opacity: .88 },
+    { left: 15, bottom: 8, size: 28, color: "#ffc35d", opacity: .82 },
+    { left: 21, bottom: 57, size: 34, color: "#ff593b", opacity: .78 },
+    { left: 28, bottom: 21, size: 20, color: "#ffad45", opacity: .8 },
+    { left: 34, bottom: 73, size: 25, color: "#ff7434", opacity: .72 },
+    { left: 40, bottom: 12, size: 17, color: "#ffc65e", opacity: .72 },
+    { left: 47, bottom: 43, size: 21, color: "#ff4e39", opacity: .68 },
+    { left: 53, bottom: 7, size: 13, color: "#ff9a3d", opacity: .62 },
+    { left: 59, bottom: 62, size: 17, color: "#ffc35d", opacity: .6 },
+    { left: 65, bottom: 26, size: 12, color: "#ff593b", opacity: .55 },
+    { left: 71, bottom: 81, size: 14, color: "#ff8a35", opacity: .5 },
+    { left: 77, bottom: 15, size: 9, color: "#ffc35d", opacity: .48 },
+    { left: 82, bottom: 47, size: 10, color: "#ff4e39", opacity: .4 },
+    { left: 88, bottom: 22, size: 7, color: "#ff9a3d", opacity: .34 },
+    { left: 93, bottom: 59, size: 6, color: "#ffc35d", opacity: .3 },
+    { left: 97, bottom: 10, size: 5, color: "#ff593b", opacity: .24 },
   ];
   return (
     <div className="px-cube-fade" aria-hidden="true">
-      {cubes.map((cube, index) => (
-        <span key={index} className="px-cube" style={{ left: `${cube.left}%`, bottom: cube.bottom, width: cube.size, height: cube.size, color: cube.color }}>
-          <i className="px-cube-top" /><i className="px-cube-front" /><i className="px-cube-side" />
-        </span>
+      {squares.map((square, index) => (
+        <span key={index} className="px-pixel-square" style={{ left: `${square.left}%`, bottom: square.bottom, width: square.size, height: square.size, backgroundColor: square.color, opacity: square.opacity }} />
       ))}
     </div>
   );
