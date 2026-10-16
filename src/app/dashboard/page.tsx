@@ -1620,7 +1620,7 @@ export default function Dashboard() {
                       textShadow: settings.shareCoverNameGlow ? `0 0 ${Math.max(8, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.2)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(1, Math.max(0.6, Math.max(20, settings.shareCoverNameGlowIntensity) / 100)))}, 0 0 ${Math.max(16, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.48)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(0.85, Math.max(0.4, Math.max(20, settings.shareCoverNameGlowIntensity) / 140)))} , 0 0 ${Math.max(28, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.82)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(0.6, Math.max(0.22, Math.max(20, settings.shareCoverNameGlowIntensity) / 320)))}` : "none",
                       filter: settings.shareCoverNameGlow ? `drop-shadow(0 0 ${Math.max(10, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.22)}px ${rgbaFromHex(settings.shareCoverNameColour, 0.9)}) drop-shadow(0 0 ${Math.max(18, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.42)}px ${rgbaFromHex(settings.shareCoverNameColour, 0.55)})` : "none",
                     }}>{settings.displayName || settings.username}</div>
-                    <div className="share-cover-preview-credit" style={{ color: settings.shareCoverCreditColour }}>Made with Pixlo</div>
+                    <div className="share-cover-preview-credit" style={{ color: settings.shareCoverCreditColour, fontFamily: fontFamily(settings.nameFont) }}>Made with Pixlo</div>
                   </div>
                 </div>
                 <p className="share-cover-preview-help">Live 1200 × 630 preview of the image used by Discord and other apps when this profile URL is shared.</p>
