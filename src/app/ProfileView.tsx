@@ -552,7 +552,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
     parallaxReturnTimerRef.current = null;
     setParallaxReturning(false);
-    if (!pointerBoundsRef.current) pointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
+    if (!pointerBoundsRef.current) pointerBoundsRef.current = event.currentTarget.parentElement?.getBoundingClientRect() || event.currentTarget.getBoundingClientRect();
   };
   const handleCardPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" || !settings.parallax) return;
