@@ -556,7 +556,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   };
   const handleCardPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" || !settings.parallax) return;
-    pointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
+    pointerBoundsRef.current = event.currentTarget.parentElement?.getBoundingClientRect() || event.currentTarget.getBoundingClientRect();
     updateCardPointer(event);
   };
   const resetCardPointer = () => {
