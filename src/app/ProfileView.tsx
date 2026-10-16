@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { defaultSettings, loadSettings, loadSettingsForUsername, normaliseProfileSettings, saveSettingsToStorage, type MusicTrack, type ProfileFont, type ProfileSettings } from "./profile";
 import { loadAsset, loadAssetMedia } from "./assetStore";
 
@@ -74,6 +75,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const pointerBoundsRef = useRef<DOMRect | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLMediaElement>(null);
+  const cursorSparkleLayerRef = useRef<HTMLDivElement>(null);
   const unlockedRef = useRef(false);
   const manualPauseRef = useRef(false);
   const lastSettingsRawRef = useRef("");
@@ -118,6 +120,74 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     setPresetPreviewMode(params.has("presetPreview"));
     setEmbedMode(params.get("embed") === "1");
   }, []);
+
+
+  useEffect(() => {
+    if (!isPremium || !settings.cursorSparklesEnabled || presetPreviewMode || embedMode || !forcedUsername) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+
+    const layer = cursorSparkleLayerRef.current;
+    if (!layer) return;
+
+    let lastX = -100;
+    let lastY = -100;
+    let lastSpawnAt = 0;
+    const density = Math.min(100, Math.max(20, settings.cursorSparklesDensity));
+    const particleCount = Math.min(4, Math.max(1, Math.round(density / 30)));
+
+    const handleCursorMove = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      const now = performance.now();
+      const distance = Math.hypot(event.clientX - lastX, event.clientY - lastY);
+      const minDistance = Math.max(3, 13 - density * 0.1);
+      if (now - lastSpawnAt < 18 || distance < minDistance) return;
+
+      lastSpawnAt = now;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      const lifetime = Math.min(1100, Math.max(320, 1250 - settings.cursorSparklesSpeed * 5));
+
+      for (let index = 0; index < particleCount; index += 1) {
+        const particle = document.createElement("span");
+        const size = Math.max(4, (6 + Math.random() * 9) * settings.cursorSparklesSize / 100);
+        const offsetX = (Math.random() - 0.5) * 18;
+        const offsetY = (Math.random() - 0.5) * 18;
+        particle.className = "pixlo-cursor-sparkle";
+        particle.textContent = Math.random() > 0.7 ? "✧" : "✦";
+        particle.style.left = (event.clientX + offsetX) + "px";
+        particle.style.top = (event.clientY + offsetY) + "px";
+        particle.style.setProperty("--cursor-sparkle-particle-size", size + "px");
+        particle.style.setProperty("--cursor-sparkle-colour", settings.cursorSparklesColour);
+        particle.style.setProperty("--cursor-sparkle-glow", (settings.cursorSparklesGlow / 8) + "px");
+        particle.style.setProperty("--cursor-sparkle-drift-x", ((Math.random() - 0.5) * 34) + "px");
+        particle.style.setProperty("--cursor-sparkle-drift-y", ((Math.random() - 0.8) * 36) + "px");
+        particle.style.setProperty("--cursor-sparkle-duration", lifetime + "ms");
+        particle.style.opacity = String(0.55 + Math.random() * 0.45);
+        particle.addEventListener("animationend", () => particle.remove(), { once: true });
+        layer.appendChild(particle);
+      }
+
+      while (layer.childElementCount > 84) layer.firstElementChild?.remove();
+    };
+
+    window.addEventListener("pointermove", handleCursorMove, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", handleCursorMove);
+      layer.replaceChildren();
+    };
+  }, [
+    isPremium,
+    settings.cursorSparklesEnabled,
+    settings.cursorSparklesColour,
+    settings.cursorSparklesGlow,
+    settings.cursorSparklesSize,
+    settings.cursorSparklesDensity,
+    settings.cursorSparklesSpeed,
+    presetPreviewMode,
+    embedMode,
+    forcedUsername,
+  ]);
 
   useEffect(() => {
     const username = (forcedUsername || "").trim().toLowerCase();
@@ -428,6 +498,10 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   return (
     <main className={`profile-page ${isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername ? "has-extras" : ""} ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
+      {isPremium && settings.cursorSparklesEnabled && !presetPreviewMode && !embedMode && forcedUsername && typeof document !== "undefined" && createPortal(
+        <div ref={cursorSparkleLayerRef} className="pixlo-cursor-sparkle-layer" aria-hidden="true" />,
+        document.body
+      )}
       <svg className="pixlo-gradient-defs" aria-hidden="true" width="0" height="0" style={{position:"absolute",width:0,height:0,overflow:"hidden"}}><defs><linearGradient id="pixlo-social-gradient" x1="0%" y1="0%" x2="100%" y2="0%" spreadMethod="repeat"><stop offset="0%" stopColor={settings.gradientSocialsColours[0]} /><stop offset="33.333%" stopColor={settings.gradientSocialsColours[1]} /><stop offset="66.666%" stopColor={settings.gradientSocialsColours[2]} /><stop offset="100%" stopColor={settings.gradientSocialsColours[0]} /><animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="-1 0" dur="8s" repeatCount="indefinite" /></linearGradient></defs></svg>
       <div className="background-media-layer" aria-hidden="true">
         {assets.backgroundImage && <div className="background-image" style={{ backgroundImage: `url("${assets.backgroundImage}")` }} />}
