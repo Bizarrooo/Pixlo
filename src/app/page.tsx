@@ -125,11 +125,9 @@ export default function Home() {
               <Link href="/dashboard" className="px-button px-button-primary">Build your Pixlo <ArrowIcon /></Link>
               <a href="#platform" className="px-button px-button-ghost">Take a look <span>↓</span></a>
             </div>
-            <div className="px-hero-footnote"><span className="px-footnote-mark">✳</span><span>YOUR PAGE. YOUR RULES.<br /><b>BUILT TO BE YOURS.</b></span><span className="px-footnote-line" /></div>
           </div>
           <div className="px-hero-visual"><ProfileArtwork /></div>
         </div>
-        <div className="px-hero-bottomline"><span>PERSONAL PROFILE PAGES</span><span>LINKS / MUSIC / STYLE</span><span>THE INTERNET, MADE PERSONAL <b>↘</b></span></div>
       </section>
 
       <section className="px-community" id="community">
