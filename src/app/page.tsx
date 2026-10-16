@@ -225,12 +225,35 @@ export default function Home() {
   const [stats, setStats] = useState<SiteStats | null>(null);
 
   useEffect(() => {
+    const cacheKey = "pixlo:site-stats:v1";
+    try {
+      const cachedText = window.localStorage.getItem(cacheKey);
+      if (cachedText) {
+        const cached = JSON.parse(cachedText) as Partial<SiteStats>;
+        if (Number.isFinite(cached.totalProfileViews) && Number.isFinite(cached.members)) {
+          setStats({
+            totalProfileViews: Number(cached.totalProfileViews),
+            members: Number(cached.members),
+            premiumMembers: Number.isFinite(cached.premiumMembers) ? Number(cached.premiumMembers) : null,
+            fileUploads: Number.isFinite(cached.fileUploads) ? Number(cached.fileUploads) : null,
+          });
+        }
+      }
+    } catch {
+      // Ignore an unavailable or outdated local statistics cache.
+    }
+
     const controller = new AbortController();
     fetch("/api/site-stats", { signal: controller.signal })
       .then(response => response.ok ? response.json() : Promise.reject(new Error("Stats unavailable")))
       .then((data: SiteStats) => {
         if (Number.isFinite(data.totalProfileViews) && Number.isFinite(data.members)) {
           setStats(data);
+          try {
+            window.localStorage.setItem(cacheKey, JSON.stringify(data));
+          } catch {
+            // Storage may be disabled or full; live stats still render.
+          }
         }
       })
       .catch(() => {});
