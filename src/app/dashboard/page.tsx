@@ -1293,7 +1293,8 @@ export default function Dashboard() {
       onReset={reset}
 />
 
-    <div className="dashboard-main">
+    {settingsReady && settings.username.trim() && <button type="button" className={`pixlo-share-profile-button pixlo-dashboard-share-button ${profileCopied ? "is-copied" : ""}`} onClick={() => void copyProfileUrl()} aria-label="Share your Pixlo profile link"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8"/><path d="M16 8V5.8A1.8 1.8 0 0 0 14.2 4H5.8A1.8 1.8 0 0 0 4 5.8v8.4A1.8 1.8 0 0 0 5.8 16H8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg><span>{profileCopied ? "Link copied!" : "Share your profile"}</span></button>}
+      <div className="dashboard-main">
       <header className="dash-header">
         <button type="button" className="mobile-menu-button" onClick={() => setMobileMenu(v => !v)}>☰</button>
         <div className="header-copy"><h1>{activePrimary === "customize" ? "Customize" : activePrimary === "optimise" ? "Optimise" : activePrimary === "links" ? "Links" : active === "Stats" && activePrimary === "account" ? "Analytics" : active === "General" && activePrimary === "account" ? "Settings" : active === "Dashboard" ? "Workspace theme" : active === "Extras" ? "Widgets" : active}</h1><p>{activePrimary === "customize" ? "Fine-tune the look and feel of your public profile." : activePrimary === "optimise" ? "Advanced tools for your Pixlo profile, exclusive to Premium." : activePrimary === "links" ? "Manage your social URLs and custom profile links." : active === "Overview" ? "Your profile, account and quick actions in one place." : active === "Connections" ? "Your linked accounts and connected services." : ""}</p></div>
