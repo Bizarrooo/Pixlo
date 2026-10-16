@@ -1089,3 +1089,82 @@
   .dashboard.dashboard-revamp .cursor-sparkles-demo-pointer { animation: none !important; }
   .pixlo-cursor-sparkle { display: none !important; }
 }
+
+
+/* Scroll recovery: dashboard content must grow with every settings panel. */
+html:has(.dashboard.dashboard-revamp),
+body:has(.dashboard.dashboard-revamp) {
+  height: auto !important;
+  min-height: 100% !important;
+  max-height: none !important;
+  overflow-x: clip !important;
+  overflow-y: auto !important;
+}
+.dashboard.dashboard-revamp {
+  display: grid !important;
+  grid-template-rows: auto !important;
+  align-items: start !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  max-height: none !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+.dashboard.dashboard-revamp .dashboard-main {
+  align-self: stretch !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+.dashboard.dashboard-revamp .editor-grid {
+  align-items: start !important;
+  height: auto !important;
+  min-height: calc(100vh - 82px) !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+.dashboard.dashboard-revamp .editor {
+  align-self: start !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+.dashboard.dashboard-revamp .editor > .form-stack {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+.dashboard.dashboard-revamp .preview-panel {
+  min-height: 0 !important;
+}
+.dashboard.dashboard-revamp .premium-nav-items {
+  max-height: 180px !important;
+}
+.dashboard.dashboard-revamp .premium-optimise-nav-button {
+  display: grid !important;
+  grid-template-columns: 17px minmax(0,1fr) auto !important;
+  align-items: center !important;
+}
+.dashboard.dashboard-revamp .premium-optimise-nav-button .dashboard-nav-badge {
+  padding: 3px 5px !important;
+  color: #2b150d !important;
+  background: linear-gradient(110deg,#ffbf71,#ff7547) !important;
+  border: 0 !important;
+}
+@media (max-width: 760px) {
+  .dashboard.dashboard-revamp {
+    display: block !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+  }
+  .dashboard.dashboard-revamp .dashboard-main,
+  .dashboard.dashboard-revamp .editor-grid,
+  .dashboard.dashboard-revamp .editor {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
