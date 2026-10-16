@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { getPublicProfileShareData } from "../../../lib/public-profile-share";
 
 export const runtime = "nodejs";
-export const alt = "Pixlo profile preview";
+export const alt = "Profile avatar and display name — Made with Pixlo";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -11,7 +11,8 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ use
   const username = rawUsername.trim().toLowerCase();
   const profile = await getPublicProfileShareData(username);
   const displayName = profile?.displayName || username || "Pixlo Profile";
-  const avatarUrl = profile?.avatarUrl || "";\n  const backgroundImageUrl = profile?.backgroundImageUrl || "";
+  const avatarUrl = profile?.avatarUrl || "";
+  const backgroundImageUrl = profile?.backgroundImageUrl || "";
   const displayFontSize = displayName.length > 30 ? 44 : displayName.length > 21 ? 54 : 66;
   const initial = (displayName || username || "P").slice(0, 1).toUpperCase();
 
@@ -30,7 +31,7 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ use
           color: "#ffffff",
           fontFamily: "Arial, sans-serif",
           background: backgroundImageUrl
-            ? `linear-gradient(rgba(7,7,9,0.42), rgba(7,7,9,0.62)), url("${backgroundImageUrl}") center / cover no-repeat`
+            ? `linear-gradient(rgba(7,7,9,0.35), rgba(7,7,9,0.60)), url("${backgroundImageUrl}") center / cover no-repeat`
             : "linear-gradient(135deg, #09090b 0%, #21100d 55%, #41180f 100%)",
         }}
       >
