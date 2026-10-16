@@ -338,12 +338,14 @@ export default function Dashboard() {
   const [discordLoading, setDiscordLoading] = useState(true);
   const [discordNotice, setDiscordNotice] = useState<"connected" | "error" | "already-linked" | "not-member" | "cancelled" | null>(null);
   const [discordDetail, setDiscordDetail] = useState("");
+  const [discordSetupStep, setDiscordSetupStep] = useState<1 | 2>(1);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const discordStatus = params.get("discord");
     const detail = params.get("discord_detail");
     if (["connected", "error", "already-linked", "not-member", "cancelled"].includes(discordStatus || "")) setDiscordNotice(discordStatus as "connected" | "error" | "already-linked" | "not-member" | "cancelled");
+    setDiscordSetupStep(discordStatus === "error" || discordStatus === "cancelled" || discordStatus === "already-linked" ? 2 : 1);
     if (detail) setDiscordDetail(detail);
     if (discordStatus) window.history.replaceState({}, "", "/dashboard");
 
@@ -391,6 +393,7 @@ export default function Dashboard() {
         loaded = { ...loaded, avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
         const linkedDiscord = accountData.user?.discordId ? accountData.user : null;
         if (accountData.discordUnlinkedForMembership) {
+          setDiscordSetupStep(1);
           setDiscordNotice("not-member");
           setDiscordDetail("Your Discord link was removed because this account is no longer in the required server.");
         }
@@ -695,6 +698,7 @@ export default function Dashboard() {
         const data = await response.json().catch(() => ({}));
         if (!active || !response.ok) return;
         if (data.discordUnlinkedForMembership) {
+          setDiscordSetupStep(1);
           setDiscordUser(null);
           setDiscordNotice("not-member");
           setDiscordDetail("Your Discord link was removed because this account is no longer in the required server.");
@@ -980,14 +984,10 @@ export default function Dashboard() {
             <i className="auth-rail auth-rail-br-bottom" /><i className="auth-rail auth-rail-br-side" />
           </div>
 
-          <div className="auth-discord-steps" aria-label="Discord setup: step 1 join the server, step 2 link your account">
+          <div className="auth-discord-steps" aria-label={`Discord setup progress, step ${discordSetupStep} of 2`}>
             <div className="auth-discord-progress" aria-hidden="true">
-              <span className={discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked" ? "is-complete" : "is-active"} />
-              <span className={discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked" ? "is-active" : ""} />
-            </div>
-            <div className="auth-discord-step-labels">
-              <span className={discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked" ? "is-complete" : "is-active"}><i>01</i><b>Join server</b></span>
-              <span className={discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked" ? "is-active" : ""}><i>02</i><b>Link account</b></span>
+              <span className={discordSetupStep === 1 ? "is-active" : "is-complete"} />
+              <span className={discordSetupStep === 2 ? "is-active" : ""} />
             </div>
           </div>
 
@@ -998,38 +998,59 @@ export default function Dashboard() {
           </div>
 
           <div className="auth-heading auth-heading-discord">
-            <h1 id="discord-gate-title">Unlock your <em>Pixlo dashboard.</em></h1>
-            <p>Join the official Pixlo Discord and connect your account to continue. Your linked badges and rewards come with it.</p>
+            {discordSetupStep === 1 ? (
+              <>
+                <h1 id="discord-gate-title">Join the <em>Pixlo Discord.</em></h1>
+                <p>First, join our official Discord server. Once you’ve joined, continue to link your account and unlock your dashboard.</p>
+              </>
+            ) : (
+              <>
+                <h1 id="discord-gate-title">Link your <em>Discord account.</em></h1>
+                <p>Next, connect the Discord account you used to join the server. We’ll verify your membership before unlocking Pixlo.</p>
+              </>
+            )}
           </div>
 
-          {discordNotice === "not-member" && (
+          {discordNotice === "not-member" && discordSetupStep === 1 && (
             <div className="auth-error auth-gate-message" role="alert">
               <span className="auth-message-icon">!</span>
-              <span>{discordDetail || "Join the official Pixlo Discord server first, then link your account."}</span>
+              <span>{discordDetail || "You aren’t in the required Discord server yet. Join it below, then continue."}</span>
             </div>
           )}
-          {(discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked") && (
+          {(discordNotice === "error" || discordNotice === "cancelled" || discordNotice === "already-linked") && discordSetupStep === 2 && (
             <div className="auth-error auth-gate-message" role="alert">
               <span className="auth-message-icon">!</span>
-              <span>{discordDetail || (discordNotice === "cancelled" ? "Discord linking was cancelled. Try again when you're ready." : discordNotice === "already-linked" ? "That Discord account is already linked to another Pixlo account. Use the correct Discord account to continue." : "Discord could not be linked. Please try again.")}</span>
+              <span>{discordDetail || (discordNotice === "cancelled" ? "Discord linking was cancelled. Try again when you’re ready." : discordNotice === "already-linked" ? "That Discord account is already linked to another Pixlo account. Use the correct Discord account to continue." : "Discord could not be linked. Please try again.")}</span>
             </div>
           )}
 
-          <div className="auth-gate-actions">
-            <a href="https://discord.gg/Bkz4P9gVy7" target="_blank" rel="noreferrer" className="auth-gate-join">
-              <span className="auth-gate-action-icon">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </span>
-              <span className="auth-gate-action-copy"><b>Join the Pixlo Discord</b><small>Become a server member first</small></span>
-              <span className="auth-gate-arrow" aria-hidden="true">↗</span>
-            </a>
-            <a href="/api/auth/discord" className="auth-submit auth-gate-connect">
-              <span>Connect Discord</span>
-              <span className="auth-submit-arrow" aria-hidden="true">↗</span>
-            </a>
-          </div>
+          {discordSetupStep === 1 ? (
+            <div className="auth-gate-actions auth-gate-step-one">
+              <a href="https://discord.gg/Bkz4P9gVy7" target="_blank" rel="noreferrer" className="auth-gate-join">
+                <span className="auth-gate-action-icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </span>
+                <span className="auth-gate-action-copy"><b>Join the Pixlo Discord</b><small>Open the official server in Discord</small></span>
+                <span className="auth-gate-arrow" aria-hidden="true">↗</span>
+              </a>
+              <button type="button" className="auth-submit auth-gate-connect auth-gate-continue" onClick={() => { setDiscordDetail(""); setDiscordNotice(null); setDiscordSetupStep(2); }}>
+                <span>I’ve joined — continue</span>
+                <span className="auth-submit-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+          ) : (
+            <div className="auth-gate-step-two">
+              <button type="button" className="auth-back-button auth-gate-back" onClick={() => { setDiscordDetail(""); setDiscordNotice(null); setDiscordSetupStep(1); }}>
+                <span aria-hidden="true">←</span><span>Back</span>
+              </button>
+              <a href="/api/auth/discord" className="auth-submit auth-gate-connect">
+                <span>Link Discord account</span>
+                <span className="auth-submit-arrow" aria-hidden="true">↗</span>
+              </a>
+            </div>
+          )}
 
-          <div className="auth-gate-note"><span className="auth-gate-note-dot" /> Your dashboard unlocks once your Discord link and server membership are verified.</div>
+          <div className="auth-gate-note"><span className="auth-gate-note-dot" /> Your dashboard unlocks only after Discord confirms both the account link and server membership.</div>
         </section>
       </main>
     );
