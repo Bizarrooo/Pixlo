@@ -1373,3 +1373,9 @@ body:has(.dashboard.dashboard-revamp) {
 .dashboard.dashboard-revamp .optimise-layouts-page .extras-card-heading h3 {
   color: #fff2e8 !important;
 }
+
+/* Use a cheaper particle glow while 3D parallax is moving the profile card. */
+.pixlo-cursor-trail-layer.parallax-lite .pixlo-cursor-trail,
+.preview-cursor-trail-layer.parallax-lite .pixlo-cursor-trail {
+  text-shadow: 0 0 4px currentColor !important;
+}
