@@ -549,13 +549,6 @@ export default function Dashboard() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const layer = previewCursorTrailLayerRef.current;
     if (!layer) return;
-    // Match the public page: the trail yields entirely while the pointer is over
-    // the profile card, so it cannot compete with the live-preview parallax.
-    if (settings.parallax && event.target instanceof Element && event.target.closest(".preview-card")) {
-      layer.replaceChildren();
-      return;
-    }
-
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - bounds.left;
     const y = event.clientY - bounds.top;
@@ -1016,9 +1009,20 @@ export default function Dashboard() {
   };
   const updatePreviewPointer = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!settings.parallax || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const bounds = previewPointerBoundsRef.current;
+    if (!bounds) return;
+    const trackingMargin = 46;
+    if (
+      event.clientX < bounds.left - trackingMargin ||
+      event.clientX > bounds.right + trackingMargin ||
+      event.clientY < bounds.top - trackingMargin ||
+      event.clientY > bounds.bottom + trackingMargin
+    ) {
+      resetPreviewPointer();
+      return;
+    }
     if (previewParallaxReturnTimerRef.current !== null) window.clearTimeout(previewParallaxReturnTimerRef.current);
     previewParallaxReturnTimerRef.current = null;
-    const bounds = previewPointerBoundsRef.current || event.currentTarget.getBoundingClientRect();
     previewParallaxTargetRef.current = {
       x: Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2)),
       y: Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2)),
@@ -1035,7 +1039,7 @@ export default function Dashboard() {
     if (previewParallaxReturnTimerRef.current !== null) window.clearTimeout(previewParallaxReturnTimerRef.current);
     previewParallaxReturnTimerRef.current = null;
     setPreviewParallaxReturning(false);
-    previewPointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
+    if (!previewPointerBoundsRef.current) previewPointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
   };
   const handlePreviewPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" || !settings.parallax) return;
@@ -1765,7 +1769,11 @@ export default function Dashboard() {
         <aside className={`preview-panel ${previewVisible ? "" : "preview-panel-loading"}`} aria-hidden={!previewVisible}>
           {previewVisible && <>
           <div className="preview-label"><div><span>Live preview</span><small>updates instantly</small></div><a href={profileUrl} target="_blank" rel="noreferrer">Open ↗</a></div>
-          <div className={`preview-frame preview-layout-${settings.layout.toLowerCase().replace(/\s+/g, "-")} ${settings.parallax ? "preview-parallax-on" : ""} ${previewParallaxReturning ? "preview-parallax-returning" : ""} ${settings.animated ? "preview-animated" : ""} ${settings.glow ? "preview-glow" : ""} ${settings.floating ? "preview-float" : ""} ${settings.particles ? "preview-particles-on" : ""} ${settings.grain ? "preview-grain-on" : ""} ${settings.scanlines ? "preview-scanlines-on" : ""} ${settings.textGlow ? "preview-text-glow" : ""}`} style={previewStyle} onPointerMove={handlePreviewCursorTrail}>
+          <div className={`preview-frame preview-layout-${settings.layout.toLowerCase().replace(/\s+/g, "-")} ${settings.parallax ? "preview-parallax-on" : ""} ${previewParallaxReturning ? "preview-parallax-returning" : ""} ${settings.animated ? "preview-animated" : ""} ${settings.glow ? "preview-glow" : ""} ${settings.floating ? "preview-float" : ""} ${settings.particles ? "preview-particles-on" : ""} ${settings.grain ? "preview-grain-on" : ""} ${settings.scanlines ? "preview-scanlines-on" : ""} ${settings.textGlow ? "preview-text-glow" : ""}`} style={previewStyle}
+            onPointerMove={event => { handlePreviewCursorTrail(event); updatePreviewPointer(event); }}
+            onPointerUp={handlePreviewPointerUp}
+            onPointerCancel={resetPreviewPointer}
+            onPointerLeave={resetPreviewPointer}>
             {previewAssets.backgroundVideo && <video key={previewAssets.backgroundVideo} className="preview-media" src={previewAssets.backgroundVideo} autoPlay={active !== "Enter Screen" || previewEntered} muted loop playsInline preload="auto" onLoadedData={event => { const video = event.currentTarget; if (active === "Enter Screen" && !previewEntered) { video.pause(); video.currentTime = 0; } else { void video.play().catch(() => {}); } }} onCanPlay={event => { if (active === "Enter Screen" && !previewEntered) { event.currentTarget.pause(); event.currentTarget.currentTime = 0; } }} />}
             {previewAssets.backgroundImage && <div className="preview-bg" style={{ backgroundImage: `url("${previewAssets.backgroundImage}")`, filter: `blur(${settings.backgroundBlur}px)`, transform: `scale(${Math.max(1, settings.backgroundScale / 100)})`, backgroundPosition: `${settings.backgroundPositionX}% ${settings.backgroundPositionY}%`, backgroundSize: `${settings.backgroundScale}% auto` }} />}
             <div className="preview-overlay" />
@@ -1778,11 +1786,7 @@ export default function Dashboard() {
               className={`preview-card ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.glow ? "effects-glow" : ""} ${settings.layout === "Minimal" ? "layout-minimal" : ""} ${settings.layout === "Modern" ? "layout-modern" : ""} ${settings.layout === "Sleek" ? "layout-sleek" : ""} ${settings.layout === "Text Only" ? "layout-text-only" : ""} ${settings.alignment === "left" ? "text-left" : ""}`}
               style={{ borderRadius: settings.layout === "Text Only" ? 0 : settings.borderRadius, fontFamily: "var(--preview-font)", background: settings.layout === "Text Only" ? "transparent" : "var(--preview-card-bg)", color: "var(--preview-text-color)", opacity: 1, boxShadow: settings.layout === "Text Only" ? "none" : previewShadow, border: settings.layout === "Text Only" ? "none" : undefined, backdropFilter: settings.layout === "Text Only" ? "none" : undefined, WebkitBackdropFilter: settings.layout === "Text Only" ? "none" : undefined, "--preview-card-shadow": settings.layout === "Text Only" ? "none" : previewShadow, "--gradient-text": `linear-gradient(110deg, ${settings.gradientTextColours.join(", ")}, ${settings.gradientTextColours[0]}, ${settings.gradientTextColours.slice(1).join(", ")}, ${settings.gradientTextColours[0]})`, "--gradient-socials": `linear-gradient(110deg, ${settings.gradientSocialsColours.join(", ")}, ${settings.gradientSocialsColours[0]}, ${settings.gradientSocialsColours.slice(1).join(", ")}, ${settings.gradientSocialsColours[0]})`, "--gradient-badges": `linear-gradient(110deg, ${settings.gradientBadgesColours.join(", ")}, ${settings.gradientBadgesColours[0]}, ${settings.gradientBadgesColours.slice(1).join(", ")}, ${settings.gradientBadgesColours[0]})` } as React.CSSProperties}
               onPointerEnter={handlePreviewPointerEnter}
-              onPointerMove={updatePreviewPointer}
               onPointerDown={handlePreviewPointerDown}
-              onPointerUp={handlePreviewPointerUp}
-              onPointerCancel={resetPreviewPointer}
-              onPointerLeave={resetPreviewPointer}
             >
               {previewAssets.banner && settings.bannerHeight > 0 && <img className="preview-banner" src={previewAssets.banner} alt="" style={{ height: settings.bannerHeight, borderRadius: `${settings.borderRadius}px ${settings.borderRadius}px 0 0` }} />}
               <div className="preview-card-inner" style={{ "--preview-content-spacing-setting": `${settings.contentSpacing}px` } as React.CSSProperties}>
