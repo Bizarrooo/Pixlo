@@ -994,3 +994,11 @@
     animation: none !important;
   }
 }
+
+
+/* Keep the resting tilt and pointer-driven parallax active on touch-sized layouts too. */
+@media (max-width: 800px) {
+  .px-live-profile-card:not(.is-returning) {
+    transform: perspective(1050px) rotateX(calc(2deg + var(--px-tilt-x))) rotateY(calc(-6deg + var(--px-tilt-y))) rotateZ(-1.7deg) scale(1.012) !important;
+  }
+}
