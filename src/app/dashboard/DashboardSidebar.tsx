@@ -75,7 +75,7 @@ type Props = {
 
 export default function DashboardSidebar({
   active, activePrimary, accountNavOpen, setAccountNavOpen, premiumOpen, setPremiumOpen,
-  mobileMenu, profileUserId, currentAccountEmail, username, displayName, avatar, isOwner, onNavigate, onReset,
+  mobileMenu, profileUserId, currentAccountEmail, username, displayName, avatar, isOwner, isPremium, onNavigate, onReset,
 }: Props) {
   const [accountSwitcherOpen, setAccountSwitcherOpen] = useState(false);
   const [savedAccounts, setSavedAccounts] = useState<SavedPixloAccount[]>([]);
