@@ -140,10 +140,10 @@ export default function SignupPage() {
   const usernameTone = usernameStatus === "available" ? "is-available" : usernameStatus === "checking" ? "is-checking" : ["taken", "invalid", "error"].includes(usernameStatus) ? "is-unavailable" : "";
 
   const heading = [
-    { kicker: "MAKE IT YOURS", title: <>Claim your <em>Pixlo.</em><br />username.</>, copy: "This becomes your link. Pick it before someone else does." },
-    { kicker: "STAY IN THE LOOP", title: <>Where can we <em>reach you?</em></>, copy: "Add an email address so your Pixlo account stays yours." },
-    { kicker: "KEEP IT PRIVATE", title: <>Create a <em>password.</em></>, copy: "Choose something unique that you don't use anywhere else." },
-    { kicker: "ALMOST THERE", title: <>One last <em>thing.</em></>, copy: "Check your details and confirm your password to finish." },
+    { title: <>Claim your <em>Pixlo.</em><br />username.</>, copy: "This becomes your link. Pick it before someone else does." },
+    { title: <>Where can we <em>reach you?</em></>, copy: "Add an email address so your Pixlo account stays yours." },
+    { title: <>Create a <em>password.</em></>, copy: "Choose something unique that you don't use anywhere else." },
+    { title: <>One last <em>thing.</em></>, copy: "Check your details and confirm your password to finish." },
   ][step - 1];
 
   return (
@@ -168,11 +168,9 @@ export default function SignupPage() {
         </div>
 
         <div className="auth-card-meta">
-          <span className="auth-step-pill"><i /> STEP {step} OF 4</span>
         </div>
 
         <div className="auth-heading auth-heading-signup">
-          <span className="auth-heading-kicker">{heading.kicker}</span>
           <h1 id="auth-title">{heading.title}</h1>
           <p>{heading.copy}</p>
         </div>
