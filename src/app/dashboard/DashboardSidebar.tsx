@@ -42,7 +42,7 @@ export const customizeTabs = [
   { value: "Fonts", label: "Fonts", icon: "layers" },
   { value: "Background", label: "Media", icon: "image" },
   { value: "Music", label: "Sound", icon: "music" },
-  { value: "Layout", label: "Sections", icon: "layout" },
+  { value: "Layout", label: "Arrangements", icon: "layout" },
   { value: "Enter Screen", label: "Intro", icon: "external" },
 ] as const;
 
@@ -50,6 +50,7 @@ export const optimiseTabs = [
   { value: "Gradients", label: "Gradients", icon: "sparkles" },
   { value: "Dashboard", label: "Workspace theme", icon: "settings" },
   { value: "Extras", label: "Widgets", icon: "clock" },
+  { value: "Layouts", label: "Layouts", icon: "layout" },
   { value: "Cursor Trail", label: "Cursor trail", icon: "sparkles" },
 ] as const;
 
@@ -68,13 +69,14 @@ type Props = {
   displayName: string;
   avatar: string;
   isOwner: boolean;
+  premiumIcon: string;
   onNavigate: (primary: DashboardPrimarySection, destination: string) => void;
   onReset: () => void;
 };
 
 export default function DashboardSidebar({
   active, activePrimary, accountNavOpen, setAccountNavOpen, premiumOpen, setPremiumOpen,
-  mobileMenu, profileUserId, currentAccountEmail, username, displayName, avatar, isOwner, onNavigate, onReset,
+  mobileMenu, profileUserId, currentAccountEmail, username, displayName, avatar, isOwner, premiumIcon, onNavigate, onReset,
 }: Props) {
   const [accountSwitcherOpen, setAccountSwitcherOpen] = useState(false);
   const [savedAccounts, setSavedAccounts] = useState<SavedPixloAccount[]>([]);
@@ -169,8 +171,8 @@ export default function DashboardSidebar({
             else setPremiumOpen(value => !value);
           }}><DashboardNavIcon name="crown" className="dashboard-nav-icon" /><b>Premium</b><DashboardNavIcon name="chevron" className={`dashboard-nav-caret ${premiumOpen || activePrimary === "premium" || activePrimary === "optimise" ? "is-open" : ""}`} /></button>
           <div className="premium-nav-items">
-            <button type="button" className={active === "Presets" ? "active premium-nav-button premium-presets-nav-button" : "premium-nav-button premium-presets-nav-button"} onClick={() => select("premium", "Presets")}><DashboardNavIcon name="layers" className="dashboard-nav-icon" /><b>Presets</b></button>
-            <button type="button" className={activePrimary === "optimise" ? "active premium-nav-button premium-optimise-nav-button" : "premium-nav-button premium-optimise-nav-button"} onClick={() => select("optimise", "Cursor Trail")}><DashboardNavIcon name="sparkles" className="dashboard-nav-icon" /><b>Optimise</b><span className="dashboard-nav-badge">PREMIUM</span></button>
+            <button type="button" className={active === "Presets" ? "active premium-nav-button premium-presets-nav-button" : "premium-nav-button premium-presets-nav-button"} onClick={() => select("premium", "Presets")}><DashboardNavIcon name="layers" className="dashboard-nav-icon" /><b>Presets</b><span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span></button>
+            <button type="button" className={activePrimary === "optimise" ? "active premium-nav-button premium-optimise-nav-button" : "premium-nav-button premium-optimise-nav-button"} onClick={() => select("optimise", "Cursor Trail")}><DashboardNavIcon name="sparkles" className="dashboard-nav-icon" /><b>Optimise</b><span className="presets-premium-mark" title="Premium exclusive" aria-label="Premium exclusive">{premiumIcon ? <img src={premiumIcon} alt="" /> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 22 12 12 21.5 2 12 12 2.5Z" /></svg>}</span></button>
           </div>
         </div>
 
