@@ -23,6 +23,10 @@ export type ProfileSettings = {
   location: string;
   avatar: string;
   banner: string;
+  shareCoverImage: string;
+  shareCoverNameSize: number;
+  shareCoverNameGlow: boolean;
+  shareCoverNameGlowIntensity: number;
   backgroundImage: string;
   backgroundVideo: string;
   backgroundVideoMusicDisabled: boolean;
@@ -186,6 +190,10 @@ export const defaultSettings: ProfileSettings = {
   location: "London, United Kingdom",
   avatar: "",
   banner: "",
+  shareCoverImage: "",
+  shareCoverNameSize: 66,
+  shareCoverNameGlow: false,
+  shareCoverNameGlowIntensity: 65,
   backgroundImage: "",
   backgroundVideo: "",
   backgroundVideoMusicDisabled: false,
@@ -401,7 +409,11 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     socials: { ...defaultSettings.socials, ...(parsed.socials || {}) },
     socialColours: { ...defaultSettings.socialColours, ...(parsed.socialColours || {}) },
     socialIconColour: typeof parsed.socialIconColour === "string" ? parsed.socialIconColour : defaultSettings.socialIconColour,
-    socialIconSize: typeof parsed.socialIconSize === "number" && Number.isFinite(parsed.socialIconSize) ? Math.min(48, Math.max(16, Math.round(parsed.socialIconSize))) : defaultSettings.socialIconSize,
+    socialIconSize: typeof parsed.socialIconSize === "number" && Number.isFinite(parsed.socialIconSize) ? Math.min(96, Math.max(16, Math.round(parsed.socialIconSize))) : defaultSettings.socialIconSize,
+    shareCoverImage: typeof parsed.shareCoverImage === "string" ? parsed.shareCoverImage : defaultSettings.shareCoverImage,
+    shareCoverNameSize: typeof parsed.shareCoverNameSize === "number" && Number.isFinite(parsed.shareCoverNameSize) ? Math.min(110, Math.max(28, Math.round(parsed.shareCoverNameSize))) : defaultSettings.shareCoverNameSize,
+    shareCoverNameGlow: typeof parsed.shareCoverNameGlow === "boolean" ? parsed.shareCoverNameGlow : defaultSettings.shareCoverNameGlow,
+    shareCoverNameGlowIntensity: typeof parsed.shareCoverNameGlowIntensity === "number" && Number.isFinite(parsed.shareCoverNameGlowIntensity) ? Math.min(200, Math.max(0, parsed.shareCoverNameGlowIntensity)) : defaultSettings.shareCoverNameGlowIntensity,
     customLinks: Array.isArray(parsed.customLinks) ? parsed.customLinks.filter((item: any) => item && typeof item.id === "string" && typeof item.url === "string" && typeof item.icon === "string") : [],
     activeLinkOrder: Array.isArray(parsed.activeLinkOrder) ? parsed.activeLinkOrder.filter((item: any) => typeof item === "string") : [],
     showVerifiedBadgeNextToUsername: typeof parsed.showVerifiedBadgeNextToUsername === "boolean" ? parsed.showVerifiedBadgeNextToUsername : defaultSettings.showVerifiedBadgeNextToUsername,
@@ -412,8 +424,8 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     badgeStyle: parsed.badgeStyle === "icon" ? "icon" : "default",
     badgeColour: typeof parsed.badgeColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.badgeColour) ? parsed.badgeColour : defaultSettings.badgeColour,
     badgeGlow: typeof parsed.badgeGlow === "boolean" ? parsed.badgeGlow : defaultSettings.badgeGlow,
-    badgeGlowIntensity: typeof parsed.badgeGlowIntensity === "number" && Number.isFinite(parsed.badgeGlowIntensity) ? Math.min(100, Math.max(0, parsed.badgeGlowIntensity)) : defaultSettings.badgeGlowIntensity,
-    badgeScale: typeof parsed.badgeScale === "number" && Number.isFinite(parsed.badgeScale) ? Math.min(150, Math.max(50, Math.round(parsed.badgeScale))) : defaultSettings.badgeScale,
+    badgeGlowIntensity: typeof parsed.badgeGlowIntensity === "number" && Number.isFinite(parsed.badgeGlowIntensity) ? Math.min(200, Math.max(0, parsed.badgeGlowIntensity)) : defaultSettings.badgeGlowIntensity,
+    badgeScale: typeof parsed.badgeScale === "number" && Number.isFinite(parsed.badgeScale) ? Math.min(300, Math.max(50, Math.round(parsed.badgeScale))) : defaultSettings.badgeScale,
     badgeUnderline: typeof parsed.badgeUnderline === "boolean" ? parsed.badgeUnderline : defaultSettings.badgeUnderline,
     badgeUnderlineGlow: typeof parsed.badgeUnderlineGlow === "boolean" ? parsed.badgeUnderlineGlow : defaultSettings.badgeUnderlineGlow,
     avatarDecoration: ["none", "halo", "orbit", "flame"].includes(parsed.avatarDecoration) ? parsed.avatarDecoration : defaultSettings.avatarDecoration,
@@ -444,11 +456,11 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     socialsAnimation: TEXT_ANIMATIONS.includes(parsed.socialsAnimation) ? parsed.socialsAnimation : defaultSettings.socialsAnimation,
     cursorTrailEnabled: typeof parsed.cursorTrailEnabled === "boolean" ? parsed.cursorTrailEnabled : typeof parsed.cursorSparklesEnabled === "boolean" ? parsed.cursorSparklesEnabled : defaultSettings.cursorTrailEnabled,
     cursorTrailColour: typeof parsed.cursorTrailColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.cursorTrailColour) ? parsed.cursorTrailColour : typeof parsed.cursorSparklesColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.cursorSparklesColour) ? parsed.cursorSparklesColour : defaultSettings.cursorTrailColour,
-    cursorTrailGlow: typeof parsed.cursorTrailGlow === "number" && Number.isFinite(parsed.cursorTrailGlow) ? Math.min(100, Math.max(0, parsed.cursorTrailGlow)) : typeof parsed.cursorSparklesGlow === "number" && Number.isFinite(parsed.cursorSparklesGlow) ? Math.min(100, Math.max(0, parsed.cursorSparklesGlow)) : defaultSettings.cursorTrailGlow,
-    cursorTrailSize: typeof parsed.cursorTrailSize === "number" && Number.isFinite(parsed.cursorTrailSize) ? Math.min(180, Math.max(50, Math.round(parsed.cursorTrailSize))) : typeof parsed.cursorSparklesSize === "number" && Number.isFinite(parsed.cursorSparklesSize) ? Math.min(180, Math.max(50, Math.round(parsed.cursorSparklesSize))) : defaultSettings.cursorTrailSize,
-    cursorTrailDensity: typeof parsed.cursorTrailDensity === "number" && Number.isFinite(parsed.cursorTrailDensity) ? Math.min(100, Math.max(20, parsed.cursorTrailDensity)) : typeof parsed.cursorSparklesDensity === "number" && Number.isFinite(parsed.cursorSparklesDensity) ? Math.min(100, Math.max(20, parsed.cursorSparklesDensity)) : defaultSettings.cursorTrailDensity,
-    cursorTrailSpeed: typeof parsed.cursorTrailSpeed === "number" && Number.isFinite(parsed.cursorTrailSpeed) ? Math.min(150, Math.max(50, parsed.cursorTrailSpeed)) : typeof parsed.cursorSparklesSpeed === "number" && Number.isFinite(parsed.cursorSparklesSpeed) ? Math.min(150, Math.max(50, parsed.cursorSparklesSpeed)) : defaultSettings.cursorTrailSpeed,
-    cursorTrailLifetime: typeof parsed.cursorTrailLifetime === "number" && Number.isFinite(parsed.cursorTrailLifetime) ? Math.min(4000, Math.max(300, Math.round(parsed.cursorTrailLifetime / 100) * 100)) : defaultSettings.cursorTrailLifetime,
+    cursorTrailGlow: typeof parsed.cursorTrailGlow === "number" && Number.isFinite(parsed.cursorTrailGlow) ? Math.min(200, Math.max(0, parsed.cursorTrailGlow)) : typeof parsed.cursorSparklesGlow === "number" && Number.isFinite(parsed.cursorSparklesGlow) ? Math.min(200, Math.max(0, parsed.cursorSparklesGlow)) : defaultSettings.cursorTrailGlow,
+    cursorTrailSize: typeof parsed.cursorTrailSize === "number" && Number.isFinite(parsed.cursorTrailSize) ? Math.min(350, Math.max(50, Math.round(parsed.cursorTrailSize))) : typeof parsed.cursorSparklesSize === "number" && Number.isFinite(parsed.cursorSparklesSize) ? Math.min(350, Math.max(50, Math.round(parsed.cursorSparklesSize))) : defaultSettings.cursorTrailSize,
+    cursorTrailDensity: typeof parsed.cursorTrailDensity === "number" && Number.isFinite(parsed.cursorTrailDensity) ? Math.min(250, Math.max(20, parsed.cursorTrailDensity)) : typeof parsed.cursorSparklesDensity === "number" && Number.isFinite(parsed.cursorSparklesDensity) ? Math.min(250, Math.max(20, parsed.cursorSparklesDensity)) : defaultSettings.cursorTrailDensity,
+    cursorTrailSpeed: typeof parsed.cursorTrailSpeed === "number" && Number.isFinite(parsed.cursorTrailSpeed) ? Math.min(300, Math.max(50, parsed.cursorTrailSpeed)) : typeof parsed.cursorSparklesSpeed === "number" && Number.isFinite(parsed.cursorSparklesSpeed) ? Math.min(300, Math.max(50, parsed.cursorSparklesSpeed)) : defaultSettings.cursorTrailSpeed,
+    cursorTrailLifetime: typeof parsed.cursorTrailLifetime === "number" && Number.isFinite(parsed.cursorTrailLifetime) ? Math.min(15000, Math.max(300, Math.round(parsed.cursorTrailLifetime / 100) * 100)) : defaultSettings.cursorTrailLifetime,
     nameGlow: typeof parsed.nameGlow === "boolean" ? parsed.nameGlow : Boolean(parsed.textGlow),
     descriptionGlow: typeof parsed.descriptionGlow === "boolean" ? parsed.descriptionGlow : false,
     locationGlow: typeof parsed.locationGlow === "boolean" ? parsed.locationGlow : false,

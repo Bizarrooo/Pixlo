@@ -23,6 +23,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const version = shareVersion([
     displayName,
     profile?.avatarUrl || "",
+    profile?.avatarDecorationUrl || "",
+    profile?.shareCoverImageUrl || "",
+    String(profile?.shareCoverNameSize ?? 66),
+    String(profile?.shareCoverNameGlow ?? false),
+    String(profile?.shareCoverNameGlowIntensity ?? 65),
+    profile?.shareCoverNameGlowColour || "",
     profile?.backgroundImageUrl || "",
     profile?.backgroundVideoUrl || "",
   ]);

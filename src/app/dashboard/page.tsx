@@ -163,15 +163,15 @@ async function migratePresetAssets(settings: ProfileSettings): Promise<ProfileSe
     if (!value || !value.startsWith("idb:")) return value;
     try { return await migrateAssetToCloud(value) || value; } catch { return value; }
   };
-  const [avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo] = await Promise.all([
-    migrate(settings.avatar), migrate(settings.banner), migrate(settings.backgroundImage), migrate(settings.backgroundVideo),
+  const [avatar, banner, shareCoverImage, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo] = await Promise.all([
+    migrate(settings.avatar), migrate(settings.banner), migrate(settings.shareCoverImage), migrate(settings.backgroundImage), migrate(settings.backgroundVideo),
     migrate(settings.enterScreenBackgroundImage), migrate(settings.enterScreenBackgroundVideo),
   ]);
   const [musicTracks, customLinks] = await Promise.all([
     Promise.all(settings.musicTracks.map(async track => ({ ...track, audio: await migrate(track.audio), cover: await migrate(track.cover) }))),
     Promise.all(settings.customLinks.map(async link => ({ ...link, icon: await migrate(link.icon) }))),
   ]);
-  return { ...settings, avatar, banner, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
+  return { ...settings, avatar, banner, shareCoverImage, backgroundImage, backgroundVideo, enterScreenBackgroundImage, enterScreenBackgroundVideo, musicTracks, customLinks };
 }
 
 export default function Dashboard() {
@@ -555,7 +555,7 @@ export default function Dashboard() {
     const now = performance.now();
     const previous = previewCursorTrailLastSpawnRef.current;
     const distance = Math.hypot(x - previous.x, y - previous.y);
-    const density = Math.min(100, Math.max(20, settings.cursorTrailDensity));
+    const density = Math.min(250, Math.max(20, settings.cursorTrailDensity));
     const parallaxActive = settings.parallax;
     const spawnInterval = parallaxActive ? 48 : 18;
     const minDistance = parallaxActive ? Math.max(12, 23 - density * 0.08) : Math.max(3, 13 - density * 0.1);
@@ -563,9 +563,9 @@ export default function Dashboard() {
     previewCursorTrailLastSpawnRef.current = { x, y, at: now };
 
     // Keep the preview trail lighter while pointer-driven parallax is re-rendering the card.
-    const count = parallaxActive ? 1 : Math.min(4, Math.max(1, Math.round(density / 30)));
-    const maxParticles = parallaxActive ? 16 : 84;
-    const lifetime = Math.min(4000, Math.max(300, settings.cursorTrailLifetime));
+    const count = parallaxActive ? 1 : Math.min(6, Math.max(1, Math.round(density / 30)));
+    const maxParticles = parallaxActive ? 20 : 120;
+    const lifetime = Math.min(15000, Math.max(300, settings.cursorTrailLifetime));
     for (let index = 0; index < count; index += 1) {
       const particle = document.createElement("span");
       particle.className = "pixlo-cursor-trail";
@@ -996,12 +996,12 @@ export default function Dashboard() {
     if (!card) return;
     const strength = settings.parallax ? settings.parallaxStrength : 0;
     const power = settings.parallax && strength > 0
-      ? Math.pow(Math.min(35, Math.max(0, strength)) / 35, 0.72)
+      ? Math.min(1.7, Math.pow(Math.min(100, Math.max(0, strength)) / 35, 0.72))
       : 0;
     card.style.setProperty("--preview-parallax-x", `${x * strength}px`);
     card.style.setProperty("--preview-parallax-y", `${y * strength}px`);
-    card.style.setProperty("--preview-parallax-rotate-x", `${y * -10 * power}deg`);
-    card.style.setProperty("--preview-parallax-rotate-y", `${x * 12 * power}deg`);
+    card.style.setProperty("--preview-parallax-rotate-x", `${y * -18 * power}deg`);
+    card.style.setProperty("--preview-parallax-rotate-y", `${x * 22 * power}deg`);
     card.style.setProperty("--preview-parallax-light-x", `${50 + x * 45 * power}%`);
     card.style.setProperty("--preview-parallax-light-y", `${50 + y * 45 * power}%`);
     card.style.setProperty("--preview-parallax-shadow-x", `${x * -10 * power}px`);
@@ -1305,6 +1305,11 @@ export default function Dashboard() {
         <div className="header-actions"><a className="view-button view-button-primary" href={profileUrl} target="_blank" rel="noreferrer">View live profile ↗</a><button type="button" className="save-button" onClick={save}>{saved ? "✓ Saved" : "Save changes"}</button></div>
       </header>
 
+      {activePrimary === "links" && <nav className="dashboard-links-tabs" aria-label="Links settings">
+        <button type="button" className={active === "Socials" ? "active" : ""} onClick={() => setActive("Socials")}>Social links</button>
+        <button type="button" className={active === "Share cover" ? "active" : ""} onClick={() => setActive("Share cover")}>Share cover</button>
+      </nav>}
+
       {activePrimary === "customize" && <nav className="dashboard-customize-tabs" aria-label="Customize profile settings">
         {customizeTabs.map(tab => <button key={tab.value} type="button" className={active === tab.value ? "active" : ""} onClick={() => { setActive(tab.value); setMobileMenu(false); setPreviewEntered(false); setPreviewEntering(false); }}><DashboardNavIcon name={tab.icon} className="dashboard-nav-icon" /><span>{tab.label}</span></button>)}
       </nav>}
@@ -1406,8 +1411,8 @@ export default function Dashboard() {
               <Setting label="Badge position" text="Place badges beside your profile picture or underneath the profile content."><select value={settings.badgePosition} onChange={e => { set("badgePosition", e.target.value as "left" | "right" | "bottom"); setSaved(false); }}><option value="left">Left side of profile picture</option><option value="right">Right side of profile picture</option><option value="bottom">Underneath everything</option></select></Setting>
               <Setting label="Badge appearance" text="Choose whether badges have a pill background and border or show only the badge icon."><select value={settings.badgeStyle} onChange={e => { set("badgeStyle", e.target.value as "default" | "icon"); setSaved(false); }}><option value="default">Background and border</option><option value="icon">Icon only — no background or border</option></select></Setting>
               <div className="colour-grid"><Colour label="Badge colour" value={settings.badgeColour} onChange={v => { set("badgeColour", v); setSaved(false); }} /><Setting label="Badge glow" text="Add a coloured glow to equipped badges."><Toggle value={settings.badgeGlow} onChange={v => { set("badgeGlow", v); setSaved(false); }} /></Setting></div>
-              <Range label="Badge glow intensity" value={settings.badgeGlowIntensity} min={0} max={100} suffix="%" onChange={v => { set("badgeGlowIntensity", v); setSaved(false); }} />
-              <Range label="Badge size" value={settings.badgeScale} min={50} max={150} suffix="%" onChange={v => { set("badgeScale", v); setSaved(false); }} />
+              <Range label="Badge glow intensity" value={settings.badgeGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("badgeGlowIntensity", v); setSaved(false); }} />
+              <Range label="Badge size" value={settings.badgeScale} min={50} max={300} suffix="%" onChange={v => { set("badgeScale", v); setSaved(false); }} />
               <div className="colour-grid"><Setting label="Double underline" text="Show two centred lines beneath your badges."><Toggle value={settings.badgeUnderline} onChange={v => { set("badgeUnderline", v); setSaved(false); }} /></Setting><Setting label="Underline glow" text="Add a matching glow to the double underline."><Toggle value={settings.badgeUnderlineGlow} onChange={v => { set("badgeUnderlineGlow", v); setSaved(false); }} /></Setting></div>
               {dashboardBadges.some(badge => badge.name.trim().toLowerCase() === "verified") && <><Setting label="Show Verified badge beside display name" text="Place the Verified icon immediately to the right of your display name on your public profile."><Toggle value={settings.showVerifiedBadgeNextToUsername} onChange={v => { set("showVerifiedBadgeNextToUsername", v); setSaved(false); }} /></Setting>{settings.showVerifiedBadgeNextToUsername && <Colour label="Verified check colour" value={settings.verifiedBadgeColour} onChange={v => { set("verifiedBadgeColour", v); setSaved(false); }} />}</>}
               <div className="badge-refresh-row"><span>Badge list</span><button type="button" disabled={dashboardBadgesLoading} onClick={async () => { setDashboardBadgesLoading(true); setDashboardBadgesError(""); try { const response = await fetch("/api/public-profile/" + encodeURIComponent(settings.username) + "?refresh=" + Date.now(), { cache: "no-store" }); const data = await response.json().catch(() => ({})); if (!response.ok || !data.profile) throw new Error(data.error || "Could not refresh your badges."); setDashboardBadges(Array.isArray(data.profile.badges) ? data.profile.badges : []); } catch (error) { setDashboardBadgesError(error instanceof Error ? error.message : "Could not refresh your badges."); } finally { setDashboardBadgesLoading(false); } }}>{dashboardBadgesLoading ? "Refreshing…" : "Refresh ↻"}</button></div>{dashboardBadgesLoading ? <div className="empty-state">Loading your badges…</div> : dashboardBadgesError ? <div className="discord-error-notice">{dashboardBadgesError}</div> : dashboardBadges.length === 0 ? <div className="empty-state">You haven't earned any badges yet. Keep an eye on the official Pixlo Discord server for roles and rewards.</div> : <div className="active-links-list pixlo-badge-editor-list">
@@ -1436,11 +1441,11 @@ export default function Dashboard() {
       <Setting label="Enable cursor trail" text="Show the trail in the live preview and on your public profile."><Toggle value={settings.cursorTrailEnabled} onChange={v => set("cursorTrailEnabled", v)} /></Setting>
       <div className="cursor-trail-control-grid">
         <div className="cursor-trail-colour-control"><Colour label="Trail colour" value={settings.cursorTrailColour} onChange={v => set("cursorTrailColour", v)} /></div>
-        <Range label="Glow intensity" value={settings.cursorTrailGlow} min={0} max={100} suffix="%" onChange={v => set("cursorTrailGlow", v)} />
-        <Range label="Trail size" value={settings.cursorTrailSize} min={50} max={180} suffix="%" onChange={v => set("cursorTrailSize", v)} />
-        <Range label="Trail density" value={settings.cursorTrailDensity} min={20} max={100} suffix="%" onChange={v => set("cursorTrailDensity", v)} />
-        <Range label="Trail speed" value={settings.cursorTrailSpeed} min={50} max={150} suffix="%" onChange={v => set("cursorTrailSpeed", v)} />
-        <Range label="Trail lifetime" value={settings.cursorTrailLifetime} min={300} max={4000} step={100} displayValue={(settings.cursorTrailLifetime / 1000).toFixed(1) + "s"} onChange={v => set("cursorTrailLifetime", v)} />
+        <Range label="Glow intensity" value={settings.cursorTrailGlow} min={0} max={200} suffix="%" onChange={v => set("cursorTrailGlow", v)} />
+        <Range label="Trail size" value={settings.cursorTrailSize} min={50} max={350} suffix="%" onChange={v => set("cursorTrailSize", v)} />
+        <Range label="Trail density" value={settings.cursorTrailDensity} min={20} max={250} suffix="%" onChange={v => set("cursorTrailDensity", v)} />
+        <Range label="Trail speed" value={settings.cursorTrailSpeed} min={50} max={300} suffix="%" onChange={v => set("cursorTrailSpeed", v)} />
+        <Range label="Trail lifetime" value={settings.cursorTrailLifetime} min={300} max={15000} step={100} displayValue={(settings.cursorTrailLifetime / 1000).toFixed(1) + "s"} onChange={v => set("cursorTrailLifetime", v)} />
       </div>
       <p className="cursor-trail-footnote">The trail is drawn directly over the live profile preview, does not block clicks, and respects reduced-motion settings.</p>
     </section>
@@ -1500,17 +1505,17 @@ export default function Dashboard() {
               <Setting label="Description glow" text="Add the accent glow to your profile description."><Toggle value={settings.descriptionGlow} onChange={v => set("descriptionGlow", v)} /></Setting>
               <Setting label="Location glow" text="Add the accent glow to your location."><Toggle value={settings.locationGlow} onChange={v => set("locationGlow", v)} /></Setting>
               <Setting label="Socials glow" text="Add the accent glow around your active social and custom-link icons."><Toggle value={settings.socialsGlow} onChange={v => set("socialsGlow", v)} /></Setting>
-              <Range label="Glow intensity" value={settings.glowIntensity} min={0} max={80} suffix="%" onChange={v => set("glowIntensity", v)} />
+              <Range label="Glow intensity" value={settings.glowIntensity} min={0} max={150} suffix="%" onChange={v => set("glowIntensity", v)} />
             </div>
             <div className="colour-grid"><Colour label="Accent" value={settings.accentColour} onChange={v => set("accentColour", v)} /><Colour label="Page background" value={settings.backgroundColour} onChange={v => set("backgroundColour", v)} /><Colour label="Text" value={settings.textColour} onChange={v => set("textColour", v)} /><Colour label="Avatar border" value={settings.avatarBorderColour} onChange={v => set("avatarBorderColour", v)} /></div>
             <div className="presets"><span>Accent presets</span><div>{["#ffffff","#8b5cf6","#3b82f6","#22c55e","#f59e0b","#ec4899","#06b6d4","#ef4444"].map(c => <button type="button" key={c} style={{ background: c }} className={settings.accentColour === c ? "selected" : ""} onClick={() => set("accentColour", c)} />)}</div></div>
             <Range label="Profile opacity" value={settings.profileOpacity} min={0} max={100} suffix="%" onChange={v => set("profileOpacity", v)} />
             <Range label="Text opacity" value={Math.max(85, settings.textOpacity)} min={85} max={100} suffix="%" onChange={v => set("textOpacity", v)} />
-            <Range label="Glass blur" value={settings.profileBlur} min={0} max={60} suffix="px" onChange={v => set("profileBlur", v)} />
+            <Range label="Glass blur" value={settings.profileBlur} min={0} max={120} suffix="px" onChange={v => set("profileBlur", v)} />
             <Range label="Card border opacity" value={settings.borderOpacity} min={0} max={100} suffix="%" onChange={v => set("borderOpacity", v)} />
             <Range label="Shadow opacity" value={settings.shadowOpacity} min={0} max={100} suffix="%" onChange={v => set("shadowOpacity", v)} />
-            <Range label="Shadow blur" value={settings.shadowBlur} min={0} max={160} suffix="px" onChange={v => set("shadowBlur", v)} />
-            <Range label="Corner radius" value={settings.borderRadius} min={0} max={60} suffix="px" onChange={v => set("borderRadius", v)} />
+            <Range label="Shadow blur" value={settings.shadowBlur} min={0} max={320} suffix="px" onChange={v => set("shadowBlur", v)} />
+            <Range label="Corner radius" value={settings.borderRadius} min={0} max={100} suffix="px" onChange={v => set("borderRadius", v)} />
 
           </div>}
           {active === "Fonts" && <div className="form-stack">
@@ -1546,9 +1551,9 @@ export default function Dashboard() {
             <FileUpload label="Background image" value={settings.backgroundImage} accept="image/*" type="image" onChange={v => set("backgroundImage", v)} note="JPG / PNG / WebP · up to 25MB" />
             <FileUpload label="Background video" value={settings.backgroundVideo} accept="video/*,.mp4,.webm,.m4v,.mov" type="video" onChange={handleBackgroundVideoChange} />
             <p className="hint">The video soundtrack is added to Music as “Imported Music”. Choose another track to override it, or remove Imported Music from the library. Visitors may need to interact with the page before audio can start.</p>
-            <Range label="Background blur" value={settings.backgroundBlur} min={0} max={30} suffix="px" onChange={v => set("backgroundBlur", v)} />
-            <Range label="Background darkness" value={settings.backgroundOverlay} min={0} max={90} suffix="%" onChange={v => set("backgroundOverlay", v)} />
-            <Range label="Background scale" value={settings.backgroundScale} min={100} max={160} suffix="%" onChange={v => set("backgroundScale", v)} />
+            <Range label="Background blur" value={settings.backgroundBlur} min={0} max={100} suffix="px" onChange={v => set("backgroundBlur", v)} />
+            <Range label="Background darkness" value={settings.backgroundOverlay} min={0} max={100} suffix="%" onChange={v => set("backgroundOverlay", v)} />
+            <Range label="Background scale" value={settings.backgroundScale} min={100} max={300} suffix="%" onChange={v => set("backgroundScale", v)} />
             <Range label="Background X position" value={settings.backgroundPositionX} min={0} max={100} suffix="%" onChange={v => set("backgroundPositionX", v)} />
             <Range label="Background Y position" value={settings.backgroundPositionY} min={0} max={100} suffix="%" onChange={v => set("backgroundPositionY", v)} />
             <Range label="Vignette" value={settings.vignette} min={0} max={100} suffix="%" onChange={v => set("vignette", v)} />
@@ -1558,15 +1563,46 @@ export default function Dashboard() {
             <SectionIntro number="05" title="Make the card yours" text="Control every major profile surface instead of being locked into one fixed design." />
             <FileUpload label="Avatar" value={settings.avatar} accept="image/*" type="image" onChange={v => set("avatar", v)} />
             <FileUpload label="Banner" value={settings.banner} accept="image/*" type="image" onChange={v => set("banner", v)} />
-            <Range label="Card width" value={settings.cardWidth} min={420} max={900} suffix="px" onChange={v => set("cardWidth", v)} />
-            <Range label="Banner height" value={settings.bannerHeight} min={0} max={300} suffix="px" onChange={v => set("bannerHeight", v)} />
-            <Range label="Avatar size" value={settings.avatarSize} min={56} max={180} suffix="px" onChange={v => set("avatarSize", v)} />
+            <Range label="Card width" value={settings.cardWidth} min={420} max={1400} suffix="px" onChange={v => set("cardWidth", v)} />
+            <Range label="Banner height" value={settings.bannerHeight} min={0} max={600} suffix="px" onChange={v => set("bannerHeight", v)} />
+            <Range label="Avatar size" value={settings.avatarSize} min={56} max={350} suffix="px" onChange={v => set("avatarSize", v)} />
             <Range label="Avatar roundness" value={settings.avatarRadius} min={0} max={50} suffix="%" onChange={v => set("avatarRadius", v)} />
-            <Range label="Avatar border" value={settings.avatarBorderWidth} min={0} max={12} suffix="px" onChange={v => set("avatarBorderWidth", v)} />
+            <Range label="Avatar border" value={settings.avatarBorderWidth} min={0} max={24} suffix="px" onChange={v => set("avatarBorderWidth", v)} />
             <Field label="Avatar decoration"><select value={settings.avatarDecoration} onChange={e => set("avatarDecoration", e.target.value as ProfileSettings["avatarDecoration"])}><option value="none">None</option><option value="halo">Halo</option><option value="orbit">Orbit</option><option value="flame">Flame</option></select></Field>
-            <Range label="Content spacing" value={settings.contentSpacing} min={6} max={36} suffix="px" onChange={v => set("contentSpacing", v)} />
+            <Range label="Content spacing" value={settings.contentSpacing} min={6} max={80} suffix="px" onChange={v => set("contentSpacing", v)} />
             <p className="hint">Adjust the inner padding between the card edge and its content. This does not change the card width.</p>
             <Setting label="Show footer" text="Keep the online and view information at the bottom."><Toggle value={settings.showFooter} onChange={v => set("showFooter", v)} /></Setting>
+          </div>}
+
+
+          {activePrimary === "links" && active === "Share cover" && <div className="form-stack share-cover-page">
+            <SectionIntro title="Shared profile cover" text="Customize the image people see when your profile link is shared. The display name and Pixlo credit stay fixed; you can adjust the name size and glow." />
+            <div className="share-cover-editor-layout">
+              <section className="share-cover-preview-panel" aria-label="Live shared-link cover preview">
+                <div className="share-cover-preview">
+                  {(settings.shareCoverImage || previewAssets.backgroundImage) && <img className="share-cover-preview-background" src={settings.shareCoverImage || previewAssets.backgroundImage} alt="" />}
+                  <div className="share-cover-preview-overlay" />
+                  <div className="share-cover-preview-content">
+                    <div className="share-cover-preview-avatar-wrap">
+                      {previewAvatar ? <img className="share-cover-preview-avatar" src={previewAvatar} alt="" /> : <span className="share-cover-preview-avatar-fallback">{(settings.displayName || settings.username || "P").slice(0, 1).toUpperCase()}</span>}
+                      {previewDecoration && <img className="share-cover-preview-decoration" src={previewDecoration} alt="" aria-hidden="true" />}
+                    </div>
+                    <div className="share-cover-preview-name" style={{
+                      fontSize: `${(settings.shareCoverNameSize / 1200) * 100}cqw`,
+                      textShadow: settings.shareCoverNameGlow ? `0 0 ${Math.max(1, settings.shareCoverNameGlowIntensity * 0.55)}px ${rgbaFromHex(settings.accentColour, Math.min(0.95, settings.shareCoverNameGlowIntensity / 100))}, 0 0 ${settings.shareCoverNameGlowIntensity}px ${rgbaFromHex(settings.accentColour, Math.min(0.45, settings.shareCoverNameGlowIntensity / 300))}` : "none",
+                    }}>{settings.displayName || settings.username}</div>
+                    <div className="share-cover-preview-credit">Made with Pixlo</div>
+                  </div>
+                </div>
+                <p className="share-cover-preview-help">Live 1200 × 630 preview of the image used by Discord and other apps when this profile URL is shared.</p>
+              </section>
+              <div className="share-cover-controls">
+                <FileUpload label="Cover image" value={settings.shareCoverImage} accept="image/*" type="image" note="Import an image for your shared-link cover." onChange={v => { set("shareCoverImage", v); setSaved(false); }} />
+                <Range label="Display name size" value={settings.shareCoverNameSize} min={28} max={110} suffix="px" onChange={v => { set("shareCoverNameSize", v); setSaved(false); }} />
+                <Setting label="Display name glow" text="Add a soft glow around the display name in the shared image."><Toggle value={settings.shareCoverNameGlow} onChange={v => { set("shareCoverNameGlow", v); setSaved(false); }} /></Setting>
+                {settings.shareCoverNameGlow && <Range label="Name glow intensity" value={settings.shareCoverNameGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("shareCoverNameGlowIntensity", v); setSaved(false); }} />}
+              </div>
+            </div>
           </div>}
 
           {active === "Socials" && <div className="form-stack">
@@ -1612,7 +1648,7 @@ export default function Dashboard() {
               })}
             </div>
             <div className="social-size-control">
-              <Range label="Social icon size" value={settings.socialIconSize} min={16} max={48} suffix="px" onChange={v => set("socialIconSize", v)} />
+              <Range label="Social icon size" value={settings.socialIconSize} min={16} max={96} suffix="px" onChange={v => set("socialIconSize", v)} />
               <p>Resize your social and custom-link icons on your public profile and in this live preview.</p>
             </div>
           </div>}
@@ -1650,10 +1686,10 @@ export default function Dashboard() {
             </div>
             <Setting label="Animated effects" text="Enable transitions and subtle motion across the profile."><Toggle value={settings.animated} onChange={v => set("animated", v)} /></Setting>
             <Setting label="Card glow" text="Create a coloured glow around the profile card."><Toggle value={settings.glow} onChange={v => set("glow", v)} /></Setting>
-            <Range label="Glow intensity" value={settings.glowIntensity} min={0} max={80} suffix="%" onChange={v => set("glowIntensity", v)} />
+            <Range label="Glow intensity" value={settings.glowIntensity} min={0} max={150} suffix="%" onChange={v => set("glowIntensity", v)} />
             <Setting label="Floating card" text="Give the profile a slow floating motion."><Toggle value={settings.floating} onChange={v => set("floating", v)} /></Setting>
             <Setting label="Profile-card parallax" text="Give the profile card a smooth 3D tilt that follows your mouse or finger. The background stays completely still."><Toggle value={settings.parallax} onChange={v => set("parallax", v)} /></Setting>
-            <Range label="Parallax intensity" value={settings.parallaxStrength} min={0} max={35} suffix="%" onChange={v => set("parallaxStrength", v)} />
+            <Range label="Parallax intensity" value={settings.parallaxStrength} min={0} max={100} suffix="%" onChange={v => set("parallaxStrength", v)} />
             <Setting label="Background particles" text="Add soft floating particles behind the profile."><Toggle value={settings.particles} onChange={v => set("particles", v)} /></Setting>
             <Setting label="Film grain" text="Add a subtle texture overlay for a less flat background."><Toggle value={settings.grain} onChange={v => set("grain", v)} /></Setting>
             <Setting label="Show earned badges on your profile" text="Hide your badges from other people without removing your earned badges."><Toggle value={!badgesHidden} onChange={async value => { const previous = badgesHidden; setBadgesHidden(!value); try { const response = await fetch("/api/profile/badges-visibility", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hidden: !value }) }); if (!response.ok) setBadgesHidden(previous); } catch { setBadgesHidden(previous); } }} /></Setting>
@@ -1757,12 +1793,12 @@ export default function Dashboard() {
             <Range label="Border transparency" value={settings.enterScreenCardBorderOpacity} min={0} max={100} suffix="%" onChange={v => set("enterScreenCardBorderOpacity", v)} />
             <Colour label="Card background colour" value={settings.enterScreenCardBackgroundColour} onChange={v => set("enterScreenCardBackgroundColour", v)} />
             <Range label="Card background transparency" value={settings.enterScreenCardOpacity} min={0} max={100} suffix="%" onChange={v => set("enterScreenCardOpacity", v)} />
-            <Range label="Card corner roundness" value={settings.enterScreenCardRadius} min={0} max={48} suffix="px" onChange={v => set("enterScreenCardRadius", v)} />
-            <Range label="Card width" value={settings.enterScreenCardWidth} min={180} max={760} suffix="px" onChange={v => set("enterScreenCardWidth", v)} />
-            <Range label="Card horizontal position" value={settings.enterScreenCardPositionX} min={5} max={95} suffix="%" onChange={v => set("enterScreenCardPositionX", v)} />
-            <Range label="Card vertical position" value={settings.enterScreenCardPositionY} min={5} max={95} suffix="%" onChange={v => set("enterScreenCardPositionY", v)} />
-            <Range label="Card padding" value={settings.enterScreenCardPadding} min={4} max={48} suffix="px" onChange={v => set("enterScreenCardPadding", v)} />
-            <Range label="Screen background blur" value={settings.enterScreenCardBlur} min={0} max={40} suffix="px" onChange={v => set("enterScreenCardBlur", v)} />
+            <Range label="Card corner roundness" value={settings.enterScreenCardRadius} min={0} max={96} suffix="px" onChange={v => set("enterScreenCardRadius", v)} />
+            <Range label="Card width" value={settings.enterScreenCardWidth} min={180} max={1100} suffix="px" onChange={v => set("enterScreenCardWidth", v)} />
+            <Range label="Card horizontal position" value={settings.enterScreenCardPositionX} min={0} max={100} suffix="%" onChange={v => set("enterScreenCardPositionX", v)} />
+            <Range label="Card vertical position" value={settings.enterScreenCardPositionY} min={0} max={100} suffix="%" onChange={v => set("enterScreenCardPositionY", v)} />
+            <Range label="Card padding" value={settings.enterScreenCardPadding} min={4} max={100} suffix="px" onChange={v => set("enterScreenCardPadding", v)} />
+            <Range label="Screen background blur" value={settings.enterScreenCardBlur} min={0} max={100} suffix="px" onChange={v => set("enterScreenCardBlur", v)} />
           </div>}
         </section>
 

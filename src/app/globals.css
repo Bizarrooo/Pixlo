@@ -7508,7 +7508,7 @@ html { scroll-behavior:smooth; }
 
 
 /* Share control belongs to the signed-in dashboard, never the public profile. */
-.dashboard .pixlo-dashboard-share-button { position: fixed !important; left: max(18px, env(safe-area-inset-left)) !important; bottom: max(18px, env(safe-area-inset-bottom)) !important; }
+.dashboard .pixlo-dashboard-share-button { position: fixed !important; left: max(18px, env(safe-area-inset-left)) !important; bottom: max(82px, calc(env(safe-area-inset-bottom) + 82px)) !important; }
 /* Keep trail particles visible above the card while never capturing pointer input. */
 .pixlo-cursor-trail-layer { z-index: 100000 !important; pointer-events: none !important; overflow: visible !important; }
 .pixlo-cursor-trail-layer .pixlo-cursor-trail { pointer-events: none !important; }

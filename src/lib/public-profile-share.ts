@@ -6,6 +6,12 @@ export type PublicProfileShareData = {
   username: string;
   displayName: string;
   avatarUrl: string;
+  avatarDecorationUrl: string;
+  shareCoverImageUrl: string;
+  shareCoverNameSize: number;
+  shareCoverNameGlow: boolean;
+  shareCoverNameGlowIntensity: number;
+  shareCoverNameGlowColour: string;
   backgroundImageUrl: string;
   backgroundVideoUrl: string;
 };
@@ -53,11 +59,30 @@ export async function getPublicProfileShareData(usernameInput: string): Promise<
       : "";
     const ordinaryAvatar = typeof settings.avatar === "string" ? settings.avatar.trim() : "";
     const avatarUrl = publicAssetUrl(discordAvatar || ordinaryAvatar);
+    const avatarDecorationUrl = settings.useDiscordDecoration === true
+      ? publicAssetUrl(settings.discordAvatarDecorationUrl)
+      : "";
+    const shareCoverNameSize = typeof settings.shareCoverNameSize === "number" && Number.isFinite(settings.shareCoverNameSize)
+      ? Math.min(110, Math.max(28, Math.round(settings.shareCoverNameSize)))
+      : 66;
+    const shareCoverNameGlow = settings.shareCoverNameGlow === true;
+    const shareCoverNameGlowIntensity = typeof settings.shareCoverNameGlowIntensity === "number" && Number.isFinite(settings.shareCoverNameGlowIntensity)
+      ? Math.min(200, Math.max(0, settings.shareCoverNameGlowIntensity))
+      : 65;
+    const shareCoverNameGlowColour = typeof settings.accentColour === "string" && /^#[0-9a-f]{6}$/i.test(settings.accentColour)
+      ? settings.accentColour
+      : "#ff6946";
 
     return {
       username: String(row.username || username).trim().toLowerCase(),
       displayName: displayName || username,
       avatarUrl,
+      avatarDecorationUrl,
+      shareCoverImageUrl: publicAssetUrl(settings.shareCoverImage),
+      shareCoverNameSize,
+      shareCoverNameGlow,
+      shareCoverNameGlowIntensity,
+      shareCoverNameGlowColour,
       backgroundImageUrl: publicAssetUrl(settings.backgroundImage),
       backgroundVideoUrl: publicAssetUrl(settings.backgroundVideo),
     };

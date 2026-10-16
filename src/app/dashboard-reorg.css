@@ -1399,7 +1399,7 @@ body:has(.dashboard.dashboard-revamp) {
   transform: perspective(1150px)
     rotateX(var(--parallax-rotate-x, 0deg))
     rotateY(var(--parallax-rotate-y, 0deg))
-    translate3d(calc(var(--mouse-x, 0px) * .30), calc(var(--mouse-y, 0px) * .30), 0)
+    translate3d(calc(var(--mouse-x, 0px) * .45), calc(var(--mouse-y, 0px) * .45), 0)
     scale3d(1.02, 1.02, 1) !important;
   transform-origin: center center !important;
   transform-style: preserve-3d !important;
@@ -1427,7 +1427,7 @@ body:has(.dashboard.dashboard-revamp) {
   transform: perspective(1100px)
     rotateX(var(--preview-parallax-rotate-x, 0deg))
     rotateY(var(--preview-parallax-rotate-y, 0deg))
-    translate3d(calc(var(--preview-parallax-x, 0px) * .30), calc(var(--preview-parallax-y, 0px) * .30), 0)
+    translate3d(calc(var(--preview-parallax-x, 0px) * .45), calc(var(--preview-parallax-y, 0px) * .45), 0)
     scale3d(1.02, 1.02, 1) !important;
   transform-origin: center center !important;
   transform-style: preserve-3d !important;
@@ -1441,3 +1441,26 @@ body:has(.dashboard.dashboard-revamp) {
   pointer-events: none !important;
   overflow: hidden !important;
 }
+
+
+/* Links tabs and the custom social-share cover editor. */
+.dashboard.dashboard-revamp .dashboard-links-tabs { display:flex; gap:8px; padding:13px clamp(22px,3vw,42px) 0; border-bottom:1px solid rgba(255,255,255,.08); }
+.dashboard.dashboard-revamp .dashboard-links-tabs button { border:1px solid transparent; border-bottom:0; border-radius:10px 10px 0 0; padding:10px 15px; background:transparent; color:#aaa09b; font:inherit; font-size:12px; font-weight:700; cursor:pointer; transition:background .18s ease,color .18s ease,border-color .18s ease; }
+.dashboard.dashboard-revamp .dashboard-links-tabs button:hover { color:#fff2e8; background:rgba(255,132,82,.07); }
+.dashboard.dashboard-revamp .dashboard-links-tabs button.active { color:#fff7f0; border-color:rgba(255,126,76,.25); background:linear-gradient(110deg,rgba(255,100,62,.16),rgba(255,174,95,.07)); box-shadow:inset 0 -2px #ff7147; }
+.dashboard.dashboard-revamp .share-cover-editor-layout { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(270px,.8fr); align-items:start; gap:22px; }
+.dashboard.dashboard-revamp .share-cover-preview-panel { min-width:0; padding:16px; border:1px solid rgba(255,255,255,.1); border-radius:16px; background:rgba(13,11,12,.68); }
+.dashboard.dashboard-revamp .share-cover-preview { position:relative; isolation:isolate; container-type:inline-size; display:flex; align-items:center; justify-content:center; width:100%; aspect-ratio:1200 / 630; overflow:hidden; border-radius:11px; color:#fff; background:linear-gradient(135deg,#09090b 0%,#21100d 55%,#41180f 100%); }
+.dashboard.dashboard-revamp .share-cover-preview-background,.dashboard.dashboard-revamp .share-cover-preview-overlay { position:absolute; inset:0; width:100%; height:100%; }
+.dashboard.dashboard-revamp .share-cover-preview-background { object-fit:cover; z-index:-2; }
+.dashboard.dashboard-revamp .share-cover-preview-overlay { z-index:-1; background:linear-gradient(rgba(7,7,9,.25),rgba(7,7,9,.62)); pointer-events:none; }
+.dashboard.dashboard-revamp .share-cover-preview-content { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:3.5% 7%; text-align:center; }
+.dashboard.dashboard-revamp .share-cover-preview-avatar-wrap { position:relative; width:clamp(64px,22cqw,264px); aspect-ratio:1; display:flex; align-items:center; justify-content:center; margin-bottom:2%; overflow:visible; }
+.dashboard.dashboard-revamp .share-cover-preview-avatar,.dashboard.dashboard-revamp .share-cover-preview-avatar-fallback { display:flex; align-items:center; justify-content:center; width:82.5%; height:82.5%; border-radius:50%; object-fit:cover; border:none !important; outline:none !important; box-shadow:none !important; background:transparent; }
+.dashboard.dashboard-revamp .share-cover-preview-avatar-fallback { color:#fff; font-size:3.2rem; font-weight:800; }
+.dashboard.dashboard-revamp .share-cover-preview-decoration { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none; }
+.dashboard.dashboard-revamp .share-cover-preview-name { max-width:100%; color:#fff; font-weight:800; line-height:1.1; overflow-wrap:anywhere; }
+.dashboard.dashboard-revamp .share-cover-preview-credit { margin-top:1cqw; color:rgba(255,255,255,.83); font-size:1.5cqw; font-weight:500; }
+.dashboard.dashboard-revamp .share-cover-preview-help { margin:12px 0 0; color:#a9a09b; font-size:11px; line-height:1.6; }
+.dashboard.dashboard-revamp .share-cover-controls { display:flex; flex-direction:column; gap:15px; min-width:0; padding:16px; border:1px solid rgba(255,255,255,.1); border-radius:16px; background:rgba(13,11,12,.68); }
+@media (max-width:940px) { .dashboard.dashboard-revamp .share-cover-editor-layout { grid-template-columns:minmax(0,1fr); } .dashboard.dashboard-revamp .share-cover-preview-panel { padding:10px; } }

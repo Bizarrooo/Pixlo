@@ -139,13 +139,13 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     let lastX = -100;
     let lastY = -100;
     let lastSpawnAt = 0;
-    const density = Math.min(100, Math.max(20, settings.cursorTrailDensity));
+    const density = Math.min(250, Math.max(20, settings.cursorTrailDensity));
     // Use a lighter trail whenever card parallax is active so particles do not compete
     // with the high-frequency pointer updates and 3D transforms.
     const parallaxActive = settings.parallax;
-    const particleCount = parallaxActive ? 1 : Math.min(4, Math.max(1, Math.round(density / 30)));
+    const particleCount = parallaxActive ? 1 : Math.min(6, Math.max(1, Math.round(density / 30)));
     const spawnInterval = parallaxActive ? 48 : 18;
-    const maxParticles = parallaxActive ? 16 : 84;
+    const maxParticles = parallaxActive ? 20 : 120;
 
     const handleCursorMove = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
@@ -157,7 +157,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       lastSpawnAt = now;
       lastX = event.clientX;
       lastY = event.clientY;
-      const lifetime = Math.min(4000, Math.max(300, settings.cursorTrailLifetime));
+      const lifetime = Math.min(15000, Math.max(300, settings.cursorTrailLifetime));
 
       for (let index = 0; index < particleCount; index += 1) {
         const particle = document.createElement("span");
@@ -509,12 +509,12 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     if (!root) return;
     const strength = settings.parallax ? settings.parallaxStrength : 0;
     const power = settings.parallax && strength > 0
-      ? Math.pow(Math.min(35, Math.max(0, strength)) / 35, 0.72)
+      ? Math.min(1.7, Math.pow(Math.min(100, Math.max(0, strength)) / 35, 0.72))
       : 0;
     root.style.setProperty("--mouse-x", `${x * strength}px`);
     root.style.setProperty("--mouse-y", `${y * strength}px`);
-    root.style.setProperty("--parallax-rotate-x", `${y * -10 * power}deg`);
-    root.style.setProperty("--parallax-rotate-y", `${x * 12 * power}deg`);
+    root.style.setProperty("--parallax-rotate-x", `${y * -18 * power}deg`);
+    root.style.setProperty("--parallax-rotate-y", `${x * 22 * power}deg`);
     root.style.setProperty("--parallax-light-x", `${50 + x * 45 * power}%`);
     root.style.setProperty("--parallax-light-y", `${50 + y * 45 * power}%`);
     root.style.setProperty("--parallax-shadow-x", `${x * -10 * power}px`);
