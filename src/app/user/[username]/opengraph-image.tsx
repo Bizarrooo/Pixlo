@@ -1,11 +1,11 @@
-import { renderShareCoverImage, SHARE_COVER_SIZE } from "../../../lib/share-cover-renderer";
+import { renderShareCoverImage } from "../../../lib/share-cover-renderer";
 import { getPublicProfileShareData } from "../../../lib/public-profile-share";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const alt = "Profile avatar, display name and custom share cover — Made with Pixlo";
-export const size = SHARE_COVER_SIZE;
+export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OpenGraphImage({

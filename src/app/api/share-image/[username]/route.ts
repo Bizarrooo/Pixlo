@@ -50,12 +50,13 @@ export async function GET(
           });
         }
     } catch {
-      // If this particular animation cannot be composited, still show its animation instead of a blank card.
-      return new Response(null, {
-        status: 302,
-        headers: { ...responseHeaders, Location: coverUrl },
-      });
+      // Fall through to the original animated asset if this particular GIF cannot be composited.
     }
+    // Keep the original animation as the fallback, never try to paint an animated GIF as a static image.
+    return new Response(null, {
+      status: 302,
+      headers: { ...responseHeaders, Location: coverUrl },
+    });
   }
 
   const imageResponse = await renderShareCoverImage(profile, "full");
