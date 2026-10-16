@@ -6,7 +6,21 @@ export type PublicProfileShareData = {
   username: string;
   displayName: string;
   avatarUrl: string;
+  backgroundImageUrl: string;
+  backgroundVideoUrl: string;
 };
+
+function publicAssetUrl(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const raw = value.trim();
+  if (!raw || /^(?:idb:|blob:|data:)/i.test(raw)) return "";
+  try {
+    const parsed = new URL(raw, PIXLO_PUBLIC_ORIGIN);
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed.toString() : "";
+  } catch {
+    return "";
+  }
+}
 
 export async function getPublicProfileShareData(usernameInput: string): Promise<PublicProfileShareData | null> {
   const username = usernameInput.trim().toLowerCase();
@@ -38,22 +52,14 @@ export async function getPublicProfileShareData(usernameInput: string): Promise<
       ? settings.discordAvatarUrl.trim()
       : "";
     const ordinaryAvatar = typeof settings.avatar === "string" ? settings.avatar.trim() : "";
-    const candidate = discordAvatar || ordinaryAvatar;\n    const rawBackground = typeof settings.backgroundImage === "string" ? settings.backgroundImage.trim() : "";\n    let backgroundImageUrl = "";\n    if (rawBackground && !rawBackground.startsWith("idb:") && !rawBackground.startsWith("blob:") && !rawBackground.startsWith("data:")) {\n      try { const parsedBackground = new URL(rawBackground, PIXLO_PUBLIC_ORIGIN); if (parsedBackground.protocol === "https:" || parsedBackground.protocol === "http:") backgroundImageUrl = parsedBackground.toString(); } catch {}\n    }
-    let avatarUrl = "";
-
-    if (candidate && !candidate.startsWith("idb:") && !candidate.startsWith("blob:") && !candidate.startsWith("data:")) {
-      try {
-        const parsed = new URL(candidate, PIXLO_PUBLIC_ORIGIN);
-        if (parsed.protocol === "https:" || parsed.protocol === "http:") avatarUrl = parsed.toString();
-      } catch {
-        avatarUrl = "";
-      }
-    }
+    const avatarUrl = publicAssetUrl(discordAvatar || ordinaryAvatar);
 
     return {
       username: String(row.username || username).trim().toLowerCase(),
       displayName: displayName || username,
       avatarUrl,
+      backgroundImageUrl: publicAssetUrl(settings.backgroundImage),
+      backgroundVideoUrl: publicAssetUrl(settings.backgroundVideo),
     };
   } catch {
     return null;
