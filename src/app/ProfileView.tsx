@@ -190,6 +190,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     settings.cursorTrailDensity,
     settings.cursorTrailSpeed,
     settings.cursorTrailLifetime,
+    settings.parallax,
     presetPreviewMode,
     embedMode,
     forcedUsername,
