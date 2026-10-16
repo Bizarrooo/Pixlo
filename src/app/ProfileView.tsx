@@ -123,7 +123,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
 
   useEffect(() => {
-    if (!isPremium || !settings.cursorSparklesEnabled || presetPreviewMode || embedMode || !forcedUsername) return;
+    if (!isPremium || !settings.cursorTrailEnabled || presetPreviewMode || embedMode || !forcedUsername) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (!window.matchMedia("(pointer: fine)").matches) return;
 
@@ -133,7 +133,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     let lastX = -100;
     let lastY = -100;
     let lastSpawnAt = 0;
-    const density = Math.min(100, Math.max(20, settings.cursorSparklesDensity));
+    const density = Math.min(100, Math.max(20, settings.cursorTrailDensity));
     const particleCount = Math.min(4, Math.max(1, Math.round(density / 30)));
 
     const handleCursorMove = (event: PointerEvent) => {
@@ -146,22 +146,22 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       lastSpawnAt = now;
       lastX = event.clientX;
       lastY = event.clientY;
-      const lifetime = Math.min(1100, Math.max(320, 1250 - settings.cursorSparklesSpeed * 5));
+      const lifetime = Math.min(4000, Math.max(300, settings.cursorTrailLifetime));
 
       for (let index = 0; index < particleCount; index += 1) {
         const particle = document.createElement("span");
-        const size = Math.max(4, (6 + Math.random() * 9) * settings.cursorSparklesSize / 100);
+        const size = Math.max(4, (6 + Math.random() * 9) * settings.cursorTrailSize / 100);
         const offsetX = (Math.random() - 0.5) * 18;
         const offsetY = (Math.random() - 0.5) * 18;
-        particle.className = "pixlo-cursor-sparkle";
+        particle.className = "pixlo-cursor-trail";
         particle.textContent = Math.random() > 0.7 ? "✧" : "✦";
         particle.style.left = (event.clientX + offsetX) + "px";
         particle.style.top = (event.clientY + offsetY) + "px";
         particle.style.setProperty("--cursor-sparkle-particle-size", size + "px");
-        particle.style.setProperty("--cursor-sparkle-colour", settings.cursorSparklesColour);
-        particle.style.setProperty("--cursor-sparkle-glow", (settings.cursorSparklesGlow / 8) + "px");
-        particle.style.setProperty("--cursor-sparkle-drift-x", ((Math.random() - 0.5) * 34) + "px");
-        particle.style.setProperty("--cursor-sparkle-drift-y", ((Math.random() - 0.8) * 36) + "px");
+        particle.style.setProperty("--cursor-sparkle-colour", settings.cursorTrailColour);
+        particle.style.setProperty("--cursor-sparkle-glow", (settings.cursorTrailGlow / 8) + "px");
+        particle.style.setProperty("--cursor-sparkle-drift-x", (((Math.random() - 0.5) * 34) * settings.cursorTrailSpeed / 100) + "px");
+        particle.style.setProperty("--cursor-sparkle-drift-y", (((Math.random() - 0.8) * 36) * settings.cursorTrailSpeed / 100) + "px");
         particle.style.setProperty("--cursor-sparkle-duration", lifetime + "ms");
         particle.style.opacity = String(0.55 + Math.random() * 0.45);
         particle.addEventListener("animationend", () => particle.remove(), { once: true });
@@ -178,12 +178,12 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     };
   }, [
     isPremium,
-    settings.cursorSparklesEnabled,
-    settings.cursorSparklesColour,
-    settings.cursorSparklesGlow,
-    settings.cursorSparklesSize,
-    settings.cursorSparklesDensity,
-    settings.cursorSparklesSpeed,
+    settings.cursorTrailEnabled,
+    settings.cursorTrailColour,
+    settings.cursorTrailGlow,
+    settings.cursorTrailSize,
+    settings.cursorTrailDensity,
+    settings.cursorTrailSpeed,
     presetPreviewMode,
     embedMode,
     forcedUsername,
@@ -498,8 +498,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   return (
     <main className={`profile-page ${isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername ? "has-extras" : ""} ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
-      {isPremium && settings.cursorSparklesEnabled && !presetPreviewMode && !embedMode && forcedUsername && typeof document !== "undefined" && createPortal(
-        <div ref={cursorSparkleLayerRef} className="pixlo-cursor-sparkle-layer" aria-hidden="true" />,
+      {isPremium && settings.cursorTrailEnabled && !presetPreviewMode && !embedMode && forcedUsername && typeof document !== "undefined" && createPortal(
+        <div ref={cursorSparkleLayerRef} className="pixlo-cursor-trail-layer" aria-hidden="true" />,
         document.body
       )}
       <svg className="pixlo-gradient-defs" aria-hidden="true" width="0" height="0" style={{position:"absolute",width:0,height:0,overflow:"hidden"}}><defs><linearGradient id="pixlo-social-gradient" x1="0%" y1="0%" x2="100%" y2="0%" spreadMethod="repeat"><stop offset="0%" stopColor={settings.gradientSocialsColours[0]} /><stop offset="33.333%" stopColor={settings.gradientSocialsColours[1]} /><stop offset="66.666%" stopColor={settings.gradientSocialsColours[2]} /><stop offset="100%" stopColor={settings.gradientSocialsColours[0]} /><animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="-1 0" dur="8s" repeatCount="indefinite" /></linearGradient></defs></svg>
