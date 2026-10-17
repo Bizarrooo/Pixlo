@@ -1792,6 +1792,7 @@ export default function Dashboard() {
                         fontFamily: fontFamily(settings.shareCoverFont),
                         fontSize: `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`,
                       }}>{settings.displayName || settings.username}</div>
+                      </div>
                       <div className="share-cover-preview-credit" style={{
                         color: settings.shareCoverCreditGradientEnabled ? "transparent" : settings.shareCoverCreditColour,
                         backgroundImage: settings.shareCoverCreditGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverCreditGradientColours.join(", ")})` : "none",
