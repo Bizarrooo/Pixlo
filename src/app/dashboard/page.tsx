@@ -362,6 +362,8 @@ export default function Dashboard() {
   const [premiumRevokeMessage, setPremiumRevokeMessage] = useState("");
   const [savedIdentity, setSavedIdentity] = useState({ username: "", displayName: "" });
   const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
+  const [usernameSaveBusy, setUsernameSaveBusy] = useState(false);
+  const [usernameSaveError, setUsernameSaveError] = useState("");
   const [badgesHidden, setBadgesHidden] = useState(false);
   const [dashboardBadges, setDashboardBadges] = useState<DashboardBadge[]>([]);
   const [previewBadges, setPreviewBadges] = useState<DashboardBadge[]>([]);
@@ -1003,7 +1005,16 @@ export default function Dashboard() {
     return [...order.filter(key => validKeys.includes(key)), ...validKeys.filter(key => !order.includes(key))];
   }, [settings]);
   const performSave = async () => {
-    if (!profileUserId) return;
+    const isUsernameChange = settings.username.trim().toLowerCase() !== savedIdentity.username.trim().toLowerCase();
+    if (isUsernameChange && usernameSaveBusy) return;
+    if (!profileUserId) {
+      if (isUsernameChange) setUsernameSaveError("Your Pixlo account is still loading. Please wait a moment and try again.");
+      return;
+    }
+    if (isUsernameChange) {
+      setUsernameSaveBusy(true);
+      setUsernameSaveError("");
+    }
     setSaved(false);
     try {
       const response = await fetch("/api/account", {
@@ -1014,19 +1025,37 @@ export default function Dashboard() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.profile) {
-        window.alert(data.error || "Unable to save your account identity.");
+        const message = data.error || "Unable to save your account identity.";
+        if (isUsernameChange) {
+          setUsernameSaveError(message);
+          return;
+        }
+        window.alert(message);
         setSettings(current => ({ ...current, username: savedIdentity.username || current.username, displayName: savedIdentity.displayName || current.displayName }));
         return;
       }
+
+      const savedUsername = String(data.profile.username || "").trim().toLowerCase();
+      const requestedUsername = settings.username.trim().toLowerCase();
+      if (isUsernameChange && savedUsername !== requestedUsername) {
+        setUsernameSaveError("Pixlo received the save request but the database still returned your previous username. No change has been confirmed. Please refresh and try again; if it repeats, send us this message.");
+        return;
+      }
+
       const nextSettings = { ...settings, username: data.profile.username, displayName: data.profile.displayName };
       setSettings(nextSettings);
       setSavedIdentity({ username: data.profile.username, displayName: data.profile.displayName });
       setUsernameChangeAvailableAt(data.profile.usernameChangeAvailableAt || null);
       saveSettingsToStorage(nextSettings, accountSettingsStorageKey(profileUserId));
       setSaved(true);
+      setShowUsernameConfirm(false);
+      setUsernameSaveError("");
       window.setTimeout(() => setSaved(false), 1800);
     } catch {
-      window.alert("Couldn't save your account identity. Check your connection and try again.");
+      if (isUsernameChange) setUsernameSaveError("Couldn't reach Pixlo to save this username. Check your connection and try again.");
+      else window.alert("Couldn't save your account identity. Check your connection and try again.");
+    } finally {
+      if (isUsernameChange) setUsernameSaveBusy(false);
     }
   };
   const save = async () => {
@@ -1404,15 +1433,38 @@ export default function Dashboard() {
       .dashboard:has(.presets-page) .preset-real-preview iframe{width:147.059%!important;height:147.059%!important;transform:scale(.68)!important;transform-origin:top left!important;overflow:hidden!important}
     }
   `}</style>
-  {showUsernameConfirm && <div role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowUsernameConfirm(false); }} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}>
-    <section role="dialog" aria-modal="true" aria-labelledby="username-confirm-title" style={{ width: "min(100%, 440px)", padding: 26, borderRadius: 20, border: "1px solid rgba(255,255,255,0.14)", background: "#15151b", color: "#fff", boxShadow: "0 24px 80px rgba(0,0,0,0.45)" }}>
-      <h2 id="username-confirm-title" style={{ margin: "0 0 12px", fontSize: 22 }}>Confirm username change</h2>
-      <p style={{ margin: "0 0 10px", lineHeight: 1.6, color: "rgba(255,255,255,0.82)" }}>You’re changing your username to <strong>@{settings.username}</strong>.</p>
-      <p style={{ margin: "0 0 22px", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>You cannot change your username again for 24 hours after saving. Your Pixlo profile URL will also change.</p>
-      <div style={{ display: "flex", justifyContent: "flex-end", flexWrap: "wrap", gap: 10 }}>
-        <button type="button" onClick={() => { setShowUsernameConfirm(false); setSettings(current => ({ ...current, username: savedIdentity.username })); }} style={{ padding: "11px 16px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.06)", color: "white", font: "inherit", cursor: "pointer" }}>Cancel</button>
-        <button type="button" onClick={() => { setShowUsernameConfirm(false); void performSave(); }} style={{ padding: "11px 16px", borderRadius: 10, border: 0, background: "#8b5cf6", color: "white", font: "inherit", fontWeight: 700, cursor: "pointer" }}>Save username</button>
+  {showUsernameConfirm && <div className="username-change-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !usernameSaveBusy) { setShowUsernameConfirm(false); setUsernameSaveError(""); } }}>
+    <section className="auth-card username-change-dialog" role="dialog" aria-modal="true" aria-labelledby="username-confirm-title" aria-describedby="username-confirm-description" aria-busy={usernameSaveBusy}>
+      <div className="auth-card-rails" aria-hidden="true">
+        <i className="auth-rail auth-rail-tl-top" /><i className="auth-rail auth-rail-tl-side" />
+        <i className="auth-rail auth-rail-tr-top" /><i className="auth-rail auth-rail-tr-side" />
+        <i className="auth-rail auth-rail-bl-side" /><i className="auth-rail auth-rail-bl-bottom" />
+        <i className="auth-rail auth-rail-br-bottom" /><i className="auth-rail auth-rail-br-side" />
       </div>
+      <div className="auth-card-meta">
+        <span className="auth-step-pill"><i /> ACCOUNT IDENTITY</span>
+        <span className="auth-meta-code">PIXLO <b>·</b> SETTINGS</span>
+      </div>
+      <div className="auth-heading username-change-heading">
+        <span className="auth-heading-kicker">PROFILE SETTINGS / CONFIRM ACTION</span>
+        <h1 id="username-confirm-title">A new name.<br /><em>Your own corner.</em></h1>
+        <p id="username-confirm-description">You’re changing the username attached to your Pixlo profile.</p>
+      </div>
+      <div className="username-change-target">
+        <span>NEW PROFILE USERNAME</span>
+        <strong>@{settings.username}</strong>
+        <small>pixlo1.vercel.app/user/{settings.username.trim().toLowerCase()}</small>
+      </div>
+      <p className="username-change-cooldown">You can change your username again after 24 hours. Your profile URL will change to match.</p>
+      {usernameSaveError && <div className="auth-error username-change-error" role="alert"><span className="auth-message-icon">!</span><span>{usernameSaveError}</span></div>}
+      <div className="username-change-actions">
+        <button type="button" className="auth-back-button" disabled={usernameSaveBusy} onClick={() => { setShowUsernameConfirm(false); setUsernameSaveError(""); setSettings(current => ({ ...current, username: savedIdentity.username })); }}>Cancel</button>
+        <button type="button" className="auth-submit username-change-submit" disabled={usernameSaveBusy || !profileUserId} onClick={() => { void performSave(); }}>
+          <span>{usernameSaveBusy ? "Saving username…" : "Save username"}</span>
+          <span className="auth-submit-arrow" aria-hidden="true">{usernameSaveBusy ? "…" : "↗"}</span>
+        </button>
+      </div>
+      <div className="username-change-footer"><span /> Username changes are saved to your Pixlo account.</div>
     </section>
   </div>}
     <main className={`dashboard dashboard-revamp ${settings.dashboardCustomisationEnabled ? "dashboard-customisation-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardBackgroundGradientEnabled ? "dashboard-bg-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardTextGradientEnabled ? "dashboard-text-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && !settings.dashboardTextGradientEnabled ? "dashboard-text-solid-on" : ""}`} style={{ "--dashboard-bg-gradient": `linear-gradient(125deg, ${settings.dashboardBackgroundGradientColours[0]}, ${settings.dashboardBackgroundGradientColours[1]}, ${settings.dashboardBackgroundGradientColours[2]})`, "--dashboard-text-gradient": `linear-gradient(90deg, ${settings.dashboardTextGradientColours[0]} 0%, ${settings.dashboardTextGradientColours[1]} 16.666%, ${settings.dashboardTextGradientColours[2]} 33.333%, ${settings.dashboardTextGradientColours[0]} 50%, ${settings.dashboardTextGradientColours[1]} 66.666%, ${settings.dashboardTextGradientColours[2]} 83.333%, ${settings.dashboardTextGradientColours[0]} 100%)`, "--dashboard-text-solid": settings.dashboardTextSolidColour } as React.CSSProperties} onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
@@ -1602,7 +1654,7 @@ export default function Dashboard() {
           {active === "General" && <div className="form-stack">
             <SectionIntro number="01" title="Identity, presence and first impression" text="Control exactly what visitors see before they explore anything else." />
             <Field label="Username" hint={usernameLockHint}><input value={settings.username} disabled={usernameLocked} maxLength={24} autoCapitalize="none" autoCorrect="off" onChange={e => { set("username", e.target.value.replace(/[^a-zA-Z0-9._-]/g, "").toLowerCase().slice(0, 24)); setSaved(false); }} /></Field>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: -6 }}><button type="button" className="save-button" disabled={usernameLocked || settings.username.trim().toLowerCase() === savedIdentity.username.trim().toLowerCase()} onClick={() => setShowUsernameConfirm(true)}>{usernameLocked ? "Username locked" : "Change username"}</button>{settings.username.trim().toLowerCase() !== savedIdentity.username.trim().toLowerCase() && <span style={{ fontSize: 12, opacity: 0.7 }}>Your new username is not saved yet.</span>}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: -6 }}><button type="button" className="save-button" disabled={usernameLocked || settings.username.trim().toLowerCase() === savedIdentity.username.trim().toLowerCase()} onClick={() => { setUsernameSaveError(""); setShowUsernameConfirm(true); }}>{usernameLocked ? "Username locked" : "Change username"}</button>{settings.username.trim().toLowerCase() !== savedIdentity.username.trim().toLowerCase() && <span style={{ fontSize: 12, opacity: 0.7 }}>Your new username is not saved yet.</span>}</div>
             <div className="url-preview" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}><span>Your profile: <b style={{ overflowWrap: "anywhere" }}>{profileUrl}</b></span><button type="button" onClick={() => void copyProfileUrl()} style={{ flexShrink: 0, padding: "8px 12px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.08)", color: "inherit", cursor: "pointer", font: "inherit" }}>{profileCopied ? "✓ Copied!" : "Copy link"}</button></div>
             <Field label="Display name"><input value={settings.displayName} onChange={e => set("displayName", e.target.value)} /></Field>
             <Field label="Bio / description"><textarea value={settings.description} onChange={e => set("description", e.target.value)} placeholder="Tell people about yourself..." /></Field>

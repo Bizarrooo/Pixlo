@@ -199,9 +199,19 @@ export async function updatePixloIdentity(
     throw new Error(`Unable to save your Pixlo profile (${response.status}). ${detail.slice(0, 220)}`);
   }
   const rows = await response.json().catch(() => []);
-  if (Array.isArray(rows) && rows[0]) return rows[0] as PixloProfile;
-  const updated = await getPixloProfile(accessToken, userId);
+  const updated = Array.isArray(rows) && rows[0]
+    ? rows[0] as PixloProfile
+    : await getPixloProfile(accessToken, userId);
   if (!updated) throw new Error("Pixlo did not return your updated profile.");
+
+  // PostgREST can return an empty representation when no row was updated; never
+  // report success unless the canonical profile now contains the requested identity.
+  if (updated.username.trim().toLowerCase() !== username) {
+    throw new Error("Pixlo did not update your username in the database. Your previous username is still saved. Check that your Supabase profile update policy is enabled, then try again.");
+  }
+  if ((updated.display_name || updated.username).trim() !== displayName) {
+    throw new Error("Pixlo saved the request but couldn't confirm your display name. Refresh the dashboard and try again.");
+  }
   return updated;
 }
 
