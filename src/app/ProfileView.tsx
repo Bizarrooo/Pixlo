@@ -183,12 +183,13 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           return null;
         }
         const data = await response.json().catch(() => null);
-        if (!cancelled) setProfileStatus(data?.profile ? "found" : "error");
+        if (!cancelled && !data?.profile) setProfileStatus("error");
         return data;
       })
       .then(async data => {
-        if (!cancelled) setProfileBadges(Array.isArray(data?.profile?.badges) ? data.profile.badges : []);
-        if (!cancelled) setIsPremium(Boolean(data?.profile?.premium));
+        if (cancelled || !data?.profile) return;
+        setProfileBadges(Array.isArray(data.profile.badges) ? data.profile.badges : []);
+        setIsPremium(Boolean(data.profile.premium));
         const previewSlot = new URLSearchParams(window.location.search).get("presetPreview");
         let remote = data?.profile?.settings;
         if (previewSlot && /^[1-5]$/.test(previewSlot)) {
@@ -198,7 +199,11 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             if (presetResponse.ok && presetData?.slot?.settings) remote = presetData.slot.settings;
           } catch {}
         }
-        if (cancelled || !remote || typeof remote !== "object" || Object.keys(remote).length === 0) return;
+        if (cancelled) return;
+        if (!remote || typeof remote !== "object" || Object.keys(remote).length === 0) {
+          setProfileStatus("found");
+          return;
+        }
         const current = normaliseProfileSettings(remote, { username: data.profile.username || username, displayName: data.profile.displayName || data.profile.username || username });
         setSettings(previous => ({ ...current, views: Math.max(Number(current.views) || 0, Number(previous.views) || 0) }));
         setTrackIndex(Math.max(0, current.musicTracks.findIndex(track => track.id === current.activeMusicId)));
@@ -218,6 +223,9 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         customLinksWithIcons.forEach((link, index) => { customLinkIcons[link.id] = entries[6 + index] as string; });
         const musicAudio = entries[5] as { url: string; type: string };
         setAssets({ avatar: entries[0] as string, banner: entries[1] as string, backgroundImage: entries[2] as string, backgroundVideo: entries[3] as string, musicCover: entries[4] as string, musicAudio: musicAudio.url, musicMediaType: musicAudio.type, customLinkIcons });
+        // Don't show the enter-screen until remote profile media URLs are in place.
+        // On mobile Safari the enter tap must reach an already-mounted audio element.
+        setProfileStatus("found");
       })
       .catch(() => { if (!cancelled) setProfileStatus("error"); });
     return () => { cancelled = true; };
@@ -293,7 +301,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   }, []);
 
   useEffect(() => {
-    if (!ready || embedMode || !settings.musicAutoplay || manualPauseRef.current) return;
+    if (!ready || profileStatus !== "found" || embedMode || !settings.musicAutoplay || manualPauseRef.current) return;
 
     const startMedia = () => {
       const audio = audioRef.current;
@@ -341,7 +349,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       window.removeEventListener("pointerdown", unlockMedia, true);
       window.removeEventListener("keydown", unlockMedia, true);
     };
-  }, [ready, embedMode, activeTrack?.id, assets.musicAudio, settings.musicAutoplay, settings.musicLoop, settings.backgroundVideoMusicDisabled, entered]);
+  }, [ready, profileStatus, embedMode, activeTrack?.id, assets.musicAudio, settings.musicAutoplay, settings.musicLoop, settings.backgroundVideoMusicDisabled, entered]);
 
   useEffect(() => {
     if (!assets.musicAudio || !audioRef.current || !activeTrack) return;
@@ -642,7 +650,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           <span style={{ position: "absolute", zIndex: 2, left: `${settings.enterScreenCardPositionX}%`, top: `${settings.enterScreenCardPositionY}%`, transform: "translate(-50%, -50%)", display: "block", width: `min(90%, ${settings.enterScreenCardWidth}px)`, boxSizing: "border-box", padding: `${settings.enterScreenCardPadding}px`, borderRadius: settings.enterScreenCardRadius, border: `1px solid ${settings.enterScreenCardBorderColour}${Math.round(settings.enterScreenCardBorderOpacity*2.55).toString(16).padStart(2,"0")}`, background: `${settings.enterScreenCardBackgroundColour}${Math.round(settings.enterScreenCardOpacity*2.55).toString(16).padStart(2,"0")}`, color: settings.enterScreenTextColour,  fontSize: "clamp(1.2rem, 3vw, 2.2rem)", fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
         </button>
       )}
-      {entered && !embedMode && settings.musicAutoplay && !settings.showMusicPlayer && activeTrack && musicPlaybackNeedsTap && !playing && (
+      {entered && !embedMode && settings.musicAutoplay && activeTrack && assets.musicAudio && musicPlaybackNeedsTap && !playing && (
         <button
           type="button"
           onPointerDown={event => event.stopPropagation()}
@@ -651,7 +659,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           style={{ position: "fixed", left: "50%", bottom: "max(18px, env(safe-area-inset-bottom))", zIndex: 9999, transform: "translateX(-50%)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9, minHeight: 44, padding: "11px 18px", border: "1px solid rgba(255,255,255,.35)", borderRadius: 999, color: "#fff", background: "linear-gradient(110deg, #f24d3d 0%, #ff7842 58%, #ffad52 100%)", boxShadow: "0 8px 28px rgba(242,77,61,.3)", font: "600 13px/1.2 inherit", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
         >
           <span aria-hidden="true">♫</span>
-          Tap to play music
+          Tap to start music
         </button>
       )}
       <section
