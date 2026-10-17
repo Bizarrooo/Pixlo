@@ -7524,3 +7524,23 @@ html { scroll-behavior:smooth; }
 .dashboard .preview-frame .preview-card { position: relative; z-index: 3 !important; }
 .dashboard .preview-frame .preview-overlay,
 .dashboard .preview-frame .preview-vignette { z-index: 0 !important; }
+
+
+/* Live preview cursor trail: transparent decoration must never cover the profile card. */
+.dashboard .preview-frame { position: relative !important; isolation: isolate !important; }
+.dashboard .preview-frame canvas.preview-cursor-trail-layer {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  background: transparent !important;
+  opacity: 1 !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+.dashboard .preview-frame .preview-overlay,
+.dashboard .preview-frame .preview-vignette { z-index: 2 !important; pointer-events: none !important; }
+.dashboard .preview-frame .preview-card { position: relative !important; z-index: 5 !important; }
