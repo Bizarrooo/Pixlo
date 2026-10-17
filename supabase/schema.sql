@@ -97,32 +97,9 @@ create trigger on_auth_user_created
 after insert on auth.users
 for each row execute procedure public.handle_new_user();
 
--- Enforce the 24-hour username cooldown in the database, not just in the UI/API.
-create or replace function public.enforce_pixlo_username_cooldown()
-returns trigger
-language plpgsql
-set search_path = public
-as $$
-begin
-  if lower(trim(new.username)) is distinct from lower(trim(old.username)) then
-    if now() < coalesce(old.username_changed_at, old.created_at, now()) + interval '24 hours' then
-      raise exception 'username_change_cooldown: You can change your username again after the 24-hour cooldown.';
-    end if;
-    new.username := lower(trim(new.username));
-    new.username_changed_at := now();
-  else
-    new.username := lower(trim(new.username));
-    new.username_changed_at := coalesce(old.username_changed_at, old.created_at, now());
-  end if;
-  new.updated_at := now();
-  return new;
-end;
-$$;
-
+-- Username changes are unrestricted; remove any previous cooldown enforcement.
 drop trigger if exists profiles_username_cooldown on public.profiles;
-create trigger profiles_username_cooldown
-before update of username on public.profiles
-for each row execute function public.enforce_pixlo_username_cooldown();
+drop function if exists public.enforce_pixlo_username_cooldown();
 
 -- Data API grants.
 -- This project was created with "Automatically expose new tables" disabled,

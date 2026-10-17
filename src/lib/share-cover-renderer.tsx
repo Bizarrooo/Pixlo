@@ -296,7 +296,7 @@ export async function renderShareCoverImage(
           </div>
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: 1100 }}>
             {glowEnabled && (
-              <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 0, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, color: "rgba(" + red + "," + green + "," + blue + ",0.9)", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow }}>
+              <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 0, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, color: "transparent", WebkitTextFillColor: "transparent", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow }}>
                 {displayName}
               </div>
             )}

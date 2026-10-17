@@ -370,7 +370,6 @@ export default function Dashboard() {
   const [dashboardBadgesLoading, setDashboardBadgesLoading] = useState(false);
   const [dashboardBadgesError, setDashboardBadgesError] = useState("");
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
-  const [usernameChangeAvailableAt, setUsernameChangeAvailableAt] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [presetsPremium, setPresetsPremium] = useState(false);
   const [presetsPremiumReady, setPresetsPremiumReady] = useState(false);
@@ -566,7 +565,7 @@ export default function Dashboard() {
         }
 
         const authUser = sessionData.user as { id: string; email?: string; user_metadata?: { username?: string; display_name?: string; full_name?: string } };
-        const profile = accountData.profile as { id?: string; username?: string; displayName?: string; usernameChangeAvailableAt?: string | null };
+        const profile = accountData.profile as { id?: string; username?: string; displayName?: string;  };
         const username = String(profile.username || authUser.user_metadata?.username || authUser.email?.split("@")[0] || "user").trim().toLowerCase();
         const displayName = String(profile.displayName || authUser.user_metadata?.display_name || authUser.user_metadata?.full_name || username).trim() || username;
         const accountEmail = String(authUser.email || "").trim().toLowerCase();
@@ -608,7 +607,6 @@ export default function Dashboard() {
 
         setProfileUserId(authUser.id);
         setSavedIdentity({ username, displayName });
-        setUsernameChangeAvailableAt(profile.usernameChangeAvailableAt || null);
         setDiscordUser(linkedDiscord);
         setSettings({
           ...loaded,
@@ -1045,7 +1043,6 @@ export default function Dashboard() {
       const nextSettings = { ...settings, username: data.profile.username, displayName: data.profile.displayName };
       setSettings(nextSettings);
       setSavedIdentity({ username: data.profile.username, displayName: data.profile.displayName });
-      setUsernameChangeAvailableAt(data.profile.usernameChangeAvailableAt || null);
       saveSettingsToStorage(nextSettings, accountSettingsStorageKey(profileUserId));
       setSaved(true);
       setShowUsernameConfirm(false);
@@ -1073,10 +1070,7 @@ export default function Dashboard() {
     setSettings(next);
     setSaved(false);
   };
-  const usernameLocked = Boolean(usernameChangeAvailableAt && Date.now() < new Date(usernameChangeAvailableAt).getTime());
-  const usernameLockHint = usernameLocked && usernameChangeAvailableAt
-    ? `Username locked until ${new Date(usernameChangeAvailableAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}. You can change it once every 24 hours.`
-    : "Usernames can be changed once every 24 hours. Changing it updates your profile URL.";
+  const usernameHint = "You can change your username at any time. Changing it updates your profile URL.";
   const profileUrl = settingsReady && settings.username.trim() ? `https://pixlo1.vercel.app/user/${encodeURIComponent(settings.username.trim().toLowerCase())}` : "/dashboard";
   const profileShareKey = (() => {
     const parts = [
@@ -1436,22 +1430,16 @@ export default function Dashboard() {
   {showUsernameConfirm && <div className="username-change-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !usernameSaveBusy) { setShowUsernameConfirm(false); setUsernameSaveError(""); } }}>
     <section className="username-change-dialog" role="dialog" aria-modal="true" aria-labelledby="username-confirm-title" aria-busy={usernameSaveBusy}>
       <div className="username-change-title-row">
-        <h2 id="username-confirm-title">{usernameLocked ? "Username change locked" : "Confirm username change"}</h2>
+        <h2 id="username-confirm-title">Confirm username change</h2>
         <button type="button" className="username-change-close" aria-label="Close" disabled={usernameSaveBusy} onClick={() => { setShowUsernameConfirm(false); setUsernameSaveError(""); }}>×</button>
       </div>
-      {usernameLocked ? <>
-        <p className="username-change-copy">You can change your username again after the 24-hour cooldown.</p>
-        {usernameChangeAvailableAt && <div className="username-change-locked-until"><span>Available again</span><strong>{new Date(usernameChangeAvailableAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</strong></div>}
-        <div className="username-change-actions"><button type="button" className="auth-submit username-change-submit" onClick={() => setShowUsernameConfirm(false)}>Got it</button></div>
-      </> : <>
-        <p className="username-change-copy">You are changing your username to <strong>@{settings.username}</strong>. Your Pixlo profile URL will change too.</p>
-        <div className="username-change-target"><strong>@{settings.username}</strong><small>pixlo1.vercel.app/user/{settings.username.trim().toLowerCase()}</small></div>
-        {usernameSaveError && <div className="auth-error username-change-error" role="alert"><span className="auth-message-icon">!</span><span>{usernameSaveError}</span></div>}
-        <div className="username-change-actions">
-          <button type="button" className="auth-back-button" disabled={usernameSaveBusy} onClick={() => { setShowUsernameConfirm(false); setUsernameSaveError(""); setSettings(current => ({ ...current, username: savedIdentity.username })); }}>Cancel</button>
-          <button type="button" className="auth-submit username-change-submit" disabled={usernameSaveBusy || !profileUserId} onClick={() => { void performSave(); }}><span>{usernameSaveBusy ? "Saving…" : "Save username"}</span>{!usernameSaveBusy && <span className="auth-submit-arrow" aria-hidden="true">↗</span>}</button>
-        </div>
-      </>}
+      <p className="username-change-copy">You are changing your username to <strong>@{settings.username}</strong>. Your Pixlo profile URL will change too.</p>
+      <div className="username-change-target"><strong>@{settings.username}</strong><small>pixlo1.vercel.app/user/{settings.username.trim().toLowerCase()}</small></div>
+      {usernameSaveError && <div className="auth-error username-change-error" role="alert"><span className="auth-message-icon">!</span><span>{usernameSaveError}</span></div>}
+      <div className="username-change-actions">
+        <button type="button" className="auth-back-button" disabled={usernameSaveBusy} onClick={() => { setShowUsernameConfirm(false); setUsernameSaveError(""); setSettings(current => ({ ...current, username: savedIdentity.username })); }}>Cancel</button>
+        <button type="button" className="auth-submit username-change-submit" disabled={usernameSaveBusy || !profileUserId} onClick={() => { void performSave(); }}><span>{usernameSaveBusy ? "Saving…" : "Save username"}</span>{!usernameSaveBusy && <span className="auth-submit-arrow" aria-hidden="true">↗</span>}</button>
+      </div>
     </section>
   </div>}
     <main className={`dashboard dashboard-revamp ${settings.dashboardCustomisationEnabled ? "dashboard-customisation-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardBackgroundGradientEnabled ? "dashboard-bg-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardTextGradientEnabled ? "dashboard-text-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && !settings.dashboardTextGradientEnabled ? "dashboard-text-solid-on" : ""}`} style={{ "--dashboard-bg-gradient": `linear-gradient(125deg, ${settings.dashboardBackgroundGradientColours[0]}, ${settings.dashboardBackgroundGradientColours[1]}, ${settings.dashboardBackgroundGradientColours[2]})`, "--dashboard-text-gradient": `linear-gradient(90deg, ${settings.dashboardTextGradientColours[0]} 0%, ${settings.dashboardTextGradientColours[1]} 16.666%, ${settings.dashboardTextGradientColours[2]} 33.333%, ${settings.dashboardTextGradientColours[0]} 50%, ${settings.dashboardTextGradientColours[1]} 66.666%, ${settings.dashboardTextGradientColours[2]} 83.333%, ${settings.dashboardTextGradientColours[0]} 100%)`, "--dashboard-text-solid": settings.dashboardTextSolidColour } as React.CSSProperties} onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
@@ -1640,8 +1628,8 @@ export default function Dashboard() {
           </div>}
           {active === "General" && <div className="form-stack">
             <SectionIntro number="01" title="Identity, presence and first impression" text="Control exactly what visitors see before they explore anything else." />
-            <Field label="Username" hint={usernameLockHint}><input value={settings.username} disabled={usernameLocked} maxLength={24} autoCapitalize="none" autoCorrect="off" onChange={e => { set("username", e.target.value.replace(/[^a-zA-Z0-9._-]/g, "").toLowerCase().slice(0, 24)); setSaved(false); }} /></Field>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: -6 }}><button type="button" className="save-button" disabled={usernameSaveBusy || (!usernameLocked && settings.username.trim().toLowerCase() === savedIdentity.username.trim().toLowerCase())} onClick={() => { setUsernameSaveError(""); setShowUsernameConfirm(true); }}>{usernameLocked ? "Username locked · details" : "Change username"}</button>{settings.username.trim().toLowerCase() !== savedIdentity.username.trim().toLowerCase() && <span style={{ fontSize: 12, opacity: 0.7 }}>Your new username is not saved yet.</span>}</div>
+            <Field label="Username" hint={usernameHint}><input value={settings.username} maxLength={24} autoCapitalize="none" autoCorrect="off" onChange={e => { set("username", e.target.value.replace(/[^a-zA-Z0-9._-]/g, "").toLowerCase().slice(0, 24)); setSaved(false); }} /></Field>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: -6 }}><button type="button" className="save-button" disabled={usernameSaveBusy || settings.username.trim().toLowerCase() === savedIdentity.username.trim().toLowerCase()} onClick={() => { setUsernameSaveError(""); setShowUsernameConfirm(true); }}>Change username</button>{settings.username.trim().toLowerCase() !== savedIdentity.username.trim().toLowerCase() && <span style={{ fontSize: 12, opacity: 0.7 }}>Your new username is not saved yet.</span>}</div>
             <div className="url-preview" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}><span>Your profile: <b style={{ overflowWrap: "anywhere" }}>{profileUrl}</b></span><button type="button" onClick={() => void copyProfileUrl()} style={{ flexShrink: 0, padding: "8px 12px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.08)", color: "inherit", cursor: "pointer", font: "inherit" }}>{profileCopied ? "✓ Copied!" : "Copy link"}</button></div>
             <Field label="Display name"><input value={settings.displayName} onChange={e => set("displayName", e.target.value)} /></Field>
             <Field label="Bio / description"><textarea value={settings.description} onChange={e => set("description", e.target.value)} placeholder="Tell people about yourself..." /></Field>
