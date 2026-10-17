@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { defaultSettings, loadSettings, loadSettingsForUsername, normaliseProfileSettings, saveSettingsToStorage, type MusicTrack, type ProfileFont, type ProfileSettings } from "./profile";
 import { loadAsset, loadAssetMedia } from "./assetStore";
+import CursorTrailCanvas from "./CursorTrailCanvas";
 
 const socialLabels: Record<string, string> = { discord: "Discord", youtube: "YouTube", roblox: "Roblox", github: "GitHub", twitch: "Twitch", instagram: "Instagram", spotify: "Spotify" };
 const socialKeys = ["discord", "youtube", "roblox", "github", "twitch", "instagram", "spotify"] as const;
@@ -79,7 +80,6 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const shareCopiedTimerRef = useRef<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLMediaElement>(null);
-  const cursorTrailLayerRef = useRef<HTMLDivElement>(null);
   const unlockedRef = useRef(false);
   const manualPauseRef = useRef(false);
   const lastSettingsRawRef = useRef("");
@@ -125,82 +125,6 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     setEmbedMode(params.get("embed") === "1");
   }, []);
 
-
-  useEffect(() => {
-    // The trail is visual-only (pointer-events are disabled in CSS), so it can remain
-    // visible over the card without intercepting pointer input used by parallax.
-    if (!isPremium || !settings.cursorTrailEnabled || presetPreviewMode || embedMode || !forcedUsername) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (!window.matchMedia("(pointer: fine)").matches) return;
-
-    const layer = cursorTrailLayerRef.current;
-    if (!layer) return;
-
-    let lastX = -100;
-    let lastY = -100;
-    let lastSpawnAt = 0;
-    const density = Math.min(250, Math.max(20, settings.cursorTrailDensity));
-    // Use a lighter trail whenever card parallax is active so particles do not compete
-    // with the high-frequency pointer updates and 3D transforms.
-    const parallaxActive = settings.parallax;
-    const particleCount = parallaxActive ? 1 : Math.min(6, Math.max(1, Math.round(density / 30)));
-    const spawnInterval = parallaxActive ? 48 : 18;
-    const maxParticles = parallaxActive ? 20 : 120;
-
-    const handleCursorMove = (event: PointerEvent) => {
-      if (event.pointerType === "touch") return;
-      const now = performance.now();
-      const distance = Math.hypot(event.clientX - lastX, event.clientY - lastY);
-      const minDistance = parallaxActive ? Math.max(12, 23 - density * 0.08) : Math.max(3, 13 - density * 0.1);
-      if (now - lastSpawnAt < spawnInterval || distance < minDistance) return;
-
-      lastSpawnAt = now;
-      lastX = event.clientX;
-      lastY = event.clientY;
-      const lifetime = Math.min(15000, Math.max(300, settings.cursorTrailLifetime));
-
-      for (let index = 0; index < particleCount; index += 1) {
-        const particle = document.createElement("span");
-        const size = Math.max(4, (6 + Math.random() * 9) * settings.cursorTrailSize / 100);
-        const offsetX = (Math.random() - 0.5) * 18;
-        const offsetY = (Math.random() - 0.5) * 18;
-        particle.className = "pixlo-cursor-trail";
-        particle.textContent = Math.random() > 0.7 ? "✧" : "✦";
-        particle.style.left = (event.clientX + offsetX) + "px";
-        particle.style.top = (event.clientY + offsetY) + "px";
-        particle.style.setProperty("--cursor-trail-particle-size", size + "px");
-        particle.style.setProperty("--cursor-trail-colour", settings.cursorTrailColour);
-        particle.style.setProperty("--cursor-trail-glow", (settings.cursorTrailGlow / 8) + "px");
-        particle.style.setProperty("--cursor-trail-drift-x", (((Math.random() - 0.5) * 34) * settings.cursorTrailSpeed / 100) + "px");
-        particle.style.setProperty("--cursor-trail-drift-y", (((Math.random() - 0.8) * 36) * settings.cursorTrailSpeed / 100) + "px");
-        particle.style.setProperty("--cursor-trail-duration", lifetime + "ms");
-        particle.style.opacity = String(0.55 + Math.random() * 0.45);
-        particle.addEventListener("animationend", () => particle.remove(), { once: true });
-        layer.appendChild(particle);
-      }
-
-      while (layer.childElementCount > maxParticles) layer.firstElementChild?.remove();
-    };
-
-    window.addEventListener("pointermove", handleCursorMove, { passive: true });
-    return () => {
-      window.removeEventListener("pointermove", handleCursorMove);
-      layer.replaceChildren();
-    };
-  }, [
-    isPremium,
-    settings.cursorTrailEnabled,
-    settings.cursorTrailColour,
-    settings.cursorTrailGlow,
-    settings.cursorTrailSize,
-    settings.cursorTrailDensity,
-    settings.cursorTrailSpeed,
-    settings.cursorTrailLifetime,
-    settings.parallax,
-    presetPreviewMode,
-    embedMode,
-    forcedUsername,
-  ]);
 
   useEffect(() => {
     const username = (forcedUsername || "").trim().toLowerCase();
@@ -581,7 +505,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   return (
     <main ref={profilePageRef} className={`profile-page ${isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername ? "has-extras" : ""} ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
       {isPremium && settings.cursorTrailEnabled && !presetPreviewMode && !embedMode && forcedUsername && typeof document !== "undefined" && createPortal(
-        <div ref={cursorTrailLayerRef} className={`pixlo-cursor-trail-layer ${settings.parallax ? "parallax-lite" : ""}`} aria-hidden="true" />,
+        <CursorTrailCanvas enabled={isPremium && settings.cursorTrailEnabled && !presetPreviewMode && !embedMode && Boolean(forcedUsername)} mode="viewport" colour={settings.cursorTrailColour} glow={settings.cursorTrailGlow} size={settings.cursorTrailSize} density={settings.cursorTrailDensity} speed={settings.cursorTrailSpeed} lifetime={settings.cursorTrailLifetime} className={settings.parallax ? "parallax-lite" : ""} />,
         document.body
       )}
       <svg className="pixlo-gradient-defs" aria-hidden="true" width="0" height="0" style={{position:"absolute",width:0,height:0,overflow:"hidden"}}><defs><linearGradient id="pixlo-social-gradient" x1="0%" y1="0%" x2="100%" y2="0%" spreadMethod="repeat"><stop offset="0%" stopColor={settings.gradientSocialsColours[0]} /><stop offset="33.333%" stopColor={settings.gradientSocialsColours[1]} /><stop offset="66.666%" stopColor={settings.gradientSocialsColours[2]} /><stop offset="100%" stopColor={settings.gradientSocialsColours[0]} /><animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="-1 0" dur="8s" repeatCount="indefinite" /></linearGradient></defs></svg>
