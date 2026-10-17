@@ -1781,8 +1781,9 @@ export default function Dashboard() {
                         {previewAvatar ? <img className="share-cover-preview-avatar" src={previewAvatar} alt="" /> : <span className="share-cover-preview-avatar-fallback">{(settings.displayName || settings.username || "P").slice(0, 1).toUpperCase()}</span>}
                         {previewDecoration && <img className="share-cover-preview-decoration" src={previewDecoration} alt="" aria-hidden="true" />}
                       </div>
-                      <div className={`share-cover-preview-name-wrap ${settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? "has-glow" : ""}`} data-glow-text={settings.displayName || settings.username} style={{ "--share-cover-name-size": `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`, "--share-cover-name-font": fontFamily(settings.shareCoverFont), "--share-cover-glow-colour": rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1) } as React.CSSProperties}>
-                      <div className={`share-cover-preview-name ${settings.shareCoverNameGradientEnabled ? "gradient-on" : ""}`} style={{
+                      <div className={settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? "share-cover-preview-name-wrap has-glow" : "share-cover-preview-name-wrap"} style={{ "--share-cover-name-size": `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`, "--share-cover-name-font": fontFamily(settings.shareCoverFont), "--share-cover-name-solid-colour": settings.shareCoverNameColour, "--share-cover-glow-colour": rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1), "--share-cover-glow-strength": settings.shareCoverNameGlowIntensity } as React.CSSProperties}>
+                      {settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 && <div className="share-cover-preview-name-glow" aria-hidden="true">{settings.displayName || settings.username}</div>}
+                      <div className={settings.shareCoverNameGradientEnabled ? "share-cover-preview-name gradient-on" : "share-cover-preview-name solid-on"} style={{
                         color: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
                         backgroundImage: settings.shareCoverNameGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverNameGradientColours.join(", ")})` : "none",
                         backgroundClip: settings.shareCoverNameGradientEnabled ? "text" : "border-box",
@@ -1790,9 +1791,7 @@ export default function Dashboard() {
                         WebkitTextFillColor: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
                         fontFamily: fontFamily(settings.shareCoverFont),
                         fontSize: `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`,
-
                       }}>{settings.displayName || settings.username}</div>
-                      </div>
                       <div className="share-cover-preview-credit" style={{
                         color: settings.shareCoverCreditGradientEnabled ? "transparent" : settings.shareCoverCreditColour,
                         backgroundImage: settings.shareCoverCreditGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverCreditGradientColours.join(", ")})` : "none",

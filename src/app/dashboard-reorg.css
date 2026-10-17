@@ -1465,7 +1465,7 @@ body:has(.dashboard.dashboard-revamp) {
 .dashboard.dashboard-revamp .share-cover-preview-avatar,.dashboard.dashboard-revamp .share-cover-preview-avatar-fallback { display:flex; align-items:center; justify-content:center; width:82.5%; height:82.5%; border-radius:50%; object-fit:cover; border:none !important; outline:none !important; box-shadow:none !important; background:transparent; }
 .dashboard.dashboard-revamp .share-cover-preview-avatar-fallback { color:#fff; font-size:3.2rem; font-weight:800; }
 .dashboard.dashboard-revamp .share-cover-preview-decoration { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none; }
-.dashboard.dashboard-revamp .share-cover-preview-name { max-width:100%; color:#fff; font-weight:800; line-height:1.1; overflow-wrap:anywhere; }
+
 .dashboard.dashboard-revamp .share-cover-preview-credit { margin-top:1cqw; color:rgba(255,255,255,.83); font-size:1.85cqw; font-weight:500; }
 .dashboard.dashboard-revamp .share-cover-preview-help { margin:12px 0 0; color:#a9a09b; font-size:11px; line-height:1.6; }
 .dashboard.dashboard-revamp .share-cover-controls { display:flex; flex-direction:column; gap:15px; min-width:0; padding:16px; border:1px solid rgba(255,255,255,.1); border-radius:16px; background:rgba(13,11,12,.68); }
@@ -1650,46 +1650,9 @@ body:has(.dashboard.dashboard-revamp) {
   min-width: 0 !important;
   max-width: 100% !important;
 }
-/* A separate blurred text silhouette gives gradient text a glow even when its fill is transparent. */
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap {
-  position: relative !important;
-  isolation: isolate !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-}
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow::before {
-  content: attr(data-glow-text) !important;
-  position: absolute !important;
-  z-index: -1 !important;
-  top: 50% !important;
-  left: 50% !important;
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  transform: translate(-50%, -50%) scale(1.025) !important;
-  color: var(--share-cover-glow-colour, #fff) !important;
-  font-family: var(--share-cover-name-font, Inter, sans-serif) !important;
-  font-size: var(--share-cover-name-size, 6cqw) !important;
-  font-weight: 800 !important;
-  line-height: 1.1 !important;
-  text-align: center !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  text-shadow:
-    0 0 var(--share-cover-glow-size-a, 48px) var(--share-cover-glow-colour, #fff),
-    0 0 var(--share-cover-glow-size-b, 94px) color-mix(in srgb, var(--share-cover-glow-colour, #fff) 86%, transparent),
-    0 0 var(--share-cover-glow-size-c, 156px) color-mix(in srgb, var(--share-cover-glow-colour, #fff) 62%, transparent) !important;
-  filter: blur(var(--share-cover-glow-blur, 16px)) saturate(1.45) !important;
-  opacity: .92 !important;
-  pointer-events: none !important;
-}
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow .share-cover-preview-name {
-  position: relative !important;
-  z-index: 1 !important;
-}
+
+
+
 @media (max-width: 1100px) {
   .dashboard.dashboard-revamp .share-cover-editor-layout { grid-template-columns: minmax(0,1fr) !important; }
   .dashboard.dashboard-revamp .share-cover-preview-panel { position: relative !important; top: auto !important; }
@@ -1795,34 +1758,8 @@ body:has(.dashboard.dashboard-revamp) {
 }
 
 
-/* Keep the editor preview responsive while dragging glow/gradient sliders.
-   The earlier version stacked huge text-shadows, drop-shadows and a blur filter on the same live text. */
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow::before {
-  text-shadow:
-    0 0 22px var(--share-cover-glow-colour, #fff),
-    0 0 46px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 68%, transparent) !important;
-  filter: none !important;
-  opacity: .78 !important;
-  transform: translate(-50%, -50%) !important;
-}
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow .share-cover-preview-name {
-  text-shadow:
-    0 0 12px var(--share-cover-glow-colour, #fff),
-    0 0 25px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 76%, transparent) !important;
-  filter: none !important;
-}
 
 
-/* Keep the live Share Cover preview cheap to repaint during slider changes. */
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow::before {
-  text-shadow: 0 0 28px var(--share-cover-glow-colour, #fff) !important;
-  filter: none !important;
-  opacity: .68 !important;
-}
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow .share-cover-preview-name {
-  text-shadow: 0 0 14px var(--share-cover-glow-colour, #fff) !important;
-  filter: none !important;
-}
 
 /* Keep cover effects inside the preview's own paint area instead of invalidating the whole editor. */
 .dashboard.dashboard-revamp .share-cover-preview {
@@ -1830,31 +1767,8 @@ body:has(.dashboard.dashboard-revamp) {
 }
 
 
-/* Final Share Cover glow fix: text-only shadow, independent of gradient fill. */
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap::before,
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow::before {
-  content: none !important;
-  display: none !important;
-  text-shadow: none !important;
-  filter: none !important;
-}
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow .share-cover-preview-name {
-  filter:
-    drop-shadow(0 0 5px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 90%, transparent))
-    drop-shadow(0 0 13px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 48%, transparent)) !important;
-  text-shadow: none !important;
-}
-/* Keep gradient text transparent and clipped regardless of whether glow is on. */
-.dashboard.dashboard-revamp .share-cover-preview-name.gradient-on {
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  -webkit-background-clip: text !important;
-}
-.dashboard.dashboard-revamp .share-cover-preview-name-wrap:not(.has-glow) .share-cover-preview-name {
-  filter: none !important;
-  text-shadow: none !important;
-}
+
+
 
 
 /* Pixlo username confirmation — match the warm glass login experience. */
@@ -2026,4 +1940,66 @@ body:has(.dashboard.dashboard-revamp) {
 }
 @media (prefers-reduced-motion: reduce) {
   .username-change-backdrop, .username-change-dialog.auth-card { animation: none !important; }
+}
+
+
+/* Share Cover glow is a separate glyph layer; it never styles the foreground fill. */
+.dashboard.dashboard-revamp .share-cover-preview-name-wrap {
+  position: relative !important;
+  isolation: isolate !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  line-height: 1.1 !important;
+}
+.dashboard.dashboard-revamp .share-cover-preview-name-glow {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  color: var(--share-cover-glow-colour, #fff) !important;
+  font-family: var(--share-cover-name-font, Inter, sans-serif) !important;
+  font-size: var(--share-cover-name-size, 6cqw) !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  text-align: center !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  text-shadow:
+    0 0 5px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 90%, transparent),
+    0 0 12px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 58%, transparent),
+    0 0 22px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 28%, transparent) !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+.dashboard.dashboard-revamp .share-cover-preview-name {
+  position: relative !important;
+  z-index: 1 !important;
+  display: block !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  overflow-wrap: anywhere !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+.dashboard.dashboard-revamp .share-cover-preview-name.gradient-on {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+.dashboard.dashboard-revamp .share-cover-preview-name.solid-on {
+  color: var(--share-cover-name-solid-colour, #fff) !important;
+  -webkit-text-fill-color: var(--share-cover-name-solid-colour, #fff) !important;
+  background-image: none !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
 }

@@ -239,11 +239,8 @@ export async function renderShareCoverImage(
   const green = Number.parseInt(glowHex.slice(3, 5), 16);
   const blue = Number.parseInt(glowHex.slice(5, 7), 16);
   const glowEnabled = isPremium && profile?.shareCoverNameGlow === true && glowIntensity > 0;
-  // Keep glow on the letters subtle. The radial bloom below supplies the soft halo;
-  // stacking several large drop-shadows turns into a solid-looking bar in small previews.
-  const glow = glowEnabled
-    ? "0 0 8px rgba(" + red + "," + green + "," + blue + ",0.90), 0 0 22px rgba(" + red + "," + green + "," + blue + ",0.48)"
-    : "none";
+  // Glow is rendered on a separate copy of the glyphs, never on the foreground text fill.
+  const glow = "0 0 5px rgba(" + red + "," + green + "," + blue + ",0.88), 0 0 13px rgba(" + red + "," + green + "," + blue + ",0.48), 0 0 22px rgba(" + red + "," + green + "," + blue + ",0.25)";
   const selectedFont = profileFontName(profile);
   const googleFont = FONT_ALIASES[selectedFont] || "Inter";
   const [backgroundImageSource, fontData] = await Promise.all([
@@ -298,10 +295,14 @@ export async function renderShareCoverImage(
             {avatarDecorationUrl && <img src={avatarDecorationUrl} width="320" height="320" style={{ position: "absolute", inset: 0, width: 320, height: 320, objectFit: "contain", pointerEvents: "none" }} />}
           </div>
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: 1100 }}>
-            {/* Glow stays on the glyphs only; no background pill is drawn behind the name. */}
-          <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, marginTop: 0, marginBottom: 0, color: nameGradientEnabled ? "transparent" : nameColour, backgroundImage: nameGradientEnabled ? "linear-gradient(90deg, " + nameGradientColours.join(", ") + ")" : "none", backgroundClip: nameGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: nameGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow }}>
-            {displayName}
-          </div>
+            {glowEnabled && (
+              <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 0, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, color: "rgba(" + red + "," + green + "," + blue + ",0.9)", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow }}>
+                {displayName}
+              </div>
+            )}
+            <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, marginTop: 0, marginBottom: 0, color: nameGradientEnabled ? "transparent" : nameColour, WebkitTextFillColor: nameGradientEnabled ? "transparent" : nameColour, backgroundImage: nameGradientEnabled ? "linear-gradient(90deg, " + nameGradientColours.join(", ") + ")" : "none", backgroundClip: nameGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: nameGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere" }}>
+              {displayName}
+            </div>
           </div>
           <div style={{ display: "flex", marginTop: 14, alignItems: "center", justifyContent: "center", color: creditGradientEnabled ? "transparent" : creditColour, backgroundImage: creditGradientEnabled ? "linear-gradient(90deg, " + creditGradientColours.join(", ") + ")" : "none", backgroundClip: creditGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: creditGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: 22, fontWeight: 500 }}>
             Made with Pixlo
