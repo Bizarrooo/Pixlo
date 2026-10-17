@@ -106,6 +106,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const [entered, setEntered] = useState(false);
   const [entering, setEntering] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [musicPlaybackNeedsTap, setMusicPlaybackNeedsTap] = useState(false);
   const [assets, setAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", musicCover: "", musicAudio: "", musicMediaType: "", customLinkIcons: {} as Record<string, string> });
   const [profileBadges, setProfileBadges] = useState<Array<{ id: string; name: string; icon_url: string | null; description: string }>>([]);
   const [isPremium, setIsPremium] = useState(false);
@@ -298,13 +299,24 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       const audio = audioRef.current;
       const video = videoRef.current;
 
-      // Start audio immediately during the user's tap gesture. Awaiting video.play()
-      // first can lose iOS Safari's user-activation permission for audio playback.
-      if (audio && activeTrack && audio.paused && !manualPauseRef.current) {
+      // Attempt audio first, while the tap is still an active user gesture on mobile Safari.
+      if (activeTrack && audio && audio.paused && !manualPauseRef.current) {
         audio.volume = 1;
         audio.muted = false;
         audio.loop = settings.musicLoop;
-        void audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+        try {
+          void audio.play()
+            .then(() => { setPlaying(true); setMusicPlaybackNeedsTap(false); })
+            .catch(() => {
+              setPlaying(false);
+              if (entered) setMusicPlaybackNeedsTap(true);
+            });
+        } catch {
+          setPlaying(false);
+          if (entered) setMusicPlaybackNeedsTap(true);
+        }
+      } else if (activeTrack && !audio && entered) {
+        setMusicPlaybackNeedsTap(true);
       }
 
       if (video && video.paused) {
@@ -320,15 +332,16 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     void startMedia();
 
     const unlockMedia = () => {
-      if (!manualPauseRef.current && settings.musicAutoplay) void startMedia();
+      if (!manualPauseRef.current && settings.musicAutoplay) startMedia();
     };
-    window.addEventListener("pointerdown", unlockMedia, { once: true, capture: true });
-    window.addEventListener("keydown", unlockMedia, { once: true, capture: true });
+    // Don't consume the only unlock tap if the audio element hasn't mounted yet.
+    window.addEventListener("pointerdown", unlockMedia, { capture: true });
+    window.addEventListener("keydown", unlockMedia, { capture: true });
     return () => {
       window.removeEventListener("pointerdown", unlockMedia, true);
       window.removeEventListener("keydown", unlockMedia, true);
     };
-  }, [ready, embedMode, activeTrack?.id, settings.musicAutoplay, settings.musicLoop]);
+  }, [ready, embedMode, activeTrack?.id, assets.musicAudio, settings.musicAutoplay, settings.musicLoop, settings.backgroundVideoMusicDisabled, entered]);
 
   useEffect(() => {
     if (!assets.musicAudio || !audioRef.current || !activeTrack) return;
@@ -468,11 +481,40 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       manualPauseRef.current = false;
       audio.muted = false;
       audio.volume = 1;
-      try { await audio.play(); setPlaying(true); } catch { setPlaying(false); }
+      try {
+        await audio.play();
+        setPlaying(true);
+        setMusicPlaybackNeedsTap(false);
+      } catch {
+        setPlaying(false);
+        setMusicPlaybackNeedsTap(true);
+      }
     } else {
       manualPauseRef.current = true;
       audio.pause();
       setPlaying(false);
+      setMusicPlaybackNeedsTap(false);
+    }
+  };
+
+  const playMusicFromGesture = () => {
+    if (embedMode || !settings.musicAutoplay || !activeTrack || manualPauseRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) {
+      setMusicPlaybackNeedsTap(true);
+      return;
+    }
+    audio.volume = 1;
+    audio.muted = false;
+    audio.loop = settings.musicLoop;
+    try {
+      // Call play synchronously from the touch gesture; don't await video or other media first.
+      void audio.play()
+        .then(() => { setPlaying(true); setMusicPlaybackNeedsTap(false); })
+        .catch(() => { setPlaying(false); setMusicPlaybackNeedsTap(true); });
+    } catch {
+      setPlaying(false);
+      setMusicPlaybackNeedsTap(true);
     }
   };
 
@@ -592,11 +634,24 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         <button
           type="button"
           aria-label="Enter profile"
+          onPointerDown={() => playMusicFromGesture()}
           onClick={() => setEntering(true)}
           onTransitionEnd={() => { if (entering) { setEntered(true); setEntering(false); const backgroundVideo = document.querySelector<HTMLVideoElement>(".background-media"); if (backgroundVideo) void backgroundVideo.play().catch(() => { backgroundVideo.muted = true; void backgroundVideo.play().catch(() => {}); }); } }}
           style={{ position: "fixed", inset: 0, zIndex: 10000, width: "100%", height: "100%", padding: 24, border: 0, margin: 0, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", cursor: "pointer", backgroundColor: `rgba(${parseInt(settings.enterScreenBackgroundColour.slice(1,3),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(3,5),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(5,7),16)||0},${assets.backgroundVideo ? Math.min(settings.enterScreenBackgroundOpacity / 100, 0.28) : settings.enterScreenBackgroundOpacity / 100})`, backdropFilter: `blur(${settings.enterScreenCardBlur}px)`, WebkitBackdropFilter: `blur(${settings.enterScreenCardBlur}px)`, color: settings.enterScreenTextColour, fontFamily: fontFamily(settings.enterScreenFont), textAlign: "center", opacity: entering ? 0 : 1, transition: "opacity 450ms ease" }}
         >
           <span style={{ position: "absolute", zIndex: 2, left: `${settings.enterScreenCardPositionX}%`, top: `${settings.enterScreenCardPositionY}%`, transform: "translate(-50%, -50%)", display: "block", width: `min(90%, ${settings.enterScreenCardWidth}px)`, boxSizing: "border-box", padding: `${settings.enterScreenCardPadding}px`, borderRadius: settings.enterScreenCardRadius, border: `1px solid ${settings.enterScreenCardBorderColour}${Math.round(settings.enterScreenCardBorderOpacity*2.55).toString(16).padStart(2,"0")}`, background: `${settings.enterScreenCardBackgroundColour}${Math.round(settings.enterScreenCardOpacity*2.55).toString(16).padStart(2,"0")}`, color: settings.enterScreenTextColour,  fontSize: "clamp(1.2rem, 3vw, 2.2rem)", fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
+        </button>
+      )}
+      {entered && !embedMode && settings.musicAutoplay && !settings.showMusicPlayer && activeTrack && musicPlaybackNeedsTap && !playing && (
+        <button
+          type="button"
+          onPointerDown={event => event.stopPropagation()}
+          onClick={event => { event.stopPropagation(); playMusicFromGesture(); }}
+          aria-label="Tap to play profile music"
+          style={{ position: "fixed", left: "50%", bottom: "max(18px, env(safe-area-inset-bottom))", zIndex: 9999, transform: "translateX(-50%)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9, minHeight: 44, padding: "11px 18px", border: "1px solid rgba(255,255,255,.35)", borderRadius: 999, color: "#fff", background: "linear-gradient(110deg, #f24d3d 0%, #ff7842 58%, #ffad52 100%)", boxShadow: "0 8px 28px rgba(242,77,61,.3)", font: "600 13px/1.2 inherit", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
+        >
+          <span aria-hidden="true">♫</span>
+          Tap to play music
         </button>
       )}
       <section
@@ -661,7 +716,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
                   preload="auto"
                   playsInline
                   onError={() => { setMusicVideoFallback(true); setPlaying(false); }}
-                  onPlay={() => setPlaying(true)}
+                  onPlay={() => { setPlaying(true); setMusicPlaybackNeedsTap(false); }}
                   onPause={() => setPlaying(false)}
                   onEnded={() => {
                     if (settings.musicLoop) return;
