@@ -1771,177 +1771,31 @@ body:has(.dashboard.dashboard-revamp) {
 
 
 
-/* Pixlo username confirmation — match the warm glass login experience. */
-.username-change-backdrop {
-  position: fixed;
-  z-index: 2000;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 22px;
-  overflow-y: auto;
-  background:
-    radial-gradient(ellipse 44% 55% at 18% 14%, rgba(244, 76, 53, .20), transparent 72%),
-    radial-gradient(ellipse 46% 48% at 88% 92%, rgba(255, 163, 70, .15), transparent 73%),
-    rgba(14, 5, 4, .78);
-  backdrop-filter: blur(15px) saturate(1.1);
-  -webkit-backdrop-filter: blur(15px) saturate(1.1);
-  animation: usernameConfirmBackdropIn .2s ease-out both;
-}
-.username-change-dialog.auth-card {
-  --auth-cut: 24px;
-  width: min(100%, 540px);
-  min-width: 0;
-  margin: 0;
-  padding: 31px clamp(22px, 4vw, 36px) 23px;
-  color: #282731;
-  background:
-    radial-gradient(ellipse at 92% 3%, rgba(255, 147, 81, .17), transparent 39%),
-    radial-gradient(ellipse at 0% 100%, rgba(239, 70, 61, .09), transparent 38%),
-    linear-gradient(145deg, rgba(255, 255, 255, .96), rgba(255, 248, 243, .91));
-  border: 1px solid rgba(255, 255, 255, .92);
-  box-shadow: 0 34px 110px rgba(0, 0, 0, .38), 0 8px 26px rgba(255, 98, 58, .10), inset 0 1px rgba(255,255,255,.98);
-  animation: usernameConfirmCardIn .34s cubic-bezier(.18,.78,.24,1) both;
-}
-.username-change-dialog.auth-card::before {
-  background: linear-gradient(132deg, rgba(255,255,255,.98) 0%, rgba(255,155,105,.95) 23%, rgba(241,74,58,.52) 46%, rgba(255,194,98,.58) 76%, rgba(255,255,255,.95) 100%);
-  opacity: .96;
-}
-.username-change-dialog .auth-card-meta {
-  margin-bottom: 13px;
-}
-.username-change-dialog .auth-step-pill {
-  color: #7e777c;
-  background: rgba(255,255,255,.77);
-  border-color: rgba(237,78,58,.20);
-}
-.username-change-dialog .auth-meta-code { color: #aa9289; }
-.username-change-dialog .auth-meta-code b { color: #f26a43; }
-.username-change-heading .auth-heading-kicker {
-  margin: 15px 0 9px;
-  color: #c45a3d;
-  font-size: 9px;
-}
-.username-change-heading h1 {
-  margin-bottom: 11px;
-  color: #242430;
-  font-size: clamp(29px, 5vw, 37px);
-  line-height: 1.06;
-  letter-spacing: -.055em;
-}
-.username-change-heading h1 em {
-  background: linear-gradient(96deg, #ef463d 0%, #ff7438 64%, #ffac4b 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.username-change-heading p {
-  color: #747684;
-  font-size: 12px;
-  line-height: 1.65;
-}
-.username-change-target {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-  margin-top: 21px;
-  padding: 15px 17px 14px;
-  border: 1px solid rgba(229, 102, 68, .22);
-  border-radius: 15px;
-  background: linear-gradient(120deg, rgba(255,255,255,.78), rgba(255,239,229,.66));
-  box-shadow: inset 0 1px rgba(255,255,255,.95), 0 8px 22px rgba(105,58,41,.045);
-}
-.username-change-target > span {
-  color: #9b7f74;
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: .16em;
-}
-.username-change-target strong {
-  color: #302b36;
-  font-size: 25px;
-  font-weight: 850;
-  letter-spacing: -.045em;
-  overflow-wrap: anywhere;
-}
-.username-change-target small {
-  color: #b36a4e;
-  font-size: 10px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-.username-change-cooldown {
-  margin: 13px 2px 17px;
-  color: #777782;
-  font-size: 11px;
-  line-height: 1.65;
-}
-.username-change-error {
-  margin: 0 0 15px;
-  color: #b93230;
-}
-.username-change-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 11px;
-  margin-top: 18px;
-}
-.username-change-actions .auth-back-button {
-  min-height: 48px;
-  padding-inline: 20px;
-  color: #776d70;
-  background: rgba(255,255,255,.68);
-}
-.username-change-actions .auth-back-button:disabled { opacity: .55; cursor: not-allowed; }
-.username-change-actions .username-change-submit {
-  width: auto;
-  min-width: 190px;
-  min-height: 48px;
-  margin: 0;
-  padding: 9px 13px 9px 20px;
-}
-.username-change-actions .username-change-submit:disabled {
-  opacity: .63;
-  cursor: wait;
-  transform: none;
-}
-.username-change-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  margin-top: 16px;
-  color: #928781;
-  font-size: 9px;
-  font-weight: 600;
-  text-align: center;
-}
-.username-change-footer > span {
-  display: inline-block;
-  flex: 0 0 5px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #29ab72;
-  box-shadow: 0 0 7px rgba(41,171,114,.4);
-}
-@keyframes usernameConfirmBackdropIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes usernameConfirmCardIn { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@media (max-width: 520px) {
-  .username-change-backdrop { align-items: center; padding: 12px; }
-  .username-change-dialog.auth-card { padding: 26px 22px 19px; }
-  .username-change-dialog .auth-meta-code { display: none; }
-  .username-change-heading h1 { font-size: 30px; }
-  .username-change-actions { align-items: stretch; flex-direction: column-reverse; }
-  .username-change-actions .auth-back-button,
-  .username-change-actions .username-change-submit { width: 100%; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .username-change-backdrop, .username-change-dialog.auth-card { animation: none !important; }
-}
-
+/* Compact username confirmation; keep the Pixlo login palette, without extra labels or slogans. */
+.username-change-backdrop { position:fixed; z-index:2000; inset:0; display:flex; align-items:center; justify-content:center; padding:18px; overflow-y:auto; background:radial-gradient(ellipse 40% 55% at 18% 14%, rgba(244,76,53,.18), transparent 72%),radial-gradient(ellipse 46% 48% at 88% 92%, rgba(255,163,70,.13), transparent 73%),rgba(14,5,4,.78); backdrop-filter:blur(12px) saturate(1.08); -webkit-backdrop-filter:blur(12px) saturate(1.08); animation:usernameConfirmBackdropIn .18s ease-out both; }
+.username-change-dialog { position:relative; isolation:isolate; width:min(100%,410px); min-width:0; margin:0; padding:22px 23px 20px; color:#282731; border:1px solid rgba(255,255,255,.88); border-radius:20px; background:radial-gradient(ellipse at 100% 0%, rgba(255,147,81,.15), transparent 42%),linear-gradient(145deg, rgba(255,255,255,.97), rgba(255,248,243,.94)); box-shadow:0 28px 80px rgba(0,0,0,.38),0 5px 18px rgba(255,98,58,.08),inset 0 1px rgba(255,255,255,.98); animation:usernameConfirmCardIn .26s cubic-bezier(.18,.78,.24,1) both; }
+.username-change-dialog::before { content:""; position:absolute; z-index:-1; inset:0; border-radius:inherit; padding:1px; pointer-events:none; background:linear-gradient(132deg, rgba(255,255,255,.95), rgba(255,155,105,.88) 28%, rgba(241,74,58,.32) 55%, rgba(255,194,98,.5) 80%, rgba(255,255,255,.8)); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; }
+.username-change-title-row { display:flex; align-items:center; justify-content:space-between; gap:14px; }
+.username-change-title-row h2 { margin:0; color:#242430; font-size:19px; font-weight:800; line-height:1.25; letter-spacing:-.035em; }
+.username-change-close { display:grid; flex:0 0 30px; place-items:center; width:30px; height:30px; padding:0 0 2px; border:1px solid rgba(184,125,104,.22); border-radius:10px; color:#8e6f66; background:rgba(255,255,255,.7); font:inherit; font-size:22px; line-height:1; cursor:pointer; }
+.username-change-close:hover { color:#d94e38; border-color:rgba(238,82,54,.38); background:#fff; }
+.username-change-close:disabled { opacity:.5; cursor:wait; }
+.username-change-copy { margin:12px 0 15px; color:#737583; font-size:12px; line-height:1.65; }
+.username-change-copy strong { color:#322d38; font-weight:800; overflow-wrap:anywhere; }
+.username-change-target,.username-change-locked-until { display:grid; gap:5px; min-width:0; margin:0 0 13px; padding:12px 14px; border:1px solid rgba(229,102,68,.2); border-radius:13px; background:linear-gradient(120deg, rgba(255,255,255,.8), rgba(255,239,229,.68)); box-shadow:inset 0 1px rgba(255,255,255,.95); }
+.username-change-target strong { color:#302b36; font-size:21px; font-weight:850; letter-spacing:-.04em; overflow-wrap:anywhere; }
+.username-change-target small { color:#ad674d; font-size:10px; line-height:1.45; overflow-wrap:anywhere; }
+.username-change-locked-until span { color:#92796f; font-size:9px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+.username-change-locked-until strong { color:#302b36; font-size:13px; font-weight:800; }
+.username-change-error { margin:0 0 12px; }
+.username-change-actions { display:flex; align-items:center; justify-content:flex-end; gap:9px; margin-top:15px; }
+.username-change-actions .auth-back-button { min-height:43px; padding-inline:18px; color:#776d70; background:rgba(255,255,255,.68); }
+.username-change-actions .username-change-submit { width:auto; min-width:138px; min-height:43px; margin:0; padding:8px 13px 8px 18px; font-size:12px; }
+.username-change-actions .username-change-submit:disabled { opacity:.63; cursor:wait; transform:none; }
+@keyframes usernameConfirmBackdropIn { from { opacity:0; } to { opacity:1; } }
+@keyframes usernameConfirmCardIn { from { opacity:0; transform:translateY(10px) scale(.99); } to { opacity:1; transform:translateY(0) scale(1); } }
+@media (max-width:480px) { .username-change-backdrop { padding:12px; } .username-change-dialog { padding:19px 17px 17px; border-radius:17px; } .username-change-title-row h2 { font-size:17px; } .username-change-actions { gap:8px; } .username-change-actions .auth-back-button { padding-inline:14px; } .username-change-actions .username-change-submit { min-width:125px; } }
+@media (prefers-reduced-motion:reduce) { .username-change-backdrop, .username-change-dialog { animation:none !important; } }
 
 /* Share Cover glow is a separate glyph layer; it never styles the foreground fill. */
 .dashboard.dashboard-revamp .share-cover-preview-name-wrap {
