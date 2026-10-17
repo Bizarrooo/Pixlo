@@ -1681,6 +1681,7 @@ export default function Dashboard() {
                 </section>
                 <div className="share-cover-controls">
                   <FileUpload label="Cover background" value={settings.shareCoverImage} accept="image/*" type="image" note="Animated uploads use their first frame in the static share image." onChange={v => { set("shareCoverImage", v); setSaved(false); }} />
+                  <div className="share-cover-font-control"><label className="field-label">Share cover font</label><FontDropdown value={settings.nameFont} onChange={v => { set("nameFont", v); setSaved(false); }} id="share-cover-font" open={openDropdown} setOpen={setOpenDropdown} /></div>
                   <Colour label="Display name colour" value={settings.shareCoverNameColour} onChange={v => { set("shareCoverNameColour", v); setSaved(false); }} />
                   <Colour label="Made with Pixlo colour" value={settings.shareCoverCreditColour} onChange={v => { set("shareCoverCreditColour", v); setSaved(false); }} />
                   <Range label="Display name size" value={settings.shareCoverNameSize} min={28} max={110} suffix="px" onChange={v => { set("shareCoverNameSize", v); setSaved(false); }} />
