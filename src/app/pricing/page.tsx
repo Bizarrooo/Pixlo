@@ -64,15 +64,44 @@ export default function PricingPage() {
 
       <div className={styles.container}>
         <section className={styles.hero}>
-          <span className={styles.eyebrow}><span className={styles.eyebrowDot} /> PIXLO PRICING</span>
-          <h1>Make more of<br /><span>your Pixlo.</span></h1>
-          <p>Start free. Unlock more customisation when you're ready, and discover new ways to grow your profile as Pixlo expands.</p>
-          <div className={styles.heroNotes}>
-            <span><b>✓</b> Free to get started</span>
-            <span><b>✓</b> Clear, upfront pricing</span>
-            <span><b>✓</b> Secure checkout</span>
+          <div className={styles.heroCopy}>
+            <span className={styles.eyebrow}><span className={styles.eyebrowDot} /> PIXLO PRICING</span>
+            <h1>Your Pixlo.<br /><span>Your way.</span></h1>
+            <p className={styles.heroDescription}>Start with everything you need for free. Add more when it makes sense for you — no confusing tiers, no surprise subscriptions.</p>
+            <div className={styles.heroActions}>
+              <a href="#plans" className={styles.heroPrimary}>Explore pricing <span aria-hidden="true">↓</span></a>
+              <Link href="/signup" className={styles.heroSecondary}>Create your profile <span aria-hidden="true">↗</span></Link>
+            </div>
+            <div className={styles.heroNotes}>
+              <span><b>✓</b> Free to start</span>
+              <span><b>✓</b> Clear pricing</span>
+              <span><b>✓</b> Secure checkout</span>
+            </div>
+          </div>
+          <div className={styles.heroVisual} aria-label="Pixlo profile preview illustration">
+            <div className={styles.visualGlow} aria-hidden="true" />
+            <div className={styles.visualOrbit} aria-hidden="true" />
+            <div className={styles.profilePreview}>
+              <div className={styles.previewTop}><span /><span /><span /><small>YOUR PIXLO</small><b>•••</b></div>
+              <div className={styles.previewCover} />
+              <div className={styles.previewIdentity}>
+                <div className={styles.previewAvatar}>P<span>✦</span></div>
+                <div className={styles.previewNames}><strong>yourname</strong><small>your corner of the internet</small></div>
+                <span className={styles.previewBadge}>✧</span>
+              </div>
+              <div className={styles.previewLines}><i /><i /><i /></div>
+              <div className={styles.previewSocials}><span>◎</span><span>♫</span><span>↗</span><span>⌘</span></div>
+            </div>
+            <div className={styles.floatPrice}><span className={styles.floatIcon}>✧</span><span><small>OPTIONAL UPGRADE</small><strong>Lifetime Premium</strong></span><b>£3.99</b></div>
+            <div className={styles.floatFree}><span>✓</span> Start free. Upgrade when you want.</div>
           </div>
         </section>
+
+        <div className={styles.promiseStrip}>
+          <span>01 <b>MAKE A PROFILE</b></span><i />
+          <span>02 <b>MAKE IT YOURS</b></span><i />
+          <span>03 <b>ADD EXTRAS WHEN YOU NEED THEM</b></span>
+        </div>
 
         <section id="plans" className={styles.section}>
           <div className={styles.sectionHeading}>

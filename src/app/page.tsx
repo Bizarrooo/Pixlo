@@ -400,15 +400,9 @@ export default function Home() {
         <div className="px-showcase-copy px-reveal"><div className="px-section-kicker"><span>03</span> NOT JUST ANOTHER LINK</div><h2>A little corner<br />of the internet.<br /><em>All yours.</em></h2><p>Keep it simple or turn every detail up. Build a page that fits your mood, connects your people and gives your online identity a place to live.</p><div className="px-showcase-points"><span><b>✳</b> No-code customisation</span><span><b>✳</b> Your links, music and socials</span><span><b>✳</b> One profile to share everywhere</span></div><Link href="/dashboard" className="px-button px-button-dark">Make yours <ArrowIcon /></Link></div>
       </section>
 
-      <section className="px-premium" id="premium">
-        <div className="px-premium-background" aria-hidden="true" />
-        <div className="px-premium-copy px-reveal"><div className="px-premium-kicker"><span>✳</span> PIXLO / PREMIUM</div><h2>More room<br />to make it <em>yours.</em></h2><p>Take your profile further with the extra customisation and tools that make Pixlo uniquely yours. Pay once during beta and keep your access.</p><Link href="/pricing" className="px-button px-button-light">Get lifetime Premium <ArrowIcon /></Link><small>ONE PAYMENT · NO SUBSCRIPTION</small></div>
-        <div className="px-premium-price px-reveal"><span className="px-price-label">BETA ACCESS</span><div>£3<span>.99</span></div><span className="px-price-note">LIFETIME ACCESS</span><span className="px-price-spark">✳</span></div>
-      </section>
-
       <section className="px-final-cta"><div className="px-reveal"><span className="px-section-kicker"><span>04</span> YOUR NEXT CHAPTER</span><h2>Your name. Your links.<br /><em>Your Pixlo.</em></h2></div><Link href="/dashboard" className="px-button px-button-primary">Create your profile <ArrowIcon /></Link></section>
 
-      <footer className="px-footer"><div className="px-footer-brand"><Link href="/" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span></div><div className="px-footer-links"><a href="#platform">Platform</a><a href="#community">Community</a><Link href="/pricing">Premium</Link><Link href="/dashboard">Dashboard <ArrowIcon diagonal /></Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
+      <footer className="px-footer"><div className="px-footer-brand"><Link href="/" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span></div><div className="px-footer-links"><a href="#platform">Platform</a><a href="#community">Community</a><Link href="/pricing">Pricing</Link><Link href="/dashboard">Dashboard <ArrowIcon diagonal /></Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
     </main>
   );
 }
