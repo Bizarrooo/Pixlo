@@ -5,6 +5,7 @@ import { accountSettingsStorageKey, defaultSettings, loadSettingsForAccount, nor
 import { deleteAsset, loadAsset, migrateAssetToCloud, saveAsset } from "../assetStore";
 import { rememberPixloAccount } from "../accountSwitcher";
 import DashboardSidebar, { DashboardNavIcon, customizeTabs, optimiseTabs, type DashboardPrimarySection } from "./DashboardSidebar";
+import CursorTrailCanvas from "../CursorTrailCanvas";
 
 type DashboardBadge = { id: string; name: string; description: string; icon_url: string | null };
 
@@ -193,8 +194,6 @@ export default function Dashboard() {
   const previewCardRef = useRef<HTMLDivElement>(null);
   const previewParallaxTargetRef = useRef({ x: 0, y: 0 });
   const previewParallaxFrameRef = useRef<number | null>(null);
-  const previewCursorTrailLayerRef = useRef<HTMLDivElement>(null);
-  const previewCursorTrailLastSpawnRef = useRef({ x: -100, y: -100, at: 0 });
   const previewAssetsLoadedRef = useRef(false);
   const [profileUserId, setProfileUserId] = useState("");
   const [viewToolAmount, setViewToolAmount] = useState("100");
@@ -545,61 +544,6 @@ export default function Dashboard() {
   }, [settingsReady, settings.avatar, settings.banner, settings.backgroundImage, settings.backgroundVideo, settings.enterScreenBackgroundImage, settings.enterScreenBackgroundVideo, settings.customLinks, settings.musicTracks, settings.activeMusicId]);
 
   const set = <K extends keyof ProfileSettings>(key: K, value: ProfileSettings[K]) => { setSettings(s => ({ ...s, [key]: value })); setSaved(false); };
-  const handlePreviewCursorTrail = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!presetsPremiumReady || !presetsPremium || !settings.cursorTrailEnabled || event.pointerType === "touch") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const layer = previewCursorTrailLayerRef.current;
-    if (!layer) return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - bounds.left;
-    const y = event.clientY - bounds.top;
-    const now = performance.now();
-    const previous = previewCursorTrailLastSpawnRef.current;
-    const distance = Math.hypot(x - previous.x, y - previous.y);
-    const density = Math.min(250, Math.max(20, settings.cursorTrailDensity));
-    const parallaxActive = settings.parallax;
-    const spawnInterval = parallaxActive ? 48 : 18;
-    const minDistance = parallaxActive ? Math.max(12, 23 - density * 0.08) : Math.max(3, 13 - density * 0.1);
-    if (now - previous.at < spawnInterval || distance < minDistance) return;
-    previewCursorTrailLastSpawnRef.current = { x, y, at: now };
-
-    // Keep the preview trail lighter while pointer-driven parallax is re-rendering the card.
-    const count = parallaxActive ? 1 : Math.min(6, Math.max(1, Math.round(density / 30)));
-    const maxParticles = parallaxActive ? 32 : 180;
-    const lifetime = Math.min(15000, Math.max(300, settings.cursorTrailLifetime));
-
-    // Recycle the oldest visible particles with a brief fade, rather than pausing new spawns at the cap.
-    const activeParticles = Array.from(layer.children).filter(
-      (element): element is HTMLElement => element instanceof HTMLElement && element.dataset.retiring !== "true",
-    );
-    const retireCount = Math.max(0, activeParticles.length + count - maxParticles);
-    for (const particle of activeParticles.slice(0, retireCount)) {
-      particle.dataset.retiring = "true";
-      particle.style.transition = "opacity 170ms ease-out";
-      particle.style.setProperty("opacity", "0", "important");
-      const removeParticle = () => particle.remove();
-      particle.addEventListener("transitionend", removeParticle, { once: true });
-      window.setTimeout(removeParticle, 220);
-    }
-
-    for (let index = 0; index < count; index += 1) {
-      const particle = document.createElement("span");
-      particle.className = "pixlo-cursor-trail";
-      particle.textContent = Math.random() > 0.7 ? "✧" : "✦";
-      const size = Math.max(4, (6 + Math.random() * 9) * settings.cursorTrailSize / 100);
-      particle.style.left = (x + (Math.random() - 0.5) * 18) + "px";
-      particle.style.top = (y + (Math.random() - 0.5) * 18) + "px";
-      particle.style.setProperty("--cursor-trail-particle-size", size + "px");
-      particle.style.setProperty("--cursor-trail-colour", settings.cursorTrailColour);
-      particle.style.setProperty("--cursor-trail-glow", (settings.cursorTrailGlow / 8) + "px");
-      particle.style.setProperty("--cursor-trail-drift-x", (((Math.random() - 0.5) * 34) * settings.cursorTrailSpeed / 100) + "px");
-      particle.style.setProperty("--cursor-trail-drift-y", (((Math.random() - 0.8) * 36) * settings.cursorTrailSpeed / 100) + "px");
-      particle.style.setProperty("--cursor-trail-duration", lifetime + "ms");
-      particle.addEventListener("animationend", () => particle.remove(), { once: true });
-      layer.appendChild(particle);
-    }
-  };
-
   const navigateDashboard = (primary: DashboardPrimarySection, destination: string) => {
     setActivePrimary(primary);
     setActive(destination);
@@ -1851,7 +1795,7 @@ export default function Dashboard() {
           {previewVisible && <>
           <div className="preview-label"><div><span>Live preview</span><small>updates instantly</small></div><a href={profileUrl} target="_blank" rel="noreferrer">Open ↗</a></div>
           <div className={`preview-frame preview-layout-${settings.layout.toLowerCase().replace(/\s+/g, "-")} ${settings.parallax ? "preview-parallax-on" : ""} ${previewParallaxReturning ? "preview-parallax-returning" : ""} ${settings.animated ? "preview-animated" : ""} ${settings.glow ? "preview-glow" : ""} ${settings.floating ? "preview-float" : ""} ${settings.particles ? "preview-particles-on" : ""} ${settings.grain ? "preview-grain-on" : ""} ${settings.scanlines ? "preview-scanlines-on" : ""} ${settings.textGlow ? "preview-text-glow" : ""}`} style={previewStyle}
-            onPointerMove={event => { handlePreviewCursorTrail(event); updatePreviewPointer(event); }}
+            onPointerMove={updatePreviewPointer}
             onPointerUp={handlePreviewPointerUp}
             onPointerCancel={resetPreviewPointer}
             onPointerLeave={resetPreviewPointer}>
@@ -1902,7 +1846,7 @@ export default function Dashboard() {
             {active === "Enter Screen" && !previewEntered && <button type="button" onClick={() => setPreviewEntering(true)} onTransitionEnd={() => { if (previewEntering) { setPreviewEntered(true); setPreviewEntering(false); } }} style={{ position: "absolute", inset: 0, zIndex: 20, width: "100%", height: "100%", padding: 16, border: 0, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", cursor: "pointer", backgroundColor: `rgba(${parseInt(settings.enterScreenBackgroundColour.slice(1,3),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(3,5),16)||0},${parseInt(settings.enterScreenBackgroundColour.slice(5,7),16)||0},${previewAssets.backgroundVideo ? Math.min(settings.enterScreenBackgroundOpacity / 100, 0.28) : settings.enterScreenBackgroundOpacity / 100})`, backdropFilter: `blur(${settings.enterScreenCardBlur}px)`, WebkitBackdropFilter: `blur(${settings.enterScreenCardBlur}px)`, color: settings.enterScreenTextColour, textAlign: "center", fontFamily: fontFamily(settings.enterScreenFont), opacity: previewEntering ? 0 : 1, transition: "opacity 450ms ease" }}>
               <span style={{ position: "absolute", zIndex: 2, left: `${settings.enterScreenCardPositionX}%`, top: `${settings.enterScreenCardPositionY}%`, transform: "translate(-50%, -50%)", display: "block", width: `min(90%, ${settings.enterScreenCardWidth}px)`, boxSizing: "border-box", padding: `${settings.enterScreenCardPadding}px`, borderRadius: settings.enterScreenCardRadius, border: `1px solid ${settings.enterScreenCardBorderColour}${Math.round(settings.enterScreenCardBorderOpacity*2.55).toString(16).padStart(2,"0")}`, background: `${settings.enterScreenCardBackgroundColour}${Math.round(settings.enterScreenCardOpacity*2.55).toString(16).padStart(2,"0")}`, color: settings.enterScreenTextColour, fontSize: "clamp(12px, 2.5vw, 20px)", fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}>{settings.enterScreenMessage || "Click to enter"}</span>
             </button>}
-            <div ref={previewCursorTrailLayerRef} className={`pixlo-cursor-trail-layer preview-cursor-trail-layer ${settings.parallax ? "parallax-lite" : ""}`} aria-hidden="true" />
+            {presetsPremiumReady && presetsPremium && settings.cursorTrailEnabled && <CursorTrailCanvas enabled={presetsPremiumReady && presetsPremium && settings.cursorTrailEnabled} mode="container" colour={settings.cursorTrailColour} glow={settings.cursorTrailGlow} size={settings.cursorTrailSize} density={settings.cursorTrailDensity} speed={settings.cursorTrailSpeed} lifetime={settings.cursorTrailLifetime} className={settings.parallax ? "parallax-lite" : ""} />}
             <div className="preview-badge"><i /> LIVE</div>
           </div>
           </>}
