@@ -382,3 +382,28 @@
 .pricing-comparison-row .pricing-premium-value{background:rgba(255,255,255,.08)!important}
 .pricing-comparison-row:last-child{border-radius:0 0 12px 12px!important}
 @media(max-width:760px){.pricing-nav{position:static!important;left:auto!important;top:auto!important;transform:none!important;order:3;width:100%;justify-content:center;white-space:normal!important}}
+
+
+/* Fix the white strip above the pricing hero: the site header must share the hero artwork. */
+.pricing-global>.pricing-header{
+  width:100%!important;
+  max-width:none!important;
+  height:78px!important;
+  margin:0!important;
+  padding-left:max(32px,calc((100% - 1420px)/2))!important;
+  padding-right:max(32px,calc((100% - 1420px)/2))!important;
+  background:#160807 url("/pixlo-ambient.svg") center 34% / cover no-repeat!important;
+  border-bottom:1px solid rgba(255,236,220,.12)!important;
+  color:#fffaf5!important;
+}
+.pricing-global>.pricing-header .pricing-nav{color:#f7e9df!important}
+.pricing-global>.pricing-header .pricing-nav a{color:#f7e9df!important}
+.pricing-global>.pricing-header .pricing-nav a:hover{color:#ffffff!important}
+@media(max-width:760px){
+  .pricing-global>.pricing-header{
+    height:auto!important;
+    min-height:72px!important;
+    padding:14px 17px!important;
+    background-position:center 34%!important;
+  }
+}
