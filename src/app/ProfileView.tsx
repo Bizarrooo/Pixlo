@@ -424,7 +424,11 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const copyProfileLink = async () => {
     const username = (forcedUsername || "").trim().toLowerCase();
     if (!username) return;
-    const profileUrl = new URL(`/user/${encodeURIComponent(username)}`, window.location.origin).toString();
+    const profileUrlObject = new URL(`/user/${encodeURIComponent(username)}`, window.location.origin);
+    // Give each copied share a fresh URL key so Discord does not reuse a previously cached OG image.
+    const shareKey = crypto.randomUUID().replace(/-/g, "").slice(0, 12).toLowerCase();
+    profileUrlObject.searchParams.set("share", shareKey);
+    const profileUrl = profileUrlObject.toString();
     let copied = false;
     try {
       await navigator.clipboard.writeText(profileUrl);

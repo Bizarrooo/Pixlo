@@ -242,7 +242,7 @@ export async function renderShareCoverImage(
   // Keep glow on the letters subtle. The radial bloom below supplies the soft halo;
   // stacking several large drop-shadows turns into a solid-looking bar in small previews.
   const glow = glowEnabled
-    ? "0 0 " + Math.max(8, glowIntensity * 0.12) + "px rgba(" + red + "," + green + "," + blue + ",0.42)"
+    ? "0 0 8px rgba(" + red + "," + green + "," + blue + ",0.90), 0 0 22px rgba(" + red + "," + green + "," + blue + ",0.48)"
     : "none";
   const selectedFont = profileFontName(profile);
   const googleFont = FONT_ALIASES[selectedFont] || "Inter";
@@ -298,20 +298,7 @@ export async function renderShareCoverImage(
             {avatarDecorationUrl && <img src={avatarDecorationUrl} width="320" height="320" style={{ position: "absolute", inset: 0, width: 320, height: 320, objectFit: "contain", pointerEvents: "none" }} />}
           </div>
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: 1100 }}>
-            {glowEnabled && (
-              <div
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  zIndex: 0,
-                  width: Math.min(920, Math.max(150, displayFontSize * Math.min(displayName.length * 0.62, 8.5))),
-                  height: Math.max(26, displayFontSize * 0.9),
-                  borderRadius: 999,
-                  background: "radial-gradient(ellipse at center, rgba(" + red + "," + green + "," + blue + ",0.30) 0%, rgba(" + red + "," + green + "," + blue + ",0.12) 48%, rgba(" + red + "," + green + "," + blue + ",0) 78%)",
-                  pointerEvents: "none",
-                }}
-              />
-            )}
+            {/* Glow stays on the glyphs only; no background pill is drawn behind the name. */}
           <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, marginTop: 0, marginBottom: 0, color: nameGradientEnabled ? "transparent" : nameColour, backgroundImage: nameGradientEnabled ? "linear-gradient(90deg, " + nameGradientColours.join(", ") + ")" : "none", backgroundClip: nameGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: nameGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow }}>
             {displayName}
           </div>
