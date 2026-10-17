@@ -1793,3 +1793,21 @@ body:has(.dashboard.dashboard-revamp) {
   .dashboard.dashboard-revamp .share-cover-preview-panel { padding: 10px !important; }
   .dashboard.dashboard-revamp .share-cover-control-group { grid-template-columns: minmax(0, 1fr) !important; padding: 14px !important; }
 }
+
+
+/* Keep the editor preview responsive while dragging glow/gradient sliders.
+   The earlier version stacked huge text-shadows, drop-shadows and a blur filter on the same live text. */
+.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow::before {
+  text-shadow:
+    0 0 22px var(--share-cover-glow-colour, #fff),
+    0 0 46px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 68%, transparent) !important;
+  filter: none !important;
+  opacity: .78 !important;
+  transform: translate(-50%, -50%) !important;
+}
+.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow .share-cover-preview-name {
+  text-shadow:
+    0 0 12px var(--share-cover-glow-colour, #fff),
+    0 0 25px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 76%, transparent) !important;
+  filter: none !important;
+}
