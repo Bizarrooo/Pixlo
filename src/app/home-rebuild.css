@@ -1002,3 +1002,9 @@
     transform: perspective(1050px) rotateX(calc(2deg + var(--px-tilt-x))) rotateY(calc(-6deg + var(--px-tilt-y))) rotateZ(-1.7deg) scale(1.012) !important;
   }
 }
+
+/* Centre the main navigation against the viewport while keeping the account control on the right. */
+.px-header{position:relative!important}
+.px-nav{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;margin:0!important;white-space:nowrap!important}
+.px-nav a:hover{color:#24242a!important}
+@media(max-width:800px){.px-nav{position:static!important;left:auto!important;top:auto!important;transform:none!important;margin:0 auto!important}}
