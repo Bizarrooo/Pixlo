@@ -55,6 +55,7 @@ export default function CursorTrailCanvas({
     if (!canvas || !context) return;
 
     const particles: TrailParticle[] = [];
+    const retiringParticles: TrailParticle[] = [];
     let frameId: number | null = null;
     let lastFrameAt = performance.now();
     let lastPointer: { x: number; y: number } | null = null;
@@ -110,10 +111,14 @@ export default function CursorTrailCanvas({
       };
 
       if (particles.length >= maxParticles) {
-        const overflow = particles.length - maxParticles + 1;
-        for (let index = 0; index < overflow; index += 1) {
-          const oldest = particles[index];
-          if (oldest) oldest.age = Math.max(oldest.age, oldest.lifetime * 0.82);
+        const oldest = particles.shift();
+        if (oldest) {
+          // Ease recycled particles into their final fade instead of abruptly popping them away.
+          oldest.age = Math.max(oldest.age, oldest.lifetime * 0.91);
+          retiringParticles.push(oldest);
+        }
+        if (retiringParticles.length > 72) {
+          retiringParticles.splice(0, retiringParticles.length - 72);
         }
       }
       particles.push(particle);
@@ -240,53 +245,55 @@ export default function CursorTrailCanvas({
         }
       }
 
-      for (let index = particles.length - 1; index >= 0; index -= 1) {
-        const particle = particles[index];
-        if (!particle) continue;
-        particle.age += delta * 1000;
-        if (particle.age >= particle.lifetime) {
-          particles.splice(index, 1);
-          continue;
-        }
+      for (const group of [retiringParticles, particles]) {
+        for (let index = group.length - 1; index >= 0; index -= 1) {
+          const particle = group[index];
+          if (!particle) continue;
+          particle.age += delta * 1000;
+          if (particle.age >= particle.lifetime) {
+            group.splice(index, 1);
+            continue;
+          }
 
-        particle.x += particle.vx * delta * 60;
-        particle.y += particle.vy * delta * 60;
-        particle.vy += 0.018 * motion;
-        particle.rotation += particle.spin * delta;
-        const progress = particle.age / particle.lifetime;
-        const fadeIn = clamp(progress / 0.09, 0, 1);
-        const alpha = fadeIn * Math.pow(1 - progress, 1.35) * particle.alpha;
-        const pulse = 0.78 + Math.sin(progress * Math.PI) * 0.22;
-        const radius = particle.size * (0.5 + Math.sin(progress * Math.PI) * 0.54) * pulse;
+          particle.x += particle.vx * delta * 60;
+          particle.y += particle.vy * delta * 60;
+          particle.vy += 0.018 * motion;
+          particle.rotation += particle.spin * delta;
+          const progress = particle.age / particle.lifetime;
+          const fadeIn = clamp(progress / 0.09, 0, 1);
+          const alpha = fadeIn * Math.pow(1 - progress, 1.35) * particle.alpha;
+          const pulse = 0.78 + Math.sin(progress * Math.PI) * 0.22;
+          const radius = particle.size * (0.5 + Math.sin(progress * Math.PI) * 0.54) * pulse;
 
-        context.save();
-        context.globalAlpha = alpha;
-        context.fillStyle = particle.colour;
-        context.shadowColor = particle.colour;
-        context.shadowBlur = Math.min(28, 2 + glowRadius * 17) * (particle.kind === "dot" ? 0.8 : 1);
-        if (particle.kind === "dot") {
-          context.beginPath();
-          context.arc(particle.x, particle.y, Math.max(0.6, radius * 0.46), 0, Math.PI * 2);
-          context.fill();
-        } else if (particle.kind === "diamond") {
-          context.translate(particle.x, particle.y);
-          context.rotate(particle.rotation);
-          context.fillRect(-radius * 0.43, -radius * 0.43, radius * 0.86, radius * 0.86);
-        } else {
-          drawSpark(particle.x, particle.y, Math.max(1, radius), particle.rotation);
-          context.globalAlpha = alpha * 0.68;
-          context.shadowBlur = 0;
-          context.fillStyle = "#ffffff";
-          context.beginPath();
-          context.arc(particle.x, particle.y, Math.max(0.35, radius * 0.12), 0, Math.PI * 2);
-          context.fill();
+          context.save();
+          context.globalAlpha = alpha;
+          context.fillStyle = particle.colour;
+          context.shadowColor = particle.colour;
+          context.shadowBlur = Math.min(28, 2 + glowRadius * 17) * (particle.kind === "dot" ? 0.8 : 1);
+          if (particle.kind === "dot") {
+            context.beginPath();
+            context.arc(particle.x, particle.y, Math.max(0.6, radius * 0.46), 0, Math.PI * 2);
+            context.fill();
+          } else if (particle.kind === "diamond") {
+            context.translate(particle.x, particle.y);
+            context.rotate(particle.rotation);
+            context.fillRect(-radius * 0.43, -radius * 0.43, radius * 0.86, radius * 0.86);
+          } else {
+            drawSpark(particle.x, particle.y, Math.max(1, radius), particle.rotation);
+            context.globalAlpha = alpha * 0.68;
+            context.shadowBlur = 0;
+            context.fillStyle = "#ffffff";
+            context.beginPath();
+            context.arc(particle.x, particle.y, Math.max(0.35, radius * 0.12), 0, Math.PI * 2);
+            context.fill();
+          }
+          context.restore();
         }
-        context.restore();
       }
 
       context.globalAlpha = 1;
       context.globalCompositeOperation = "source-over";
-      if (particles.length > 0 || trailPoints.length > 1) scheduleFrame();
+      if (particles.length > 0 || retiringParticles.length > 0 || trailPoints.length > 1) scheduleFrame();
     };
 
     function scheduleFrame() {
