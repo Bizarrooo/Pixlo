@@ -24,6 +24,7 @@ export type ProfileSettings = {
   avatar: string;
   banner: string;
   shareCoverImage: string;
+  shareCoverFont: ProfileFont;
   shareCoverNameSize: number;
   shareCoverNameColour: string;
   shareCoverCreditColour: string;
@@ -197,6 +198,7 @@ export const defaultSettings: ProfileSettings = {
   avatar: "",
   banner: "",
   shareCoverImage: "",
+  shareCoverFont: "Inter",
   shareCoverNameSize: 66,
   shareCoverNameColour: "#ffffff",
   shareCoverCreditColour: "#e3dcd8",
@@ -423,6 +425,7 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     socialIconColour: typeof parsed.socialIconColour === "string" ? parsed.socialIconColour : defaultSettings.socialIconColour,
     socialIconSize: typeof parsed.socialIconSize === "number" && Number.isFinite(parsed.socialIconSize) ? Math.min(96, Math.max(16, Math.round(parsed.socialIconSize))) : defaultSettings.socialIconSize,
     shareCoverImage: typeof parsed.shareCoverImage === "string" ? parsed.shareCoverImage : defaultSettings.shareCoverImage,
+    shareCoverFont: PROFILE_FONTS.includes(parsed.shareCoverFont) ? parsed.shareCoverFont : (PROFILE_FONTS.includes(parsed.nameFont) ? parsed.nameFont : defaultSettings.shareCoverFont),
     shareCoverNameSize: typeof parsed.shareCoverNameSize === "number" && Number.isFinite(parsed.shareCoverNameSize) ? Math.min(110, Math.max(28, Math.round(parsed.shareCoverNameSize))) : defaultSettings.shareCoverNameSize,
     shareCoverNameColour: typeof parsed.shareCoverNameColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.shareCoverNameColour) ? parsed.shareCoverNameColour : defaultSettings.shareCoverNameColour,
     shareCoverCreditColour: typeof parsed.shareCoverCreditColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.shareCoverCreditColour) ? parsed.shareCoverCreditColour : defaultSettings.shareCoverCreditColour,
