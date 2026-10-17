@@ -59,6 +59,7 @@ export default function CursorTrailCanvas({
     let lastFrameAt = performance.now();
     let lastPointer: { x: number; y: number } | null = null;
     let spacingRemainder = 0;
+    const trailPoints: Array<{ x: number; y: number; age: number; lifetime: number }> = [];
     let canvasWidth = 1;
     let canvasHeight = 1;
     let pixelRatio = 1;
@@ -122,6 +123,11 @@ export default function CursorTrailCanvas({
       }
     };
 
+    const addTrailPoint = (x: number, y: number) => {
+      trailPoints.push({ x, y, age: 0, lifetime: clamp(240 / motion, 120, 300) });
+      if (trailPoints.length > 100) trailPoints.splice(0, trailPoints.length - 100);
+    };
+
     const movePointer = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
       const rect = canvas.getBoundingClientRect();
@@ -137,6 +143,7 @@ export default function CursorTrailCanvas({
       if (!lastPointer) {
         lastPointer = { x, y };
         addParticle(x, y);
+        addTrailPoint(x, y);
         scheduleFrame();
         return;
       }
@@ -146,15 +153,22 @@ export default function CursorTrailCanvas({
       const distance = Math.hypot(dx, dy);
       if (distance > 0.1) {
         const totalDistance = spacingRemainder + distance;
-        const sampleCount = Math.min(90, Math.floor(totalDistance / spacing));
+        const fullSampleCount = Math.floor(totalDistance / spacing);
+        const sampleCount = Math.min(90, fullSampleCount);
         for (let index = 1; index <= sampleCount; index += 1) {
-          const travelled = spacing - spacingRemainder + (index - 1) * spacing;
+          const travelled = fullSampleCount > 90
+            ? (distance * index) / sampleCount
+            : spacing - spacingRemainder + (index - 1) * spacing;
           const progress = clamp(travelled / distance, 0, 1);
-          addParticle(lastPointer.x + dx * progress, lastPointer.y + dy * progress);
+          const sampleX = lastPointer.x + dx * progress;
+          const sampleY = lastPointer.y + dy * progress;
+          addParticle(sampleX, sampleY);
+          addTrailPoint(sampleX, sampleY);
         }
-        spacingRemainder = totalDistance - sampleCount * spacing;
+        spacingRemainder = totalDistance % spacing;
         if (distance > 26 && Math.random() < 0.7) {
           addParticle(x, y, true);
+          addTrailPoint(x, y);
         }
         lastPointer = { x, y };
         scheduleFrame();
@@ -183,6 +197,48 @@ export default function CursorTrailCanvas({
       lastFrameAt = now;
       context.clearRect(0, 0, canvasWidth, canvasHeight);
       context.globalCompositeOperation = "lighter";
+
+      for (let index = trailPoints.length - 1; index >= 0; index -= 1) {
+        const point = trailPoints[index];
+        if (!point) continue;
+        point.age += delta * 1000;
+        if (point.age >= point.lifetime) trailPoints.splice(index, 1);
+      }
+
+      if (trailPoints.length > 1) {
+        const first = trailPoints[0];
+        const last = trailPoints[trailPoints.length - 1];
+        if (first && last) {
+          const oldFade = Math.pow(1 - first.age / first.lifetime, 1.5);
+          const alphaColour = (alpha: number) => {
+            const hex = /^#[0-9a-f]{6}$/i.test(colour) ? colour.slice(1) : "ff9b52";
+            const red = Number.parseInt(hex.slice(0, 2), 16);
+            const green = Number.parseInt(hex.slice(2, 4), 16);
+            const blue = Number.parseInt(hex.slice(4, 6), 16);
+            return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+          };
+          const ribbon = context.createLinearGradient(first.x, first.y, last.x, last.y);
+          ribbon.addColorStop(0, alphaColour(0));
+          ribbon.addColorStop(0.34, alphaColour(0.16 * oldFade));
+          ribbon.addColorStop(1, alphaColour(0.56));
+          context.save();
+          context.globalAlpha = 1;
+          context.strokeStyle = ribbon;
+          context.lineWidth = clamp(particleSize * 1.65, 0.8, 3.5);
+          context.lineCap = "round";
+          context.lineJoin = "round";
+          context.shadowColor = colour;
+          context.shadowBlur = Math.min(24, glowRadius * 12);
+          context.beginPath();
+          context.moveTo(first.x, first.y);
+          for (let index = 1; index < trailPoints.length; index += 1) {
+            const point = trailPoints[index];
+            if (point) context.lineTo(point.x, point.y);
+          }
+          context.stroke();
+          context.restore();
+        }
+      }
 
       for (let index = particles.length - 1; index >= 0; index -= 1) {
         const particle = particles[index];
@@ -238,17 +294,19 @@ export default function CursorTrailCanvas({
     }
 
     resize();
+    const handleBlur = () => { lastPointer = null; spacingRemainder = 0; };
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(canvas);
     window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pointermove", movePointer, { passive: true });
-    window.addEventListener("blur", () => { lastPointer = null; spacingRemainder = 0; }, { passive: true });
+    window.addEventListener("blur", handleBlur, { passive: true });
 
     return () => {
       disposed = true;
       resizeObserver.disconnect();
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", movePointer);
+      window.removeEventListener("blur", handleBlur);
       if (frameId !== null) window.cancelAnimationFrame(frameId);
       context.clearRect(0, 0, canvasWidth, canvasHeight);
     };
