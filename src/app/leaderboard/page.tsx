@@ -39,7 +39,7 @@ export default function LeaderboardPage() {
     const load = async (showInitialLoader: boolean) => {
       if (refreshingInBackground) return;
       refreshingInBackground = true;
-      if (showInitialLoader && !people.length) setLoading(true);
+      if (showInitialLoader) setLoading(true);
       else setRefreshing(true);
       setError("");
       try {
