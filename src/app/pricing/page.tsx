@@ -210,7 +210,7 @@ export default function PricingPage() {
             <div className="pricing-benefits">
               <span><i>✓</i> Dashboard customisation</span>
               <span><i>✓</i> Cursor trails</span>
-              <span><i>✓</i> Customisable share covers</span>
+              <span><i>✓</i> Customisable Share covers</span>
               <span><i>✓</i> Premium badge</span>
             </div>
 
@@ -302,7 +302,7 @@ export default function PricingPage() {
             <div className="pricing-comparison-row"><strong>Music and profile sharing</strong><span className="pricing-yes">✓</span><span className="pricing-yes pricing-premium-value">✓</span></div>
             <div className="pricing-comparison-row"><strong>Premium customisation</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
             <div className="pricing-comparison-row"><strong>Cursor trails</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
-            <div className="pricing-comparison-row"><strong>Customisable share covers</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Customisable Share covers</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
             <div className="pricing-comparison-row"><strong>Premium badge</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
             <div className="pricing-comparison-row"><strong>Recurring subscription</strong><span className="pricing-muted">—</span><span className="pricing-muted pricing-premium-value">Never</span></div>
           </div>
