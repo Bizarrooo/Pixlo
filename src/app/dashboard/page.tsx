@@ -217,9 +217,58 @@ function Setting({ label, text, children }: { label: string; text: string; child
   return <div className="setting"><div><b>{label}</b><span>{text}</span></div>{children}</div>;
 }
 
-function Range({ label, value, min, max, suffix = "", step = 1, displayValue, onChange }: { label: string; value: number; min: number; max: number; suffix?: string; step?: number; displayValue?: string; onChange: (v: number) => void }) {
-  const progress = max > min ? ((value - min) / (max - min)) * 100 : 0;
-  return <div className="range"><div><span>{label}</span><b>{displayValue ?? `${value}${suffix}`}</b></div><input type="range" min={min} max={max} step={step} value={value} style={{ "--range-progress": `${progress}%` } as React.CSSProperties} onChange={e => onChange(Number(e.target.value))} /></div>;
+function Range({ label, value, min, max, suffix = "", step = 1, displayValue, throttleMs = 0, onChange }: { label: string; value: number; min: number; max: number; suffix?: string; step?: number; displayValue?: string; throttleMs?: number; onChange: (v: number) => void }) {
+  const [draftValue, setDraftValue] = useState(value);
+  const lastSentValue = useRef(value);
+  const lastCommitAt = useRef(0);
+  const pendingValue = useRef<number | null>(null);
+  const timer = useRef<number | null>(null);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+  useEffect(() => {
+    if (value !== lastSentValue.current) {
+      lastSentValue.current = value;
+      setDraftValue(value);
+    }
+  }, [value]);
+  useEffect(() => () => {
+    if (timer.current !== null) window.clearTimeout(timer.current);
+  }, []);
+
+  const commit = (nextValue: number) => {
+    if (throttleMs <= 0) {
+      lastSentValue.current = nextValue;
+      onChange(nextValue);
+      return;
+    }
+    pendingValue.current = nextValue;
+    const now = Date.now();
+    const wait = throttleMs - (now - lastCommitAt.current);
+    if (wait <= 0) {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+      timer.current = null;
+      pendingValue.current = null;
+      lastCommitAt.current = now;
+      lastSentValue.current = nextValue;
+      onChangeRef.current(nextValue);
+      return;
+    }
+    if (timer.current === null) {
+      timer.current = window.setTimeout(() => {
+        timer.current = null;
+        const pending = pendingValue.current;
+        if (pending === null) return;
+        pendingValue.current = null;
+        lastCommitAt.current = Date.now();
+        lastSentValue.current = pending;
+        onChangeRef.current(pending);
+      }, wait);
+    }
+  };
+
+  const progress = max > min ? ((draftValue - min) / (max - min)) * 100 : 0;
+  return <div className="range"><div><span>{label}</span><b>{displayValue ?? `${draftValue}${suffix}`}</b></div><input type="range" min={min} max={max} step={step} value={draftValue} style={{ "--range-progress": `${progress}%` } as React.CSSProperties} onChange={e => { const nextValue = Number(e.target.value); setDraftValue(nextValue); commit(nextValue); }} /></div>;
 }
 
 function Colour({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
@@ -610,7 +659,7 @@ export default function Dashboard() {
       }
       setSaved(true);
       window.setTimeout(() => setSaved(false), 900);
-    }, 150);
+    }, 650);
     return () => window.clearTimeout(timer);
   }, [settings, settingsReady, profileUserId, savedIdentity]);
 
@@ -1680,14 +1729,14 @@ export default function Dashboard() {
                         {previewAvatar ? <img className="share-cover-preview-avatar" src={previewAvatar} alt="" /> : <span className="share-cover-preview-avatar-fallback">{(settings.displayName || settings.username || "P").slice(0, 1).toUpperCase()}</span>}
                         {previewDecoration && <img className="share-cover-preview-decoration" src={previewDecoration} alt="" aria-hidden="true" />}
                       </div>
-                      <div className={`share-cover-preview-name-wrap ${settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? "has-glow" : ""}`} data-glow-text={settings.displayName || settings.username} style={{ "--share-cover-name-size": `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`, "--share-cover-name-font": fontFamily(settings.nameFont), "--share-cover-glow-colour": rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1), "--share-cover-glow-blur": `${Math.max(10, settings.shareCoverNameGlowIntensity * 0.16)}px`, "--share-cover-glow-size-a": `${Math.max(24, settings.shareCoverNameGlowIntensity * 0.75)}px`, "--share-cover-glow-size-b": `${Math.max(54, settings.shareCoverNameGlowIntensity * 1.45)}px`, "--share-cover-glow-size-c": `${Math.max(88, settings.shareCoverNameGlowIntensity * 2.4)}px`, "--share-cover-glow-strength": settings.shareCoverNameGlowIntensity } as React.CSSProperties}>
+                      <div className={`share-cover-preview-name-wrap ${settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? "has-glow" : ""}`} data-glow-text={settings.displayName || settings.username} style={{ "--share-cover-name-size": `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`, "--share-cover-name-font": fontFamily(settings.shareCoverFont), "--share-cover-glow-colour": rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1), "--share-cover-glow-blur": `${Math.max(10, settings.shareCoverNameGlowIntensity * 0.16)}px`, "--share-cover-glow-size-a": `${Math.max(24, settings.shareCoverNameGlowIntensity * 0.75)}px`, "--share-cover-glow-size-b": `${Math.max(54, settings.shareCoverNameGlowIntensity * 1.45)}px`, "--share-cover-glow-size-c": `${Math.max(88, settings.shareCoverNameGlowIntensity * 2.4)}px`, "--share-cover-glow-strength": settings.shareCoverNameGlowIntensity } as React.CSSProperties}>
                       <div className="share-cover-preview-name" style={{
                         color: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
                         backgroundImage: settings.shareCoverNameGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverNameGradientColours.join(", ")})` : "none",
                         backgroundClip: settings.shareCoverNameGradientEnabled ? "text" : "border-box",
                         WebkitBackgroundClip: settings.shareCoverNameGradientEnabled ? "text" : "border-box",
                         WebkitTextFillColor: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
-                        fontFamily: fontFamily(settings.nameFont),
+                        fontFamily: fontFamily(settings.shareCoverFont),
                         fontSize: `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`,
                         textShadow: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `0 0 ${Math.max(28, settings.shareCoverNameGlowIntensity * 0.9)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1)}, 0 0 ${Math.max(58, settings.shareCoverNameGlowIntensity * 1.8)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.95)}, 0 0 ${Math.max(100, settings.shareCoverNameGlowIntensity * 2.8)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.78)}` : "none",
                         filter: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `drop-shadow(0 0 ${Math.max(24, settings.shareCoverNameGlowIntensity * 0.75)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1)}) drop-shadow(0 0 ${Math.max(52, settings.shareCoverNameGlowIntensity * 1.65)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.92)}) drop-shadow(0 0 ${Math.max(88, settings.shareCoverNameGlowIntensity * 2.5)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.72)})` : "none",
@@ -1709,14 +1758,14 @@ export default function Dashboard() {
                   <section className="share-cover-control-group share-cover-control-group-background">
                     <div className="share-cover-control-heading"><span>01</span><div><b>Background & typography</b><small>Choose the cover image and typeface.</small></div></div>
                     <FileUpload label="Cover background" value={settings.shareCoverImage} accept="image/*" type="image" note="Animated uploads use their first frame in the static share image." onChange={v => { set("shareCoverImage", v); setSaved(false); }} />
-                    <div className="share-cover-font-control"><label className="field-label">Share cover font</label><FontDropdown value={settings.nameFont} onChange={v => { set("nameFont", v); setSaved(false); }} id="share-cover-font" open={openDropdown} setOpen={setOpenDropdown} /></div>
+                    <div className="share-cover-font-control"><label className="field-label">Share cover font</label><FontDropdown value={settings.shareCoverFont} onChange={v => set("shareCoverFont", v)} id="share-cover-font" open={openDropdown} setOpen={setOpenDropdown} /></div>
                   </section>
                   <section className="share-cover-control-group share-cover-control-group-name">
                     <div className="share-cover-control-heading"><span>02</span><div><b>Display name</b><small>Control the main name, glow and gradient.</small></div></div>
                     <Colour label="Display name colour" value={settings.shareCoverNameColour} onChange={v => { set("shareCoverNameColour", v); setSaved(false); }} />
-                    <Range label="Display name size" value={settings.shareCoverNameSize} min={28} max={110} suffix="px" onChange={v => { set("shareCoverNameSize", v); setSaved(false); }} />
+                    <Range label="Display name size" value={settings.shareCoverNameSize} min={28} max={110} suffix="px" throttleMs={80} onChange={v => set("shareCoverNameSize", v)} />
                     <Setting label="Display name glow" text="A broad, coloured halo around the name."><Toggle value={settings.shareCoverNameGlow} onChange={v => { set("shareCoverNameGlow", v); setSaved(false); }} /></Setting>
-                    {settings.shareCoverNameGlow && <Range label="Glow intensity" value={settings.shareCoverNameGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("shareCoverNameGlowIntensity", v); setSaved(false); }} />}
+                    {settings.shareCoverNameGlow && <Range label="Glow intensity" value={settings.shareCoverNameGlowIntensity} min={0} max={200} suffix="%" throttleMs={80} onChange={v => set("shareCoverNameGlowIntensity", v)} />}
                     <Setting label="Display name gradient" text="Blend three colours across the name."><Toggle value={settings.shareCoverNameGradientEnabled} onChange={v => { set("shareCoverNameGradientEnabled", v); setSaved(false); }} /></Setting>
                     {settings.shareCoverNameGradientEnabled && <div className="share-cover-gradient-colours"><Colour label="Name gradient · start" value={settings.shareCoverNameGradientColours[0]} onChange={v => { set("shareCoverNameGradientColours", [v, settings.shareCoverNameGradientColours[1], settings.shareCoverNameGradientColours[2]]); setSaved(false); }} /><Colour label="Name gradient · middle" value={settings.shareCoverNameGradientColours[1]} onChange={v => { set("shareCoverNameGradientColours", [settings.shareCoverNameGradientColours[0], v, settings.shareCoverNameGradientColours[2]]); setSaved(false); }} /><Colour label="Name gradient · end" value={settings.shareCoverNameGradientColours[2]} onChange={v => { set("shareCoverNameGradientColours", [settings.shareCoverNameGradientColours[0], settings.shareCoverNameGradientColours[1], v]); setSaved(false); }} /></div>}
                   </section>
