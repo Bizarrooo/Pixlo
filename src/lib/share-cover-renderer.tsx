@@ -239,9 +239,10 @@ export async function renderShareCoverImage(
   const green = Number.parseInt(glowHex.slice(3, 5), 16);
   const blue = Number.parseInt(glowHex.slice(5, 7), 16);
   const glowEnabled = isPremium && profile?.shareCoverNameGlow === true && glowIntensity > 0;
-  const glow = glowEnabled ? "0 0 " + Math.max(32, glowIntensity * 0.9) + "px rgba(" + red + "," + green + "," + blue + ",1), 0 0 " + Math.max(64, glowIntensity * 1.8) + "px rgba(" + red + "," + green + "," + blue + ",0.96), 0 0 " + Math.max(112, glowIntensity * 2.8) + "px rgba(" + red + "," + green + "," + blue + ",0.82)" : "none";
-  const glowFilter = glowEnabled
-    ? "drop-shadow(0 0 " + Math.max(28, glowIntensity * 0.8) + "px rgba(" + red + "," + green + "," + blue + ",0.98)) drop-shadow(0 0 " + Math.max(60, glowIntensity * 1.7) + "px rgba(" + red + "," + green + "," + blue + ",0.72)) drop-shadow(0 0 " + Math.max(100, glowIntensity * 2.5) + "px rgba(" + red + "," + green + "," + blue + ",0.45))"
+  // Keep glow on the letters subtle. The radial bloom below supplies the soft halo;
+  // stacking several large drop-shadows turns into a solid-looking bar in small previews.
+  const glow = glowEnabled
+    ? "0 0 " + Math.max(8, glowIntensity * 0.12) + "px rgba(" + red + "," + green + "," + blue + ",0.42)"
     : "none";
   const selectedFont = profileFontName(profile);
   const googleFont = FONT_ALIASES[selectedFont] || "Inter";
@@ -299,18 +300,19 @@ export async function renderShareCoverImage(
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: 1100 }}>
             {glowEnabled && (
               <div
+                aria-hidden="true"
                 style={{
                   position: "absolute",
                   zIndex: 0,
-                  width: "88%",
-                  height: Math.max(54, displayFontSize * 1.65),
+                  width: Math.min(920, Math.max(150, displayFontSize * Math.min(displayName.length * 0.62, 8.5))),
+                  height: Math.max(26, displayFontSize * 0.9),
                   borderRadius: 999,
-                  background: "radial-gradient(ellipse at center, rgba(" + red + "," + green + "," + blue + ",0.58) 0%, rgba(" + red + "," + green + "," + blue + ",0.24) 42%, rgba(" + red + "," + green + "," + blue + ",0) 76%)",
-                  boxShadow: "0 0 " + Math.max(45, glowIntensity * 0.85) + "px rgba(" + red + "," + green + "," + blue + ",0.45), 0 0 " + Math.max(90, glowIntensity * 1.7) + "px rgba(" + red + "," + green + "," + blue + ",0.25)",
+                  background: "radial-gradient(ellipse at center, rgba(" + red + "," + green + "," + blue + ",0.30) 0%, rgba(" + red + "," + green + "," + blue + ",0.12) 48%, rgba(" + red + "," + green + "," + blue + ",0) 78%)",
+                  pointerEvents: "none",
                 }}
               />
             )}
-          <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, marginTop: 0, marginBottom: 0, color: nameGradientEnabled ? "transparent" : nameColour, backgroundImage: nameGradientEnabled ? "linear-gradient(90deg, " + nameGradientColours.join(", ") + ")" : "none", backgroundClip: nameGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: nameGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow, filter: glowFilter }}>
+          <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, marginTop: 0, marginBottom: 0, color: nameGradientEnabled ? "transparent" : nameColour, backgroundImage: nameGradientEnabled ? "linear-gradient(90deg, " + nameGradientColours.join(", ") + ")" : "none", backgroundClip: nameGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: nameGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow }}>
             {displayName}
           </div>
           </div>
