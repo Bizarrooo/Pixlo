@@ -567,9 +567,22 @@ export default function Dashboard() {
     const count = parallaxActive ? 1 : Math.min(6, Math.max(1, Math.round(density / 30)));
     const maxParticles = parallaxActive ? 32 : 180;
     const lifetime = Math.min(15000, Math.max(300, settings.cursorTrailLifetime));
-    const availableParticleSlots = Math.max(0, maxParticles - layer.childElementCount);
-    const spawnCount = Math.min(count, availableParticleSlots);
-    for (let index = 0; index < spawnCount; index += 1) {
+
+    // Recycle the oldest visible particles with a brief fade, rather than pausing new spawns at the cap.
+    const activeParticles = Array.from(layer.children).filter(
+      (element): element is HTMLElement => element instanceof HTMLElement && element.dataset.retiring !== "true",
+    );
+    const retireCount = Math.max(0, activeParticles.length + count - maxParticles);
+    for (const particle of activeParticles.slice(0, retireCount)) {
+      particle.dataset.retiring = "true";
+      particle.style.transition = "opacity 170ms ease-out";
+      particle.style.setProperty("opacity", "0", "important");
+      const removeParticle = () => particle.remove();
+      particle.addEventListener("transitionend", removeParticle, { once: true });
+      window.setTimeout(removeParticle, 220);
+    }
+
+    for (let index = 0; index < count; index += 1) {
       const particle = document.createElement("span");
       particle.className = "pixlo-cursor-trail";
       particle.textContent = Math.random() > 0.7 ? "✧" : "✦";
@@ -585,7 +598,6 @@ export default function Dashboard() {
       particle.addEventListener("animationend", () => particle.remove(), { once: true });
       layer.appendChild(particle);
     }
-    // Never trim live particles here: animationend removes each one only after it has faded to opacity 0.
   };
 
   const navigateDashboard = (primary: DashboardPrimarySection, destination: string) => {
