@@ -53,7 +53,7 @@ export default function PricingPage() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link href="/" className={styles.logo} aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
+        <Link href="/" className={styles.logo} aria-label="Pixlo home"><span className={styles.wordmark}>pixlo<span>.</span></span></Link>
         <nav className={styles.nav} aria-label="Pricing navigation">
           <Link href="/">Home</Link>
           <a href="#plans">Plans</a>
@@ -186,7 +186,7 @@ export default function PricingPage() {
         </section>
 
         <footer className={styles.footer}>
-          <Link href="/" className={styles.footerLogo}><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
+          <Link href="/" className={styles.footerLogo}><span className={styles.wordmark + " " + styles.footerWordmark}>pixlo<span>.</span></span></Link>
           <span>YOUR SPACE ON THE WEB.</span>
           <Link href="/dashboard">Open dashboard ↗</Link>
         </footer>

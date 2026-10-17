@@ -76,3 +76,13 @@
 @media(max-width:760px){.hero{grid-template-columns:minmax(0,1fr);gap:16px;padding:68px 0 58px;min-height:0;text-align:left}.hero h1{font-size:clamp(52px,11vw,76px)}.heroDescription{font-size:14px}.heroVisual{min-height:355px;margin-top:8px}.profilePreview{width:min(82%,365px)}.floatPrice{top:20px;right:1%}.floatFree{bottom:17px;left:0}.visualOrbit{width:290px;height:290px}.promiseStrip{justify-content:flex-start;overflow:auto;scrollbar-width:none}.promiseStrip::-webkit-scrollbar{display:none}}
 @media(max-width:440px){.heroActions{gap:16px}.heroNotes{gap:10px 14px}.heroVisual{min-height:330px}.profilePreview{width:90%}.floatPrice{right:-4px;gap:7px;padding:9px}.floatPrice small{font-size:6px}.floatFree{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.heroPrimary,.heroSecondary,.profilePreview{transition:none}}
+
+/* Compact text wordmark instead of an image asset with a large transparent canvas. */
+.logo,.footerLogo{display:inline-flex;align-items:center;flex:0 0 auto;max-width:120px;min-width:0}
+.wordmark{display:inline-flex;align-items:baseline;gap:0;color:#fff;font-size:27px;font-weight:900;line-height:1;letter-spacing:-1.9px;text-transform:lowercase;white-space:nowrap;text-shadow:0 5px 24px rgba(255,86,65,.16)}
+.wordmark>span{display:inline-block;color:#ff7857;font-size:1.12em;line-height:.8}
+.footerWordmark{font-size:22px}
+.footerLogo{max-width:100px}
+@media(max-width:760px){.wordmark{font-size:24px}.footerWordmark{font-size:20px}}
+/* Prevent any large intrinsic media from expanding this page's layout. */
+.page img{display:block;max-width:100%;height:auto}
