@@ -393,21 +393,6 @@ export default function Dashboard() {
   const [presetNames, setPresetNames] = useState<Record<number, string>>({});
   const [presetMessage, setPresetMessage] = useState("");
   const [profileCopied, setProfileCopied] = useState(false);
-  const [viewLeaderboard, setViewLeaderboard] = useState<{ leaderboard: { username: string; displayName: string; views: number; rank: number }[]; viewer: { username: string; displayName: string; views: number; rank: number } | null; totalProfiles: number } | null>(null);
-  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
-  const [leaderboardError, setLeaderboardError] = useState("");
-  useEffect(() => {
-    if (active !== "Stats" || !settingsReady || !settings.username || viewLeaderboard || leaderboardLoading) return;
-    let cancelled = false;
-    setLeaderboardLoading(true);
-    setLeaderboardError("");
-    fetch('/api/profile-stats?username=' + encodeURIComponent(settings.username), { cache: "no-store" })
-      .then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || "Could not load leaderboard."); return data; })
-      .then(data => { if (!cancelled) setViewLeaderboard(data); })
-      .catch(error => { if (!cancelled) setLeaderboardError(error instanceof Error ? error.message : "Could not load leaderboard."); })
-      .finally(() => { if (!cancelled) setLeaderboardLoading(false); });
-    return () => { cancelled = true; };
-  }, [active, settingsReady, settings.username]);
   useEffect(() => {
     let cancelled = false;
     fetch("/api/profile/badges-visibility", { cache: "no-store" }).then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || "Unable to load badge visibility."); return data; }).then(data => { if (!cancelled) setBadgesHidden(Boolean(data.hidden)); }).catch(() => {});
@@ -2048,15 +2033,6 @@ export default function Dashboard() {
               <div className="stats-card"><span><i>♫</i> Music tracks</span><strong>{settings.musicTracks.length}</strong><small>Tracks saved to your profile</small></div>
               <div className="stats-card"><span><i>✳</i> Profile completion</span><strong>{Math.round(([settings.avatar, settings.description, ...socials.map(([key]) => settings.socials[key]), ...settings.customLinks.map(link => link.url)].filter(value => Boolean(String(value || "").trim())).length / (3 + socials.length + settings.customLinks.length)) * 100)}%</strong><small>Based on your profile details</small></div>
             </div>
-            <div className="leaderboard-heading"><div><span>COMMUNITY RANKING</span><h3>Profile views leaderboard</h3><p>Top 100 Pixlo profiles by unique views.</p></div><button type="button" onClick={() => { setLeaderboardLoading(true); setLeaderboardError(""); fetch('/api/profile-stats?username=' + encodeURIComponent(settings.username), { cache: "no-store" }).then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || "Could not load leaderboard."); setViewLeaderboard(data); }).catch(error => setLeaderboardError(error instanceof Error ? error.message : "Could not load leaderboard.")).finally(() => setLeaderboardLoading(false)); }}>Refresh ↻</button></div>
-            {leaderboardLoading && <div className="leaderboard-empty">Loading leaderboard…</div>}
-            {!leaderboardLoading && leaderboardError && <div className="leaderboard-empty leaderboard-error">{leaderboardError}<small>Run the latest supabase/schema.sql in Supabase SQL Editor.</small></div>}
-            {!leaderboardLoading && !leaderboardError && viewLeaderboard && <div className="leaderboard-list">
-              {viewLeaderboard.leaderboard.map(person => <div key={person.username} className={'leaderboard-row ' + (person.username.toLowerCase() === settings.username.toLowerCase() ? "leaderboard-you " : "") + (person.rank <= 3 ? 'leaderboard-rank-' + person.rank : "")}><span className="leaderboard-rank">{person.rank === 1 ? "♛" : person.rank === 2 ? "✦" : person.rank === 3 ? "✧" : '#' + person.rank}</span><div className="leaderboard-person"><b>{person.displayName || person.username}{person.username.toLowerCase() === settings.username.toLowerCase() && <em>YOU</em>}</b><small>@{person.username}</small></div><strong>{Number(person.views).toLocaleString()} <small>views</small></strong></div>)}
-              {viewLeaderboard.viewer && viewLeaderboard.viewer.rank > 100 && <><div className="leaderboard-ellipsis">···</div><div className="leaderboard-row leaderboard-you leaderboard-your-rank"><span className="leaderboard-rank">#{viewLeaderboard.viewer.rank}</span><div className="leaderboard-person"><b>{viewLeaderboard.viewer.displayName || viewLeaderboard.viewer.username}<em>YOUR POSITION</em></b><small>@{viewLeaderboard.viewer.username}</small></div><strong>{Number(viewLeaderboard.viewer.views).toLocaleString()} <small>views</small></strong></div></>}
-            </div>}
-            {!viewLeaderboard && !leaderboardLoading && !leaderboardError && <button type="button" className="leaderboard-load" onClick={() => { setLeaderboardLoading(true); fetch('/api/profile-stats?username=' + encodeURIComponent(settings.username), { cache: "no-store" }).then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error || "Could not load leaderboard."); setViewLeaderboard(data); }).catch(error => setLeaderboardError(error instanceof Error ? error.message : "Could not load leaderboard.")).finally(() => setLeaderboardLoading(false)); }}>Load top 100 leaderboard</button>}
-            <p className="stats-footnote">Your highlighted row is easy to spot, even if you are outside the top 100.</p>
           </div>}
           {active === "Enter Screen" && <div className="form-stack">
             <SectionIntro number="11" title="Your entrance" text="The message appears once, inside its own customisable bordered card." />

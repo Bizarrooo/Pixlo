@@ -189,12 +189,11 @@ export default function PricingPage() {
     <main className="pricing-global">
       <header className="pricing-header">
         <Link href="/" className="pricing-brand" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
-        <nav className="pricing-nav" aria-label="Pricing navigation">
+        <nav className="pricing-nav" aria-label="Site navigation">
           <Link href="/">Home</Link>
-          <a href="#premium">Premium</a>
-          <a href="#extras">Extras</a>
+          <a href="https://discord.gg/rdAyWGGDCe" target="_blank" rel="noreferrer">Discord</a>
+          <Link href="/leaderboard">Leaderboard</Link>
         </nav>
-        <Link href="/dashboard" className="pricing-dashboard-link">Dashboard <span aria-hidden="true">↗</span></Link>
       </header>
 
       <div className="pricing-container">
@@ -420,7 +419,11 @@ export default function PricingPage() {
         <footer className="pricing-footer">
           <Link href="/" className="pricing-brand pricing-footer-brand" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
           <span>YOUR SPACE ON THE WEB.</span>
-          <Link href="/dashboard">Open dashboard ↗</Link>
+          <nav className="pricing-footer-nav" aria-label="Site navigation">
+            <Link href="/">Home</Link>
+            <a href="https://discord.gg/rdAyWGGDCe" target="_blank" rel="noreferrer">Discord</a>
+            <Link href="/leaderboard">Leaderboard</Link>
+          </nav>
         </footer>
       </div>
     </main>

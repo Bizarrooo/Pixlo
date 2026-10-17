@@ -330,8 +330,8 @@ export default function Home() {
         <header className="px-header">
           <Link href="/" className="px-logo" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
           <nav className="px-nav" aria-label="Main navigation">
-            <a href="#platform">Platform</a>
-            <a href="#community">Community</a>
+            <a href="https://discord.gg/rdAyWGGDCe" target="_blank" rel="noreferrer">Discord</a>
+            <Link href="/leaderboard">Leaderboard</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
           <div className="revamp-account px-account"><HomeAccountNav /></div>
@@ -402,7 +402,7 @@ export default function Home() {
 
       <section className="px-final-cta"><div className="px-reveal"><span className="px-section-kicker"><span>04</span> YOUR NEXT CHAPTER</span><h2>Your name. Your links.<br /><em>Your Pixlo.</em></h2></div><Link href="/dashboard" className="px-button px-button-primary">Create your profile <ArrowIcon /></Link></section>
 
-      <footer className="px-footer"><div className="px-footer-brand"><Link href="/" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span></div><div className="px-footer-links"><a href="#platform">Platform</a><a href="#community">Community</a><Link href="/pricing">Pricing</Link><Link href="/dashboard">Dashboard <ArrowIcon diagonal /></Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
+      <footer className="px-footer"><div className="px-footer-brand"><Link href="/" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span></div><div className="px-footer-links"><a href="https://discord.gg/rdAyWGGDCe" target="_blank" rel="noreferrer">Discord</a><Link href="/leaderboard">Leaderboard</Link><Link href="/pricing">Pricing</Link><Link href="/dashboard">Dashboard <ArrowIcon diagonal /></Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
     </main>
   );
 }

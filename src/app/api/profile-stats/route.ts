@@ -3,7 +3,51 @@ import { authHeaders, supabaseConfig } from "../../../lib/supabase-config";
 
 export const runtime = "nodejs";
 
-type ProfileRow = { username?: string; display_name?: string; settings?: { views?: number | string } | null };
+type ProfileSettings = { views?: number | string; avatar?: unknown } | null;
+type ProfileRow = {
+  username?: string;
+  display_name?: string;
+  settings?: ProfileSettings;
+  discord_avatar?: string | null;
+  discord_membership_verified?: boolean | null;
+  use_discord_avatar?: boolean | null;
+};
+type LeaderboardPerson = { username: string; displayName: string; views: number; rank: number; avatar?: string | null };
+
+function validPublicImage(value: unknown): string | null {
+  return typeof value === "string" && /^https?:\/\//i.test(value) ? value : null;
+}
+
+async function addPublicAvatars<T extends { leaderboard: LeaderboardPerson[] }>(data: T, url: string, headers: Record<string, string>) {
+  const people = Array.isArray(data.leaderboard) ? data.leaderboard.slice(0, 100) : [];
+  if (!people.length) return { ...data, leaderboard: people };
+  try {
+    const usernames = people.map(person => person.username.toLowerCase()).filter(Boolean);
+    if (!usernames.length) return { ...data, leaderboard: people };
+    const query = new URLSearchParams({
+      select: "username,settings,discord_avatar,discord_membership_verified,use_discord_avatar",
+      username: "in.(" + usernames.join(",") + ")",
+      limit: "100",
+    });
+    const response = await fetch(`${url}/rest/v1/profiles?${query.toString()}`, { headers, cache: "no-store" });
+    if (!response.ok) return { ...data, leaderboard: people };
+    const rows = await response.json() as ProfileRow[];
+    const avatars = new Map<string, string>();
+    for (const row of Array.isArray(rows) ? rows : []) {
+      const key = String(row.username || "").toLowerCase();
+      const discordAvatar = row.use_discord_avatar && row.discord_membership_verified ? validPublicImage(row.discord_avatar) : null;
+      const profileAvatar = validPublicImage(row.settings?.avatar);
+      const avatar = discordAvatar || profileAvatar;
+      if (key && avatar) avatars.set(key, avatar);
+    }
+    return {
+      ...data,
+      leaderboard: people.map(person => ({ ...person, avatar: avatars.get(person.username.toLowerCase()) || null })),
+    };
+  } catch {
+    return { ...data, leaderboard: people };
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -19,7 +63,10 @@ export async function GET(request: Request) {
     });
     if (rpc.ok) {
       const data = await rpc.json();
-      if (data && Array.isArray(data.leaderboard)) return NextResponse.json(data, { headers: { "Cache-Control": "no-store, max-age=0" } });
+      if (data && Array.isArray(data.leaderboard)) {
+        const complete = await addPublicAvatars(data as { leaderboard: LeaderboardPerson[]; viewer: LeaderboardPerson | null; totalProfiles: number }, url, headers);
+        return NextResponse.json(complete, { headers: { "Cache-Control": "no-store, max-age=0" } });
+      }
     }
 
     // Fallback keeps the leaderboard usable even if the optional SQL RPC has not been installed yet.
@@ -33,6 +80,7 @@ export async function GET(request: Request) {
       username: String(profile.username || "").toLowerCase(),
       displayName: String(profile.display_name || profile.username || ""),
       views: Math.max(0, Number(profile.settings?.views || 0) || 0),
+      avatar: validPublicImage(profile.settings?.avatar),
     })).filter(profile => profile.username).sort((a, b) => b.views - a.views || a.username.localeCompare(b.username)).map((profile, index) => ({ ...profile, rank: index + 1 }));
     const viewer = ranked.find(profile => profile.username === username) || null;
     return NextResponse.json({ leaderboard: ranked.slice(0, 100), viewer, totalProfiles: ranked.length }, { headers: { "Cache-Control": "no-store, max-age=0" } });

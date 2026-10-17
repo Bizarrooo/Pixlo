@@ -317,3 +317,54 @@
   .pricing-hero-art{background-position:center center!important}
   .pricing-hero-shade{background:linear-gradient(90deg,rgba(21,7,6,.67),rgba(23,7,6,.28)),linear-gradient(180deg,rgba(16,5,5,.05),transparent 58%,rgba(247,246,251,.17) 100%)!important}
 }
+
+
+/* Final Pricing polish: the original ambient art is the hero background, not a blank panel.
+   The only fade is at the bottom edge, where it melts into the warm page background. */
+.pricing-global:before{
+  background:
+    radial-gradient(ellipse at 8% 5%,rgba(255,138,61,.14),transparent 25%),
+    radial-gradient(ellipse at 82% 1%,rgba(255,128,73,.12),transparent 28%),
+    radial-gradient(ellipse at 46% 28%,rgba(255,255,255,.95),transparent 50%),
+    linear-gradient(180deg,#fffaf5 0%,#f7f4ef 65%,#fffaf5 100%)!important;
+}
+.pricing-hero{
+  background-color:#160807!important;
+  background-image:
+    linear-gradient(to bottom,rgba(247,246,251,0) 0%,rgba(247,246,251,0) 60%,rgba(247,246,251,.2) 73%,rgba(247,246,251,.68) 88%,#f7f6fb 100%),
+    url("/pixlo-ambient.svg")!important;
+  background-position:center,center!important;
+  background-size:100% 100%,cover!important;
+  background-repeat:no-repeat,no-repeat!important;
+  isolation:isolate!important;
+}
+.pricing-hero-art{display:none!important}
+.pricing-hero-shade{
+  position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important;
+  background:
+    linear-gradient(90deg,rgba(21,7,6,.58) 0%,rgba(32,8,6,.35) 43%,rgba(27,8,6,.08) 100%),
+    linear-gradient(180deg,transparent 57%,rgba(247,246,251,.08) 70%,rgba(247,246,251,.62) 89%,#f7f6fb 100%)!important;
+  -webkit-mask-image:none!important;mask-image:none!important;
+}
+.pricing-hero-copy{position:relative!important;z-index:3!important}
+.pricing-comparison{
+  position:relative!important;z-index:3!important;
+  background:rgba(255,250,245,.84)!important;
+  border-color:rgba(255,230,210,.55)!important;
+  backdrop-filter:blur(12px)!important;
+  -webkit-backdrop-filter:blur(12px)!important;
+}
+.pricing-nav a:hover,.pricing-footer-nav a:hover{color:#e9682b!important}
+.pricing-footer-nav{display:flex;align-items:center;justify-content:flex-end;gap:clamp(14px,2vw,28px);flex-wrap:wrap;font-size:11px;font-weight:750;letter-spacing:0}
+.pricing-footer-nav a{color:#73695f;transition:color .18s}
+.pricing-footer-nav a:hover{color:#e9682b}
+.pricing-header{border-bottom-color:rgba(126,76,44,.13)!important}
+.pricing-global .pricing-gift-icon{color:#d96529!important;border-color:#ecd2b8!important}
+.pricing-global .pricing-gift-icon:hover,.pricing-global .pricing-gift-area.is-open .pricing-gift-icon{border-color:#e9a46f!important;background:#fff4e8!important}
+.pricing-global .pricing-gift-eye{color:#db6a2e!important}
+.pricing-global .pricing-donation-options button:hover{border-color:#e9ae7a!important;color:#c55a23!important}
+.pricing-global .pricing-donation-options button.is-selected{border-color:#f1b783!important;background:#fff0de!important;color:#c65b22!important}
+@media(max-width:760px){
+  .pricing-hero{background-position:center,center!important}
+  .pricing-footer-nav{width:100%;justify-content:flex-start;order:4;padding-top:6px}
+}
