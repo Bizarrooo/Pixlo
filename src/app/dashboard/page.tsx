@@ -1074,9 +1074,9 @@ export default function Dashboard() {
   const profileUrl = settingsReady && settings.username.trim() ? `https://pixlo1.vercel.app/user/${encodeURIComponent(settings.username.trim().toLowerCase())}` : "/dashboard";
   const profileShareKey = (() => {
     const parts = [
-      "share-cover-v6-crawler-extension-smooth-trail",
+      "share-cover-v7-independent-glow-gradient",
       settings.displayName,
-      settings.nameFont,
+      settings.shareCoverFont,
       settings.shareCoverImage,
       String(settings.shareCoverNameSize),
       settings.shareCoverNameColour,

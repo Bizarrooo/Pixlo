@@ -46,7 +46,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   // Keep still previews on Next's standard OG image route; animated GIFs need the dedicated GIF response route.
   // Always use the standard Open Graph image route. It normalises the selected background
   // to a static PNG so GIFs and other uploaded formats render consistently on every platform.
-  const cacheTag = `cover-v3-${version}${shareKey ? `-${shareKey}` : ""}`;
+  const cacheTag = `cover-v4-${version}${shareKey ? `-${shareKey}` : ""}`;
   const imageUrl = `${profileUrl}/opengraph-image?v=${cacheTag}.png`;
   const imageType = "image/png";
   const description = "Made with Pixlo";
