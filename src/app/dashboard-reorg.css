@@ -1811,3 +1811,15 @@ body:has(.dashboard.dashboard-revamp) {
     0 0 25px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 76%, transparent) !important;
   filter: none !important;
 }
+
+
+/* Keep the live Share Cover preview cheap to repaint during slider changes. */
+.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow::before {
+  text-shadow: 0 0 28px var(--share-cover-glow-colour, #fff) !important;
+  filter: none !important;
+  opacity: .68 !important;
+}
+.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow .share-cover-preview-name {
+  text-shadow: 0 0 14px var(--share-cover-glow-colour, #fff) !important;
+  filter: none !important;
+}
