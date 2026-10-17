@@ -953,7 +953,7 @@ export default function Dashboard() {
   const profileUrl = settingsReady && settings.username.trim() ? `https://pixlo1.vercel.app/user/${encodeURIComponent(settings.username.trim().toLowerCase())}` : "/dashboard";
   const profileShareKey = (() => {
     const parts = [
-      "share-cover-v5-preview-fallback-fade-cap",
+      "share-cover-v6-crawler-extension-smooth-trail",
       settings.displayName,
       settings.nameFont,
       settings.shareCoverImage,
