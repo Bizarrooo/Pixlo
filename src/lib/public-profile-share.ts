@@ -117,7 +117,7 @@ export async function getPublicProfileShareData(usernameInput: string): Promise<
       avatarUrl,
       avatarDecorationUrl: isPremium ? avatarDecorationUrl : "",
       shareCoverImageUrl: isPremium ? publicAssetUrl(settings.shareCoverImage) : "",
-      nameFont: isPremium && typeof settings.nameFont === "string" && settings.nameFont.trim() ? settings.nameFont.trim() : "Inter",
+      nameFont: isPremium && typeof settings.shareCoverFont === "string" && settings.shareCoverFont.trim() ? settings.shareCoverFont.trim() : (isPremium && typeof settings.nameFont === "string" && settings.nameFont.trim() ? settings.nameFont.trim() : "Inter"),
       shareCoverNameSize: isPremium ? shareCoverNameSize : 66,
       shareCoverNameColour: isPremium ? shareCoverNameColour : "#ffffff",
       shareCoverCreditColour: isPremium ? shareCoverCreditColour : "#ffffff",
