@@ -12,6 +12,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  icons: { icon: [{ url: "/pixlo-favicon.svg", type: "image/svg+xml" }], shortcut: "/pixlo-favicon.svg", apple: "/pixlo-favicon.svg" },
   title: "Pixlo",
   description: "Build a profile that feels like you with Pixlo.",
 };
