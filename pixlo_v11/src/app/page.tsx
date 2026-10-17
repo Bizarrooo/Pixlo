@@ -87,9 +87,9 @@ export default function Home() {
           </Link>
 
           <div className="home-nav-links">
-            <a href="#features">Features</a>
-            <a href="#showcase">Showcase</a>
-            <a href="#why-pixlo">Why Pixlo</a>
+            <a href="#features">Platform</a>
+            <a href="https://discord.gg/rdAyWGGDCe" target="_blank" rel="noreferrer">Discord</a>
+            <Link href="/leaderboard">Leaderboard</Link>
             <a href="#pricing">Pricing</a>
           </div>
 
@@ -218,7 +218,7 @@ export default function Home() {
       <footer className="home-footer">
         <Link href="/" className="home-brand"><span className="home-brand-mark"><Icon name="spark" size={16} /></span><span>pixlo<span>.gg</span></span></Link>
         <span>Build something that feels like you.</span>
-        <div><a href="#features">Features</a><a href="#showcase">Showcase</a><Link href="/dashboard">Dashboard</Link></div>
+        <div><a href="#features">Platform</a><a href="https://discord.gg/rdAyWGGDCe" target="_blank" rel="noreferrer">Discord</a><Link href="/leaderboard">Leaderboard</Link><a href="#pricing">Pricing</a></div>
       </footer>
     </main>
   );
