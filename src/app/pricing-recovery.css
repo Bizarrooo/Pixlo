@@ -407,3 +407,57 @@
     background-position:center 34%!important;
   }
 }
+
+
+/* Match the homepage hero's exact artwork treatment and vertical sizing. */
+.pricing-global{
+  background:#190907!important;
+}
+.pricing-global:before,
+.pricing-global:after{
+  display:none!important;
+}
+.pricing-global>.pricing-header{
+  background:#190907 url("/pixlo-ambient.svg") center top / 100% 720px no-repeat!important;
+  border-bottom-color:rgba(255,221,198,.17)!important;
+  color:#fff9f2!important;
+}
+.pricing-global>.pricing-header .pricing-nav,
+.pricing-global>.pricing-header .pricing-nav a{
+  color:#fff9f2!important;
+}
+.pricing-hero{
+  min-height:720px!important;
+  padding-top:0!important;
+  padding-bottom:175px!important;
+  background:#190907!important;
+}
+.pricing-hero-art{
+  top:0!important;
+  background:#190907 url("/pixlo-ambient.svg") center top / 100% 720px no-repeat!important;
+  opacity:.98!important;
+  filter:none!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+.pricing-hero-shade{
+  top:0!important;
+  background:linear-gradient(90deg,rgba(21,7,6,.86) 0%,rgba(32,8,6,.72) 42%,rgba(27,8,6,.2) 100%),linear-gradient(180deg,rgba(16,5,5,.2) 0%,transparent 56%,rgba(24,7,5,.76) 100%)!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+@media(max-width:760px){
+  .pricing-global>.pricing-header{
+    background-size:auto 720px!important;
+    background-position:center top!important;
+  }
+  .pricing-hero{
+    min-height:720px!important;
+    padding-top:46px!important;
+    padding-bottom:145px!important;
+  }
+  .pricing-hero-art{
+    background-size:auto 720px!important;
+    background-position:center top!important;
+  }
+}
