@@ -239,9 +239,9 @@ export async function renderShareCoverImage(
   const green = Number.parseInt(glowHex.slice(3, 5), 16);
   const blue = Number.parseInt(glowHex.slice(5, 7), 16);
   const glowEnabled = isPremium && profile?.shareCoverNameGlow === true && glowIntensity > 0;
-  const glow = glowEnabled ? "0 0 " + Math.max(24, glowIntensity * 0.75) + "px rgba(" + red + "," + green + "," + blue + ",1), 0 0 " + Math.max(48, glowIntensity * 1.35) + "px rgba(" + red + "," + green + "," + blue + ",0.9), 0 0 " + Math.max(72, glowIntensity * 1.9) + "px rgba(" + red + "," + green + "," + blue + ",0.62)" : "none";
+  const glow = glowEnabled ? "0 0 " + Math.max(32, glowIntensity * 0.9) + "px rgba(" + red + "," + green + "," + blue + ",1), 0 0 " + Math.max(64, glowIntensity * 1.8) + "px rgba(" + red + "," + green + "," + blue + ",0.96), 0 0 " + Math.max(112, glowIntensity * 2.8) + "px rgba(" + red + "," + green + "," + blue + ",0.82)" : "none";
   const glowFilter = glowEnabled
-    ? "drop-shadow(0 0 " + Math.max(18, glowIntensity * 0.6) + "px rgba(" + red + "," + green + "," + blue + ",0.98)) drop-shadow(0 0 " + Math.max(36, glowIntensity * 1.1) + "px rgba(" + red + "," + green + "," + blue + ",0.72)) drop-shadow(0 0 " + Math.max(60, glowIntensity * 1.6) + "px rgba(" + red + "," + green + "," + blue + ",0.45))"
+    ? "drop-shadow(0 0 " + Math.max(28, glowIntensity * 0.8) + "px rgba(" + red + "," + green + "," + blue + ",0.98)) drop-shadow(0 0 " + Math.max(60, glowIntensity * 1.7) + "px rgba(" + red + "," + green + "," + blue + ",0.72)) drop-shadow(0 0 " + Math.max(100, glowIntensity * 2.5) + "px rgba(" + red + "," + green + "," + blue + ",0.45))"
     : "none";
   const selectedFont = profileFontName(profile);
   const googleFont = FONT_ALIASES[selectedFont] || "Inter";
