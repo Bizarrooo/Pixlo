@@ -87,7 +87,7 @@ export default function CursorTrailCanvas({
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     };
 
-    const addParticle = (x: number, y: number, satellite = false) => {
+    const addParticle = (x: number, y: number, satellite = false): void => {
       const jitter = satellite ? 5 : 2.8;
       const isDot = Math.random() < (satellite ? 0.76 : 0.34);
       const kind: ParticleKind = isDot
@@ -286,7 +286,7 @@ export default function CursorTrailCanvas({
 
       context.globalAlpha = 1;
       context.globalCompositeOperation = "source-over";
-      if (particles.length > 0) scheduleFrame();
+      if (particles.length > 0 || trailPoints.length > 1) scheduleFrame();
     };
 
     function scheduleFrame() {
