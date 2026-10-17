@@ -42,8 +42,11 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   // Keep still previews on Next's standard OG image route; animated GIFs need the dedicated GIF response route.
   const coverAssetUrl = profile?.shareCoverImageUrl || profile?.backgroundImageUrl || "";
   const isGifCover = (() => { try { return new URL(coverAssetUrl).pathname.toLowerCase().endsWith(".gif"); } catch { return false; } })();
-  const staticImageUrl = `${profileUrl}/opengraph-image?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
-  const animatedImageUrl = `${PIXLO_PUBLIC_ORIGIN}/api/share-image/${encodeURIComponent(username)}?v=${version}${shareKey ? `&share=${encodeURIComponent(shareKey)}` : ""}`;
+  // End image URLs with their actual file extension. Some social preview bots reject image URLs
+  // whose final URL segment/query does not look like a supported image type, even with image/png headers.
+  const cacheTag = `${version}${shareKey ? `-${shareKey}` : ""}`;
+  const staticImageUrl = `${profileUrl}/opengraph-image?v=${cacheTag}.png`;
+  const animatedImageUrl = `${PIXLO_PUBLIC_ORIGIN}/api/share-image/${encodeURIComponent(username)}?v=${cacheTag}.gif`;
   const imageUrl = isGifCover ? animatedImageUrl : staticImageUrl;
   const imageType = isGifCover ? "image/gif" : "image/png";
   const description = "Made with Pixlo";
