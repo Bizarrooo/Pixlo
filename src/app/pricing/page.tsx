@@ -1,7 +1,7 @@
 "use client";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import styles from "./pricing.module.css";
 
 type PremiumStatus = { authenticated?: boolean; premium?: boolean; error?: string };
 
@@ -31,7 +31,8 @@ export default function PricingPage() {
     setMessage("");
     try {
       const response = await fetch("/api/premium/checkout", {
-        method: "POST", credentials: "include",
+        method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(recipientUsername ? { recipientUsername } : {}),
       });
@@ -51,142 +52,149 @@ export default function PricingPage() {
   }
 
   return (
-    <main className={styles.page + " pricing-page pricing-global"}>
-      <header className={styles.header + " pricing-header"}>
-        <Link href="/" className={styles.logo + " pricing-logo"} aria-label="Pixlo home"><span className={styles.wordmark + " pricing-wordmark"}>pixlo<span>.</span></span></Link>
-        <nav className={styles.nav + " pricing-nav"} aria-label="Pricing navigation">
+    <main className="pricing-global">
+      <header className="pricing-header">
+        <Link href="/" className="pricing-wordmark" aria-label="Pixlo home">pixlo<span>.</span></Link>
+        <nav className="pricing-nav" aria-label="Pricing navigation">
           <Link href="/">Home</Link>
-          <a href="#plans">Plans</a>
-          <a href="#extras">Creator tools</a>
+          <a href="#premium">Premium</a>
+          <a href="#extras">Extras</a>
         </nav>
-        <Link href="/dashboard" className={styles.dashboardLink + " pricing-dashboardLink"}>Dashboard <span aria-hidden="true">↗</span></Link>
+        <Link href="/dashboard" className="pricing-dashboard-link">Dashboard <span aria-hidden="true">↗</span></Link>
       </header>
 
-      <div className={styles.container + " pricing-container"}>
-        <section className={styles.hero + " pricing-hero"}>
-          <div className={styles.heroCopy + " pricing-heroCopy"}>
-            <span className={styles.eyebrow + " pricing-eyebrow"}><span className={styles.eyebrowDot + " pricing-eyebrowDot"} /> PIXLO PRICING</span>
-            <h1>Your Pixlo.<br /><span>Your way.</span></h1>
-            <p className={styles.heroDescription + " pricing-heroDescription"}>Start with everything you need for free. Add more when it makes sense for you — no confusing tiers, no surprise subscriptions.</p>
-            <div className={styles.heroActions + " pricing-heroActions"}>
-              <a href="#plans" className={styles.heroPrimary + " pricing-heroPrimary"}>Explore pricing <span aria-hidden="true">↓</span></a>
-              <Link href="/signup" className={styles.heroSecondary + " pricing-heroSecondary"}>Create your profile <span aria-hidden="true">↗</span></Link>
-            </div>
-            <div className={styles.heroNotes + " pricing-heroNotes"}>
-              <span><b>✓</b> Free to start</span>
-              <span><b>✓</b> Clear pricing</span>
-              <span><b>✓</b> Secure checkout</span>
-            </div>
-          </div>
-          <div className={styles.heroVisual + " pricing-heroVisual"} aria-label="Pixlo profile preview illustration">
-            <div className={styles.visualGlow + " pricing-visualGlow"} aria-hidden="true" />
-            <div className={styles.visualOrbit + " pricing-visualOrbit"} aria-hidden="true" />
-            <div className={styles.profilePreview + " pricing-profilePreview"}>
-              <div className={styles.previewTop + " pricing-previewTop"}><span /><span /><span /><small>YOUR PIXLO</small><b>•••</b></div>
-              <div className={styles.previewCover + " pricing-previewCover"} />
-              <div className={styles.previewIdentity + " pricing-previewIdentity"}>
-                <div className={styles.previewAvatar + " pricing-previewAvatar"}>P<span>✦</span></div>
-                <div className={styles.previewNames + " pricing-previewNames"}><strong>yourname</strong><small>your corner of the internet</small></div>
-                <span className={styles.previewBadge + " pricing-previewBadge"}>✧</span>
-              </div>
-              <div className={styles.previewLines + " pricing-previewLines"}><i /><i /><i /></div>
-              <div className={styles.previewSocials + " pricing-previewSocials"}><span>◎</span><span>♫</span><span>↗</span><span>⌘</span></div>
-            </div>
-            <div className={styles.floatPrice + " pricing-floatPrice"}><span className={styles.floatIcon + " pricing-floatIcon"}>✧</span><span><small>OPTIONAL UPGRADE</small><strong>Lifetime Premium</strong></span><b>£3.99</b></div>
-            <div className={styles.floatFree + " pricing-floatFree"}><span>✓</span> Start free. Upgrade when you want.</div>
-          </div>
-        </section>
+      <div className="pricing-container">
+        <section id="premium" className="pricing-hero">
+          <div className="pricing-hero-copy">
+            <span className="pricing-eyebrow"><span className="pricing-eyebrow-dot" /> LIFETIME UPGRADE</span>
+            <h1>Pixlo <span>Premium.</span></h1>
+            <p className="pricing-hero-description">Unlock more ways to make your profile yours. One payment, lifetime access — no recurring subscription.</p>
 
-        <div className={styles.promiseStrip + " pricing-promiseStrip"}>
-          <span>01 <b>MAKE A PROFILE</b></span><i />
-          <span>02 <b>MAKE IT YOURS</b></span><i />
-          <span>03 <b>ADD EXTRAS WHEN YOU NEED THEM</b></span>
-        </div>
+            <div className="pricing-benefits">
+              <span><i>✓</i> Premium-only customisation</span>
+              <span><i>✓</i> Exclusive profile effects</span>
+              <span><i>✓</i> Custom share cover</span>
+              <span><i>✓</i> Premium templates and badge</span>
+            </div>
 
-        <section id="plans" className={styles.section + " pricing-section"}>
-          <div className={styles.sectionHeading + " pricing-sectionHeading"}>
-            <div><span className={styles.sectionEyebrow + " pricing-sectionEyebrow"}>CHOOSE WHAT FITS</span><h2>One home. More possibilities.</h2></div>
-            <p>Only pay for extras you want. Your standard Pixlo profile stays free.</p>
-          </div>
-          <div className={styles.planGrid + " pricing-planGrid"}>
-            <article className={styles.planCard + " pricing-planCard" + " " + styles.freeCard + " pricing-freeCard"}>
-              <div className={styles.planTop + " pricing-planTop"}><span className={styles.planIcon + " pricing-planIcon"}>✳</span><span className={styles.planType + " pricing-planType"}>START HERE</span></div>
-              <h3>Free</h3>
-              <p className={styles.description + " pricing-description"}>Everything you need to create your own corner of the internet.</p>
-              <div className={styles.price + " pricing-price"}><strong>£0</strong><span>forever</span></div>
-              <Link href="/signup" className={styles.secondaryButton + " pricing-secondaryButton"}>Create a profile <span>↗</span></Link>
-              <div className={styles.divider + " pricing-divider"} />
-              <ul className={styles.features + " pricing-features"}>
-                <li><b>✓</b> Your own /user/username page</li>
-                <li><b>✓</b> Socials and custom links</li>
-                <li><b>✓</b> Backgrounds and profile styling</li>
-                <li><b>✓</b> Music and profile sharing</li>
-              </ul>
-            </article>
-
-            <article className={styles.planCard + " pricing-planCard" + " " + styles.premiumCard + " pricing-premiumCard"}>
-              <div className={styles.glow + " pricing-glow"} aria-hidden="true" />
-              <div className={styles.planTop + " pricing-planTop"}><span className={styles.planIcon + " pricing-planIcon" + " " + styles.premiumIcon + " pricing-premiumIcon"}>✧</span><span className={styles.featuredTag + " pricing-featuredTag"}>LIFETIME ACCESS</span></div>
-              <h3>Pixlo <span>Premium</span></h3>
-              <p className={styles.description + " pricing-description"}>Take your profile further with Premium customisation and exclusive tools.</p>
-              <div className={styles.price + " pricing-price"}><strong>£3.99</strong><span>one payment</span></div>
-              <p className={styles.priceNote + " pricing-priceNote"}>Beta price · Lifetime access</p>
-              {loading ? <div className={styles.status + " pricing-status"}>Checking your account…</div> : status?.premium ? (
-                <div className={styles.owned + " pricing-owned"}><b>✓</b><span><strong>You own Premium</strong><small>Lifetime access is active on this account.</small></span></div>
+            <div className="pricing-hero-buy">
+              {loading ? (
+                <span className="pricing-status">Checking your account…</span>
+              ) : status?.premium ? (
+                <span className="pricing-owned"><i>✓</i> Premium is active on this account</span>
               ) : (
-                <button type="button" className={styles.primaryButton + " pricing-primaryButton"} onClick={() => void buyPremium()} disabled={buying}>
-                  {buying ? "Opening secure checkout…" : "Get lifetime Premium"} <span>↗</span>
+                <button type="button" className="pricing-cta" onClick={() => void buyPremium()} disabled={buying}>
+                  {buying ? "Opening checkout…" : "Get Premium"} <span aria-hidden="true">›</span>
                 </button>
               )}
-              <div className={styles.divider + " pricing-divider"} />
-              <ul className={styles.features + " pricing-features"}>
-                <li><b>✓</b> Premium-only customisation</li>
-                <li><b>✓</b> Exclusive effects and options</li>
-                <li><b>✓</b> Premium badge</li>
-                <li><b>✓</b> No recurring subscription</li>
-              </ul>
-              <details className={styles.gift + " pricing-gift"}>
-                <summary>Gift Premium to someone</summary>
-                <p>Enter their Pixlo username. They receive lifetime Premium after payment is verified.</p>
-                <label htmlFor="pricing-gift-username">Recipient username</label>
-                <input id="pricing-gift-username" value={giftUsername} onChange={event => setGiftUsername(event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 24))} placeholder="username" autoComplete="off" maxLength={24} />
-                <button type="button" className={styles.giftButton + " pricing-giftButton"} disabled={buying || giftUsername.trim().length < 3} onClick={() => void buyPremium(giftUsername.trim())}>{buying ? "Opening checkout…" : "Gift Premium — £3.99"}</button>
-              </details>
-            </article>
+              <div className="pricing-price"><strong>£3.99</strong><span>/ lifetime</span></div>
+            </div>
+            <p className="pricing-hero-footnote">Secure checkout through Stripe · Beta price · Lifetime access</p>
           </div>
-          {message && <p className={styles.message + " pricing-message"} role="status">{message}</p>}
-          <p className={styles.paymentNote + " pricing-paymentNote"}>Payments are processed through Stripe. Premium is only activated after a verified payment. The beta price may change for future purchases; completed lifetime purchases remain active.</p>
-        </section>
 
-        <section id="extras" className={styles.section + " pricing-section"}>
-          <div className={styles.sectionHeading + " pricing-sectionHeading"}>
-            <div><span className={styles.sectionEyebrow + " pricing-sectionEyebrow"}>COMING TO PIXLO</span><h2>More ways to grow.</h2></div>
-            <p>Optional tools for people who want to reach more visitors and support creators.</p>
-          </div>
-          <div className={styles.extraGrid + " pricing-extraGrid"}>
-            <article className={styles.extraCard + " pricing-extraCard"}>
-              <div className={styles.artwork + " pricing-artwork" + " " + styles.boostArtwork + " pricing-boostArtwork"} aria-hidden="true"><span className={styles.boostIcon + " pricing-boostIcon"}>↗</span><span className={styles.boostRing + " pricing-boostRing"} /><span className={styles.boostSpark + " pricing-boostSpark"}>✦</span></div>
-              <div className={styles.extraBody + " pricing-extraBody"}><span className={styles.comingTag + " pricing-comingTag"}>COMING SOON</span><h3>Profile Boosts</h3><p>Promote your Pixlo in discovery for a set amount of time, with sponsored placement clearly labelled.</p><button type="button" className={styles.upcoming + " pricing-upcoming"} disabled>Boosts aren't available yet</button></div>
-            </article>
-            <article className={styles.extraCard + " pricing-extraCard"}>
-              <div className={styles.artwork + " pricing-artwork" + " " + styles.supportArtwork + " pricing-supportArtwork"} aria-hidden="true"><span className={styles.heart + " pricing-heart"}>♡</span><span className={styles.coin + " pricing-coin"}>✳</span><span className={styles.supportLine + " pricing-supportLine"} /></div>
-              <div className={styles.extraBody + " pricing-extraBody"}><span className={styles.comingTag + " pricing-comingTag"}>COMING SOON</span><h3>Support &amp; Tips</h3><p>Let visitors support your work through your profile, with creator payouts set up securely.</p><button type="button" className={styles.upcoming + " pricing-upcoming"} disabled>Creator support isn't available yet</button></div>
-            </article>
+          <div className="pricing-comparison">
+            <div className="pricing-comparison-heading">
+              <span>FEATURES</span><span>FREE</span><span>PREMIUM</span>
+            </div>
+            <div className="pricing-comparison-row"><strong>Profile page and custom links</strong><span className="pricing-yes">✓</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Backgrounds and profile styling</strong><span className="pricing-yes">✓</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Music and profile sharing</strong><span className="pricing-yes">✓</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Premium customisation</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Exclusive profile effects</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Custom share cover options</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Premium templates and badge</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Recurring subscription</strong><span className="pricing-muted">—</span><span className="pricing-muted pricing-premium-value">Never</span></div>
           </div>
         </section>
 
-        <section className={styles.faq + " pricing-faq"}>
-          <span className={styles.sectionEyebrow + " pricing-sectionEyebrow"}>GOOD TO KNOW</span><h2>Pricing, without the guesswork.</h2>
-          <div className={styles.faqGrid + " pricing-faqGrid"}>
-            <article><h3>Can I use Pixlo for free?</h3><p>Yes. Creating and sharing a standard profile does not require payment.</p></article>
-            <article><h3>Is Premium a subscription?</h3><p>No. The current beta offer is a one-time £3.99 payment for lifetime Premium.</p></article>
-            <article><h3>Are Boosts and Tips live?</h3><p>Not yet. They're shown here as upcoming features; we won't take payment until the systems are ready.</p></article>
-            <article><h3>When does Premium activate?</h3><p>After Stripe verifies payment through Pixlo's server-side webhook. Returning from checkout alone doesn't unlock it.</p></article>
+        {message && <p className="pricing-message" role="status">{message}</p>}
+
+        <section id="extras" className="pricing-section">
+          <div className="pricing-section-heading">
+            <div><span className="pricing-eyebrow">EXTRAS</span><h2>Get more from Pixlo</h2></div>
+            <p>Choose lifetime Premium, gift it to someone, or see what is on the way.</p>
+          </div>
+
+          <div className="pricing-product-grid">
+            <article className="pricing-product-card">
+              <div className="pricing-product-art pricing-art-premium" aria-hidden="true"><span className="pricing-art-spark">✦</span><span className="pricing-art-ring" /><span className="pricing-art-diamond">✧</span></div>
+              <div className="pricing-product-body">
+                <span className="pricing-product-tag">LIFETIME ACCESS</span>
+                <h3>Pixlo Premium</h3>
+                <p>Unlock additional customisation, exclusive effects, premium templates and your Premium badge.</p>
+                <div className="pricing-product-bottom"><strong>£3.99 <small>one payment</small></strong>
+                  {status?.premium ? <span className="pricing-included">Already yours</span> : <button type="button" onClick={() => void buyPremium()} disabled={buying}>{buying ? "Opening…" : "Buy"} <span>›</span></button>}
+                </div>
+              </div>
+            </article>
+
+            <article className="pricing-product-card">
+              <div className="pricing-product-art pricing-art-gift" aria-hidden="true"><span className="pricing-gift-box">✳</span><span className="pricing-gift-orbit" /></div>
+              <div className="pricing-product-body">
+                <span className="pricing-product-tag">GIFT SOMEONE</span>
+                <h3>Gift Premium</h3>
+                <p>Send lifetime Premium to a Pixlo username. It activates when the payment is verified.</p>
+                <label className="pricing-input-label" htmlFor="pricing-gift-username">Recipient username</label>
+                <input className="pricing-gift-input" id="pricing-gift-username" value={giftUsername} onChange={event => setGiftUsername(event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 24))} placeholder="Enter username" autoComplete="off" maxLength={24} />
+                <div className="pricing-product-bottom"><strong>£3.99 <small>one payment</small></strong><button type="button" onClick={() => void buyPremium(giftUsername.trim())} disabled={buying || giftUsername.trim().length < 3}>{buying ? "Opening…" : "Gift"} <span>›</span></button></div>
+              </div>
+            </article>
+
+            <article className="pricing-product-card">
+              <div className="pricing-product-art pricing-art-cover" aria-hidden="true"><span className="pricing-cover-mini"><b>YOU</b><i /><i /><i /></span><span className="pricing-cover-flare" /></div>
+              <div className="pricing-product-body">
+                <span className="pricing-product-tag pricing-tag-included">PREMIUM FEATURE</span>
+                <h3>Share cover</h3>
+                <p>Give your shared Pixlo link a more personal look with Premium cover customisation.</p>
+                <div className="pricing-product-bottom"><strong>Included <small>with Premium</small></strong><a href="#premium">View Premium <span>›</span></a></div>
+              </div>
+            </article>
+
+            <article className="pricing-product-card">
+              <div className="pricing-product-art pricing-art-effects" aria-hidden="true"><span className="pricing-effect-orbit" /><span className="pricing-effect-core">✧</span><span className="pricing-effect-dot" /></div>
+              <div className="pricing-product-body">
+                <span className="pricing-product-tag pricing-tag-included">PREMIUM FEATURE</span>
+                <h3>Exclusive effects</h3>
+                <p>Bring more movement and personality to your profile with additional visual effects.</p>
+                <div className="pricing-product-bottom"><strong>Included <small>with Premium</small></strong><a href="#premium">View Premium <span>›</span></a></div>
+              </div>
+            </article>
+
+            <article className="pricing-product-card">
+              <div className="pricing-product-art pricing-art-boost" aria-hidden="true"><span className="pricing-boost-arrow">↗</span><span className="pricing-boost-bars"><i /><i /><i /><i /></span></div>
+              <div className="pricing-product-body">
+                <span className="pricing-product-tag pricing-tag-soon">COMING SOON</span>
+                <h3>Profile Boosts</h3>
+                <p>Promote your Pixlo in discovery, with sponsored placement clearly labelled.</p>
+                <div className="pricing-product-bottom"><strong>Coming soon</strong><span className="pricing-unavailable">Not available yet</span></div>
+              </div>
+            </article>
+
+            <article className="pricing-product-card">
+              <div className="pricing-product-art pricing-art-support" aria-hidden="true"><span className="pricing-support-heart">♡</span><span className="pricing-support-coin">✦</span><span className="pricing-support-glow" /></div>
+              <div className="pricing-product-body">
+                <span className="pricing-product-tag pricing-tag-soon">COMING SOON</span>
+                <h3>Support &amp; tips</h3>
+                <p>Let visitors support your work through your profile when creator payouts are ready.</p>
+                <div className="pricing-product-bottom"><strong>Coming soon</strong><span className="pricing-unavailable">Not available yet</span></div>
+              </div>
+            </article>
           </div>
         </section>
 
-        <footer className={styles.footer + " pricing-footer"}>
-          <Link href="/" className={styles.footerLogo + " pricing-footerLogo"}><span className={styles.wordmark + " pricing-wordmark" + " " + styles.footerWordmark + " pricing-footerWordmark"}>pixlo<span>.</span></span></Link>
+        <section className="pricing-faq">
+          <span className="pricing-eyebrow">GOOD TO KNOW</span>
+          <h2>Questions about <span>buying</span></h2>
+          <div className="pricing-faq-grid">
+            <details><summary>Is anything a subscription?</summary><p>No. Premium is currently a one-time £3.99 payment for lifetime access. There are no recurring Premium charges.</p></details>
+            <details><summary>How does gifting work?</summary><p>Enter the recipient's Pixlo username and complete checkout. Premium is granted after the payment has been verified.</p></details>
+            <details><summary>Can I use Pixlo for free?</summary><p>Yes. You can make and share a standard Pixlo profile without paying.</p></details>
+            <details><summary>Are Profile Boosts and Support &amp; Tips available?</summary><p>Not yet. They're shown as upcoming features and cannot currently be purchased.</p></details>
+          </div>
+        </section>
+
+        <footer className="pricing-footer">
+          <Link href="/" className="pricing-wordmark" aria-label="Pixlo home">pixlo<span>.</span></Link>
           <span>YOUR SPACE ON THE WEB.</span>
           <Link href="/dashboard">Open dashboard ↗</Link>
         </footer>
