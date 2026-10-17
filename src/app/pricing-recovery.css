@@ -186,3 +186,86 @@
 .pricing-product-bottom button:disabled{cursor:wait;opacity:.55}
 @media(max-width:760px){.pricing-product-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:460px){.pricing-product-grid{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Final accent correction: Pixlo orange, never the pink template accent. */
+.pricing-eyebrow{color:#e96d31!important}
+.pricing-eyebrow-dot{background:#ff8a3d!important;box-shadow:0 0 0 4px rgba(255,138,61,.13),0 0 17px rgba(255,110,48,.24)!important}
+.pricing-hero h1 span{background-image:linear-gradient(105deg,#ffd06e 0%,#ff963d 47%,#f4512c 100%)!important}
+.pricing-nav a:hover,.pricing-footer>a:last-child:hover{color:#ea6a2b!important}
+.pricing-cta{border-color:rgba(255,153,76,.43)!important;background:linear-gradient(110deg,#f64b32,#ff9b35)!important;box-shadow:0 9px 28px rgba(255,94,39,.18),inset 0 1px 0 rgba(255,255,255,.2)!important}
+.pricing-benefits i{background:linear-gradient(135deg,#ffbd56,#ff7d2f)!important;box-shadow:0 3px 12px rgba(255,124,45,.19)!important}
+.pricing-comparison-heading>span:last-child{background:#fff0dd!important;color:#c75a20!important}
+.pricing-premium-value{background:#fff0df!important}
+.pricing-comparison-row .pricing-yes{color:#e87527!important}
+.pricing-comparison-row .pricing-premium-value.pricing-yes{color:#e87527!important;background:#fff0df!important}
+.pricing-comparison-row .pricing-no{color:#c6b8a8!important}
+.pricing-gift-icon{color:#dc672b!important;border-color:#ecd2b8!important}
+.pricing-gift-icon:hover,.pricing-gift-area.is-open .pricing-gift-icon{border-color:#e9a46f!important;background:#fff4e8!important}
+.pricing-gift-field:focus-within{border-color:#ed9d5d!important;box-shadow:0 0 0 3px rgba(239,141,53,.1)!important}
+.pricing-gift-eye{color:#db6a2e!important}
+.pricing-gift-eye:hover{color:#b94d1e!important}
+.pricing-gift-confirm{border-color:#f1c9a9!important;background:linear-gradient(135deg,#fff,#fff3e6)!important;color:#cf5d26!important}
+.pricing-gift-confirm:hover:not(:disabled){border-color:#e9a06f!important;background:#ffeddb!important}
+.pricing-faq h2 span{background-image:linear-gradient(105deg,#ffc96b,#ff923f,#f4512c)!important}
+.pricing-product-tag{border-color:#efd2bd!important;background:#fff7ee!important;color:#ce6129!important}
+.pricing-tag-soon{border-color:#edd4be!important;background:#fff7ee!important;color:#bd662f!important}
+.pricing-donation-options button:hover{border-color:#e9ae7a!important;color:#c55a23!important}
+.pricing-donation-options button.is-selected{border-color:#f1b783!important;background:#fff0de!important;color:#c65b22!important;box-shadow:0 2px 8px rgba(225,113,39,.09)!important}
+.pricing-product-bottom button{border-color:#efc5a6!important;background:linear-gradient(135deg,#fff,#fff3e8)!important;color:#c85a25!important}
+.pricing-product-bottom button:hover:not(:disabled){background:#ffedde!important;border-color:#e8a270!important}
+
+/* Full-bleed homepage artwork: the image fills the viewport, then fades at the hero base. */
+.pricing-hero{
+  width:100vw!important;
+  margin-left:calc((100% - 100vw)/2)!important;
+  padding-left:max(32px,calc((100vw - 1280px)/2))!important;
+  padding-right:max(32px,calc((100vw - 1280px)/2))!important;
+  padding-top:clamp(58px,6vw,88px)!important;
+  padding-bottom:175px!important;
+  min-height:clamp(680px,calc(100vh - 20px),820px)!important;
+  overflow:visible!important;
+}
+.pricing-hero-art{
+  top:-82px!important;right:0!important;bottom:0!important;left:0!important;
+  z-index:0!important;opacity:1!important;
+  background-image:url("/pixlo-ambient.svg")!important;
+  background-position:center 46%!important;background-size:cover!important;background-repeat:no-repeat!important;
+  filter:brightness(1.28) saturate(.88)!important;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 53%,rgba(0,0,0,.92) 67%,rgba(0,0,0,.64) 79%,rgba(0,0,0,.25) 91%,transparent 100%)!important;
+  mask-image:linear-gradient(to bottom,#000 0%,#000 53%,rgba(0,0,0,.92) 67%,rgba(0,0,0,.64) 79%,rgba(0,0,0,.25) 91%,transparent 100%)!important;
+}
+.pricing-hero-shade{
+  top:-82px!important;right:0!important;bottom:0!important;left:0!important;z-index:1!important;
+  background:linear-gradient(90deg,rgba(249,247,251,.62) 0%,rgba(249,247,251,.48) 46%,rgba(249,247,251,.27) 100%),linear-gradient(180deg,rgba(249,247,251,.20) 0%,rgba(249,247,251,.04) 52%,rgba(247,246,251,.7) 100%)!important;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 56%,rgba(0,0,0,.9) 72%,transparent 100%)!important;
+  mask-image:linear-gradient(to bottom,#000 0%,#000 56%,rgba(0,0,0,.9) 72%,transparent 100%)!important;
+}
+.pricing-hero-copy,.pricing-comparison{z-index:3!important}
+.pricing-pixel-fade{z-index:2!important;height:250px!important;bottom:-2px!important}
+.pricing-pixel-square{box-shadow:0 0 0 1px rgba(255,255,255,.035)!important}
+@media(max-width:760px){
+  .pricing-hero{width:100vw!important;margin-left:calc((100% - 100vw)/2)!important;padding-left:17px!important;padding-right:17px!important;padding-top:46px!important;padding-bottom:145px!important;min-height:0!important}
+  .pricing-hero-art{top:-82px!important;background-position:54% center!important;filter:brightness(1.22) saturate(.8)!important}
+  .pricing-hero-shade{top:-82px!important;background:linear-gradient(90deg,rgba(249,247,251,.7),rgba(249,247,251,.4)),linear-gradient(180deg,rgba(249,247,251,.2),rgba(247,246,251,.65))!important}
+  .pricing-pixel-fade{height:190px!important}
+}
+@media(max-width:460px){.pricing-hero{padding-left:17px!important;padding-right:17px!important;padding-bottom:135px!important}}
+
+/* Keep the real image logo in the header and footer. */
+.pricing-brand{display:inline-flex;align-items:center;flex:0 0 auto;max-width:120px;min-width:0}
+.pricing-brand img{display:block;width:108px;height:auto;max-height:48px;object-fit:contain;object-position:left center}
+.pricing-footer-brand{max-width:105px}
+.pricing-footer-brand img{width:88px;max-height:40px}
+@media(max-width:760px){.pricing-brand img{width:94px;max-height:42px}.pricing-footer-brand img{width:82px}}
+@media(max-width:460px){.pricing-brand img{width:88px}}
+
+/* Editable custom donations, with a bounded server-validated Stripe amount. */
+.pricing-donation-options button:last-child{min-width:61px}
+.pricing-custom-donation{display:flex;align-items:center;gap:8px;width:min(260px,100%);height:39px;margin-top:12px;padding:0 10px;border:1px solid #e8d8c9;border-radius:11px;background:#fffaf5;color:#d6632b}
+.pricing-custom-donation:focus-within{border-color:#e8a06a;box-shadow:0 0 0 3px rgba(230,135,58,.1)}
+.pricing-custom-donation>span{font-size:13px;font-weight:850}
+.pricing-custom-donation input{width:100%;min-width:0;height:100%;border:0!important;outline:none!important;background:transparent!important;color:#282330;font-size:12px!important;box-shadow:none!important}
+.pricing-custom-donation input::placeholder{color:#aaa2b1}
+.pricing-custom-donation small{flex:0 0 auto;color:#a69a8c;font-size:9px}
+@media(max-width:460px){.pricing-custom-donation{width:100%}}

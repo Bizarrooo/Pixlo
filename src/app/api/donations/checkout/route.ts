@@ -3,7 +3,8 @@ import { serverEnv } from "../../../../lib/server-env";
 
 export const runtime = "nodejs";
 
-const ALLOWED_DONATION_AMOUNTS = new Set([100, 300, 500, 1000]);
+const MIN_DONATION_PENCE = 100;
+const MAX_DONATION_PENCE = 100000;
 
 export async function POST(request: Request) {
   const stripeKey = serverEnv("STRIPE_SECRET_KEY");
@@ -13,8 +14,8 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => ({})) as { amountPence?: unknown };
   const amountPence = Number(body.amountPence);
-  if (!Number.isInteger(amountPence) || !ALLOWED_DONATION_AMOUNTS.has(amountPence)) {
-    return NextResponse.json({ error: "Choose one of the available donation amounts." }, { status: 400 });
+  if (!Number.isInteger(amountPence) || amountPence < MIN_DONATION_PENCE || amountPence > MAX_DONATION_PENCE) {
+    return NextResponse.json({ error: "Enter a donation between £1 and £1,000." }, { status: 400 });
   }
 
   const configuredOrigin = serverEnv("NEXT_PUBLIC_SITE_URL") || "https://pixlo1.vercel.app";

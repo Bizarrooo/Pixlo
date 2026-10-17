@@ -60,6 +60,8 @@ export default function PricingPage() {
   const [giftFeedback, setGiftFeedback] = useState("");
   const [message, setMessage] = useState("");
   const [donationAmount, setDonationAmount] = useState(500);
+  const [donationCustomMode, setDonationCustomMode] = useState(false);
+  const [customDonationInput, setCustomDonationInput] = useState("");
   const [donating, setDonating] = useState(false);
 
   useEffect(() => {
@@ -151,7 +153,15 @@ export default function PricingPage() {
   }
 
 
+  const customDonationValid = /^\d{1,4}(?:\.\d{1,2})?$/.test(customDonationInput)
+    && Number(customDonationInput) >= 1
+    && Number(customDonationInput) <= 1000;
+
   async function startDonation() {
+    if (donationCustomMode && !customDonationValid) {
+      setMessage("Enter a donation between £1 and £1,000, with up to two decimal places.");
+      return;
+    }
     setDonating(true);
     setMessage("");
     try {
@@ -198,10 +208,10 @@ export default function PricingPage() {
             <p className="pricing-hero-description">Make your Pixlo feel even more like you. Unlock Premium customisation and exclusive extras with one payment — no recurring subscription.</p>
 
             <div className="pricing-benefits">
-              <span><i>✓</i> Premium-only customisation</span>
-              <span><i>✓</i> Exclusive profile effects</span>
-              <span><i>✓</i> Custom share-cover options</span>
-              <span><i>✓</i> Premium badge and tools</span>
+              <span><i>✓</i> Dashboard customisation</span>
+              <span><i>✓</i> Cursor trails</span>
+              <span><i>✓</i> Customisable share covers</span>
+              <span><i>✓</i> Premium badge</span>
             </div>
 
             <div className="pricing-hero-buy">
@@ -291,9 +301,9 @@ export default function PricingPage() {
             <div className="pricing-comparison-row"><strong>Backgrounds and profile styling</strong><span className="pricing-yes">✓</span><span className="pricing-yes pricing-premium-value">✓</span></div>
             <div className="pricing-comparison-row"><strong>Music and profile sharing</strong><span className="pricing-yes">✓</span><span className="pricing-yes pricing-premium-value">✓</span></div>
             <div className="pricing-comparison-row"><strong>Premium customisation</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
-            <div className="pricing-comparison-row"><strong>Exclusive profile effects</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
-            <div className="pricing-comparison-row"><strong>Custom share-cover options</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
-            <div className="pricing-comparison-row"><strong>Premium badge and tools</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Cursor trails</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Customisable share covers</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
+            <div className="pricing-comparison-row"><strong>Premium badge</strong><span className="pricing-no">×</span><span className="pricing-yes pricing-premium-value">✓</span></div>
             <div className="pricing-comparison-row"><strong>Recurring subscription</strong><span className="pricing-muted">—</span><span className="pricing-muted pricing-premium-value">Never</span></div>
           </div>
         </section>
@@ -340,17 +350,54 @@ export default function PricingPage() {
                     <button
                       type="button"
                       key={amount}
-                      className={donationAmount === amount ? "is-selected" : ""}
-                      aria-pressed={donationAmount === amount}
-                      onClick={() => setDonationAmount(amount)}
+                      className={!donationCustomMode && donationAmount === amount ? "is-selected" : ""}
+                      aria-pressed={!donationCustomMode && donationAmount === amount}
+                      onClick={() => {
+                        setDonationCustomMode(false);
+                        setCustomDonationInput("");
+                        setDonationAmount(amount);
+                      }}
                     >
                       £{amount / 100}
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    className={donationCustomMode ? "is-selected" : ""}
+                    aria-pressed={donationCustomMode}
+                    onClick={() => {
+                      setDonationCustomMode(true);
+                      setCustomDonationInput("");
+                    }}
+                  >Custom</button>
                 </div>
+                {donationCustomMode && (
+                  <label className="pricing-custom-donation" htmlFor="pricing-custom-donation">
+                    <span>£</span>
+                    <input
+                      id="pricing-custom-donation"
+                      type="number"
+                      min="1"
+                      max="1000"
+                      step="0.01"
+                      inputMode="decimal"
+                      placeholder="Enter amount"
+                      value={customDonationInput}
+                      onChange={event => {
+                        const value = event.target.value;
+                        setCustomDonationInput(value);
+                        if (/^\d{1,4}(?:\.\d{1,2})?$/.test(value) && Number(value) >= 1 && Number(value) <= 1000) {
+                          setDonationAmount(Math.round(Number(value) * 100));
+                        }
+                      }}
+                      aria-label="Custom donation amount in pounds"
+                    />
+                    <small>£1–£1,000</small>
+                  </label>
+                )}
                 <div className="pricing-product-bottom pricing-donation-bottom">
-                  <strong>£{(donationAmount / 100).toFixed(2)}<small>one-time donation</small></strong>
-                  <button type="button" onClick={() => void startDonation()} disabled={donating}>
+                  <strong>{donationCustomMode && !customDonationValid ? "Enter amount" : `£${(donationAmount / 100).toFixed(2)}`}<small>one-time donation</small></strong>
+                  <button type="button" onClick={() => void startDonation()} disabled={donating || (donationCustomMode && !customDonationValid)}>
                     {donating ? "Opening Stripe…" : "Donate"} <span>›</span>
                   </button>
                 </div>
@@ -371,7 +418,7 @@ export default function PricingPage() {
         </section>
 
         <footer className="pricing-footer">
-          <Link href="/" className="pricing-wordmark" aria-label="Pixlo home">pixlo<span>.</span></Link>
+          <Link href="/" className="pricing-brand pricing-footer-brand" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
           <span>YOUR SPACE ON THE WEB.</span>
           <Link href="/dashboard">Open dashboard ↗</Link>
         </footer>
