@@ -28,11 +28,11 @@ function parseEnvFile(file: string): Record<string, string> {
 
 function readProjectEnv(): Record<string, string> {
   const values: Record<string, string> = {};
-  let current = path.resolve(process.cwd());
+  let current = path.resolve(/*turbopackIgnore: true*/ process.cwd());
   for (let depth = 0; depth < 6; depth += 1) {
     // .env.local is deliberately read first and wins over inherited process.env.
     for (const filename of [".env.local", ".env"]) {
-      const parsed = parseEnvFile(path.join(current, filename));
+      const parsed = parseEnvFile(path.join(/*turbopackIgnore: true*/ current, filename));
       for (const [key, value] of Object.entries(parsed)) {
         if (!(key in values) && value.trim()) values[key] = value.trim();
       }
