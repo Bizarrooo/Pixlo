@@ -53,6 +53,18 @@ const FONT_ALIASES: Record<string, string> = {
   "Jost": "Jost",
   "Spectral": "Spectral",
   "Cinzel": "Cinzel",
+  "Anton": "Anton",
+  "Bricolage Grotesque": "Bricolage Grotesque",
+  "DM Serif Display": "DM Serif Display",
+  "IBM Plex Serif": "IBM Plex Serif",
+  "Onest": "Onest",
+  "Righteous": "Righteous",
+  "Space Mono": "Space Mono",
+  "Titillium Web": "Titillium Web",
+  "Ubuntu": "Ubuntu",
+  "Yeseva One": "Yeseva One",
+  "Zilla Slab": "Zilla Slab",
+  "Archivo Black": "Archivo Black",
   Arial: "Inter",
   system: "Inter",
   monospace: "JetBrains Mono",
@@ -227,9 +239,9 @@ export async function renderShareCoverImage(
   const green = Number.parseInt(glowHex.slice(3, 5), 16);
   const blue = Number.parseInt(glowHex.slice(5, 7), 16);
   const glowEnabled = isPremium && profile?.shareCoverNameGlow === true && glowIntensity > 0;
-  const glow = glowEnabled ? "0 0 " + Math.max(14, glowIntensity * 0.4) + "px rgba(" + red + "," + green + "," + blue + ",0.95)" : "none";
+  const glow = glowEnabled ? "0 0 " + Math.max(32, glowIntensity * 0.9) + "px rgba(" + red + "," + green + "," + blue + ",1), 0 0 " + Math.max(64, glowIntensity * 1.8) + "px rgba(" + red + "," + green + "," + blue + ",0.96), 0 0 " + Math.max(112, glowIntensity * 2.8) + "px rgba(" + red + "," + green + "," + blue + ",0.82)" : "none";
   const glowFilter = glowEnabled
-    ? "drop-shadow(0 0 " + Math.max(10, glowIntensity * 0.42) + "px rgba(" + red + "," + green + "," + blue + ",0.98)) drop-shadow(0 0 " + Math.max(22, glowIntensity * 0.8) + "px rgba(" + red + "," + green + "," + blue + ",0.72)) drop-shadow(0 0 " + Math.max(34, glowIntensity * 1.2) + "px rgba(" + red + "," + green + "," + blue + ",0.45))"
+    ? "drop-shadow(0 0 " + Math.max(28, glowIntensity * 0.8) + "px rgba(" + red + "," + green + "," + blue + ",0.98)) drop-shadow(0 0 " + Math.max(60, glowIntensity * 1.7) + "px rgba(" + red + "," + green + "," + blue + ",0.72)) drop-shadow(0 0 " + Math.max(100, glowIntensity * 2.5) + "px rgba(" + red + "," + green + "," + blue + ",0.45))"
     : "none";
   const selectedFont = profileFontName(profile);
   const googleFont = FONT_ALIASES[selectedFont] || "Inter";
@@ -284,8 +296,23 @@ export async function renderShareCoverImage(
             </div>
             {avatarDecorationUrl && <img src={avatarDecorationUrl} width="320" height="320" style={{ position: "absolute", inset: 0, width: 320, height: 320, objectFit: "contain", pointerEvents: "none" }} />}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, marginTop: 0, marginBottom: 0, color: nameGradientEnabled ? "transparent" : nameColour, backgroundImage: nameGradientEnabled ? "linear-gradient(90deg, " + nameGradientColours.join(", ") + ")" : "none", backgroundClip: nameGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: nameGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow, filter: glowFilter }}>
+          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: 1100 }}>
+            {glowEnabled && (
+              <div
+                style={{
+                  position: "absolute",
+                  zIndex: 0,
+                  width: "88%",
+                  height: Math.max(54, displayFontSize * 1.65),
+                  borderRadius: 999,
+                  background: "radial-gradient(ellipse at center, rgba(" + red + "," + green + "," + blue + ",0.58) 0%, rgba(" + red + "," + green + "," + blue + ",0.24) 42%, rgba(" + red + "," + green + "," + blue + ",0) 76%)",
+                  boxShadow: "0 0 " + Math.max(45, glowIntensity * 0.85) + "px rgba(" + red + "," + green + "," + blue + ",0.45), 0 0 " + Math.max(90, glowIntensity * 1.7) + "px rgba(" + red + "," + green + "," + blue + ",0.25)",
+                }}
+              />
+            )}
+          <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, marginTop: 0, marginBottom: 0, color: nameGradientEnabled ? "transparent" : nameColour, backgroundImage: nameGradientEnabled ? "linear-gradient(90deg, " + nameGradientColours.join(", ") + ")" : "none", backgroundClip: nameGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: nameGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow, filter: glowFilter }}>
             {displayName}
+          </div>
           </div>
           <div style={{ display: "flex", marginTop: 14, alignItems: "center", justifyContent: "center", color: creditGradientEnabled ? "transparent" : creditColour, backgroundImage: creditGradientEnabled ? "linear-gradient(90deg, " + creditGradientColours.join(", ") + ")" : "none", backgroundClip: creditGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: creditGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: 22, fontWeight: 500 }}>
             Made with Pixlo

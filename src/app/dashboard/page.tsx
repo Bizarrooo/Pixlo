@@ -71,6 +71,18 @@ const fontOptions: [ProfileFont, string][] = [
   ["Jost", "Jost"],
   ["Spectral", "Spectral"],
   ["Cinzel", "Cinzel"],
+  ["Anton", "Anton"],
+  ["Bricolage Grotesque", "Bricolage Grotesque"],
+  ["DM Serif Display", "DM Serif Display"],
+  ["IBM Plex Serif", "IBM Plex Serif"],
+  ["Onest", "Onest"],
+  ["Righteous", "Righteous"],
+  ["Space Mono", "Space Mono"],
+  ["Titillium Web", "Titillium Web"],
+  ["Ubuntu", "Ubuntu"],
+  ["Yeseva One", "Yeseva One"],
+  ["Zilla Slab", "Zilla Slab"],
+  ["Archivo Black", "Archivo Black"],
 ];
 const animationOptions: [TextAnimation, string][] = [
   ["none", "None"], ["fade-up", "Fade Up"], ["blur-in", "Blur In"], ["typewriter", "Typewriter"],
@@ -116,6 +128,18 @@ function fontFamily(font: ProfileFont) {
     "Jost": "Jost, sans-serif",
     "Spectral": "Spectral, sans-serif",
     "Cinzel": "Cinzel, sans-serif",
+    "Anton": "Anton, sans-serif",
+    "Bricolage Grotesque": "Bricolage Grotesque, sans-serif",
+    "DM Serif Display": "DM Serif Display, sans-serif",
+    "IBM Plex Serif": "IBM Plex Serif, sans-serif",
+    "Onest": "Onest, sans-serif",
+    "Righteous": "Righteous, sans-serif",
+    "Space Mono": "Space Mono, monospace",
+    "Titillium Web": "Titillium Web, sans-serif",
+    "Ubuntu": "Ubuntu, sans-serif",
+    "Yeseva One": "Yeseva One, sans-serif",
+    "Zilla Slab": "Zilla Slab, sans-serif",
+    "Archivo Black": "Archivo Black, sans-serif",
     Arial: "Arial, Helvetica, sans-serif", system: "system-ui, sans-serif",
     monospace: "ui-monospace, SFMono-Regular, monospace", Georgia: "Georgia, serif", "Courier New": "\"Courier New\", monospace",
     "Trebuchet MS": "\"Trebuchet MS\", sans-serif", Impact: "Impact, Haettenschweiler, sans-serif",
@@ -1656,6 +1680,7 @@ export default function Dashboard() {
                         {previewAvatar ? <img className="share-cover-preview-avatar" src={previewAvatar} alt="" /> : <span className="share-cover-preview-avatar-fallback">{(settings.displayName || settings.username || "P").slice(0, 1).toUpperCase()}</span>}
                         {previewDecoration && <img className="share-cover-preview-decoration" src={previewDecoration} alt="" aria-hidden="true" />}
                       </div>
+                      <div className={`share-cover-preview-name-wrap ${settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? "has-glow" : ""}`} data-glow-text={settings.displayName || settings.username} style={{ "--share-cover-name-size": `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`, "--share-cover-name-font": fontFamily(settings.nameFont), "--share-cover-glow-colour": rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1), "--share-cover-glow-blur": `${Math.max(10, settings.shareCoverNameGlowIntensity * 0.16)}px`, "--share-cover-glow-size-a": `${Math.max(24, settings.shareCoverNameGlowIntensity * 0.75)}px`, "--share-cover-glow-size-b": `${Math.max(54, settings.shareCoverNameGlowIntensity * 1.45)}px`, "--share-cover-glow-size-c": `${Math.max(88, settings.shareCoverNameGlowIntensity * 2.4)}px`, "--share-cover-glow-strength": settings.shareCoverNameGlowIntensity } as React.CSSProperties}>
                       <div className="share-cover-preview-name" style={{
                         color: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
                         backgroundImage: settings.shareCoverNameGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverNameGradientColours.join(", ")})` : "none",
@@ -1664,9 +1689,10 @@ export default function Dashboard() {
                         WebkitTextFillColor: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
                         fontFamily: fontFamily(settings.nameFont),
                         fontSize: `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`,
-                        textShadow: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `0 0 ${Math.max(12, settings.shareCoverNameGlowIntensity * 0.55)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.98)}` : "none",
-                        filter: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `drop-shadow(0 0 ${Math.max(10, settings.shareCoverNameGlowIntensity * 0.42)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.9)}) drop-shadow(0 0 ${Math.max(20, settings.shareCoverNameGlowIntensity * 0.78)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.62)})` : "none",
+                        textShadow: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `0 0 ${Math.max(28, settings.shareCoverNameGlowIntensity * 0.9)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1)}, 0 0 ${Math.max(58, settings.shareCoverNameGlowIntensity * 1.8)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.95)}, 0 0 ${Math.max(100, settings.shareCoverNameGlowIntensity * 2.8)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.78)}` : "none",
+                        filter: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `drop-shadow(0 0 ${Math.max(24, settings.shareCoverNameGlowIntensity * 0.75)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1)}) drop-shadow(0 0 ${Math.max(52, settings.shareCoverNameGlowIntensity * 1.65)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.92)}) drop-shadow(0 0 ${Math.max(88, settings.shareCoverNameGlowIntensity * 2.5)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.72)})` : "none",
                       }}>{settings.displayName || settings.username}</div>
+                      </div>
                       <div className="share-cover-preview-credit" style={{
                         color: settings.shareCoverCreditGradientEnabled ? "transparent" : settings.shareCoverCreditColour,
                         backgroundImage: settings.shareCoverCreditGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverCreditGradientColours.join(", ")})` : "none",
@@ -1680,16 +1706,26 @@ export default function Dashboard() {
                   <p className="share-cover-preview-help">Static 1200 × 630 PNG used by Discord and other link previews.</p>
                 </section>
                 <div className="share-cover-controls">
-                  <FileUpload label="Cover background" value={settings.shareCoverImage} accept="image/*" type="image" note="Animated uploads use their first frame in the static share image." onChange={v => { set("shareCoverImage", v); setSaved(false); }} />
-                  <Colour label="Display name colour" value={settings.shareCoverNameColour} onChange={v => { set("shareCoverNameColour", v); setSaved(false); }} />
-                  <Colour label="Made with Pixlo colour" value={settings.shareCoverCreditColour} onChange={v => { set("shareCoverCreditColour", v); setSaved(false); }} />
-                  <Range label="Display name size" value={settings.shareCoverNameSize} min={28} max={110} suffix="px" onChange={v => { set("shareCoverNameSize", v); setSaved(false); }} />
-                  <Setting label="Display name glow" text="Adds a bright layered halo to the rendered image."><Toggle value={settings.shareCoverNameGlow} onChange={v => { set("shareCoverNameGlow", v); setSaved(false); }} /></Setting>
-                  {settings.shareCoverNameGlow && <Range label="Glow intensity" value={settings.shareCoverNameGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("shareCoverNameGlowIntensity", v); setSaved(false); }} />}
-                  <Setting label="Display name gradient" text="Use three colours across your display name."><Toggle value={settings.shareCoverNameGradientEnabled} onChange={v => { set("shareCoverNameGradientEnabled", v); setSaved(false); }} /></Setting>
-                  {settings.shareCoverNameGradientEnabled && <div className="share-cover-gradient-colours"><Colour label="Name gradient · start" value={settings.shareCoverNameGradientColours[0]} onChange={v => { set("shareCoverNameGradientColours", [v, settings.shareCoverNameGradientColours[1], settings.shareCoverNameGradientColours[2]]); setSaved(false); }} /><Colour label="Name gradient · middle" value={settings.shareCoverNameGradientColours[1]} onChange={v => { set("shareCoverNameGradientColours", [settings.shareCoverNameGradientColours[0], v, settings.shareCoverNameGradientColours[2]]); setSaved(false); }} /><Colour label="Name gradient · end" value={settings.shareCoverNameGradientColours[2]} onChange={v => { set("shareCoverNameGradientColours", [settings.shareCoverNameGradientColours[0], settings.shareCoverNameGradientColours[1], v]); setSaved(false); }} /></div>}
-                  <Setting label="Made with Pixlo gradient" text="Add a separate gradient to the credit line."><Toggle value={settings.shareCoverCreditGradientEnabled} onChange={v => { set("shareCoverCreditGradientEnabled", v); setSaved(false); }} /></Setting>
-                  {settings.shareCoverCreditGradientEnabled && <div className="share-cover-gradient-colours"><Colour label="Credit gradient · start" value={settings.shareCoverCreditGradientColours[0]} onChange={v => { set("shareCoverCreditGradientColours", [v, settings.shareCoverCreditGradientColours[1], settings.shareCoverCreditGradientColours[2]]); setSaved(false); }} /><Colour label="Credit gradient · middle" value={settings.shareCoverCreditGradientColours[1]} onChange={v => { set("shareCoverCreditGradientColours", [settings.shareCoverCreditGradientColours[0], v, settings.shareCoverCreditGradientColours[2]]); setSaved(false); }} /><Colour label="Credit gradient · end" value={settings.shareCoverCreditGradientColours[2]} onChange={v => { set("shareCoverCreditGradientColours", [settings.shareCoverCreditGradientColours[0], settings.shareCoverCreditGradientColours[1], v]); setSaved(false); }} /></div>}
+                  <section className="share-cover-control-group share-cover-control-group-background">
+                    <div className="share-cover-control-heading"><span>01</span><div><b>Background & typography</b><small>Choose the cover image and typeface.</small></div></div>
+                    <FileUpload label="Cover background" value={settings.shareCoverImage} accept="image/*" type="image" note="Animated uploads use their first frame in the static share image." onChange={v => { set("shareCoverImage", v); setSaved(false); }} />
+                    <div className="share-cover-font-control"><label className="field-label">Share cover font</label><FontDropdown value={settings.nameFont} onChange={v => { set("nameFont", v); setSaved(false); }} id="share-cover-font" open={openDropdown} setOpen={setOpenDropdown} /></div>
+                  </section>
+                  <section className="share-cover-control-group share-cover-control-group-name">
+                    <div className="share-cover-control-heading"><span>02</span><div><b>Display name</b><small>Control the main name, glow and gradient.</small></div></div>
+                    <Colour label="Display name colour" value={settings.shareCoverNameColour} onChange={v => { set("shareCoverNameColour", v); setSaved(false); }} />
+                    <Range label="Display name size" value={settings.shareCoverNameSize} min={28} max={110} suffix="px" onChange={v => { set("shareCoverNameSize", v); setSaved(false); }} />
+                    <Setting label="Display name glow" text="A broad, coloured halo around the name."><Toggle value={settings.shareCoverNameGlow} onChange={v => { set("shareCoverNameGlow", v); setSaved(false); }} /></Setting>
+                    {settings.shareCoverNameGlow && <Range label="Glow intensity" value={settings.shareCoverNameGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("shareCoverNameGlowIntensity", v); setSaved(false); }} />}
+                    <Setting label="Display name gradient" text="Blend three colours across the name."><Toggle value={settings.shareCoverNameGradientEnabled} onChange={v => { set("shareCoverNameGradientEnabled", v); setSaved(false); }} /></Setting>
+                    {settings.shareCoverNameGradientEnabled && <div className="share-cover-gradient-colours"><Colour label="Name gradient · start" value={settings.shareCoverNameGradientColours[0]} onChange={v => { set("shareCoverNameGradientColours", [v, settings.shareCoverNameGradientColours[1], settings.shareCoverNameGradientColours[2]]); setSaved(false); }} /><Colour label="Name gradient · middle" value={settings.shareCoverNameGradientColours[1]} onChange={v => { set("shareCoverNameGradientColours", [settings.shareCoverNameGradientColours[0], v, settings.shareCoverNameGradientColours[2]]); setSaved(false); }} /><Colour label="Name gradient · end" value={settings.shareCoverNameGradientColours[2]} onChange={v => { set("shareCoverNameGradientColours", [settings.shareCoverNameGradientColours[0], settings.shareCoverNameGradientColours[1], v]); setSaved(false); }} /></div>}
+                  </section>
+                  <section className="share-cover-control-group share-cover-control-group-credit">
+                    <div className="share-cover-control-heading"><span>03</span><div><b>Pixlo credit</b><small>Style the small “Made with Pixlo” line.</small></div></div>
+                    <Colour label="Made with Pixlo colour" value={settings.shareCoverCreditColour} onChange={v => { set("shareCoverCreditColour", v); setSaved(false); }} />
+                    <Setting label="Made with Pixlo gradient" text="Give the credit line its own gradient."><Toggle value={settings.shareCoverCreditGradientEnabled} onChange={v => { set("shareCoverCreditGradientEnabled", v); setSaved(false); }} /></Setting>
+                    {settings.shareCoverCreditGradientEnabled && <div className="share-cover-gradient-colours"><Colour label="Credit gradient · start" value={settings.shareCoverCreditGradientColours[0]} onChange={v => { set("shareCoverCreditGradientColours", [v, settings.shareCoverCreditGradientColours[1], settings.shareCoverCreditGradientColours[2]]); setSaved(false); }} /><Colour label="Credit gradient · middle" value={settings.shareCoverCreditGradientColours[1]} onChange={v => { set("shareCoverCreditGradientColours", [settings.shareCoverCreditGradientColours[0], v, settings.shareCoverCreditGradientColours[2]]); setSaved(false); }} /><Colour label="Credit gradient · end" value={settings.shareCoverCreditGradientColours[2]} onChange={v => { set("shareCoverCreditGradientColours", [settings.shareCoverCreditGradientColours[0], settings.shareCoverCreditGradientColours[1], v]); setSaved(false); }} /></div>}
+                  </section>
                 </div>
               </div>
             </>}
