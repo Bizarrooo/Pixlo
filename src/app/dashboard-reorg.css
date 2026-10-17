@@ -1823,3 +1823,8 @@ body:has(.dashboard.dashboard-revamp) {
   text-shadow: 0 0 14px var(--share-cover-glow-colour, #fff) !important;
   filter: none !important;
 }
+
+/* Keep cover effects inside the preview's own paint area instead of invalidating the whole editor. */
+.dashboard.dashboard-revamp .share-cover-preview {
+  contain: paint !important;
+}

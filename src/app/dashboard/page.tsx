@@ -1729,7 +1729,7 @@ export default function Dashboard() {
                         {previewAvatar ? <img className="share-cover-preview-avatar" src={previewAvatar} alt="" /> : <span className="share-cover-preview-avatar-fallback">{(settings.displayName || settings.username || "P").slice(0, 1).toUpperCase()}</span>}
                         {previewDecoration && <img className="share-cover-preview-decoration" src={previewDecoration} alt="" aria-hidden="true" />}
                       </div>
-                      <div className={`share-cover-preview-name-wrap ${settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? "has-glow" : ""}`} data-glow-text={settings.displayName || settings.username} style={{ "--share-cover-name-size": `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`, "--share-cover-name-font": fontFamily(settings.shareCoverFont), "--share-cover-glow-colour": rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1), "--share-cover-glow-blur": `${Math.max(10, settings.shareCoverNameGlowIntensity * 0.16)}px`, "--share-cover-glow-size-a": `${Math.max(24, settings.shareCoverNameGlowIntensity * 0.75)}px`, "--share-cover-glow-size-b": `${Math.max(54, settings.shareCoverNameGlowIntensity * 1.45)}px`, "--share-cover-glow-size-c": `${Math.max(88, settings.shareCoverNameGlowIntensity * 2.4)}px`, "--share-cover-glow-strength": settings.shareCoverNameGlowIntensity } as React.CSSProperties}>
+                      <div className={`share-cover-preview-name-wrap ${settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? "has-glow" : ""}`} data-glow-text={settings.displayName || settings.username} style={{ "--share-cover-name-size": `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`, "--share-cover-name-font": fontFamily(settings.shareCoverFont), "--share-cover-glow-colour": rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1) } as React.CSSProperties}>
                       <div className="share-cover-preview-name" style={{
                         color: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
                         backgroundImage: settings.shareCoverNameGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverNameGradientColours.join(", ")})` : "none",
@@ -1738,8 +1738,7 @@ export default function Dashboard() {
                         WebkitTextFillColor: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
                         fontFamily: fontFamily(settings.shareCoverFont),
                         fontSize: `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`,
-                        textShadow: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `0 0 ${Math.max(28, settings.shareCoverNameGlowIntensity * 0.9)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1)}, 0 0 ${Math.max(58, settings.shareCoverNameGlowIntensity * 1.8)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.95)}, 0 0 ${Math.max(100, settings.shareCoverNameGlowIntensity * 2.8)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.78)}` : "none",
-                        filter: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `drop-shadow(0 0 ${Math.max(24, settings.shareCoverNameGlowIntensity * 0.75)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1)}) drop-shadow(0 0 ${Math.max(52, settings.shareCoverNameGlowIntensity * 1.65)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.92)}) drop-shadow(0 0 ${Math.max(88, settings.shareCoverNameGlowIntensity * 2.5)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.72)})` : "none",
+
                       }}>{settings.displayName || settings.username}</div>
                       </div>
                       <div className="share-cover-preview-credit" style={{
@@ -1748,7 +1747,7 @@ export default function Dashboard() {
                         backgroundClip: settings.shareCoverCreditGradientEnabled ? "text" : "border-box",
                         WebkitBackgroundClip: settings.shareCoverCreditGradientEnabled ? "text" : "border-box",
                         WebkitTextFillColor: settings.shareCoverCreditGradientEnabled ? "transparent" : settings.shareCoverCreditColour,
-                        fontFamily: fontFamily(settings.nameFont),
+                        fontFamily: fontFamily(settings.shareCoverFont),
                       }}>Made with Pixlo</div>
                     </div>
                   </div>
