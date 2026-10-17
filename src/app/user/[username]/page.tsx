@@ -46,9 +46,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   // whose final URL segment/query does not look like a supported image type, even with image/png headers.
   const cacheTag = `${version}${shareKey ? `-${shareKey}` : ""}`;
   const staticImageUrl = `${profileUrl}/opengraph-image?v=${cacheTag}.png`;
-  const gifBackgroundImageUrl = `${PIXLO_PUBLIC_ORIGIN}/api/share-image/${encodeURIComponent(username)}?v=${cacheTag}.png`;
+  // Use a real .gif path for GIF backgrounds so platforms that support animated OG images can play them.
+  const gifBackgroundImageUrl = `${PIXLO_PUBLIC_ORIGIN}/api/share-image/${encodeURIComponent(username)}.gif?v=${cacheTag}`;
   const imageUrl = isGifCover ? gifBackgroundImageUrl : staticImageUrl;
-  const imageType = "image/png";
+  const imageType = isGifCover ? "image/gif" : "image/png";
   const description = "Made with Pixlo";
 
   return {
