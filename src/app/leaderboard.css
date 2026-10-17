@@ -102,3 +102,9 @@
   .lb-list{padding:0 9px}
 }
 @media(prefers-reduced-motion:reduce){.lb-page *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Keep leaderboard navigation centred in the viewport instead of in the space after the logo. */
+.lb-header{position:relative!important;justify-content:space-between!important}
+.lb-nav{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;margin:0!important;white-space:nowrap!important}
+.lb-nav a:hover{color:#24242a!important}
+@media(max-width:760px){.lb-nav{position:static!important;left:auto!important;top:auto!important;transform:none!important;order:3;width:100%;justify-content:center;white-space:normal!important}}
