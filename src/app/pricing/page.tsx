@@ -14,6 +14,7 @@ export default function PricingPage() {
   const [giftUsername, setGiftUsername] = useState("");
   const [giftCheck, setGiftCheck] = useState<GiftCheck>("idle");
   const [giftDisplayName, setGiftDisplayName] = useState("");
+  const [giftRecipientPremium, setGiftRecipientPremium] = useState(false);
   const [giftFeedback, setGiftFeedback] = useState("");
   const [message, setMessage] = useState("");
 
@@ -37,12 +38,14 @@ export default function PricingPage() {
     if (!/^[a-z0-9._-]{3,24}$/.test(username)) {
       setGiftCheck("idle");
       setGiftDisplayName("");
+      setGiftRecipientPremium(false);
       setGiftFeedback(username.length ? "Use 3–24 letters, numbers, dots, underscores or hyphens." : "");
       return;
     }
 
     setGiftCheck("checking");
     setGiftDisplayName("");
+    setGiftRecipientPremium(false);
     setGiftFeedback("Checking Pixlo username…");
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
@@ -56,7 +59,9 @@ export default function PricingPage() {
         if (response.ok && profile && String(profile.username || "").toLowerCase() === username) {
           setGiftCheck("valid");
           setGiftDisplayName(String(profile.displayName || profile.username || username));
-          setGiftFeedback("Profile found — check it's the right person before gifting.");
+          const recipientAlreadyPremium = Boolean(profile.premium);
+          setGiftRecipientPremium(recipientAlreadyPremium);
+          setGiftFeedback(recipientAlreadyPremium ? "This account already has Premium. You can preview the profile, but it can't receive a duplicate gift." : "Profile found — check it's the right person before gifting.");
         } else {
           setGiftCheck("invalid");
           setGiftFeedback(response.status === 500 ? "Couldn't verify this username. Try again." : "We couldn't find that Pixlo username.");
@@ -154,6 +159,7 @@ export default function PricingPage() {
                   setGiftFeedback("");
                   setGiftCheck("idle");
                   setGiftDisplayName("");
+                  setGiftRecipientPremium(false);
                 }}
               >
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 10h17v10.5h-17zM2.5 6.5h19v3.5h-19zM12 6.5v14M12 6.5H8.7a2.2 2.2 0 1 1 2.2-2.2C10.9 5.4 12 6.5 12 6.5ZM12 6.5h3.3a2.2 2.2 0 1 0-2.2-2.2C13.1 5.4 12 6.5 12 6.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -199,10 +205,10 @@ export default function PricingPage() {
                   <button
                     type="button"
                     className="pricing-gift-checkout"
-                    disabled={buying || giftCheck !== "valid" || Boolean(status?.premium)}
+                    disabled={buying || giftCheck !== "valid" || giftRecipientPremium}
                     onClick={() => void buyPremium(giftUsername.trim().toLowerCase())}
                   >
-                    {buying ? "Opening secure checkout…" : status?.premium ? "This account already has Premium" : "Gift Premium · £3.99"}
+                    {buying ? "Opening secure checkout…" : giftRecipientPremium ? "Already owns Premium" : "Gift Premium · £3.99"}
                     <span aria-hidden="true">↗</span>
                   </button>
                 </div>
