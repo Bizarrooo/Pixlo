@@ -1,5 +1,5 @@
 export type SocialKey = "discord" | "youtube" | "roblox" | "github" | "twitch" | "instagram" | "spotify";
-export type ProfileFont = "Inter" | "DM Sans" | "Manrope" | "Poppins" | "Montserrat" | "Space Grotesk" | "Outfit" | "Plus Jakarta Sans" | "Rubik" | "Raleway" | "Playfair Display" | "Bebas Neue" | "Oswald" | "JetBrains Mono" | "Fira Code" | "Arial" | "system" | "monospace" | "Georgia" | "Courier New" | "Trebuchet MS" | "Impact" | "Times New Roman" | "Verdana";
+export type ProfileFont = "Inter" | "DM Sans" | "Manrope" | "Poppins" | "Montserrat" | "Space Grotesk" | "Outfit" | "Plus Jakarta Sans" | "Rubik" | "Raleway" | "Playfair Display" | "Bebas Neue" | "Oswald" | "JetBrains Mono" | "Fira Code" | "Arial" | "system" | "monospace" | "Georgia" | "Courier New" | "Trebuchet MS" | "Impact" | "Times New Roman" | "Verdana" | "Lexend" | "Urbanist" | "Sora" | "Lato" | "Roboto" | "Roboto Condensed" | "Nunito" | "Nunito Sans" | "Mulish" | "Work Sans" | "Archivo" | "Exo 2" | "Merriweather" | "Lora" | "Source Sans 3" | "Source Code Pro" | "IBM Plex Sans" | "IBM Plex Mono" | "Comfortaa" | "Figtree" | "Karla" | "Asap" | "Libre Franklin" | "Oxygen" | "Barlow" | "Barlow Condensed" | "Josefin Sans" | "Cabin" | "Jost" | "Spectral" | "Cinzel";
 export type TextAnimation = "none" | "fade-up" | "blur-in" | "typewriter" | "glitch" | "slide" | "float" | "pop";
 export type CustomLink = {
   id: string;
@@ -29,6 +29,10 @@ export type ProfileSettings = {
   shareCoverCreditColour: string;
   shareCoverNameGlow: boolean;
   shareCoverNameGlowIntensity: number;
+  shareCoverNameGradientEnabled: boolean;
+  shareCoverNameGradientColours: [string, string, string];
+  shareCoverCreditGradientEnabled: boolean;
+  shareCoverCreditGradientColours: [string, string, string];
   backgroundImage: string;
   backgroundVideo: string;
   backgroundVideoMusicDisabled: boolean;
@@ -198,6 +202,10 @@ export const defaultSettings: ProfileSettings = {
   shareCoverCreditColour: "#e3dcd8",
   shareCoverNameGlow: false,
   shareCoverNameGlowIntensity: 65,
+  shareCoverNameGradientEnabled: false,
+  shareCoverNameGradientColours: ["#ff8a00", "#ff3e5f", "#b14dff"],
+  shareCoverCreditGradientEnabled: false,
+  shareCoverCreditGradientColours: ["#ffffff", "#ffd2b4", "#ffffff"],
   backgroundImage: "",
   backgroundVideo: "",
   backgroundVideoMusicDisabled: false,
@@ -363,7 +371,7 @@ export function accountSettingsStorageKey(userId: string) {
   return `${ACCOUNT_PROFILE_SETTINGS_PREFIX}${userId}`;
 }
 
-const PROFILE_FONTS: readonly ProfileFont[] = ["Inter", "DM Sans", "Manrope", "Poppins", "Montserrat", "Space Grotesk", "Outfit", "Plus Jakarta Sans", "Rubik", "Raleway", "Playfair Display", "Bebas Neue", "Oswald", "JetBrains Mono", "Fira Code", "Arial", "system", "monospace", "Georgia", "Courier New", "Trebuchet MS", "Impact", "Times New Roman", "Verdana"];
+const PROFILE_FONTS: readonly ProfileFont[] = ["Inter", "DM Sans", "Manrope", "Poppins", "Montserrat", "Space Grotesk", "Outfit", "Plus Jakarta Sans", "Rubik", "Raleway", "Playfair Display", "Bebas Neue", "Oswald", "JetBrains Mono", "Fira Code", "Arial", "system", "monospace", "Georgia", "Courier New", "Trebuchet MS", "Impact", "Times New Roman", "Verdana", "Lexend", "Urbanist", "Sora", "Lato", "Roboto", "Roboto Condensed", "Nunito", "Nunito Sans", "Mulish", "Work Sans", "Archivo", "Exo 2", "Merriweather", "Lora", "Source Sans 3", "Source Code Pro", "IBM Plex Sans", "IBM Plex Mono", "Comfortaa", "Figtree", "Karla", "Asap", "Libre Franklin", "Oxygen", "Barlow", "Barlow Condensed", "Josefin Sans", "Cabin", "Jost", "Spectral", "Cinzel"];
 const TEXT_ANIMATIONS: readonly TextAnimation[] = ["none", "fade-up", "blur-in", "typewriter", "glitch", "slide", "float", "pop"];
 
 function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {}): ProfileSettings {
@@ -420,6 +428,10 @@ function normaliseSettings(parsedValue: unknown, identity: ProfileIdentity = {})
     shareCoverCreditColour: typeof parsed.shareCoverCreditColour === "string" && /^#[0-9a-f]{6}$/i.test(parsed.shareCoverCreditColour) ? parsed.shareCoverCreditColour : defaultSettings.shareCoverCreditColour,
     shareCoverNameGlow: typeof parsed.shareCoverNameGlow === "boolean" ? parsed.shareCoverNameGlow : defaultSettings.shareCoverNameGlow,
     shareCoverNameGlowIntensity: typeof parsed.shareCoverNameGlowIntensity === "number" && Number.isFinite(parsed.shareCoverNameGlowIntensity) ? Math.min(200, Math.max(0, parsed.shareCoverNameGlowIntensity)) : defaultSettings.shareCoverNameGlowIntensity,
+    shareCoverNameGradientEnabled: typeof parsed.shareCoverNameGradientEnabled === "boolean" ? parsed.shareCoverNameGradientEnabled : defaultSettings.shareCoverNameGradientEnabled,
+    shareCoverNameGradientColours: Array.isArray(parsed.shareCoverNameGradientColours) && parsed.shareCoverNameGradientColours.length === 3 ? parsed.shareCoverNameGradientColours.map((colour: unknown, i: number) => typeof colour === "string" && /^#[0-9a-f]{6}$/i.test(colour) ? colour : defaultSettings.shareCoverNameGradientColours[i]) as [string, string, string] : defaultSettings.shareCoverNameGradientColours,
+    shareCoverCreditGradientEnabled: typeof parsed.shareCoverCreditGradientEnabled === "boolean" ? parsed.shareCoverCreditGradientEnabled : defaultSettings.shareCoverCreditGradientEnabled,
+    shareCoverCreditGradientColours: Array.isArray(parsed.shareCoverCreditGradientColours) && parsed.shareCoverCreditGradientColours.length === 3 ? parsed.shareCoverCreditGradientColours.map((colour: unknown, i: number) => typeof colour === "string" && /^#[0-9a-f]{6}$/i.test(colour) ? colour : defaultSettings.shareCoverCreditGradientColours[i]) as [string, string, string] : defaultSettings.shareCoverCreditGradientColours,
     customLinks: Array.isArray(parsed.customLinks) ? parsed.customLinks.filter((item: any) => item && typeof item.id === "string" && typeof item.url === "string" && typeof item.icon === "string") : [],
     activeLinkOrder: Array.isArray(parsed.activeLinkOrder) ? parsed.activeLinkOrder.filter((item: any) => typeof item === "string") : [],
     showVerifiedBadgeNextToUsername: typeof parsed.showVerifiedBadgeNextToUsername === "boolean" ? parsed.showVerifiedBadgeNextToUsername : defaultSettings.showVerifiedBadgeNextToUsername,

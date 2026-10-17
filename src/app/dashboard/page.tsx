@@ -16,12 +16,61 @@ const socials: [SocialKey, string][] = [
 const socialLabels: Record<SocialKey, string> = Object.fromEntries(socials) as Record<SocialKey, string>;
 
 const fontOptions: [ProfileFont, string][] = [
-  ["Inter", "Inter"], ["DM Sans", "DM Sans"], ["Manrope", "Manrope"], ["Poppins", "Poppins"], ["Montserrat", "Montserrat"],
-  ["Space Grotesk", "Space Grotesk"], ["Outfit", "Outfit"], ["Plus Jakarta Sans", "Plus Jakarta Sans"], ["Rubik", "Rubik"],
-  ["Raleway", "Raleway"], ["Playfair Display", "Playfair Display"], ["Bebas Neue", "Bebas Neue"], ["Oswald", "Oswald"],
-  ["JetBrains Mono", "JetBrains Mono"], ["Fira Code", "Fira Code"], ["Arial", "Arial"], ["system", "System UI"],
-  ["monospace", "Monospace"], ["Georgia", "Georgia"], ["Courier New", "Courier New"], ["Trebuchet MS", "Trebuchet MS"],
-  ["Impact", "Impact"], ["Times New Roman", "Times New Roman"], ["Verdana", "Verdana"],
+  ["Inter", "Inter"],
+  ["DM Sans", "DM Sans"],
+  ["Manrope", "Manrope"],
+  ["Poppins", "Poppins"],
+  ["Montserrat", "Montserrat"],
+  ["Space Grotesk", "Space Grotesk"],
+  ["Outfit", "Outfit"],
+  ["Plus Jakarta Sans", "Plus Jakarta Sans"],
+  ["Rubik", "Rubik"],
+  ["Raleway", "Raleway"],
+  ["Playfair Display", "Playfair Display"],
+  ["Bebas Neue", "Bebas Neue"],
+  ["Oswald", "Oswald"],
+  ["JetBrains Mono", "JetBrains Mono"],
+  ["Fira Code", "Fira Code"],
+  ["Arial", "Arial"],
+  ["system", "System UI"],
+  ["monospace", "Monospace"],
+  ["Georgia", "Georgia"],
+  ["Courier New", "Courier New"],
+  ["Trebuchet MS", "Trebuchet MS"],
+  ["Impact", "Impact"],
+  ["Times New Roman", "Times New Roman"],
+  ["Verdana", "Verdana"],
+  ["Lexend", "Lexend"],
+  ["Urbanist", "Urbanist"],
+  ["Sora", "Sora"],
+  ["Lato", "Lato"],
+  ["Roboto", "Roboto"],
+  ["Roboto Condensed", "Roboto Condensed"],
+  ["Nunito", "Nunito"],
+  ["Nunito Sans", "Nunito Sans"],
+  ["Mulish", "Mulish"],
+  ["Work Sans", "Work Sans"],
+  ["Archivo", "Archivo"],
+  ["Exo 2", "Exo 2"],
+  ["Merriweather", "Merriweather"],
+  ["Lora", "Lora"],
+  ["Source Sans 3", "Source Sans 3"],
+  ["Source Code Pro", "Source Code Pro"],
+  ["IBM Plex Sans", "IBM Plex Sans"],
+  ["IBM Plex Mono", "IBM Plex Mono"],
+  ["Comfortaa", "Comfortaa"],
+  ["Figtree", "Figtree"],
+  ["Karla", "Karla"],
+  ["Asap", "Asap"],
+  ["Libre Franklin", "Libre Franklin"],
+  ["Oxygen", "Oxygen"],
+  ["Barlow", "Barlow"],
+  ["Barlow Condensed", "Barlow Condensed"],
+  ["Josefin Sans", "Josefin Sans"],
+  ["Cabin", "Cabin"],
+  ["Jost", "Jost"],
+  ["Spectral", "Spectral"],
+  ["Cinzel", "Cinzel"],
 ];
 const animationOptions: [TextAnimation, string][] = [
   ["none", "None"], ["fade-up", "Fade Up"], ["blur-in", "Blur In"], ["typewriter", "Typewriter"],
@@ -35,7 +84,39 @@ function fontFamily(font: ProfileFont) {
     "Space Grotesk": "\"Space Grotesk\", sans-serif", Outfit: "Outfit, sans-serif", "Plus Jakarta Sans": "\"Plus Jakarta Sans\", sans-serif",
     Rubik: "Rubik, sans-serif", Raleway: "Raleway, sans-serif", "Playfair Display": "\"Playfair Display\", Georgia, serif",
     "Bebas Neue": "\"Bebas Neue\", Impact, sans-serif", Oswald: "Oswald, sans-serif", "JetBrains Mono": "\"JetBrains Mono\", monospace",
-    "Fira Code": "\"Fira Code\", monospace", Arial: "Arial, Helvetica, sans-serif", system: "system-ui, sans-serif",
+    "Fira Code": "\"Fira Code\", monospace",
+    "Lexend": "Lexend, sans-serif",
+    "Urbanist": "Urbanist, sans-serif",
+    "Sora": "Sora, sans-serif",
+    "Lato": "Lato, sans-serif",
+    "Roboto": "Roboto, sans-serif",
+    "Roboto Condensed": "Roboto Condensed, sans-serif",
+    "Nunito": "Nunito, sans-serif",
+    "Nunito Sans": "Nunito Sans, sans-serif",
+    "Mulish": "Mulish, sans-serif",
+    "Work Sans": "Work Sans, sans-serif",
+    "Archivo": "Archivo, sans-serif",
+    "Exo 2": "Exo 2, sans-serif",
+    "Merriweather": "Merriweather, sans-serif",
+    "Lora": "Lora, sans-serif",
+    "Source Sans 3": "Source Sans 3, sans-serif",
+    "Source Code Pro": "Source Code Pro, monospace",
+    "IBM Plex Sans": "IBM Plex Sans, sans-serif",
+    "IBM Plex Mono": "IBM Plex Mono, monospace",
+    "Comfortaa": "Comfortaa, sans-serif",
+    "Figtree": "Figtree, sans-serif",
+    "Karla": "Karla, sans-serif",
+    "Asap": "Asap, sans-serif",
+    "Libre Franklin": "Libre Franklin, sans-serif",
+    "Oxygen": "Oxygen, sans-serif",
+    "Barlow": "Barlow, sans-serif",
+    "Barlow Condensed": "Barlow Condensed, sans-serif",
+    "Josefin Sans": "Josefin Sans, sans-serif",
+    "Cabin": "Cabin, sans-serif",
+    "Jost": "Jost, sans-serif",
+    "Spectral": "Spectral, sans-serif",
+    "Cinzel": "Cinzel, sans-serif",
+    Arial: "Arial, Helvetica, sans-serif", system: "system-ui, sans-serif",
     monospace: "ui-monospace, SFMono-Regular, monospace", Georgia: "Georgia, serif", "Courier New": "\"Courier New\", monospace",
     "Trebuchet MS": "\"Trebuchet MS\", sans-serif", Impact: "Impact, Haettenschweiler, sans-serif",
     "Times New Roman": "\"Times New Roman\", Times, serif", Verdana: "Verdana, sans-serif",
@@ -906,6 +987,10 @@ export default function Dashboard() {
       settings.shareCoverCreditColour,
       String(settings.shareCoverNameGlow),
       String(settings.shareCoverNameGlowIntensity),
+      String(settings.shareCoverNameGradientEnabled),
+      JSON.stringify(settings.shareCoverNameGradientColours),
+      String(settings.shareCoverCreditGradientEnabled),
+      JSON.stringify(settings.shareCoverCreditGradientColours),
       settings.useDiscordAvatar ? settings.discordAvatarUrl : settings.avatar,
       settings.useDiscordDecoration ? settings.discordAvatarDecorationUrl : "",
       settings.backgroundImage,
@@ -1287,7 +1372,6 @@ export default function Dashboard() {
 
       {activePrimary === "links" && <nav className="dashboard-links-tabs" aria-label="Links settings">
         <button type="button" className={active === "Socials" ? "active" : ""} onClick={() => setActive("Socials")}>Social links</button>
-        <button type="button" className={active === "Share cover" ? "active" : ""} onClick={() => setActive("Share cover")}>Share cover</button>
       </nav>}
 
       {activePrimary === "customize" && <nav className="dashboard-customize-tabs" aria-label="Customize profile settings">
@@ -1559,39 +1643,56 @@ export default function Dashboard() {
           </div>}
 
 
-          {activePrimary === "links" && active === "Share cover" && <div className="form-stack share-cover-page">
-            <SectionIntro title="Shared profile cover" text="Design the cover people see when your Pixlo profile is shared. The wording stays fixed, while both text colours and the display-name styling are yours to control." />
-            <div className="share-cover-editor-layout">
-              <section className="share-cover-preview-panel" aria-label="Live shared-link cover preview">
-                <div className="share-cover-preview">
-                  {(settings.shareCoverImage || previewAssets.backgroundImage) && <img className="share-cover-preview-background" src={settings.shareCoverImage || previewAssets.backgroundImage} alt="" />}
-                  <div className="share-cover-preview-overlay" />
-                  <div className="share-cover-preview-content">
-                    <div className="share-cover-preview-avatar-wrap">
-                      {previewAvatar ? <img className="share-cover-preview-avatar" src={previewAvatar} alt="" /> : <span className="share-cover-preview-avatar-fallback">{(settings.displayName || settings.username || "P").slice(0, 1).toUpperCase()}</span>}
-                      {previewDecoration && <img className="share-cover-preview-decoration" src={previewDecoration} alt="" aria-hidden="true" />}
+          {activePrimary === "optimise" && active === "Share cover" && <div className="form-stack share-cover-page">
+            {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>✦ Premium feature</h3><p>Custom shared-link covers, uploaded backgrounds, text gradients and display-name glow are exclusive to Pixlo Premium. Free profiles use a clean Pixlo-branded cover with a centered avatar and white text.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <>
+              <SectionIntro title="Shared profile cover" text="Design the static preview people see when your Pixlo profile is shared. The live preview matches the static image used by Discord and other apps." />
+              <div className="share-cover-editor-layout">
+                <section className="share-cover-preview-panel" aria-label="Live shared-link cover preview">
+                  <div className="share-cover-preview">
+                    {settings.shareCoverImage && <img className="share-cover-preview-background" src={settings.shareCoverImage} alt="" />}
+                    <div className="share-cover-preview-overlay" />
+                    <div className="share-cover-preview-content">
+                      <div className="share-cover-preview-avatar-wrap">
+                        {previewAvatar ? <img className="share-cover-preview-avatar" src={previewAvatar} alt="" /> : <span className="share-cover-preview-avatar-fallback">{(settings.displayName || settings.username || "P").slice(0, 1).toUpperCase()}</span>}
+                        {previewDecoration && <img className="share-cover-preview-decoration" src={previewDecoration} alt="" aria-hidden="true" />}
+                      </div>
+                      <div className="share-cover-preview-name" style={{
+                        color: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
+                        backgroundImage: settings.shareCoverNameGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverNameGradientColours.join(", ")})` : "none",
+                        backgroundClip: settings.shareCoverNameGradientEnabled ? "text" : "border-box",
+                        WebkitBackgroundClip: settings.shareCoverNameGradientEnabled ? "text" : "border-box",
+                        WebkitTextFillColor: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
+                        fontFamily: fontFamily(settings.nameFont),
+                        fontSize: `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`,
+                        textShadow: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `0 0 ${Math.max(12, settings.shareCoverNameGlowIntensity * 0.55)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.98)}` : "none",
+                        filter: settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? `drop-shadow(0 0 ${Math.max(10, settings.shareCoverNameGlowIntensity * 0.42)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.9)}) drop-shadow(0 0 ${Math.max(20, settings.shareCoverNameGlowIntensity * 0.78)}px ${rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 0.62)})` : "none",
+                      }}>{settings.displayName || settings.username}</div>
+                      <div className="share-cover-preview-credit" style={{
+                        color: settings.shareCoverCreditGradientEnabled ? "transparent" : settings.shareCoverCreditColour,
+                        backgroundImage: settings.shareCoverCreditGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverCreditGradientColours.join(", ")})` : "none",
+                        backgroundClip: settings.shareCoverCreditGradientEnabled ? "text" : "border-box",
+                        WebkitBackgroundClip: settings.shareCoverCreditGradientEnabled ? "text" : "border-box",
+                        WebkitTextFillColor: settings.shareCoverCreditGradientEnabled ? "transparent" : settings.shareCoverCreditColour,
+                        fontFamily: fontFamily(settings.nameFont),
+                      }}>Made with Pixlo</div>
                     </div>
-                    <div className="share-cover-preview-name" style={{
-                      color: settings.shareCoverNameColour,
-                      fontFamily: fontFamily(settings.nameFont),
-                      fontSize: `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`,
-                      textShadow: settings.shareCoverNameGlow ? `0 0 ${Math.max(8, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.2)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(1, Math.max(0.6, Math.max(20, settings.shareCoverNameGlowIntensity) / 100)))}, 0 0 ${Math.max(16, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.48)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(0.85, Math.max(0.4, Math.max(20, settings.shareCoverNameGlowIntensity) / 140)))} , 0 0 ${Math.max(28, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.82)}px ${rgbaFromHex(settings.shareCoverNameColour, Math.min(0.6, Math.max(0.22, Math.max(20, settings.shareCoverNameGlowIntensity) / 320)))}` : "none",
-                      filter: settings.shareCoverNameGlow ? `drop-shadow(0 0 ${Math.max(10, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.22)}px ${rgbaFromHex(settings.shareCoverNameColour, 0.9)}) drop-shadow(0 0 ${Math.max(18, Math.max(20, settings.shareCoverNameGlowIntensity) * 0.42)}px ${rgbaFromHex(settings.shareCoverNameColour, 0.55)})` : "none",
-                    }}>{settings.displayName || settings.username}</div>
-                    <div className="share-cover-preview-credit" style={{ color: settings.shareCoverCreditColour, fontFamily: fontFamily(settings.nameFont) }}>Made with Pixlo</div>
                   </div>
+                  <p className="share-cover-preview-help">Static 1200 × 630 PNG used by Discord and other link previews.</p>
+                </section>
+                <div className="share-cover-controls">
+                  <FileUpload label="Cover background" value={settings.shareCoverImage} accept="image/*" type="image" note="Animated uploads use their first frame in the static share image." onChange={v => { set("shareCoverImage", v); setSaved(false); }} />
+                  <Colour label="Display name colour" value={settings.shareCoverNameColour} onChange={v => { set("shareCoverNameColour", v); setSaved(false); }} />
+                  <Colour label="Made with Pixlo colour" value={settings.shareCoverCreditColour} onChange={v => { set("shareCoverCreditColour", v); setSaved(false); }} />
+                  <Range label="Display name size" value={settings.shareCoverNameSize} min={28} max={110} suffix="px" onChange={v => { set("shareCoverNameSize", v); setSaved(false); }} />
+                  <Setting label="Display name glow" text="Adds a bright layered halo to the rendered image."><Toggle value={settings.shareCoverNameGlow} onChange={v => { set("shareCoverNameGlow", v); setSaved(false); }} /></Setting>
+                  {settings.shareCoverNameGlow && <Range label="Glow intensity" value={settings.shareCoverNameGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("shareCoverNameGlowIntensity", v); setSaved(false); }} />}
+                  <Setting label="Display name gradient" text="Use three colours across your display name."><Toggle value={settings.shareCoverNameGradientEnabled} onChange={v => { set("shareCoverNameGradientEnabled", v); setSaved(false); }} /></Setting>
+                  {settings.shareCoverNameGradientEnabled && <div className="share-cover-gradient-colours"><Colour label="Name gradient · start" value={settings.shareCoverNameGradientColours[0]} onChange={v => { set("shareCoverNameGradientColours", [v, settings.shareCoverNameGradientColours[1], settings.shareCoverNameGradientColours[2]]); setSaved(false); }} /><Colour label="Name gradient · middle" value={settings.shareCoverNameGradientColours[1]} onChange={v => { set("shareCoverNameGradientColours", [settings.shareCoverNameGradientColours[0], v, settings.shareCoverNameGradientColours[2]]); setSaved(false); }} /><Colour label="Name gradient · end" value={settings.shareCoverNameGradientColours[2]} onChange={v => { set("shareCoverNameGradientColours", [settings.shareCoverNameGradientColours[0], settings.shareCoverNameGradientColours[1], v]); setSaved(false); }} /></div>}
+                  <Setting label="Made with Pixlo gradient" text="Add a separate gradient to the credit line."><Toggle value={settings.shareCoverCreditGradientEnabled} onChange={v => { set("shareCoverCreditGradientEnabled", v); setSaved(false); }} /></Setting>
+                  {settings.shareCoverCreditGradientEnabled && <div className="share-cover-gradient-colours"><Colour label="Credit gradient · start" value={settings.shareCoverCreditGradientColours[0]} onChange={v => { set("shareCoverCreditGradientColours", [v, settings.shareCoverCreditGradientColours[1], settings.shareCoverCreditGradientColours[2]]); setSaved(false); }} /><Colour label="Credit gradient · middle" value={settings.shareCoverCreditGradientColours[1]} onChange={v => { set("shareCoverCreditGradientColours", [settings.shareCoverCreditGradientColours[0], v, settings.shareCoverCreditGradientColours[2]]); setSaved(false); }} /><Colour label="Credit gradient · end" value={settings.shareCoverCreditGradientColours[2]} onChange={v => { set("shareCoverCreditGradientColours", [settings.shareCoverCreditGradientColours[0], settings.shareCoverCreditGradientColours[1], v]); setSaved(false); }} /></div>}
                 </div>
-                <p className="share-cover-preview-help">Live 1200 × 630 preview of the image used by Discord and other apps when this profile URL is shared.</p>
-              </section>
-              <div className="share-cover-controls">
-                <FileUpload label="Cover image" value={settings.shareCoverImage} accept="image/*" type="image" note="Import an image for your shared-link cover." onChange={v => { set("shareCoverImage", v); setSaved(false); }} />
-                <Colour label="Display name colour" value={settings.shareCoverNameColour} onChange={v => { set("shareCoverNameColour", v); setSaved(false); }} />
-                <Colour label="Made with Pixlo colour" value={settings.shareCoverCreditColour} onChange={v => { set("shareCoverCreditColour", v); setSaved(false); }} />
-                <Range label="Display name size" value={settings.shareCoverNameSize} min={28} max={110} suffix="px" onChange={v => { set("shareCoverNameSize", v); setSaved(false); }} />
-                <Setting label="Display name glow" text="Add a glow that matches the display-name colour."><Toggle value={settings.shareCoverNameGlow} onChange={v => { set("shareCoverNameGlow", v); setSaved(false); }} /></Setting>
-                {settings.shareCoverNameGlow && <Range label="Name glow intensity" value={settings.shareCoverNameGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("shareCoverNameGlowIntensity", v); setSaved(false); }} />}
               </div>
-            </div>
+            </>}
           </div>}
 
           {active === "Socials" && <div className="form-stack">

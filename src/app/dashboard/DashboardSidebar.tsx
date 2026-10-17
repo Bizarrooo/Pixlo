@@ -52,6 +52,7 @@ export const optimiseTabs = [
   { value: "Extras", label: "Widgets", icon: "clock" },
   { value: "Layouts", label: "Layouts", icon: "layout" },
   { value: "Cursor Trail", label: "Cursor trail", icon: "sparkles" },
+  { value: "Share cover", label: "Share cover", icon: "image" },
 ] as const;
 
 
