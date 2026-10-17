@@ -409,7 +409,7 @@
 }
 
 
-/* Match the homepage hero's exact artwork treatment and vertical sizing. */
+/* Use the exact same background image, sizing, position and shade as the homepage hero. */
 .pricing-global{
   background:#190907!important;
 }
@@ -418,8 +418,12 @@
   display:none!important;
 }
 .pricing-global>.pricing-header{
-  background:#190907 url("/pixlo-ambient.svg") center top / 100% 720px no-repeat!important;
-  border-bottom-color:rgba(255,221,198,.17)!important;
+  background-color:#190907!important;
+  background-image:url("/pixlo-ambient.svg")!important;
+  background-position:center!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  border-bottom-color:rgba(255,224,203,.17)!important;
   color:#fff9f2!important;
 }
 .pricing-global>.pricing-header .pricing-nav,
@@ -434,7 +438,10 @@
 }
 .pricing-hero-art{
   top:0!important;
-  background:#190907 url("/pixlo-ambient.svg") center top / 100% 720px no-repeat!important;
+  background-image:url("/pixlo-ambient.svg")!important;
+  background-position:center!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
   opacity:.98!important;
   filter:none!important;
   -webkit-mask-image:none!important;
@@ -448,8 +455,8 @@
 }
 @media(max-width:760px){
   .pricing-global>.pricing-header{
-    background-size:auto 720px!important;
-    background-position:center top!important;
+    background-position:center!important;
+    background-size:cover!important;
   }
   .pricing-hero{
     min-height:720px!important;
@@ -457,7 +464,7 @@
     padding-bottom:145px!important;
   }
   .pricing-hero-art{
-    background-size:auto 720px!important;
-    background-position:center top!important;
+    background-position:center!important;
+    background-size:cover!important;
   }
 }
