@@ -22,6 +22,37 @@ const FONT_ALIASES: Record<string, string> = {
   Oswald: "Oswald",
   "JetBrains Mono": "JetBrains Mono",
   "Fira Code": "Fira Code",
+  "Lexend": "Lexend",
+  "Urbanist": "Urbanist",
+  "Sora": "Sora",
+  "Lato": "Lato",
+  "Roboto": "Roboto",
+  "Roboto Condensed": "Roboto Condensed",
+  "Nunito": "Nunito",
+  "Nunito Sans": "Nunito Sans",
+  "Mulish": "Mulish",
+  "Work Sans": "Work Sans",
+  "Archivo": "Archivo",
+  "Exo 2": "Exo 2",
+  "Merriweather": "Merriweather",
+  "Lora": "Lora",
+  "Source Sans 3": "Source Sans 3",
+  "Source Code Pro": "Source Code Pro",
+  "IBM Plex Sans": "IBM Plex Sans",
+  "IBM Plex Mono": "IBM Plex Mono",
+  "Comfortaa": "Comfortaa",
+  "Figtree": "Figtree",
+  "Karla": "Karla",
+  "Asap": "Asap",
+  "Libre Franklin": "Libre Franklin",
+  "Oxygen": "Oxygen",
+  "Barlow": "Barlow",
+  "Barlow Condensed": "Barlow Condensed",
+  "Josefin Sans": "Josefin Sans",
+  "Cabin": "Cabin",
+  "Jost": "Jost",
+  "Spectral": "Spectral",
+  "Cinzel": "Cinzel",
   Arial: "Inter",
   system: "Inter",
   monospace: "JetBrains Mono",
@@ -170,10 +201,11 @@ export async function renderShareCoverImage(
   mode: RenderMode = "full",
 ): Promise<ImageResponse> {
   const username = profile?.username || "pixlo";
+  const isPremium = Boolean(profile?.isPremium);
   const displayName = profile?.displayName || username || "Pixlo Profile";
   const avatarUrl = profile?.avatarUrl || "";
   const avatarDecorationUrl = profile?.avatarDecorationUrl || "";
-  const backgroundImageUrl = mode === "full"
+  const backgroundImageUrl = mode === "full" && isPremium
     ? profile?.shareCoverImageUrl || profile?.backgroundImageUrl || ""
     : "";
   const backgroundImageSourcePromise = embedStoredCoverImage(backgroundImageUrl);
@@ -183,17 +215,21 @@ export async function renderShareCoverImage(
     : displayName.length > 21
       ? Math.min(100, baseNameSize)
       : baseNameSize;
-  const nameColour = profile?.shareCoverNameColour || "#ffffff";
-  const creditColour = profile?.shareCoverCreditColour || "#e3dcd8";
-  const glowIntensity = Math.max(20, Math.min(200, profile?.shareCoverNameGlowIntensity ?? 65));
-  const glowHex = /^#[0-9a-f]{6}$/i.test(nameColour) ? nameColour : "#ffffff";
+  const nameColour = isPremium ? (profile?.shareCoverNameColour || "#ffffff") : "#ffffff";
+  const creditColour = isPremium ? (profile?.shareCoverCreditColour || "#ffffff") : "#ffffff";
+  const nameGradientEnabled = isPremium && profile?.shareCoverNameGradientEnabled === true;
+  const creditGradientEnabled = isPremium && profile?.shareCoverCreditGradientEnabled === true;
+  const nameGradientColours = profile?.shareCoverNameGradientColours || ["#ff8a00", "#ff3e5f", "#b14dff"];
+  const creditGradientColours = profile?.shareCoverCreditGradientColours || ["#ffffff", "#ffd2b4", "#ffffff"];
+  const glowIntensity = Math.max(0, Math.min(200, profile?.shareCoverNameGlowIntensity ?? 65));
+  const glowHex = /^#[0-9a-f]{6}$/i.test(nameGradientEnabled ? nameGradientColours[1] : nameColour) ? (nameGradientEnabled ? nameGradientColours[1] : nameColour) : "#ffffff";
   const red = Number.parseInt(glowHex.slice(1, 3), 16);
   const green = Number.parseInt(glowHex.slice(3, 5), 16);
   const blue = Number.parseInt(glowHex.slice(5, 7), 16);
-  const glow = profile?.shareCoverNameGlow
-    ? "0 0 " + Math.max(10, glowIntensity * 0.3) + "px rgba(" + red + "," + green + "," + blue + ",0.62), " +
-      "0 0 " + Math.max(24, glowIntensity * 0.72) + "px rgba(" + red + "," + green + "," + blue + ",0.38), " +
-      "0 0 " + Math.max(42, glowIntensity * 1.15) + "px rgba(" + red + "," + green + "," + blue + ",0.22)"
+  const glowEnabled = isPremium && profile?.shareCoverNameGlow === true && glowIntensity > 0;
+  const glow = glowEnabled ? "0 0 " + Math.max(14, glowIntensity * 0.4) + "px rgba(" + red + "," + green + "," + blue + ",0.95)" : "none";
+  const glowFilter = glowEnabled
+    ? "drop-shadow(0 0 " + Math.max(10, glowIntensity * 0.42) + "px rgba(" + red + "," + green + "," + blue + ",0.98)) drop-shadow(0 0 " + Math.max(22, glowIntensity * 0.8) + "px rgba(" + red + "," + green + "," + blue + ",0.72)) drop-shadow(0 0 " + Math.max(34, glowIntensity * 1.2) + "px rgba(" + red + "," + green + "," + blue + ",0.45))"
     : "none";
   const selectedFont = profileFontName(profile);
   const googleFont = FONT_ALIASES[selectedFont] || "Inter";
@@ -206,7 +242,7 @@ export async function renderShareCoverImage(
     ? [{ name: "PixloShareName", data: fontData, weight: 800 as const, style: "normal" as const }]
     : [];
   const initials = (displayName || username || "P").slice(0, 1).toUpperCase();
-  const showBackground = mode === "full" && Boolean(backgroundImageUrl);
+  const showBackground = mode === "full" && isPremium && Boolean(backgroundImageUrl);
 
   return new ImageResponse(
     (
@@ -222,7 +258,7 @@ export async function renderShareCoverImage(
           overflow: "hidden",
           color: "#ffffff",
           fontFamily: renderedFontFamily,
-          background: mode === "overlay" ? "transparent" : "linear-gradient(135deg, #09090b 0%, #21100d 55%, #41180f 100%)",
+          background: mode === "overlay" ? "transparent" : "linear-gradient(135deg, #ff8a00 0%, #ff5a00 48%, #ee2b42 100%)",
         }}
       >
         {showBackground && (
@@ -248,10 +284,10 @@ export async function renderShareCoverImage(
             </div>
             {avatarDecorationUrl && <img src={avatarDecorationUrl} width="320" height="320" style={{ position: "absolute", inset: 0, width: 320, height: 320, objectFit: "contain", pointerEvents: "none" }} />}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, marginTop: 0, marginBottom: 0, color: nameColour, fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", maxWidth: 1060, marginTop: 0, marginBottom: 0, color: nameGradientEnabled ? "transparent" : nameColour, backgroundImage: nameGradientEnabled ? "linear-gradient(90deg, " + nameGradientColours.join(", ") + ")" : "none", backgroundClip: nameGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: nameGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: displayFontSize, fontWeight: 800, lineHeight: 1.1, overflowWrap: "anywhere", textShadow: glow, filter: glowFilter }}>
             {displayName}
           </div>
-          <div style={{ display: "flex", marginTop: 14, alignItems: "center", justifyContent: "center", color: creditColour, fontFamily: renderedFontFamily, fontSize: 22, fontWeight: 500 }}>
+          <div style={{ display: "flex", marginTop: 14, alignItems: "center", justifyContent: "center", color: creditGradientEnabled ? "transparent" : creditColour, backgroundImage: creditGradientEnabled ? "linear-gradient(90deg, " + creditGradientColours.join(", ") + ")" : "none", backgroundClip: creditGradientEnabled ? "text" : "border-box", WebkitBackgroundClip: creditGradientEnabled ? "text" : "border-box", fontFamily: renderedFontFamily, fontSize: 22, fontWeight: 500 }}>
             Made with Pixlo
           </div>
         </div>
