@@ -332,7 +332,7 @@ export default function Home() {
           <nav className="px-nav" aria-label="Main navigation">
             <a href="#platform">Platform</a>
             <a href="#community">Community</a>
-            <a href="#premium">Premium</a>
+            <Link href="/pricing">Pricing</Link>
           </nav>
           <div className="revamp-account px-account"><HomeAccountNav /></div>
         </header>
@@ -390,7 +390,7 @@ export default function Home() {
             <div className="px-feature-top"><span>04 / RECOGNITION</span><span className="px-feature-icon"><FeatureIcon kind="badge" /></span></div>
             <div className="px-feature-art px-art-badges"><div className="px-badge-large">✦</div><div className="px-badge-small">✓</div><div className="px-badge-stamp">PIXLO<br />VERIFIED</div></div>
             <h3>A page with personality.</h3><p>Show off your badges, connect Discord and bring your Pixlo identity along wherever you share it.</p>
-            <Link href="/premium" className="px-feature-link">Explore the extras <ArrowIcon diagonal /></Link>
+            <Link href="/pricing" className="px-feature-link">Explore the extras <ArrowIcon diagonal /></Link>
           </article>
         </div>
       </section>
@@ -402,13 +402,13 @@ export default function Home() {
 
       <section className="px-premium" id="premium">
         <div className="px-premium-background" aria-hidden="true" />
-        <div className="px-premium-copy px-reveal"><div className="px-premium-kicker"><span>✳</span> PIXLO / PREMIUM</div><h2>More room<br />to make it <em>yours.</em></h2><p>Take your profile further with the extra customisation and tools that make Pixlo uniquely yours. Pay once during beta and keep your access.</p><Link href="/premium" className="px-button px-button-light">Get lifetime Premium <ArrowIcon /></Link><small>ONE PAYMENT · NO SUBSCRIPTION</small></div>
+        <div className="px-premium-copy px-reveal"><div className="px-premium-kicker"><span>✳</span> PIXLO / PREMIUM</div><h2>More room<br />to make it <em>yours.</em></h2><p>Take your profile further with the extra customisation and tools that make Pixlo uniquely yours. Pay once during beta and keep your access.</p><Link href="/pricing" className="px-button px-button-light">Get lifetime Premium <ArrowIcon /></Link><small>ONE PAYMENT · NO SUBSCRIPTION</small></div>
         <div className="px-premium-price px-reveal"><span className="px-price-label">BETA ACCESS</span><div>£3<span>.99</span></div><span className="px-price-note">LIFETIME ACCESS</span><span className="px-price-spark">✳</span></div>
       </section>
 
       <section className="px-final-cta"><div className="px-reveal"><span className="px-section-kicker"><span>04</span> YOUR NEXT CHAPTER</span><h2>Your name. Your links.<br /><em>Your Pixlo.</em></h2></div><Link href="/dashboard" className="px-button px-button-primary">Create your profile <ArrowIcon /></Link></section>
 
-      <footer className="px-footer"><div className="px-footer-brand"><Link href="/" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span></div><div className="px-footer-links"><a href="#platform">Platform</a><a href="#community">Community</a><Link href="/premium">Premium</Link><Link href="/dashboard">Dashboard <ArrowIcon diagonal /></Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
+      <footer className="px-footer"><div className="px-footer-brand"><Link href="/" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link><span>YOUR SPACE ON THE WEB.</span></div><div className="px-footer-links"><a href="#platform">Platform</a><a href="#community">Community</a><Link href="/pricing">Premium</Link><Link href="/dashboard">Dashboard <ArrowIcon diagonal /></Link></div><small>© PIXLO — MADE TO BE YOURS.</small></footer>
     </main>
   );
 }

@@ -67,8 +67,8 @@ export async function POST(request: Request) {
   const origin = configuredOrigin.endsWith("/") ? configuredOrigin.slice(0, -1) : configuredOrigin;
   const form = new URLSearchParams();
   form.set("mode", "payment");
-  form.set("success_url", `${origin}/premium?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
-  form.set("cancel_url", `${origin}/premium?checkout=cancelled`);
+  form.set("success_url", `${origin}/pricing?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
+  form.set("cancel_url", `${origin}/pricing?checkout=cancelled`);
   form.set("client_reference_id", user.id);
   form.set("metadata[user_id]", recipientId);
   form.set("metadata[product]", "pixlo_premium_lifetime");
