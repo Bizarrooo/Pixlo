@@ -352,7 +352,7 @@ export default function CursorTrailCanvas({
         const particle = retiring[index];
         if (!particle) continue;
         particle.age += deltaMs;
-        if (particle.age >= particle.lifetime || particle.age >= particle.lifetime - 1) {
+        if (particle.age >= particle.lifetime) {
           retiring.splice(index, 1);
           continue;
         }
