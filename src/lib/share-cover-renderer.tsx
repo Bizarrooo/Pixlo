@@ -115,23 +115,47 @@ async function embedStoredCoverImage(value: string): Promise<string> {
   try {
     const assetUrl = new URL(value);
     const { url: supabaseUrl } = supabaseConfig();
-    if (assetUrl.origin !== new URL(supabaseUrl).origin || !assetUrl.pathname.startsWith("/storage/v1/object/public/pixlo-assets/")) {
-      return value;
+    const isPixloStorageAsset =
+      assetUrl.origin === new URL(supabaseUrl).origin &&
+      assetUrl.pathname.startsWith("/storage/v1/object/public/pixlo-assets/");
+
+    // Keep remote standard image URLs usable, but never hand an animated GIF directly to
+    // ImageResponse: social covers are deliberately static, including when the source is a GIF.
+    if (!isPixloStorageAsset) {
+      return /\.gif$/i.test(assetUrl.pathname) ? "" : value;
     }
+
     const response = await fetch(assetUrl.toString(), {
       cache: "no-store",
-      signal: AbortSignal.timeout(4500),
+      signal: AbortSignal.timeout(5500),
     });
-    if (!response.ok) return value;
+    if (!response.ok) return "";
     const contentType = (response.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
-    if (!contentType.startsWith("image/") || contentType === "image/gif") return value;
+    const extensionLooksLikeImage = /\.(?:avif|bmp|gif|jpe?g|png|tiff?|webp)$/i.test(assetUrl.pathname);
+    if (!contentType.startsWith("image/") && !extensionLooksLikeImage) return "";
+
     const declaredLength = Number(response.headers.get("content-length") || 0);
-    if (declaredLength > 10 * 1024 * 1024) return value;
+    if (declaredLength > 25 * 1024 * 1024) return "";
     const bytes = Buffer.from(await response.arrayBuffer());
-    if (!bytes.length || bytes.byteLength > 10 * 1024 * 1024) return value;
-    return "data:" + contentType + ";base64," + bytes.toString("base64");
+    if (!bytes.length || bytes.byteLength > 25 * 1024 * 1024) return "";
+
+    // Decode only the first frame/page, resize before embedding, and normalise every supported
+    // upload format (GIF/AVIF/WebP/PNG/JPEG) to PNG. This makes Open Graph rendering deterministic.
+    const { default: sharp } = await import("sharp");
+    const staticPng = await sharp(bytes, {
+      animated: false,
+      failOn: "none",
+      limitInputPixels: 100_000_000,
+    })
+      .rotate()
+      .resize(1200, 630, { fit: "cover", position: "centre", withoutEnlargement: true })
+      .png({ compressionLevel: 9, adaptiveFiltering: true })
+      .toBuffer();
+
+    return "data:image/png;base64," + staticPng.toString("base64");
   } catch {
-    return value;
+    // Keep the rest of the share cover renderable even if a background upload is unsupported.
+    return "";
   }
 }
 
