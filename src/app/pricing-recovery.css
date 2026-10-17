@@ -368,3 +368,17 @@
   .pricing-hero{background-position:center,center!important}
   .pricing-footer-nav{width:100%;justify-content:flex-start;order:4;padding-top:6px}
 }
+
+/* Final navigation + hero visual fix: keep links truly centred and let the artwork show through. */
+.pricing-header{position:relative!important;justify-content:space-between!important}
+.pricing-nav{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;margin:0!important;white-space:nowrap!important;z-index:4!important;color:#4d4b52!important}
+.pricing-nav a:hover{color:#171923!important}
+.pricing-comparison{background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-radius:0!important;overflow:visible!important}
+.pricing-comparison-heading{background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.22)!important;border-radius:12px 12px 0 0!important;color:#fff!important}
+.pricing-comparison-heading>span:last-child{background:rgba(255,255,255,.1)!important;color:#fff!important}
+.pricing-comparison-row{background:rgba(20,18,20,.25)!important;border-left:1px solid rgba(255,255,255,.15)!important;border-right:1px solid rgba(255,255,255,.15)!important;border-bottom:1px solid rgba(255,255,255,.12)!important;color:#fff!important}
+.pricing-comparison-row strong{color:rgba(255,255,255,.9)!important}
+.pricing-comparison-row>span{color:#fff!important}
+.pricing-comparison-row .pricing-premium-value{background:rgba(255,255,255,.08)!important}
+.pricing-comparison-row:last-child{border-radius:0 0 12px 12px!important}
+@media(max-width:760px){.pricing-nav{position:static!important;left:auto!important;top:auto!important;transform:none!important;order:3;width:100%;justify-content:center;white-space:normal!important}}
