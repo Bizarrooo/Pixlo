@@ -6,6 +6,48 @@ import { useEffect, useState } from "react";
 type PremiumStatus = { authenticated?: boolean; premium?: boolean; error?: string };
 type GiftCheck = "idle" | "checking" | "valid" | "invalid";
 
+const pricingPixelSquares = [
+  { left: 2, bottom: 4, size: 58, color: "#ff4e39", opacity: .86 },
+  { left: 9, bottom: 34, size: 42, color: "#ff8a35", opacity: .82 },
+  { left: 15, bottom: 8, size: 28, color: "#ffc35d", opacity: .76 },
+  { left: 21, bottom: 55, size: 32, color: "#ff593b", opacity: .72 },
+  { left: 28, bottom: 20, size: 20, color: "#ffad45", opacity: .72 },
+  { left: 34, bottom: 72, size: 23, color: "#ff7434", opacity: .64 },
+  { left: 40, bottom: 12, size: 17, color: "#ffc65e", opacity: .62 },
+  { left: 47, bottom: 43, size: 20, color: "#ff4e39", opacity: .58 },
+  { left: 53, bottom: 7, size: 13, color: "#ff9a3d", opacity: .52 },
+  { left: 59, bottom: 61, size: 17, color: "#ffc35d", opacity: .46 },
+  { left: 65, bottom: 26, size: 12, color: "#ff593b", opacity: .43 },
+  { left: 71, bottom: 80, size: 14, color: "#ff8a35", opacity: .39 },
+  { left: 77, bottom: 15, size: 9, color: "#ffc35d", opacity: .35 },
+  { left: 82, bottom: 47, size: 10, color: "#ff4e39", opacity: .31 },
+  { left: 88, bottom: 22, size: 7, color: "#ff9a3d", opacity: .28 },
+  { left: 93, bottom: 59, size: 6, color: "#ffc35d", opacity: .24 },
+  { left: 97, bottom: 10, size: 5, color: "#ff593b", opacity: .2 },
+];
+
+function PricingCubeFade() {
+  return (
+    <div className="pricing-pixel-fade" aria-hidden="true">
+      {pricingPixelSquares.map((square, index) => (
+        <span
+          key={index}
+          className="pricing-pixel-square"
+          style={{
+            left: `${square.left}%`,
+            bottom: square.bottom,
+            width: square.size,
+            height: square.size,
+            backgroundColor: square.color,
+            opacity: square.opacity,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+
 export default function PricingPage() {
   const [status, setStatus] = useState<PremiumStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -17,11 +59,15 @@ export default function PricingPage() {
   const [giftRecipientPremium, setGiftRecipientPremium] = useState(false);
   const [giftFeedback, setGiftFeedback] = useState("");
   const [message, setMessage] = useState("");
+  const [donationAmount, setDonationAmount] = useState(500);
+  const [donating, setDonating] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("checkout") === "success") setMessage("Payment submitted! Premium unlocks after Stripe confirms the payment.");
     if (params.get("checkout") === "cancelled") setMessage("Checkout was cancelled. You have not been charged.");
+    if (params.get("donation") === "success") setMessage("Thank you for supporting Pixlo! Stripe has returned you from checkout.");
+    if (params.get("donation") === "cancelled") setMessage("Donation checkout was cancelled. You have not been charged.");
     fetch("/api/premium/status", { cache: "no-store", credentials: "include" })
       .then(async response => {
         const data = await response.json().catch(() => ({}));
@@ -104,6 +150,27 @@ export default function PricingPage() {
     }
   }
 
+
+  async function startDonation() {
+    setDonating(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/donations/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amountPence: donationAmount }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || typeof data.url !== "string") {
+        throw new Error(data.error || "Could not start donation checkout.");
+      }
+      window.location.href = data.url;
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not start donation checkout.");
+      setDonating(false);
+    }
+  }
+
   function updateGiftUsername(value: string) {
     setGiftUsername(value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 24));
   }
@@ -111,7 +178,7 @@ export default function PricingPage() {
   return (
     <main className="pricing-global">
       <header className="pricing-header">
-        <Link href="/" className="pricing-wordmark" aria-label="Pixlo home">pixlo<span>.</span></Link>
+        <Link href="/" className="pricing-brand" aria-label="Pixlo home"><img src="/pixlo-logo.png" alt="Pixlo" /></Link>
         <nav className="pricing-nav" aria-label="Pricing navigation">
           <Link href="/">Home</Link>
           <a href="#premium">Premium</a>
@@ -122,6 +189,9 @@ export default function PricingPage() {
 
       <div className="pricing-container">
         <section id="premium" className="pricing-hero">
+          <div className="pricing-hero-art" aria-hidden="true" />
+          <div className="pricing-hero-shade" aria-hidden="true" />
+          <PricingCubeFade />
           <div className="pricing-hero-copy">
             <span className="pricing-eyebrow"><span className="pricing-eyebrow-dot" /> LIFETIME UPGRADE</span>
             <h1>Your profile.<br /><span>Your rules.</span></h1>
@@ -148,70 +218,67 @@ export default function PricingPage() {
             </div>
             <p className="pricing-hero-footnote">Secure checkout through Stripe · One payment · Lifetime access</p>
 
-            <div className={"pricing-gift-launch" + (giftOpen ? " is-open" : "")}>
-              <button
-                type="button"
-                className="pricing-gift-trigger"
-                aria-expanded={giftOpen}
-                aria-controls="pricing-gift-panel"
-                onClick={() => {
-                  setGiftOpen(open => !open);
-                  setGiftFeedback("");
-                  setGiftCheck("idle");
-                  setGiftDisplayName("");
-                  setGiftRecipientPremium(false);
-                }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 10h17v10.5h-17zM2.5 6.5h19v3.5h-19zM12 6.5v14M12 6.5H8.7a2.2 2.2 0 1 1 2.2-2.2C10.9 5.4 12 6.5 12 6.5ZM12 6.5h3.3a2.2 2.2 0 1 0-2.2-2.2C13.1 5.4 12 6.5 12 6.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                <span>{giftOpen ? "Close gifting" : "Gift Premium"}</span>
-                <span className="pricing-gift-trigger-arrow" aria-hidden="true">{giftOpen ? "−" : "+"}</span>
-              </button>
-
-              {giftOpen && (
-                <div className="pricing-gift-panel" id="pricing-gift-panel">
-                  <label htmlFor="pricing-gift-username">Who are you gifting?</label>
-                  <div className="pricing-gift-input-row">
-                    <input
-                      id="pricing-gift-username"
-                      value={giftUsername}
-                      onChange={event => updateGiftUsername(event.target.value)}
-                      placeholder="Pixlo username"
-                      autoComplete="off"
-                      maxLength={24}
-                      aria-describedby="pricing-gift-feedback"
-                    />
-                    {giftCheck === "valid" && (
-                      <Link
-                        href={"/user/" + encodeURIComponent(giftUsername.trim().toLowerCase())}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="pricing-gift-preview"
-                        aria-label={"Preview " + giftDisplayName + "'s profile in a new tab"}
-                        title={"Preview @" + giftUsername}
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.2 12s3.4-6.8 9.8-6.8 9.8 6.8 9.8 6.8-3.4 6.8-9.8 6.8S2.2 12 2.2 12Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><circle cx="12" cy="12" r="3.1" stroke="currentColor" strokeWidth="1.7"/></svg>
-                      </Link>
-                    )}
-                  </div>
-                  <p className={"pricing-gift-feedback " + "is-" + giftCheck} id="pricing-gift-feedback" role="status">
-                    {giftFeedback || "Enter a username to check the profile."}
-                  </p>
-                  {giftCheck === "valid" && (
-                    <div className="pricing-gift-recipient">
-                      <span className="pricing-recipient-check">✓</span>
-                      <span><strong>{giftDisplayName}</strong><small>@{giftUsername}</small></span>
+            <div className={"pricing-gift-area" + (giftOpen ? " is-open" : "")}>
+              <div className="pricing-gift-row">
+                <button
+                  type="button"
+                  className="pricing-gift-icon"
+                  aria-label={giftOpen ? "Close Premium gifting" : "Gift Premium"}
+                  title="Gift Premium"
+                  aria-expanded={giftOpen}
+                  aria-controls="pricing-gift-controls"
+                  onClick={() => {
+                    setGiftOpen(open => !open);
+                    setGiftFeedback("");
+                    setGiftCheck("idle");
+                    setGiftDisplayName("");
+                    setGiftRecipientPremium(false);
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 10h17v10.5h-17zM2.5 6.5h19v3.5h-19zM12 6.5v14M12 6.5H8.7a2.2 2.2 0 1 1 2.2-2.2C10.9 5.4 12 6.5 12 6.5ZM12 6.5h3.3a2.2 2.2 0 1 0-2.2-2.2C13.1 5.4 12 6.5 12 6.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+                {giftOpen && (
+                  <div className="pricing-gift-controls" id="pricing-gift-controls">
+                    <div className={"pricing-gift-field" + (giftCheck === "valid" ? " is-valid" : giftCheck === "invalid" ? " is-invalid" : "")}>
+                      <input
+                        id="pricing-gift-username"
+                        value={giftUsername}
+                        onChange={event => updateGiftUsername(event.target.value)}
+                        placeholder="Pixlo username"
+                        autoComplete="off"
+                        maxLength={24}
+                        aria-label="Premium gift recipient username"
+                        aria-describedby="pricing-gift-feedback"
+                      />
+                      {giftCheck === "valid" && (
+                        <Link
+                          href={"/user/" + encodeURIComponent(giftUsername.trim().toLowerCase())}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="pricing-gift-eye"
+                          aria-label={"Preview " + giftDisplayName + "'s profile"}
+                          title={"Preview @" + giftUsername}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.2 12s3.4-6.8 9.8-6.8 9.8 6.8 9.8 6.8-3.4 6.8-9.8 6.8S2.2 12 2.2 12Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><circle cx="12" cy="12" r="3.1" stroke="currentColor" strokeWidth="1.7"/></svg>
+                        </Link>
+                      )}
                     </div>
-                  )}
-                  <button
-                    type="button"
-                    className="pricing-gift-checkout"
-                    disabled={buying || giftCheck !== "valid" || giftRecipientPremium}
-                    onClick={() => void buyPremium(giftUsername.trim().toLowerCase())}
-                  >
-                    {buying ? "Opening secure checkout…" : giftRecipientPremium ? "Already owns Premium" : "Gift Premium · £3.99"}
-                    <span aria-hidden="true">↗</span>
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      className="pricing-gift-confirm"
+                      disabled={buying || giftCheck !== "valid" || giftRecipientPremium}
+                      onClick={() => void buyPremium(giftUsername.trim().toLowerCase())}
+                    >
+                      {buying ? "Opening Stripe…" : giftRecipientPremium ? "Already Premium" : "Gift Premium"}
+                      <span aria-hidden="true">↗</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              {giftOpen && (giftCheck === "checking" || giftCheck === "invalid" || giftRecipientPremium) && (
+                <p className={"pricing-gift-feedback is-" + giftCheck} id="pricing-gift-feedback" role="status">
+                  {giftFeedback}
+                </p>
               )}
             </div>
           </div>
@@ -235,26 +302,61 @@ export default function PricingPage() {
 
         <section id="extras" className="pricing-section">
           <div className="pricing-section-heading">
-            <div><span className="pricing-eyebrow"><span className="pricing-eyebrow-dot" /> EXTRAS</span><h2>One more way to grow.</h2></div>
-            <p>Only the upcoming profile promotion feature lives here. Premium features stay in the Premium comparison above.</p>
+            <div><span className="pricing-eyebrow"><span className="pricing-eyebrow-dot" /> EXTRAS</span><h2>Support the future of Pixlo.</h2></div>
+            <p>Choose an optional one-time donation, or keep an eye out for Profile Boosts.</p>
           </div>
 
-          <article className="pricing-product-card">
-            <div className="pricing-product-art pricing-art-boost" aria-hidden="true">
-              <div className="pricing-boost-orb"></div>
-              <span className="pricing-boost-arrow">↗</span>
-              <span className="pricing-boost-bars"><i /><i /><i /><i /></span>
-            </div>
-            <div className="pricing-product-body">
-              <span className="pricing-product-tag pricing-tag-soon">COMING SOON</span>
-              <h3>Profile Boosts</h3>
-              <p>Give your Pixlo more visibility in discovery. Any promoted placement will be clearly labelled, and Boosts won't be sold until the feature is ready.</p>
-              <div className="pricing-product-bottom">
-                <strong>Coming soon</strong>
-                <span className="pricing-unavailable">Not available yet</span>
+          <div className="pricing-product-grid">
+            <article className="pricing-product-card">
+              <div className="pricing-product-art pricing-art-boost" aria-hidden="true">
+                <div className="pricing-boost-orb" />
+                <span className="pricing-boost-arrow">↗</span>
+                <span className="pricing-boost-bars"><i /><i /><i /><i /></span>
               </div>
-            </div>
-          </article>
+              <div className="pricing-product-body">
+                <span className="pricing-product-tag pricing-tag-soon">COMING SOON</span>
+                <h3>Profile Boosts</h3>
+                <p>Give your Pixlo more visibility in discovery. Sponsored placement will always be clearly labelled, and Boosts won't be sold until the feature is ready.</p>
+                <div className="pricing-product-bottom">
+                  <strong>Coming soon</strong>
+                  <span className="pricing-unavailable">Not available yet</span>
+                </div>
+              </div>
+            </article>
+
+            <article className="pricing-product-card">
+              <div className="pricing-product-art pricing-art-donation" aria-hidden="true">
+                <span className="pricing-donation-mark">
+                  <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12.5" stroke="currentColor" strokeWidth="1.6"/><path d="M20.4 11.6c-.7-1.1-2-1.8-4.1-1.8-2.4 0-3.9 1.2-3.9 2.9 0 4.4 7.7 1.8 7.7 6 0 1.9-1.6 3.3-4.2 3.3-1.9 0-3.4-.7-4.3-2M16 7.7v16.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
+                </span>
+                <span className="pricing-donation-orbit" />
+              </div>
+              <div className="pricing-product-body">
+                <span className="pricing-product-tag">OPTIONAL SUPPORT</span>
+                <h3>Donations</h3>
+                <p>Enjoying Pixlo? A small one-time contribution helps support ongoing development. Checkout is handled securely by Stripe.</p>
+                <div className="pricing-donation-options" aria-label="Choose a donation amount">
+                  {[100, 300, 500, 1000].map(amount => (
+                    <button
+                      type="button"
+                      key={amount}
+                      className={donationAmount === amount ? "is-selected" : ""}
+                      aria-pressed={donationAmount === amount}
+                      onClick={() => setDonationAmount(amount)}
+                    >
+                      £{amount / 100}
+                    </button>
+                  ))}
+                </div>
+                <div className="pricing-product-bottom pricing-donation-bottom">
+                  <strong>£{(donationAmount / 100).toFixed(2)}<small>one-time donation</small></strong>
+                  <button type="button" onClick={() => void startDonation()} disabled={donating}>
+                    {donating ? "Opening Stripe…" : "Donate"} <span>›</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
         </section>
 
         <section className="pricing-faq">
