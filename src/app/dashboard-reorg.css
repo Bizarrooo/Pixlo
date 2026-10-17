@@ -1828,3 +1828,30 @@ body:has(.dashboard.dashboard-revamp) {
 .dashboard.dashboard-revamp .share-cover-preview {
   contain: paint !important;
 }
+
+
+/* Final Share Cover glow fix: text-only shadow, independent of gradient fill. */
+.dashboard.dashboard-revamp .share-cover-preview-name-wrap::before,
+.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow::before {
+  content: none !important;
+  display: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+.dashboard.dashboard-revamp .share-cover-preview-name-wrap.has-glow .share-cover-preview-name {
+  filter:
+    drop-shadow(0 0 5px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 90%, transparent))
+    drop-shadow(0 0 13px color-mix(in srgb, var(--share-cover-glow-colour, #fff) 48%, transparent)) !important;
+  text-shadow: none !important;
+}
+/* Keep gradient text transparent and clipped regardless of whether glow is on. */
+.dashboard.dashboard-revamp .share-cover-preview-name.gradient-on {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+}
+.dashboard.dashboard-revamp .share-cover-preview-name-wrap:not(.has-glow) .share-cover-preview-name {
+  filter: none !important;
+  text-shadow: none !important;
+}

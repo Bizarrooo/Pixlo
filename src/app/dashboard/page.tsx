@@ -1730,7 +1730,7 @@ export default function Dashboard() {
                         {previewDecoration && <img className="share-cover-preview-decoration" src={previewDecoration} alt="" aria-hidden="true" />}
                       </div>
                       <div className={`share-cover-preview-name-wrap ${settings.shareCoverNameGlow && settings.shareCoverNameGlowIntensity > 0 ? "has-glow" : ""}`} data-glow-text={settings.displayName || settings.username} style={{ "--share-cover-name-size": `${(settings.shareCoverNameSize * 1.18 / 1200) * 100}cqw`, "--share-cover-name-font": fontFamily(settings.shareCoverFont), "--share-cover-glow-colour": rgbaFromHex(settings.shareCoverNameGradientEnabled ? settings.shareCoverNameGradientColours[1] : settings.shareCoverNameColour, 1) } as React.CSSProperties}>
-                      <div className="share-cover-preview-name" style={{
+                      <div className={`share-cover-preview-name ${settings.shareCoverNameGradientEnabled ? "gradient-on" : ""}`} style={{
                         color: settings.shareCoverNameGradientEnabled ? "transparent" : settings.shareCoverNameColour,
                         backgroundImage: settings.shareCoverNameGradientEnabled ? `linear-gradient(90deg, ${settings.shareCoverNameGradientColours.join(", ")})` : "none",
                         backgroundClip: settings.shareCoverNameGradientEnabled ? "text" : "border-box",
