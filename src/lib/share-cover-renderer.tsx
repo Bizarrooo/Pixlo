@@ -227,9 +227,9 @@ export async function renderShareCoverImage(
   const green = Number.parseInt(glowHex.slice(3, 5), 16);
   const blue = Number.parseInt(glowHex.slice(5, 7), 16);
   const glowEnabled = isPremium && profile?.shareCoverNameGlow === true && glowIntensity > 0;
-  const glow = glowEnabled ? "0 0 " + Math.max(14, glowIntensity * 0.4) + "px rgba(" + red + "," + green + "," + blue + ",0.95)" : "none";
+  const glow = glowEnabled ? "0 0 " + Math.max(24, glowIntensity * 0.75) + "px rgba(" + red + "," + green + "," + blue + ",1), 0 0 " + Math.max(48, glowIntensity * 1.35) + "px rgba(" + red + "," + green + "," + blue + ",0.9), 0 0 " + Math.max(72, glowIntensity * 1.9) + "px rgba(" + red + "," + green + "," + blue + ",0.62)" : "none";
   const glowFilter = glowEnabled
-    ? "drop-shadow(0 0 " + Math.max(10, glowIntensity * 0.42) + "px rgba(" + red + "," + green + "," + blue + ",0.98)) drop-shadow(0 0 " + Math.max(22, glowIntensity * 0.8) + "px rgba(" + red + "," + green + "," + blue + ",0.72)) drop-shadow(0 0 " + Math.max(34, glowIntensity * 1.2) + "px rgba(" + red + "," + green + "," + blue + ",0.45))"
+    ? "drop-shadow(0 0 " + Math.max(18, glowIntensity * 0.6) + "px rgba(" + red + "," + green + "," + blue + ",0.98)) drop-shadow(0 0 " + Math.max(36, glowIntensity * 1.1) + "px rgba(" + red + "," + green + "," + blue + ",0.72)) drop-shadow(0 0 " + Math.max(60, glowIntensity * 1.6) + "px rgba(" + red + "," + green + "," + blue + ",0.45))"
     : "none";
   const selectedFont = profileFontName(profile);
   const googleFont = FONT_ALIASES[selectedFont] || "Inter";
