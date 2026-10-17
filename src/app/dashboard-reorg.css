@@ -1857,3 +1857,25 @@ body:has(.dashboard.dashboard-revamp) {
   background-clip: border-box !important;
   -webkit-background-clip: border-box !important;
 }
+
+
+/* Explicit save action for display name, matching the compact username-change confirmation. */
+.identity-change-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex-wrap: wrap;
+  margin: -6px 0 4px;
+}
+.identity-change-note {
+  color: #b9a39a;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.display-name-dialog .display-name-target strong {
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+.display-name-dialog .display-name-target small {
+  color: #9a8b88;
+}

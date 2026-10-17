@@ -364,6 +364,9 @@ export default function Dashboard() {
   const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
   const [usernameSaveBusy, setUsernameSaveBusy] = useState(false);
   const [usernameSaveError, setUsernameSaveError] = useState("");
+  const [showDisplayNameConfirm, setShowDisplayNameConfirm] = useState(false);
+  const [displayNameSaveBusy, setDisplayNameSaveBusy] = useState(false);
+  const [displayNameSaveError, setDisplayNameSaveError] = useState("");
   const [badgesHidden, setBadgesHidden] = useState(false);
   const [dashboardBadges, setDashboardBadges] = useState<DashboardBadge[]>([]);
   const [previewBadges, setPreviewBadges] = useState<DashboardBadge[]>([]);
@@ -1055,6 +1058,60 @@ export default function Dashboard() {
       if (isUsernameChange) setUsernameSaveBusy(false);
     }
   };
+  const performDisplayNameSave = async () => {
+    const requestedDisplayName = settings.displayName.trim().slice(0, 48);
+    if (displayNameSaveBusy) return;
+    if (!requestedDisplayName) {
+      setDisplayNameSaveError("Display name cannot be empty.");
+      return;
+    }
+    if (!profileUserId) {
+      setDisplayNameSaveError("Your Pixlo account is still loading. Please wait a moment and try again.");
+      return;
+    }
+
+    setDisplayNameSaveBusy(true);
+    setDisplayNameSaveError("");
+    try {
+      const response = await fetch("/api/account", {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: savedIdentity.username || settings.username,
+          displayName: requestedDisplayName,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.profile) {
+        setDisplayNameSaveError(data.error || "Unable to save your display name.");
+        return;
+      }
+
+      const savedDisplayName = String(data.profile.displayName || "").trim();
+      if (!savedDisplayName || savedDisplayName !== requestedDisplayName) {
+        setDisplayNameSaveError("Pixlo did not confirm the new display name. Your previous name is still saved; please try again.");
+        return;
+      }
+
+      const nextSettings = {
+        ...settings,
+        username: savedIdentity.username || settings.username,
+        displayName: savedDisplayName,
+      };
+      setSettings(current => ({ ...current, displayName: savedDisplayName }));
+      setSavedIdentity(current => ({ ...current, displayName: savedDisplayName }));
+      saveSettingsToStorage(nextSettings, accountSettingsStorageKey(profileUserId));
+      setSaved(true);
+      setShowDisplayNameConfirm(false);
+      setDisplayNameSaveError("");
+      window.setTimeout(() => setSaved(false), 1800);
+    } catch {
+      setDisplayNameSaveError("Couldn't reach Pixlo to save your display name. Check your connection and try again.");
+    } finally {
+      setDisplayNameSaveBusy(false);
+    }
+  };
   const save = async () => {
     if (settings.username.trim().toLowerCase() !== savedIdentity.username.trim().toLowerCase()) {
       setShowUsernameConfirm(true);
@@ -1442,6 +1499,21 @@ export default function Dashboard() {
       </div>
     </section>
   </div>}
+  {showDisplayNameConfirm && <div className="username-change-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !displayNameSaveBusy) { setShowDisplayNameConfirm(false); setDisplayNameSaveError(""); } }}>
+    <section className="username-change-dialog display-name-dialog" role="dialog" aria-modal="true" aria-labelledby="display-name-confirm-title" aria-busy={displayNameSaveBusy}>
+      <div className="username-change-title-row">
+        <h2 id="display-name-confirm-title">Confirm display name change</h2>
+        <button type="button" className="username-change-close" aria-label="Close" disabled={displayNameSaveBusy} onClick={() => { setShowDisplayNameConfirm(false); setDisplayNameSaveError(""); }}>×</button>
+      </div>
+      <p className="username-change-copy">You are changing your display name to <strong>{settings.displayName.trim()}</strong>.</p>
+      <div className="username-change-target display-name-target"><strong>{settings.displayName.trim()}</strong><small>This is the name visitors will see on your Pixlo profile.</small></div>
+      {displayNameSaveError && <div className="auth-error username-change-error" role="alert"><span className="auth-message-icon">!</span><span>{displayNameSaveError}</span></div>}
+      <div className="username-change-actions">
+        <button type="button" className="auth-back-button" disabled={displayNameSaveBusy} onClick={() => { setShowDisplayNameConfirm(false); setDisplayNameSaveError(""); setSettings(current => ({ ...current, displayName: savedIdentity.displayName })); }}>Cancel</button>
+        <button type="button" className="auth-submit username-change-submit" disabled={displayNameSaveBusy || !profileUserId || !settings.displayName.trim()} onClick={() => { void performDisplayNameSave(); }}><span>{displayNameSaveBusy ? "Saving…" : "Save display name"}</span>{!displayNameSaveBusy && <span className="auth-submit-arrow" aria-hidden="true">↗</span>}</button>
+      </div>
+    </section>
+  </div>}
     <main className={`dashboard dashboard-revamp ${settings.dashboardCustomisationEnabled ? "dashboard-customisation-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardBackgroundGradientEnabled ? "dashboard-bg-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && settings.dashboardTextGradientEnabled ? "dashboard-text-gradient-on" : ""} ${settings.dashboardCustomisationEnabled && !settings.dashboardTextGradientEnabled ? "dashboard-text-solid-on" : ""}`} style={{ "--dashboard-bg-gradient": `linear-gradient(125deg, ${settings.dashboardBackgroundGradientColours[0]}, ${settings.dashboardBackgroundGradientColours[1]}, ${settings.dashboardBackgroundGradientColours[2]})`, "--dashboard-text-gradient": `linear-gradient(90deg, ${settings.dashboardTextGradientColours[0]} 0%, ${settings.dashboardTextGradientColours[1]} 16.666%, ${settings.dashboardTextGradientColours[2]} 33.333%, ${settings.dashboardTextGradientColours[0]} 50%, ${settings.dashboardTextGradientColours[1]} 66.666%, ${settings.dashboardTextGradientColours[2]} 83.333%, ${settings.dashboardTextGradientColours[0]} 100%)`, "--dashboard-text-solid": settings.dashboardTextSolidColour } as React.CSSProperties} onMouseDownCapture={event => { if (active === "Presets" && !(event.target as HTMLElement).closest(".preset-real-preview")) setPresetPreviewResetKey(value => value + 1); }}>
     <DashboardSidebar
       active={active}
@@ -1631,7 +1703,11 @@ export default function Dashboard() {
             <Field label="Username" hint={usernameHint}><input value={settings.username} maxLength={24} autoCapitalize="none" autoCorrect="off" onChange={e => { set("username", e.target.value.replace(/[^a-zA-Z0-9._-]/g, "").toLowerCase().slice(0, 24)); setSaved(false); }} /></Field>
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: -6 }}><button type="button" className="save-button" disabled={usernameSaveBusy || settings.username.trim().toLowerCase() === savedIdentity.username.trim().toLowerCase()} onClick={() => { setUsernameSaveError(""); setShowUsernameConfirm(true); }}>Change username</button>{settings.username.trim().toLowerCase() !== savedIdentity.username.trim().toLowerCase() && <span style={{ fontSize: 12, opacity: 0.7 }}>Your new username is not saved yet.</span>}</div>
             <div className="url-preview" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}><span>Your profile: <b style={{ overflowWrap: "anywhere" }}>{profileUrl}</b></span><button type="button" onClick={() => void copyProfileUrl()} style={{ flexShrink: 0, padding: "8px 12px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.08)", color: "inherit", cursor: "pointer", font: "inherit" }}>{profileCopied ? "✓ Copied!" : "Copy link"}</button></div>
-            <Field label="Display name"><input value={settings.displayName} onChange={e => set("displayName", e.target.value)} /></Field>
+            <Field label="Display name"><input value={settings.displayName} maxLength={48} onChange={e => { set("displayName", e.target.value.slice(0, 48)); setSaved(false); }} /></Field>
+<div className="identity-change-row">
+  <button type="button" className="save-button" disabled={displayNameSaveBusy || !settings.displayName.trim() || settings.displayName.trim() === savedIdentity.displayName.trim()} onClick={() => { setDisplayNameSaveError(""); setShowDisplayNameConfirm(true); }}>Change display name</button>
+  {settings.displayName.trim() !== savedIdentity.displayName.trim() && <span className="identity-change-note">Not saved yet</span>}
+</div>
             <Field label="Bio / description"><textarea value={settings.description} onChange={e => set("description", e.target.value)} placeholder="Tell people about yourself..." /></Field>
             <Field label="Location"><input value={settings.location} onChange={e => set("location", e.target.value)} placeholder="London, United Kingdom" /></Field>
             {discordNotice === "connected" && <div className="discord-success-notice">Discord connected successfully. Your Discord account is now linked to Pixlo.</div>}
