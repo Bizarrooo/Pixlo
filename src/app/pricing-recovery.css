@@ -269,3 +269,51 @@
 .pricing-custom-donation input::placeholder{color:#aaa2b1}
 .pricing-custom-donation small{flex:0 0 auto;color:#a69a8c;font-size:9px}
 @media(max-width:460px){.pricing-custom-donation{width:100%}}
+
+
+/* Match the homepage hero: show the complete artwork at full strength and fade only
+   the bottom edge into the light pricing page. No milky overlay over the artwork. */
+.pricing-hero{
+  background:transparent!important;
+}
+.pricing-hero-art{
+  top:0!important;
+  right:0!important;
+  bottom:0!important;
+  left:0!important;
+  opacity:1!important;
+  filter:none!important;
+  background-color:#160807!important;
+  background-image:url("/pixlo-ambient.svg")!important;
+  background-repeat:no-repeat!important;
+  background-position:center center!important;
+  background-size:cover!important;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 58%,rgba(0,0,0,.88) 68%,rgba(0,0,0,.42) 83%,transparent 100%)!important;
+  mask-image:linear-gradient(to bottom,#000 0%,#000 58%,rgba(0,0,0,.88) 68%,rgba(0,0,0,.42) 83%,transparent 100%)!important;
+}
+.pricing-hero-shade{
+  top:0!important;
+  right:0!important;
+  bottom:0!important;
+  left:0!important;
+  z-index:1!important;
+  background:
+    linear-gradient(90deg,rgba(21,7,6,.66) 0%,rgba(32,8,6,.44) 43%,rgba(27,8,6,.12) 100%),
+    linear-gradient(180deg,rgba(16,5,5,.08) 0%,transparent 58%,rgba(16,5,5,.04) 78%,rgba(247,246,251,.18) 100%)!important;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 58%,rgba(0,0,0,.88) 68%,rgba(0,0,0,.42) 83%,transparent 100%)!important;
+  mask-image:linear-gradient(to bottom,#000 0%,#000 58%,rgba(0,0,0,.88) 68%,rgba(0,0,0,.42) 83%,transparent 100%)!important;
+}
+.pricing-hero-copy{z-index:3!important}
+.pricing-hero h1{color:#fffaf4!important;text-shadow:0 2px 25px rgba(20,6,4,.24)}
+.pricing-hero-description{color:rgba(255,249,242,.82)!important}
+.pricing-benefits>span{color:rgba(255,249,242,.91)!important}
+.pricing-hero-footnote{color:rgba(255,243,226,.66)!important}
+.pricing-price{color:rgba(255,245,233,.72)!important}
+.pricing-price strong{color:#fffaf4!important}
+.pricing-status{color:rgba(255,249,242,.78)!important}
+.pricing-hero .pricing-owned{background:rgba(10,30,18,.72)!important;color:#a4efbf!important;border-color:rgba(125,223,160,.3)!important}
+.pricing-pixel-fade{z-index:2!important;bottom:-1px!important;height:250px!important}
+@media(max-width:760px){
+  .pricing-hero-art{background-position:center center!important}
+  .pricing-hero-shade{background:linear-gradient(90deg,rgba(21,7,6,.67),rgba(23,7,6,.28)),linear-gradient(180deg,rgba(16,5,5,.05),transparent 58%,rgba(247,246,251,.17) 100%)!important}
+}
