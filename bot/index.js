@@ -606,29 +606,76 @@ async function announceRoleChange(guild, profile, roleId, action) {
   const actorText = actor ? `<@${actor.id}>` : "Unknown / System";
   const isAward = action === "award";
   const badgeEmoji = getBadgeEmoji(guild, roleName);
+  const lowerRoleName = String(roleName).toLowerCase();
+  const messageType = [
+    { match: /recruit/, label: "Recruiter", fallbackIcon: "🎟️", color: 0x42B99A },
+    { match: /donor|supporter|patron|benefactor|sponsor/, label: "Donor", fallbackIcon: "💝", color: 0xF0A35E },
+    { match: /booster/, label: "Server Booster", fallbackIcon: "🚀", color: 0xA78BFA },
+    { match: /bug/, label: "Bug Hunter", fallbackIcon: "🐛", color: 0x8BCF75 },
+    { match: /premium/, label: "Pixlo Premium", fallbackIcon: "💎", color: 0xF4B942 },
+    { match: /verif/, label: "Verified", fallbackIcon: "✅", color: 0x60A5FA },
+    { match: /view|eye|seen|viral|famous/, label: "Profile Views", fallbackIcon: "👁️", color: 0xF47A42 },
+  ].find(type => type.match.test(lowerRoleName)) || {
+    label: "Discord Role",
+    fallbackIcon: "🏅",
+    color: EMBED_ORANGE,
+  };
+  const iconText = badgeEmoji ? `<:${badgeEmoji.name}:${badgeEmoji.id}>` : messageType.fallbackIcon;
+
+  let description;
+  if (messageType.label === "Recruiter") {
+    description = isAward
+      ? `🎟️ Congratulations, <@${member.id}>! You've earned the **${roleName}** Recruiter badge on Pixlo. Keep inviting unique members to progress through the Recruiter tiers.`
+      : `🎟️ The **${roleName}** Recruiter badge has been revoked for <@${member.id}>. Their corresponding role-based badge has been removed from Pixlo.`;
+  } else if (messageType.label === "Donor") {
+    description = isAward
+      ? `💝 Thank you, <@${member.id}>! You've earned the **${roleName}** donor badge on Pixlo for supporting the project.`
+      : `💝 The **${roleName}** donor badge has been revoked for <@${member.id}>. Their current donor badge will reflect the eligible tier now held.`;
+  } else if (messageType.label === "Server Booster") {
+    description = isAward
+      ? `🚀 Thank you, <@${member.id}>, for boosting the Pixlo Discord! You've earned the **${roleName}** badge.`
+      : `🚀 The **${roleName}** Server Booster badge has been revoked for <@${member.id}> because the qualifying boost role is no longer held.`;
+  } else if (messageType.label === "Bug Hunter") {
+    description = isAward
+      ? `🐛 Congratulations, <@${member.id}>! You've earned the **${roleName}** Bug Hunter badge for helping improve Pixlo.`
+      : `🐛 The **${roleName}** Bug Hunter badge has been revoked for <@${member.id}>. Their current Pixlo badges have been updated.`;
+  } else if (messageType.label === "Pixlo Premium") {
+    description = isAward
+      ? `💎 <@${member.id}> has been granted the **${roleName}** role in the Pixlo Discord.`
+      : `💎 The **${roleName}** role has been removed from <@${member.id}>. Their Premium access should be checked against their active entitlement.`;
+  } else if (messageType.label === "Verified") {
+    description = isAward
+      ? `✅ Congratulations, <@${member.id}>! The **${roleName}** Verified badge has been granted on Pixlo.`
+      : `✅ The **${roleName}** Verified badge has been revoked for <@${member.id}>. Their verification badge has been removed from Pixlo.`;
+  } else if (messageType.label === "Profile Views") {
+    description = isAward
+      ? `👁️ <@${member.id}> has earned the **${roleName}** profile-views badge on Pixlo.`
+      : `👁️ The **${roleName}** profile-views badge has been revoked for <@${member.id}>.`;
+  } else {
+    description = isAward
+      ? `🎉 Congratulations, <@${member.id}>! You've earned the **${roleName}** role in the Pixlo Discord server. Your linked Pixlo badge has been updated too.`
+      : `The **${roleName}** role has been removed from <@${member.id}>. Their corresponding Discord-earned badge has been removed from Pixlo.`;
+  }
+
   const embed = new EmbedBuilder()
-    .setColor(EMBED_ORANGE)
-    .setTitle(isAward ? "🏆 Badge Awarded!" : "🚫 Badge Revoked")
-    .setDescription(isAward
-      ? `🎉 Congratulations, <@${member.id}>! You've earned the **${roleName}** role in the Pixlo Discord server.\n\nYou should now have been awarded the corresponding badge on **Pixlo** too. Head over to your Pixlo account and check it out!`
-      : `Hey <@${member.id}> — your **${roleName}** role has been removed from the Pixlo Discord server. Your corresponding Discord-earned badge has been removed from Pixlo. Visit your account to check your current badges.`)
+    .setColor(isAward ? messageType.color : 0xE05A47)
+    .setTitle(`${iconText} ${messageType.label} Badge ${isAward ? "Awarded!" : "Revoked"}`)
+    .setDescription(description)
     .addFields(
-      { name: isAward ? "🏅 Role Earned" : "🛡️ Revoked Role", value: roleName, inline: true },
+      { name: isAward ? "🏅 Badge Earned" : "🛡️ Badge Revoked", value: roleName, inline: true },
       { name: "👤 Member", value: `<@${member.id}>`, inline: true },
       { name: isAward ? "🛡️ Awarded By" : "🛡️ Removed By", value: actorText, inline: true },
     )
-    .setFooter({ text: "Pixlo • Keep earning, keep flexing." })
+    .setFooter({ text: `Pixlo • ${messageType.label} badge updates` })
     .setTimestamp();
   if (badgeEmoji) embed.setThumbnail(badgeEmoji.imageURL({ extension: "png", size: 256 }));
 
-  // Discord rejects duplicate IDs in allowedMentions.users when the member also performed the action.
-  // Embed mentions are rendered as clickable mentions without notifying users.
-  // Avoid explicit users arrays: Discord can reject duplicate IDs when member and actor are the same.
+  // Keep bot-authored embeds icon-led while preventing notification pings.
   await channel.send({
     embeds: [embed],
     allowedMentions: { parse: [], users: [], roles: [] },
   });
-  console.log(`[announcements] sent ${action} embed for role ${roleId} to member ${member.id}`);
+  console.log(`[announcements] sent ${action} ${messageType.label} message for role ${roleId} to member ${member.id}`);
 }
 
 const DONOR_TIER_KEYS = [
