@@ -256,11 +256,14 @@ export default function BadgeManagementPage() {
                 <section className="badge-admin-subpanel">
                   <div className="badge-admin-section-intro"><div><h2>Existing badges <span>{badges.length}</span></h2><p>Delete only legacy badges. Tier badges managed above are referenced by tier tables and should not be removed.</p></div></div>
                   {badges.length === 0 ? <p className="badge-admin-muted">No badges created yet.</p> : <div className="badge-admin-list">
-                    {badges.map(badge => <article className="badge-admin-item" key={badge.id}>
-                      <div className="badge-admin-icon">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
-                      <div className="badge-admin-info"><strong>{badge.name}</strong><small>{badge.badge_key}</small>{badge.description && <p>{badge.description}</p>}</div>
-                      <button className="badge-admin-danger" disabled={busy} onClick={() => { if (window.confirm("Delete the " + badge.name + " badge and its awards? Tier-managed badges cannot be deleted while their tier configuration exists.")) void act({ action: "delete_badge", id: badge.id }, "Badge deleted."); }}>Delete</button>
-                    </article>)}
+                    {badges.map(badge => {
+                      const tierManaged = badge.badge_key.startsWith("views_") || badge.badge_key.startsWith("recruiter_") || badge.badge_key.startsWith("donor_");
+                      return <article className="badge-admin-item" key={badge.id}>
+                        <div className="badge-admin-icon">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
+                        <div className="badge-admin-info"><strong>{badge.name}</strong><small>{badge.badge_key}</small>{badge.description && <p>{badge.description}</p>}</div>
+                        {tierManaged ? <span className="badge-admin-managed-pill">Tier managed</span> : <button className="badge-admin-danger" disabled={busy} onClick={() => { if (window.confirm("Delete the " + badge.name + " badge and its awards? This cannot be undone.")) void act({ action: "delete_badge", id: badge.id }, "Badge deleted."); }}>Delete</button>}
+                      </article>;
+                    })}
                   </div>}
                 </section>
               </div>
