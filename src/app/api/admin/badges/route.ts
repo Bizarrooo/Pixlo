@@ -103,6 +103,14 @@ export async function POST(request: Request) {
     if (action === "delete_badge") {
       const id = String(body?.id || "");
       if (!id) return json({ error: "Badge ID is required." }, 400);
+      const badgeResponse = await requestDb(`badges?select=id,badge_key,name&id=eq.${encodeURIComponent(id)}&limit=1`, "GET");
+      const badgeRows = await badgeResponse.json().catch(() => []);
+      const badge = Array.isArray(badgeRows) ? badgeRows[0] as Row | undefined : undefined;
+      if (!badgeResponse.ok || !badge) return json({ error: "Badge not found." }, 404);
+      const badgeKey = String(badge.badge_key || "");
+      if (badgeKey.startsWith("views_") || badgeKey.startsWith("recruiter_") || badgeKey.startsWith("donor_")) {
+        return json({ error: "This badge is managed by a tier configuration. Remove or reconfigure the tier first; tier-managed badges cannot be deleted directly." }, 409);
+      }
       const response = await requestDb(`badges?id=eq.${encodeURIComponent(id)}`, "DELETE", undefined, "return=minimal");
       if (!response.ok) return json({ error: "Could not delete this badge." }, 400);
       return json({ ok: true });
