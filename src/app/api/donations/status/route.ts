@@ -95,7 +95,6 @@ export async function GET(request: Request) {
   }
   const awardedRows = await awardedResponse.json().catch(() => []);
   const awardedIds = new Set(Array.isArray(awardedRows) ? awardedRows.map((row: { badge_id?: string }) => row.badge_id) : []);
-  const badgeKeyById = new Map(badgeDefinitions.map((badge: { id: string; badge_key: string }) => [badge.id, badge.badge_key]));
   const badgeTier = [...DONOR_TIERS].reverse().find(tier =>
     badgeDefinitions.some((badge: { id: string; badge_key: string }) => badge.badge_key === tier.key && awardedIds.has(badge.id))
   ) || null;
