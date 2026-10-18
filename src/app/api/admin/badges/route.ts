@@ -32,12 +32,30 @@ export async function GET(request: Request) {
   const serviceKey = serverEnv("SUPABASE_SERVICE_ROLE_KEY");
   if (!serviceKey) return NextResponse.json({ error: "SUPABASE_SERVICE_ROLE_KEY is missing from the server environment." }, { status: 503 });
   const { url } = supabaseConfig();
-  const [badgesResponse, mappingsResponse] = await Promise.all([
+  const [badgesResponse, mappingsResponse, donorTiersResponse] = await Promise.all([
     fetch(`${url}/rest/v1/badges?select=*&order=created_at.desc`, { headers: adminHeaders(serviceKey), cache: "no-store" }),
     fetch(`${url}/rest/v1/discord_role_badges?select=discord_role_id,badge_id,created_at`, { headers: adminHeaders(serviceKey), cache: "no-store" }),
+    fetch(`${url}/rest/v1/pixlo_donor_tiers?select=tier_key,badge_id,threshold_pence,discord_role_id,created_at,updated_at&order=threshold_pence.asc`, { headers: adminHeaders(serviceKey), cache: "no-store" }),
   ]);
   if (!badgesResponse.ok || !mappingsResponse.ok) return NextResponse.json({ error: "Could not load badge settings. Check that the badge migration ran successfully." }, { status: 503 });
-  return NextResponse.json({ badges: await badgesResponse.json(), mappings: await mappingsResponse.json() }, { headers: { "Cache-Control": "no-store" } });
+  const badges = await badgesResponse.json();
+  const mappings = await mappingsResponse.json();
+  const donorTierSetupRequired = !donorTiersResponse.ok;
+  const donorTierRows = donorTierSetupRequired ? [] : await donorTiersResponse.json();
+  const donorBadgeById = new Map((Array.isArray(badges) ? badges : []).map((badge: Row) => [String(badge.id), badge]));
+  const donorTiers = (Array.isArray(donorTierRows) ? donorTierRows : []).map((tier: Row) => {
+    const badge = donorBadgeById.get(String(tier.badge_id)) || {};
+    return {
+      tier_key: String(tier.tier_key || ""),
+      badge_id: String(tier.badge_id || ""),
+      name: String(badge.name || tier.tier_key || ""),
+      description: String(badge.description || ""),
+      icon_url: typeof badge.icon_url === "string" ? badge.icon_url : null,
+      threshold_pence: Number(tier.threshold_pence || 0),
+      discord_role_id: typeof tier.discord_role_id === "string" ? tier.discord_role_id : "",
+    };
+  });
+  return NextResponse.json({ badges, mappings, donorTiers, donorTierSetupRequired }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(request: Request) {
@@ -79,6 +97,39 @@ export async function POST(request: Request) {
       if (!id) return json({ error: "Badge ID is required." }, 400);
       const response = await requestDb(`badges?id=eq.${encodeURIComponent(id)}`, "DELETE", undefined, "return=minimal");
       if (!response.ok) return json({ error: "Could not delete this badge." }, 400);
+      return json({ ok: true });
+    }
+
+    if (action === "save_donor_tier") {
+      const tierKey = String(body?.tier_key || "").trim();
+      const validKeys = new Set([
+        "donor_supporter", "donor_patron", "donor_benefactor", "donor_sponsor",
+        "donor_elite_sponsor", "donor_mythic_patron", "donor_eternal_benefactor",
+      ]);
+      const thresholdPence = Number(body?.threshold_pence);
+      const roleId = String(body?.discord_role_id || "").trim();
+      if (!validKeys.has(tierKey)) return json({ error: "Choose a valid Pixlo donor tier." }, 400);
+      if (!Number.isInteger(thresholdPence) || thresholdPence < 100 || thresholdPence > 100000) {
+        return json({ error: "Set a tier threshold between £1.00 and £1,000.00." }, 400);
+      }
+      if (roleId && !/^\\d{15,22}$/.test(roleId)) {
+        return json({ error: "Enter a valid Discord role ID, or leave it blank to disable role syncing for this tier." }, 400);
+      }
+      const response = await requestDb(
+        `pixlo_donor_tiers?tier_key=eq.${encodeURIComponent(tierKey)}`,
+        "PATCH",
+        { threshold_pence: thresholdPence, discord_role_id: roleId || null, updated_at: new Date().toISOString() },
+        "return=representation",
+      );
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        const dbError = result && typeof result === "object" ? result as Record<string, unknown> : {};
+        const code = typeof dbError.code === "string" ? dbError.code : "";
+        if (code === "42P01" || code === "PGRST205") return json({ error: "Donor tier settings are not set up yet. Run supabase/migrations/202610180002_pixlo_donor_tier_admin.sql in Supabase after the donor badge migration." }, 503);
+        if (code === "23505") return json({ error: "That threshold or Discord role ID is already assigned to another tier. Every tier needs a unique threshold and role." }, 400);
+        return json({ error: "Could not save donor tier settings. Check the Supabase donor-tier migration and role ID." }, 400);
+      }
+      if (!Array.isArray(result) || result.length === 0) return json({ error: "Donor tier not found. Run the donor-tier migration in Supabase." }, 404);
       return json({ ok: true });
     }
 
