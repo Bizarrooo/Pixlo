@@ -40,7 +40,135 @@ export async function POST(request: Request) {
   if (session?.mode !== "payment" || session?.payment_status !== "paid") return NextResponse.json({ received: true });
   const configuredLiveMode = Boolean(serverEnv("STRIPE_SECRET_KEY")?.startsWith("sk_live_"));
   if (Boolean(session?.livemode) !== configuredLiveMode) return NextResponse.json({ received: true });
-  if (session?.metadata?.product !== "pixlo_premium_lifetime") return NextResponse.json({ received: true });
+  const product = String(session?.metadata?.product || "");
+
+  if (product === "pixlo_donation") {
+    const checkoutSessionId = session?.id;
+    const amountTotal = Number(session?.amount_total);
+    const currency = String(session?.currency || "").toLowerCase();
+    const rawDonorId = session?.metadata?.user_id || session?.client_reference_id;
+    const donorId = typeof rawDonorId === "string" && /^[0-9a-f-]{36}$/i.test(rawDonorId) ? rawDonorId : null;
+    if (typeof checkoutSessionId !== "string" || !checkoutSessionId.startsWith("cs_")) {
+      return NextResponse.json({ error: "Donation checkout session is missing or invalid." }, { status: 400 });
+    }
+    if (!Number.isInteger(amountTotal) || amountTotal < 100 || amountTotal > 100000 || currency !== "gbp") {
+      return NextResponse.json({ error: "Donation amount or currency is invalid." }, { status: 400 });
+    }
+
+    const { url } = supabaseConfig();
+    const donationResponse = await fetch(`${url}/rest/v1/pixlo_donations?on_conflict=checkout_session_id`, {
+      method: "POST",
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        "Content-Type": "application/json",
+        Prefer: "resolution=ignore-duplicates,return=minimal",
+      },
+      body: JSON.stringify({
+        user_id: donorId,
+        checkout_session_id: checkoutSessionId,
+        payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : null,
+        amount_pence: amountTotal,
+        currency,
+        livemode: Boolean(session.livemode),
+      }),
+      cache: "no-store",
+    });
+    if (!donationResponse.ok) {
+      const detail = await donationResponse.text().catch(() => "");
+      console.error("Could not record Pixlo donation:", donationResponse.status, detail.slice(0, 300));
+      return NextResponse.json({ error: "Could not record Pixlo donation." }, { status: 500 });
+    }
+
+    if (donorId) {
+      const liveMode = Boolean(session.livemode);
+      const historyResponse = await fetch(
+        `${url}/rest/v1/pixlo_donations?select=amount_pence&user_id=eq.${encodeURIComponent(donorId)}&livemode=eq.${liveMode}`,
+        { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
+      );
+      if (!historyResponse.ok) {
+        const detail = await historyResponse.text().catch(() => "");
+        console.error("Could not total Pixlo donations:", historyResponse.status, detail.slice(0, 300));
+        return NextResponse.json({ error: "Could not calculate donor tier." }, { status: 500 });
+      }
+      const history = await historyResponse.json().catch(() => []);
+      const totalPence = Array.isArray(history)
+        ? history.reduce((total: number, row: { amount_pence?: unknown }) => total + (Number.isInteger(Number(row.amount_pence)) ? Number(row.amount_pence) : 0), 0)
+        : 0;
+      const tierThresholds: Record<string, number> = {
+        donor_supporter: 500,
+        donor_patron: 1500,
+        donor_benefactor: 3000,
+        donor_sponsor: 5000,
+        donor_elite_sponsor: 10000,
+        donor_mythic_patron: 25000,
+        donor_eternal_benefactor: 50000,
+      };
+      const earnedKeys = Object.entries(tierThresholds).filter(([, threshold]) => totalPence >= threshold).map(([key]) => key);
+      if (earnedKeys.length) {
+        const badgeQuery = new URLSearchParams({
+          select: "id,badge_key",
+          is_active: "eq.true",
+          badge_key: `in.(${earnedKeys.join(",")})`,
+        });
+        const badgesResponse = await fetch(`${url}/rest/v1/badges?${badgeQuery.toString()}`, {
+          headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store",
+        });
+        if (!badgesResponse.ok) {
+          const detail = await badgesResponse.text().catch(() => "");
+          console.error("Could not load Pixlo donor badge definitions:", badgesResponse.status, detail.slice(0, 300));
+          return NextResponse.json({ error: "Could not load donor badge definitions." }, { status: 500 });
+        }
+        const badgeRows = await badgesResponse.json().catch(() => []);
+        const badges = Array.isArray(badgeRows) ? badgeRows.filter((badge: { id?: unknown; badge_key?: unknown }) => typeof badge.id === "string" && typeof badge.badge_key === "string") : [];
+        if (badges.length) {
+          const badgeIds = badges.map((badge: { id: string }) => badge.id);
+          const existingQuery = new URLSearchParams({
+            select: "badge_id",
+            user_id: `eq.${donorId}`,
+            source: "eq.manual",
+            badge_id: `in.(${badgeIds.join(",")})`,
+          });
+          const existingResponse = await fetch(`${url}/rest/v1/user_badges?${existingQuery.toString()}`, {
+            headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store",
+          });
+          if (!existingResponse.ok) {
+            const detail = await existingResponse.text().catch(() => "");
+            console.error("Could not check existing Pixlo donor badges:", existingResponse.status, detail.slice(0, 300));
+            return NextResponse.json({ error: "Could not check donor badges." }, { status: 500 });
+          }
+          const existingRows = await existingResponse.json().catch(() => []);
+          const existingIds = new Set(Array.isArray(existingRows) ? existingRows.map((row: { badge_id?: string }) => row.badge_id) : []);
+          const missingBadges = badges.filter((badge: { id: string }) => !existingIds.has(badge.id));
+          if (missingBadges.length) {
+            const awardResponse = await fetch(`${url}/rest/v1/user_badges`, {
+              method: "POST",
+              headers: {
+                apikey: serviceKey,
+                Authorization: `Bearer ${serviceKey}`,
+                "Content-Type": "application/json",
+                Prefer: "return=minimal",
+              },
+              body: JSON.stringify(missingBadges.map((badge: { id: string }) => ({
+                user_id: donorId,
+                badge_id: badge.id,
+                source: "manual",
+              }))),
+              cache: "no-store",
+            });
+            if (!awardResponse.ok) {
+              const detail = await awardResponse.text().catch(() => "");
+              console.error("Could not award Pixlo donor badges:", awardResponse.status, detail.slice(0, 300));
+              return NextResponse.json({ error: "Could not award donor badges." }, { status: 500 });
+            }
+          }
+        }
+      }
+    }
+    return NextResponse.json({ received: true });
+  }
+
+  if (product !== "pixlo_premium_lifetime") return NextResponse.json({ received: true });
 
   const userId = session?.metadata?.user_id || session?.client_reference_id;
   const checkoutSessionId = session?.id;
