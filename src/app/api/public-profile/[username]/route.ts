@@ -43,7 +43,7 @@ export async function GET(_request: Request, context: { params: Promise<{ userna
       }
     })();
 
-    const badgesPromise: Promise<Array<{ id: string; name: string; description: string; icon_url: string | null }>> = (async () => {
+    const badgesPromise: Promise<Array<{ id: string; name: string; description: string; icon_url: string | null; badge_key: string }>> = (async () => {
       try {
         const awardsResponse = await fetch(
           `${url}/rest/v1/public_badge_awards?select=badge_id&user_id=eq.${encodeURIComponent(String(row.id))}`,
@@ -56,7 +56,7 @@ export async function GET(_request: Request, context: { params: Promise<{ userna
           : [];
         if (!badgeIds.length) return [];
         const badgeQuery = new URLSearchParams({
-          select: "id,name,description,icon_url",
+          select: "id,name,description,icon_url,badge_key",
           is_active: "eq.true",
           id: `in.(${badgeIds.join(",")})`,
           order: "created_at.asc",
