@@ -145,3 +145,8 @@
 @media(max-width:1100px){.pixlo-badge-tier-modal.is-recruiter .pixlo-badge-tier-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:760px){.pixlo-badge-tier-modal.is-recruiter .pixlo-badge-tier-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:440px){.pixlo-badge-tier-modal.is-recruiter .pixlo-badge-tier-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Keep tier artwork standalone and transparent; the SVG supplies the icon, not a badge background. */
+.pixlo-badge-tier-icon.recruiter-icon,
+.pixlo-badge-tier-icon.views-icon,
+.pixlo-badge-tier-icon.donor-icon{background:transparent!important;background-color:transparent!important;color:#fff}
