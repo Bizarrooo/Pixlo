@@ -9,6 +9,7 @@ import CursorTrailCanvas from "./CursorTrailCanvas";
 const socialLabels: Record<string, string> = { discord: "Discord", youtube: "YouTube", roblox: "Roblox", github: "GitHub", twitch: "Twitch", instagram: "Instagram", spotify: "Spotify" };
 const socialKeys = ["discord", "youtube", "roblox", "github", "twitch", "instagram", "spotify"] as const;
 const donorBadgeKeys = new Set(["donor_supporter", "donor_patron", "donor_benefactor", "donor_sponsor", "donor_elite_sponsor", "donor_mythic_patron", "donor_eternal_benefactor"]);
+const donorTierOrder = ["donor_supporter", "donor_patron", "donor_benefactor", "donor_sponsor", "donor_elite_sponsor", "donor_mythic_patron", "donor_eternal_benefactor"];
 
 function SocialIcon({ name }: { name: string }) {
   const common = { width: 24, height: 24, viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true };
@@ -134,17 +135,25 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const activeTrack = settings.musicTracks[trackIndex] || settings.musicTracks.find(track => track.id === settings.activeMusicId) || settings.musicTracks[0];
   const activeTrackIndex = activeTrack ? settings.musicTracks.findIndex(track => track.id === activeTrack.id) : -1;
 
-  // Donor tiers are earned and equipped automatically. They remain visible even
-  // when the user has not manually selected that badge in dashboard customisation.
-  const visibleProfileBadges = useMemo(() => profileBadges
-    .filter(badge => donorBadgeKeys.has(badge.badge_key || "") || settings.activeBadgeIds.includes(badge.id))
-    .sort((a, b) => {
-      const aOrder = settings.activeBadgeOrder.indexOf(a.id);
-      const bOrder = settings.activeBadgeOrder.indexOf(b.id);
-      if (donorBadgeKeys.has(a.badge_key || "")) return donorBadgeKeys.has(b.badge_key || "") ? 0 : -1;
-      if (donorBadgeKeys.has(b.badge_key || "")) return 1;
-      return (aOrder < 0 ? Number.MAX_SAFE_INTEGER : aOrder) - (bOrder < 0 ? Number.MAX_SAFE_INTEGER : bOrder);
-    }), [profileBadges, settings.activeBadgeIds, settings.activeBadgeOrder]);
+  // Exactly one donor tier is shown: use the member's chosen tier, or the
+  // highest unlocked tier as a safe default for profiles that predate this setting.
+  const visibleProfileBadges = useMemo(() => {
+    const donorCandidates = profileBadges
+      .filter(badge => donorBadgeKeys.has(badge.badge_key || ""))
+      .sort((a, b) => donorTierOrder.indexOf(String(a.badge_key || "")) - donorTierOrder.indexOf(String(b.badge_key || "")));
+    const selectedDonor = donorCandidates.find(badge => settings.activeBadgeIds.includes(badge.id)) || donorCandidates[donorCandidates.length - 1] || null;
+    return profileBadges
+      .filter(badge => donorBadgeKeys.has(badge.badge_key || "")
+        ? badge.id === selectedDonor?.id
+        : settings.activeBadgeIds.includes(badge.id))
+      .sort((a, b) => {
+        const aOrder = settings.activeBadgeOrder.indexOf(a.id);
+        const bOrder = settings.activeBadgeOrder.indexOf(b.id);
+        if (donorBadgeKeys.has(a.badge_key || "")) return donorBadgeKeys.has(b.badge_key || "") ? 0 : -1;
+        if (donorBadgeKeys.has(b.badge_key || "")) return 1;
+        return (aOrder < 0 ? Number.MAX_SAFE_INTEGER : aOrder) - (bOrder < 0 ? Number.MAX_SAFE_INTEGER : bOrder);
+      });
+  }, [profileBadges, settings.activeBadgeIds, settings.activeBadgeOrder]);
 
   useEffect(() => {
     const selection = loadSettingsForUsername(forcedUsername || "");
