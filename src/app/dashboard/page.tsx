@@ -1840,25 +1840,32 @@ export default function Dashboard() {
             </section>}
 
             {badgeTierModal && <div className="pixlo-badge-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setBadgeTierModal(null); }}>
-              <section className={"pixlo-badge-tier-modal" + (badgeTierModal === "donor" ? " is-donor" : "")} role="dialog" aria-modal="true" aria-labelledby="pixlo-badge-tier-title">
+              <section className={"pixlo-badge-tier-modal" + (badgeTierModal === "donor" ? " is-donor" : badgeTierModal === "recruiter" ? " is-recruiter" : "")} role="dialog" aria-modal="true" aria-labelledby="pixlo-badge-tier-title">
                 <button type="button" className="pixlo-badge-modal-close" aria-label="Close badge tiers" onClick={() => setBadgeTierModal(null)}>×</button>
                 <div className="pixlo-badge-modal-heading">
-                  <span className={"pixlo-badge-modal-emblem " + (badgeTierModal === "views" ? "views-icon" : "donor-icon")}>{badgeTierModal === "views" ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.8 10-6.8S22 12 22 12s-3.6 6.8-10 6.8S2 12 2 12Z"/><circle cx="12" cy="12" r="3.2"/></svg> : "$"}</span>
-                  <div><h3 id="pixlo-badge-tier-title">{badgeTierModal === "views" ? "Profile view tiers" : "Donor badge tiers"}</h3><p>{badgeTierModal === "views" ? "Build your profile audience and unlock the next milestone." : "Your lifetime donations determine your donor badge tier."}</p></div>
+                  <span className={"pixlo-badge-modal-emblem " + (badgeTierModal === "views" ? "views-icon" : badgeTierModal === "donor" ? "donor-icon" : "recruiter-icon")}>
+                    {badgeTierModal === "views" ? <img src="/badges/views-rising.svg" alt="" /> : badgeTierModal === "donor" ? "$" : <img src="/badges/recruiter-scout.svg" alt="" />}
+                  </span>
+                  <div>
+                    <h3 id="pixlo-badge-tier-title">{badgeTierModal === "views" ? "Profile view tiers" : badgeTierModal === "donor" ? "Donor badge tiers" : "Recruiter badge tiers"}</h3>
+                    <p>{badgeTierModal === "views" ? "Build your profile audience and unlock each view milestone." : badgeTierModal === "donor" ? "Your lifetime donations determine your current donor badge." : "Bring new people into the Pixlo Discord community and unlock recruiter badges."}</p>
+                  </div>
                 </div>
+
                 {badgeTierModal === "views" ? <div className="pixlo-badge-tier-grid">
-                  {PROFILE_VIEW_TIERS.map(tier => {
-                    const reached = badgeViews >= tier.views;
-                    const previous = PROFILE_VIEW_TIERS[PROFILE_VIEW_TIERS.findIndex(item => item.key === tier.key) - 1]?.views || 0;
-                    const progress = reached ? 100 : Math.max(0, Math.min(100, Math.round(((badgeViews - previous) / (tier.views - previous)) * 100)));
-                    return <article key={tier.key} className={"pixlo-badge-tier-item" + (reached ? " is-reached" : "")}>
-                      <span className="pixlo-badge-tier-icon views-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.8 10-6.8S22 12 22 12s-3.6 6.8-10 6.8S2 12 2 12Z"/><circle cx="12" cy="12" r="3.2"/></svg></span>
-                      <strong>{tier.name}</strong><small>{tier.views.toLocaleString("en-GB")} views</small>
+                  {effectiveViewTiers.map((tier, index) => {
+                    const target = Number(tier.threshold_views || 0);
+                    const reached = badgeViews >= target;
+                    const previous = Number(effectiveViewTiers[index - 1]?.threshold_views || 0);
+                    const progress = reached ? 100 : Math.max(0, Math.min(100, Math.round(((badgeViews - previous) / Math.max(1, target - previous)) * 100)));
+                    return <article key={tier.tier_key} className={"pixlo-badge-tier-item" + (reached ? " is-reached" : "")}>
+                      <span className="pixlo-badge-tier-icon views-icon">{tier.icon_url ? <img src={tier.icon_url} alt="" /> : <span>{index + 1}</span>}</span>
+                      <strong>{tier.name}</strong><small>{target.toLocaleString("en-GB")} views</small>
                       <div className="pixlo-badge-tier-mini-track"><span style={{ width: progress + "%" }} /></div>
                       <span className="pixlo-badge-tier-lock">{reached ? "✓ Reached" : "🔒 Locked"}</span>
                     </article>;
                   })}
-                </div> : <div className="pixlo-badge-tier-grid">
+                </div> : badgeTierModal === "donor" ? <div className="pixlo-badge-tier-grid">
                   {(badgeDonorStatus?.tiers || []).map(tier => {
                     const total = Number(badgeDonorStatus?.totalDonatedPence || 0);
                     const reached = Boolean(badgeDonorStatus?.authenticated && total >= tier.amountPence);
@@ -1870,17 +1877,34 @@ export default function Dashboard() {
                     </article>;
                   })}
                   {!badgeDonorStatus?.tiers?.length && <p className="pixlo-badge-tier-empty">Donor tiers are temporarily unavailable. Check back in a moment.</p>}
+                </div> : <div className="pixlo-badge-tier-grid">
+                  {effectiveRecruiterTiers.map((tier, index) => {
+                    const target = Number(tier.threshold_invites || 0);
+                    const reached = badgeDiscordLinked && totalRecruiterInvites >= target;
+                    const previous = Number(effectiveRecruiterTiers[index - 1]?.threshold_invites || 0);
+                    const progress = reached ? 100 : Math.max(0, Math.min(100, Math.round(((totalRecruiterInvites - previous) / Math.max(1, target - previous)) * 100)));
+                    return <article key={tier.tier_key} className={"pixlo-badge-tier-item" + (reached ? " is-reached" : "")}>
+                      <span className="pixlo-badge-tier-icon recruiter-icon">{tier.icon_url ? <img src={tier.icon_url} alt="" /> : <span>{index + 1}</span>}</span>
+                      <strong>{tier.name}</strong><small>{target.toLocaleString("en-GB")} invites</small>
+                      <div className="pixlo-badge-tier-mini-track"><span style={{ width: (badgeDiscordLinked ? progress : 0) + "%" }} /></div>
+                      <span className="pixlo-badge-tier-lock">{reached ? "✓ Reached" : badgeDiscordLinked ? "🔒 Locked" : "Link Discord"}</span>
+                    </article>;
+                  })}
                 </div>}
+
                 <footer className="pixlo-badge-tier-footer">
                   {badgeTierModal === "views" ? <>
                     <span>Profile views</span><strong>{badgeViews.toLocaleString("en-GB")}</strong>
-                    <span>Next tier</span><strong>{PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews) ? PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews)!.name + ", " + (PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews)!.views - badgeViews).toLocaleString("en-GB") + " to go" : "All milestones reached"}</strong>
-                  </> : <>
+                    <span>Next tier</span><strong>{effectiveViewTiers.find(tier => Number(tier.threshold_views || 0) > badgeViews) ? effectiveViewTiers.find(tier => Number(tier.threshold_views || 0) > badgeViews)!.name + ", " + (Number(effectiveViewTiers.find(tier => Number(tier.threshold_views || 0) > badgeViews)!.threshold_views || 0) - badgeViews).toLocaleString("en-GB") + " to go" : "All milestones reached"}</strong>
+                  </> : badgeTierModal === "donor" ? <>
                     <span>Lifetime donations</span><strong>{badgeDonorStatus?.authenticated ? "£" + (Number(badgeDonorStatus.totalDonatedPence || 0) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "Sign in to track"}</strong>
                     <span>Next tier</span><strong>{badgeDonorStatus?.tiers?.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0)) ? badgeDonorStatus.tiers.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0))!.name + ", £" + ((badgeDonorStatus.tiers.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0))!.amountPence - Number(badgeDonorStatus.totalDonatedPence || 0)) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " to go" : badgeDonorStatus?.authenticated ? "Top donor tier reached" : "Open Pricing to learn more"}</strong>
+                  </> : <>
+                    <span>Tracked invites</span><strong>{badgeDiscordLinked ? totalRecruiterInvites.toLocaleString("en-GB") : "Discord not linked"}</strong>
+                    <span>Next tier</span><strong>{effectiveRecruiterTiers.find(tier => Number(tier.threshold_invites || 0) > totalRecruiterInvites) ? effectiveRecruiterTiers.find(tier => Number(tier.threshold_invites || 0) > totalRecruiterInvites)!.name + ", " + (Number(effectiveRecruiterTiers.find(tier => Number(tier.threshold_invites || 0) > totalRecruiterInvites)!.threshold_invites || 0) - totalRecruiterInvites).toLocaleString("en-GB") + " to go" : badgeDiscordLinked ? "Elite Recruiter reached" : "Link Discord to track"}</strong>
                   </>}
                 </footer>
-                <p className="pixlo-badge-modal-note">{badgeTierModal === "views" ? "View milestones track the live profile-view counter. Your catalogue will show any badges that have actually been awarded to your account." : "Donor tier rewards are awarded from confirmed Stripe donations. A higher donor tier replaces the lower tier rather than stacking."}</p>
+                <p className="pixlo-badge-modal-note">{badgeTierModal === "views" ? "Each view milestone has its own icon. Tier awards are refreshed by the Pixlo badge worker." : badgeTierModal === "donor" ? "Donor tier rewards are awarded from confirmed Stripe donations. A higher tier replaces the lower tier rather than stacking." : "Recruiter milestones count distinct members whose invite can be attributed by Discord. Invite tracking starts when the updated worker is running; old invite history cannot be reconstructed."}</p>
               </section>
             </div>}
           </div>}
