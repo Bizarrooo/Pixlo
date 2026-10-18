@@ -807,3 +807,31 @@
   .pricing-donor-tier-panel{padding:11px 10px}
   .pricing-donor-tier-chip{flex-basis:65px}
 }
+
+
+/* Live donor tier preview based on the currently selected donation amount. */
+.pricing-donor-tier-chip.is-projected-unlocked{
+  border-color:rgba(255,111,47,.82);
+  background:linear-gradient(150deg,#fff8ee,#ffdfc5);
+  box-shadow:0 0 0 1px rgba(249,116,50,.14),0 0 18px rgba(255,122,47,.2);
+}
+.pricing-donor-tier-chip.is-projected-current{
+  border-color:#f06b32;
+  transform:translateY(-3px);
+  box-shadow:0 0 0 2px rgba(240,107,50,.16),0 8px 20px rgba(230,96,36,.17);
+}
+.pricing-donor-tier-chip.is-projected-current .pricing-donor-tier-icon,
+.pricing-donor-tier-chip.is-projected-unlocked .pricing-donor-tier-icon{
+  opacity:1;
+  filter:none;
+}
+.pricing-donor-progress-track.is-projecting-unlock>span{
+  background:linear-gradient(90deg,#f34432 0%,#ff7935 55%,#ffc25a 100%);
+  box-shadow:0 0 13px rgba(249,110,45,.34);
+}
+.pricing-donor-progress-copy>strong{
+  transition:color .16s ease;
+}
+.pricing-donor-progress-track>span{
+  transition:width .22s ease-out;
+}
