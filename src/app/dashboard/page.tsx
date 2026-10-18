@@ -2034,7 +2034,7 @@ export default function Dashboard() {
                       <strong>{tier.name}</strong><small>{target.toLocaleString("en-GB")} views</small>
                       <div className="pixlo-badge-tier-mini-track"><span style={{ width: progress + "%" }} /></div>
                       <span className="pixlo-badge-tier-lock">{reached ? "✓ Reached" : "🔒 Locked"}</span>
-                      <button type="button" className="pixlo-badge-tier-equip" disabled={!reached || !tierBadge} onClick={() => equipBadgeTier(tier.key)}>{!reached ? "Locked" : equipped ? "Equipped" : "Equip tier"}</button>
+                      
                       <button type="button" className="pixlo-badge-tier-equip" disabled={!reached || !tierBadge} onClick={() => equipBadgeTier(tier.tier_key)}>{!reached ? "Locked" : equipped ? "Equipped" : "Equip tier"}</button>
                     </article>;
                   })}
@@ -2049,6 +2049,7 @@ export default function Dashboard() {
                       <strong>{tier.name}</strong><small>{"£" + (tier.amountPence / 100).toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} lifetime</small>
                       <div className="pixlo-badge-tier-mini-track"><span style={{ width: (badgeDonorStatus?.authenticated ? Math.max(0, Math.min(100, Math.round((total / tier.amountPence) * 100))) : 0) + "%" }} /></div>
                       <span className="pixlo-badge-tier-lock">{reached ? "✓ Reached" : "🔒 Locked"}</span>
+                      <button type="button" className="pixlo-badge-tier-equip" disabled={!reached || !tierBadge} onClick={() => equipBadgeTier(tier.key)}>{!reached ? "Locked" : equipped ? "Equipped" : "Equip tier"}</button>
                     </article>;
                   })}
                   {!badgeDonorStatus?.tiers?.length && <p className="pixlo-badge-tier-empty">Donor tiers are temporarily unavailable. Check back in a moment.</p>}
