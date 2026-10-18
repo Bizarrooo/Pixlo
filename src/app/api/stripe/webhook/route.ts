@@ -95,41 +95,32 @@ export async function POST(request: Request) {
       const totalPence = Array.isArray(history)
         ? history.reduce((total: number, row: { amount_pence?: unknown }) => total + (Number.isInteger(Number(row.amount_pence)) ? Number(row.amount_pence) : 0), 0)
         : 0;
-      const tierThresholds = [
-        { key: "donor_supporter", amountPence: 500 },
-        { key: "donor_patron", amountPence: 1500 },
-        { key: "donor_benefactor", amountPence: 3000 },
-        { key: "donor_sponsor", amountPence: 5000 },
-        { key: "donor_elite_sponsor", amountPence: 10000 },
-        { key: "donor_mythic_patron", amountPence: 25000 },
-        { key: "donor_eternal_benefactor", amountPence: 50000 },
-      ] as const;
-      const selectedTier = [...tierThresholds].reverse().find(tier => totalPence >= tier.amountPence) || null;
-      const allTierKeys = tierThresholds.map(tier => tier.key);
-      const badgeQuery = new URLSearchParams({
-        select: "id,badge_key",
-        is_active: "eq.true",
-        badge_key: `in.(${allTierKeys.join(",")})`,
-      });
-      const badgesResponse = await fetch(`${url}/rest/v1/badges?${badgeQuery.toString()}`, {
-        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store",
-      });
-      if (!badgesResponse.ok) {
-        const detail = await badgesResponse.text().catch(() => "");
-        console.error("Could not load Pixlo donor badge definitions:", badgesResponse.status, detail.slice(0, 300));
-        return NextResponse.json({ error: "Could not load donor badge definitions." }, { status: 500 });
+      const tiersResponse = await fetch(
+        `${url}/rest/v1/pixlo_donor_tiers?select=tier_key,badge_id,threshold_pence&order=threshold_pence.asc`,
+        { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
+      );
+      if (!tiersResponse.ok) {
+        const detail = await tiersResponse.text().catch(() => "");
+        console.error("Could not load Pixlo donor tier settings:", tiersResponse.status, detail.slice(0, 300));
+        return NextResponse.json({ error: "Donor tier setup is incomplete." }, { status: 500 });
       }
-      const badgeRows = await badgesResponse.json().catch(() => []);
-      const badges = Array.isArray(badgeRows)
-        ? badgeRows.filter((badge: { id?: unknown; badge_key?: unknown }) => typeof badge.id === "string" && typeof badge.badge_key === "string")
-        : [];
-      const badgesByKey = new Map(badges.map((badge: { id: string; badge_key: string }) => [badge.badge_key, badge]));
-      if (badges.length !== allTierKeys.length) {
-        console.error("Pixlo donor badge definitions are incomplete. Run the donor badge migration in Supabase.");
+      const tierRows = await tiersResponse.json().catch(() => []);
+      const validTierKeys = [
+        "donor_supporter", "donor_patron", "donor_benefactor", "donor_sponsor",
+        "donor_elite_sponsor", "donor_mythic_patron", "donor_eternal_benefactor",
+      ];
+      const tiers = (Array.isArray(tierRows) ? tierRows : [])
+        .filter((tier: { tier_key?: unknown; badge_id?: unknown; threshold_pence?: unknown }) =>
+          typeof tier.tier_key === "string" && validTierKeys.includes(tier.tier_key) &&
+          typeof tier.badge_id === "string" && Number.isInteger(Number(tier.threshold_pence)))
+        .sort((a: { threshold_pence: number }, b: { threshold_pence: number }) => Number(a.threshold_pence) - Number(b.threshold_pence));
+      if (tiers.length !== validTierKeys.length) {
+        console.error("Pixlo donor tiers are incomplete. Run the donor badge and donor tier admin migrations in Supabase.");
         return NextResponse.json({ error: "Donor badge setup is incomplete." }, { status: 500 });
       }
 
-      const donorBadgeIds = badges.map((badge: { id: string }) => badge.id);
+      const selectedTier = [...tiers].reverse().find((tier: { threshold_pence: number }) => totalPence >= Number(tier.threshold_pence)) || null;
+      const donorBadgeIds = tiers.map((tier: { badge_id: string }) => tier.badge_id);
       const existingQuery = new URLSearchParams({
         select: "id,badge_id,source",
         user_id: `eq.${donorId}`,
@@ -144,7 +135,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Could not check donor badges." }, { status: 500 });
       }
       const existingRows = await existingResponse.json().catch(() => []);
-      const desiredBadge = selectedTier ? badgesByKey.get(selectedTier.key) || null : null;
+      const desiredBadge = selectedTier ? { id: selectedTier.badge_id, badge_key: selectedTier.tier_key } : null;
       let hasDesiredManualBadge = false;
       const existingAwards = Array.isArray(existingRows) ? existingRows : [];
 
