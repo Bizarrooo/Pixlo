@@ -137,7 +137,7 @@
 .pixlo-badge-progression-icon.recruiter-icon{background:linear-gradient(135deg,#70d9b0,#218d79);color:#fff;overflow:hidden}
 .pixlo-badge-progression-icon.recruiter-icon img{display:block;width:100%;height:100%;object-fit:contain;padding:0}
 .pixlo-badge-modal-emblem img{display:block;width:100%;height:100%;object-fit:contain}
-.pixlo-badge-tier-icon img{display:block;width:78%;height:78%;object-fit:contain}
+.pixlo-badge-tier-icon img{display:block;width:78%;height:78%;object-fit:contain;background:transparent!important;background-color:transparent!important}
 .pixlo-badge-tier-modal.is-recruiter .pixlo-badge-tier-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
 .pixlo-badge-tier-icon.recruiter-icon{background:linear-gradient(135deg,#e2f9f1,#e7f3ff);color:#188d73}
 .pixlo-badge-tier-icon.views-icon{background:rgba(255,255,255,.76)}
