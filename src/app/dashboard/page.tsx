@@ -6,6 +6,7 @@ import { deleteAsset, loadAsset, migrateAssetToCloud, saveAsset } from "../asset
 import { rememberPixloAccount } from "../accountSwitcher";
 import DashboardSidebar, { DashboardNavIcon, customizeTabs, optimiseTabs, type DashboardPrimarySection } from "./DashboardSidebar";
 import CursorTrailCanvas from "../CursorTrailCanvas";
+import "./dashboard-badges.css";
 
 type DashboardBadge = { id: string; badge_key?: string; name: string; description: string; icon_url: string | null; awarded_at?: string };
 type BadgeHubTab = "Your badges" | "All badges" | "Customize" | "Shop";
@@ -1806,7 +1807,7 @@ export default function Dashboard() {
             </section>}
 
             {badgeTierModal && <div className="pixlo-badge-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setBadgeTierModal(null); }}>
-              <section className="pixlo-badge-tier-modal" role="dialog" aria-modal="true" aria-labelledby="pixlo-badge-tier-title">
+              <section className={"pixlo-badge-tier-modal" + (badgeTierModal === "donor" ? " is-donor" : "")} role="dialog" aria-modal="true" aria-labelledby="pixlo-badge-tier-title">
                 <button type="button" className="pixlo-badge-modal-close" aria-label="Close badge tiers" onClick={() => setBadgeTierModal(null)}>×</button>
                 <div className="pixlo-badge-modal-heading">
                   <span className={"pixlo-badge-modal-emblem " + (badgeTierModal === "views" ? "views-icon" : "donor-icon")}>{badgeTierModal === "views" ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.8 10-6.8S22 12 22 12s-3.6 6.8-10 6.8S2 12 2 12Z"/><circle cx="12" cy="12" r="3.2"/></svg> : "$"}</span>
