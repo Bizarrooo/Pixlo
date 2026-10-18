@@ -464,8 +464,9 @@ async function announceManagedTierBadgeChange(guild, profile, tierKey, action, o
   const replacementName = options.replacementTierKey
     ? MANAGED_TIER_DISPLAY_NAMES[options.replacementTierKey] || options.replacementTierKey
     : "";
-  const icon = guild.emojis.cache.find(emoji => category.emojiNames.includes(emoji.name)) || null;
-  const iconText = icon ? `<:${icon.name}:${icon.id}>` : category.fallbackIcon;
+  // The specific tier artwork is shown as the embed thumbnail below. Use a
+  // category symbol in the title instead of the generic one-size-fits-all badge icon.
+  const iconText = category.fallbackIcon;
   const publicOrigin = String(process.env.PIXLO_PUBLIC_ORIGIN || "https://pixlo1.vercel.app").replace(/\/$/, "");
   const tierIconUrl = `${publicOrigin}/api/badge-icon/${encodeURIComponent(tierKey)}`;
   const count = Number(options.value);
