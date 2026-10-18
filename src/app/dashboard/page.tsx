@@ -1987,7 +1987,7 @@ export default function Dashboard() {
                       <span className="pixlo-badge-drag-handle" title="Drag to reorder" aria-hidden="true">⠿</span>
                       <div className="pixlo-badge-mini-mark">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
                       <div className="pixlo-badge-equip-copy"><strong>{badge.name}</strong><small>{badge.description || "Pixlo badge"}</small></div>
-                      <Toggle value={equipped} onChange={v => { setSettings(current => ({ ...current, activeBadgeIds: v ? [...current.activeBadgeIds, badge.id] : current.activeBadgeIds.filter(id => id !== badge.id) })); setSaved(false); }} />
+                      <Toggle value={equipped} onChange={v => { const family = badgeTierFamily(badge.badge_key); const familyIds = family ? [...badgeCatalog, ...dashboardBadges].filter(item => badgeTierFamily(item.badge_key) === family).map(item => item.id) : [badge.id]; setSettings(current => ({ ...current, activeBadgeIds: v ? [...current.activeBadgeIds.filter(id => !familyIds.includes(id)), badge.id] : current.activeBadgeIds.filter(id => id !== badge.id), activeBadgeOrder: v ? [...current.activeBadgeOrder.filter(id => !familyIds.includes(id)), badge.id] : current.activeBadgeOrder.filter(id => id !== badge.id) })); setSaved(false); }} />
                     </div>;
                   })}
                 </div>}
@@ -2018,7 +2018,9 @@ export default function Dashboard() {
                 {badgeTierModal === "views" ? <div className="pixlo-badge-tier-grid">
                   {effectiveViewTiers.map((tier, index) => {
                     const target = Number(tier.threshold_views || 0);
-                    const reached = badgeViews >= target;
+                    const reached = Boolean(viewsTierProgress.tiers.find(item => item.key === tier.tier_key)?.unlocked) || badgeViews >= target;
+                    const tierBadge = badgeCatalog.find(badge => badge.badge_key === tier.tier_key);
+                    const equipped = Boolean(tierBadge && settings.activeBadgeIds.includes(tierBadge.id));
                     const previous = Number(effectiveViewTiers[index - 1]?.threshold_views || 0);
                     const progress = reached ? 100 : Math.max(0, Math.min(100, Math.round(((badgeViews - previous) / Math.max(1, target - previous)) * 100)));
                     return <article key={tier.tier_key} className={"pixlo-badge-tier-item" + (reached ? " is-reached" : "")}>
@@ -2026,12 +2028,16 @@ export default function Dashboard() {
                       <strong>{tier.name}</strong><small>{target.toLocaleString("en-GB")} views</small>
                       <div className="pixlo-badge-tier-mini-track"><span style={{ width: progress + "%" }} /></div>
                       <span className="pixlo-badge-tier-lock">{reached ? "✓ Reached" : "🔒 Locked"}</span>
+                      <button type="button" className="pixlo-badge-tier-equip" disabled={!reached || !tierBadge} onClick={() => equipBadgeTier(tier.key)}>{!reached ? "Locked" : equipped ? "Equipped" : "Equip tier"}</button>
+                      <button type="button" className="pixlo-badge-tier-equip" disabled={!reached || !tierBadge} onClick={() => equipBadgeTier(tier.tier_key)}>{!reached ? "Locked" : equipped ? "Equipped" : "Equip tier"}</button>
                     </article>;
                   })}
                 </div> : badgeTierModal === "donor" ? <div className="pixlo-badge-tier-grid">
                   {(badgeDonorStatus?.tiers || []).map(tier => {
                     const total = Number(badgeDonorStatus?.totalDonatedPence || 0);
-                    const reached = Boolean(badgeDonorStatus?.authenticated && total >= tier.amountPence);
+                    const reached = Boolean(donorTierProgress.tiers.find(item => item.key === tier.key)?.unlocked) || Boolean(badgeDonorStatus?.authenticated && total >= tier.amountPence);
+                    const tierBadge = badgeCatalog.find(badge => badge.badge_key === tier.key);
+                    const equipped = Boolean(tierBadge && settings.activeBadgeIds.includes(tierBadge.id));
                     return <article key={tier.key} className={"pixlo-badge-tier-item" + (reached ? " is-reached" : "")}>
                       <span className="pixlo-badge-tier-icon donor-icon">{tier.icon ? <img src={tier.icon} alt="" /> : "$"}</span>
                       <strong>{tier.name}</strong><small>{"£" + (tier.amountPence / 100).toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} lifetime</small>
@@ -2043,7 +2049,9 @@ export default function Dashboard() {
                 </div> : <div className="pixlo-badge-tier-grid">
                   {effectiveRecruiterTiers.map((tier, index) => {
                     const target = Number(tier.threshold_invites || 0);
-                    const reached = badgeDiscordLinked && totalRecruiterInvites >= target;
+                    const reached = Boolean(recruiterTierProgress.tiers.find(item => item.key === tier.tier_key)?.unlocked);
+                    const tierBadge = badgeCatalog.find(badge => badge.badge_key === tier.tier_key);
+                    const equipped = Boolean(tierBadge && settings.activeBadgeIds.includes(tierBadge.id));
                     const previous = Number(effectiveRecruiterTiers[index - 1]?.threshold_invites || 0);
                     const progress = reached ? 100 : Math.max(0, Math.min(100, Math.round(((totalRecruiterInvites - previous) / Math.max(1, target - previous)) * 100)));
                     return <article key={tier.tier_key} className={"pixlo-badge-tier-item" + (reached ? " is-reached" : "")}>
@@ -2051,6 +2059,7 @@ export default function Dashboard() {
                       <strong>{tier.name}</strong><small>{target.toLocaleString("en-GB")} invites</small>
                       <div className="pixlo-badge-tier-mini-track"><span style={{ width: (badgeDiscordLinked ? progress : 0) + "%" }} /></div>
                       <span className="pixlo-badge-tier-lock">{reached ? "✓ Reached" : badgeDiscordLinked ? "🔒 Locked" : "Link Discord"}</span>
+                      <button type="button" className="pixlo-badge-tier-equip" disabled={!reached || !tierBadge} onClick={() => equipBadgeTier(tier.tier_key)}>{!reached ? "Locked" : equipped ? "Equipped" : "Equip tier"}</button>
                     </article>;
                   })}
                 </div>}
