@@ -150,3 +150,54 @@
 .pixlo-badge-tier-icon.recruiter-icon,
 .pixlo-badge-tier-icon.views-icon,
 .pixlo-badge-tier-icon.donor-icon{background:transparent!important;background-color:transparent!important;color:#fff}
+
+/* Expandable per-family tier progress and tier selection. */
+.pixlo-badge-tier-dropdowns{display:grid;gap:10px;min-width:0}
+.pixlo-badge-tier-progress-dropdown{min-width:0;overflow:hidden;border:1px solid rgba(255,143,94,.17);border-radius:13px;background:linear-gradient(120deg,rgba(255,105,70,.055),rgba(255,255,255,.018))}
+.pixlo-badge-tier-progress-dropdown>summary{display:flex;align-items:center;gap:12px;min-width:0;padding:12px 14px;list-style:none;cursor:pointer;transition:background .16s}
+.pixlo-badge-tier-progress-dropdown>summary::-webkit-details-marker{display:none}
+.pixlo-badge-tier-progress-dropdown>summary:hover{background:rgba(255,255,255,.025)}
+.pixlo-tier-summary-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;overflow:hidden;border:1px solid rgba(255,145,95,.15);border-radius:11px;background:rgba(255,255,255,.035);color:#ffb48e;font-size:18px}
+.pixlo-tier-summary-icon img{width:78%;height:78%;object-fit:contain}
+.pixlo-tier-summary-copy{display:grid;gap:4px;min-width:0;flex:1}
+.pixlo-tier-summary-copy strong{color:#fff;font-size:12px;font-weight:850}
+.pixlo-tier-summary-copy small{color:rgba(255,255,255,.48);font-size:10px;line-height:1.4}
+.pixlo-tier-summary-value{flex:0 1 auto;color:#ffbf9d;font-size:10px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.pixlo-tier-summary-chevron{flex:0 0 17px;color:rgba(255,255,255,.48);font-size:17px;text-align:center;transition:transform .16s}
+.pixlo-badge-tier-progress-dropdown[open]>.pixlo-tier-summary-chevron,
+.pixlo-badge-tier-progress-dropdown[open]>summary .pixlo-tier-summary-chevron{transform:rotate(180deg)}
+.pixlo-tier-progress-body{padding:13px 15px 14px;border-top:1px solid rgba(255,255,255,.07)}
+.pixlo-tier-progress-labels{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;color:rgba(255,255,255,.53);font-size:9px;font-weight:750}
+.pixlo-tier-progress-labels span:last-child{text-align:right}
+.pixlo-tier-progress-rail-row{display:flex;align-items:center;gap:10px;min-width:0}
+.pixlo-tier-progress-badge{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;overflow:hidden;border:1px solid rgba(255,150,99,.2);border-radius:50%;background:rgba(255,255,255,.025);color:#ffb791;font-size:16px}
+.pixlo-tier-progress-badge img{display:block;width:76%;height:76%;object-fit:contain}
+.pixlo-tier-progress-badge.is-next{border-color:rgba(255,149,98,.36);background:rgba(255,130,82,.06)}
+.pixlo-tier-progress-badge.is-complete{border-color:rgba(255,149,98,.3)}
+.pixlo-tier-progress-rail{position:relative;display:block;flex:1;min-width:35px;height:8px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1)}
+.pixlo-tier-progress-rail>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ff4d48,#ff853f 58%,#ffbd64);box-shadow:0 0 10px rgba(255,115,65,.24);transition:width .3s ease}
+.pixlo-tier-open-button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-height:34px;padding:0 10px;border:1px solid rgba(255,144,91,.3);border-radius:9px;background:linear-gradient(105deg,rgba(255,74,65,.13),rgba(255,159,72,.11));color:#ffc09c;font-size:10px;font-weight:900;cursor:pointer;transition:background .16s,border-color .16s,transform .16s}
+.pixlo-tier-open-button:hover{transform:translateY(-1px);border-color:rgba(255,144,91,.55);background:linear-gradient(105deg,rgba(255,74,65,.22),rgba(255,159,72,.2))}
+.pixlo-tier-progress-caption{margin:10px 0 0;color:rgba(255,255,255,.55);font-size:10px;line-height:1.5}
+.pixlo-badge-tier-item{min-height:188px}
+.pixlo-badge-tier-equip{display:inline-flex;align-items:center;justify-content:center;min-height:28px;width:100%;margin-top:9px;padding:0 7px;border:1px solid rgba(225,113,61,.28);border-radius:8px;background:linear-gradient(100deg,rgba(255,78,67,.12),rgba(255,164,77,.12));color:#c95b32;font-size:9px;font-weight:900;cursor:pointer;transition:background .15s,border-color .15s}
+.pixlo-badge-tier-equip:hover:not(:disabled){border-color:rgba(225,113,61,.56);background:linear-gradient(100deg,rgba(255,78,67,.2),rgba(255,164,77,.2))}
+.pixlo-badge-tier-equip:disabled{opacity:.45;cursor:not-allowed}
+.pixlo-badge-tier-item.is-reached .pixlo-badge-tier-equip{background:linear-gradient(100deg,rgba(255,95,65,.15),rgba(255,166,77,.17));color:#b84d28}
+@media(max-width:760px){
+  .pixlo-tier-summary-value{display:none}
+  .pixlo-tier-progress-body{padding:11px 10px 12px}
+  .pixlo-tier-progress-rail-row{gap:7px}
+  .pixlo-tier-progress-badge{flex-basis:31px;width:31px;height:31px}
+  .pixlo-tier-open-button{min-height:31px;padding:0 8px}
+}
+@media(max-width:440px){
+  .pixlo-badge-tier-progress-dropdown>summary{gap:8px;padding:10px}
+  .pixlo-tier-summary-icon{flex-basis:33px;width:33px;height:33px}
+  .pixlo-tier-summary-copy strong{font-size:11px}
+  .pixlo-tier-progress-rail-row{gap:5px}
+  .pixlo-tier-progress-badge{flex-basis:25px;width:25px;height:25px}
+  .pixlo-tier-open-button{font-size:9px;padding:0 7px}
+  .pixlo-badge-tier-item{min-height:180px}
+}
+
