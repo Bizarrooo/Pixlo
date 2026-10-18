@@ -404,7 +404,9 @@ export default function PricingPage() {
                   </div>
                   {donorStatus?.unavailable ? (
                     <p className="pricing-donor-signin">Donor tracking needs its database setup before lifetime totals and badges can unlock.</p>
-                  ) : donorStatus?.authenticated ? (
+                  ) : donorStatus === null ? (
+                    <p className="pricing-donor-signin">Checking your lifetime donor total…</p>
+                  ) : donorStatus.authenticated ? (
                     <div className="pricing-donor-progress" aria-live="polite">
                       <div className="pricing-donor-progress-copy">
                         <span>{currentDonorTier ? `Current tier: ${currentDonorTier.name}` : "Your donor journey starts here"}</span>
