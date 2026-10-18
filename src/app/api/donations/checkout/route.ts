@@ -5,7 +5,8 @@ import { supabaseConfig } from "../../../../lib/supabase-config";
 export const runtime = "nodejs";
 
 const MIN_DONATION_PENCE = 100;
-const MAX_DONATION_PENCE = 100000;
+// Stripe supports up to eight digits in the smallest currency unit (GBP pence).
+const MAX_DONATION_PENCE = 99999999;
 
 function cookieValue(request: Request, name: string) {
   const raw = request.headers.get("cookie") || "";
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({})) as { amountPence?: unknown };
   const amountPence = Number(body.amountPence);
   if (!Number.isInteger(amountPence) || amountPence < MIN_DONATION_PENCE || amountPence > MAX_DONATION_PENCE) {
-    return NextResponse.json({ error: "Enter a donation between £1 and £1,000." }, { status: 400 });
+    return NextResponse.json({ error: "Enter a donation between £1 and £999,999.99." }, { status: 400 });
   }
 
   // Donations remain available to guests, but signed-in donors can earn and display
