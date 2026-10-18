@@ -1899,7 +1899,66 @@ export default function Dashboard() {
                 {settings.showVerifiedBadgeNextToUsername && dashboardBadges.some(badge => badge.name.trim().toLowerCase() === "verified") && <Colour label="Verified check colour" value={settings.verifiedBadgeColour} onChange={v => { set("verifiedBadgeColour", v); setSaved(false); }} />}
               </div>
 
-              <div className="pixlo-badge-panel-heading pixlo-badge-equip-heading"><div><h3>Equip and order badges</h3><p>Toggle badges on or off. Drag a card with the handle to change the display order. Save your dashboard to apply the changes.</p></div></div>
+              <div className="pixlo-badge-tier-dropdowns">
+                <details className="pixlo-badge-tier-progress-dropdown">
+                  <summary>
+                    <span className="pixlo-tier-summary-icon">{(viewsTierProgress.current || viewsTierProgress.next)?.icon_url ? <img src={(viewsTierProgress.current || viewsTierProgress.next)!.icon_url!} alt="" /> : <span>👁</span>}</span>
+                    <span className="pixlo-tier-summary-copy"><strong>Profile views tiers</strong><small>{viewsTierProgress.current ? `Current: ${viewsTierProgress.current.name}` : "Not unlocked yet"}</small></span>
+                    <span className="pixlo-tier-summary-value">{badgeViews.toLocaleString("en-GB")} views</span>
+                    <span className="pixlo-tier-summary-chevron" aria-hidden="true">⌄</span>
+                  </summary>
+                  <div className="pixlo-tier-progress-body">
+                    <div className="pixlo-tier-progress-labels"><span>{viewsTierProgress.current?.name || "Not unlocked"}</span><span>{viewsTierProgress.next ? "Next: " + viewsTierProgress.next.name : "All view tiers unlocked"}</span></div>
+                    <div className="pixlo-tier-progress-rail-row">
+                      <span className="pixlo-tier-progress-badge">{viewsTierProgress.current?.icon_url ? <img src={viewsTierProgress.current.icon_url} alt={viewsTierProgress.current.name} /> : <span>✦</span>}</span>
+                      <div className="pixlo-tier-progress-rail" role="progressbar" aria-label="Profile views progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={viewsTierProgress.progressPercent}><span style={{ width: viewsTierProgress.progressPercent + "%" }} /></div>
+                      <span className={viewsTierProgress.next ? "pixlo-tier-progress-badge is-next" : "pixlo-tier-progress-badge is-next is-complete"}>{(viewsTierProgress.next || viewsTierProgress.current)?.icon_url ? <img src={(viewsTierProgress.next || viewsTierProgress.current)!.icon_url!} alt={(viewsTierProgress.next || viewsTierProgress.current)!.name} /> : <span>✦</span>}</span>
+                      <button type="button" className="pixlo-tier-open-button" onClick={() => setBadgeTierModal("views")}>Tiers ↗</button>
+                    </div>
+                    <p className="pixlo-tier-progress-caption">{viewsTierProgress.next ? `${viewsTierProgress.remaining.toLocaleString("en-GB")} more views until ${viewsTierProgress.next.name}.` : "You've unlocked every profile-view tier."}</p>
+                  </div>
+                </details>
+
+                <details className="pixlo-badge-tier-progress-dropdown">
+                  <summary>
+                    <span className="pixlo-tier-summary-icon">{(donorTierProgress.current || donorTierProgress.next)?.icon_url ? <img src={(donorTierProgress.current || donorTierProgress.next)!.icon_url!} alt="" /> : <span>💝</span>}</span>
+                    <span className="pixlo-tier-summary-copy"><strong>Donor tiers</strong><small>{donorTierProgress.current ? `Current: ${donorTierProgress.current.name}` : "Not unlocked yet"}</small></span>
+                    <span className="pixlo-tier-summary-value">{badgeDonorStatus?.authenticated ? "£" + (Number(badgeDonorStatus.totalDonatedPence || 0) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "Donation progress unavailable"}</span>
+                    <span className="pixlo-tier-summary-chevron" aria-hidden="true">⌄</span>
+                  </summary>
+                  <div className="pixlo-tier-progress-body">
+                    <div className="pixlo-tier-progress-labels"><span>{donorTierProgress.current?.name || "Not unlocked"}</span><span>{donorTierProgress.next ? "Next: " + donorTierProgress.next.name : "All donor tiers unlocked"}</span></div>
+                    <div className="pixlo-tier-progress-rail-row">
+                      <span className="pixlo-tier-progress-badge">{donorTierProgress.current?.icon_url ? <img src={donorTierProgress.current.icon_url} alt={donorTierProgress.current.name} /> : <span>✦</span>}</span>
+                      <div className="pixlo-tier-progress-rail" role="progressbar" aria-label="Donor tier progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={donorTierProgress.progressPercent}><span style={{ width: donorTierProgress.progressPercent + "%" }} /></div>
+                      <span className={donorTierProgress.next ? "pixlo-tier-progress-badge is-next" : "pixlo-tier-progress-badge is-next is-complete"}>{(donorTierProgress.next || donorTierProgress.current)?.icon_url ? <img src={(donorTierProgress.next || donorTierProgress.current)!.icon_url!} alt={(donorTierProgress.next || donorTierProgress.current)!.name} /> : <span>✦</span>}</span>
+                      <button type="button" className="pixlo-tier-open-button" onClick={() => setBadgeTierModal("donor")}>Tiers ↗</button>
+                    </div>
+                    <p className="pixlo-tier-progress-caption">{donorTierProgress.next ? (badgeDonorStatus?.authenticated ? "£" + (donorTierProgress.remaining / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " more in donations until " + donorTierProgress.next.name + "." : "Sign in to track the amount needed for your next donor tier.") : badgeDonorStatus?.authenticated ? "You've unlocked every donor tier." : "View donor tiers to see their requirements."}</p>
+                  </div>
+                </details>
+
+                <details className="pixlo-badge-tier-progress-dropdown">
+                  <summary>
+                    <span className="pixlo-tier-summary-icon">{(recruiterTierProgress.current || recruiterTierProgress.next)?.icon_url ? <img src={(recruiterTierProgress.current || recruiterTierProgress.next)!.icon_url!} alt="" /> : <span>🎟</span>}</span>
+                    <span className="pixlo-tier-summary-copy"><strong>Recruiter tiers</strong><small>{recruiterTierProgress.current ? `Current: ${recruiterTierProgress.current.name}` : "Not unlocked yet"}</small></span>
+                    <span className="pixlo-tier-summary-value">{badgeDiscordLinked ? totalRecruiterInvites.toLocaleString("en-GB") + " invites" : "Link Discord to track"}</span>
+                    <span className="pixlo-tier-summary-chevron" aria-hidden="true">⌄</span>
+                  </summary>
+                  <div className="pixlo-tier-progress-body">
+                    <div className="pixlo-tier-progress-labels"><span>{recruiterTierProgress.current?.name || "Not unlocked"}</span><span>{recruiterTierProgress.next ? "Next: " + recruiterTierProgress.next.name : "All recruiter tiers unlocked"}</span></div>
+                    <div className="pixlo-tier-progress-rail-row">
+                      <span className="pixlo-tier-progress-badge">{recruiterTierProgress.current?.icon_url ? <img src={recruiterTierProgress.current.icon_url} alt={recruiterTierProgress.current.name} /> : <span>✦</span>}</span>
+                      <div className="pixlo-tier-progress-rail" role="progressbar" aria-label="Recruiter tier progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={badgeDiscordLinked ? recruiterTierProgress.progressPercent : 0}><span style={{ width: (badgeDiscordLinked ? recruiterTierProgress.progressPercent : 0) + "%" }} /></div>
+                      <span className={recruiterTierProgress.next ? "pixlo-tier-progress-badge is-next" : "pixlo-tier-progress-badge is-next is-complete"}>{(recruiterTierProgress.next || recruiterTierProgress.current)?.icon_url ? <img src={(recruiterTierProgress.next || recruiterTierProgress.current)!.icon_url!} alt={(recruiterTierProgress.next || recruiterTierProgress.current)!.name} /> : <span>✦</span>}</span>
+                      <button type="button" className="pixlo-tier-open-button" onClick={() => setBadgeTierModal("recruiter")}>Tiers ↗</button>
+                    </div>
+                    <p className="pixlo-tier-progress-caption">{!badgeDiscordLinked ? "Link your Discord to track invite milestones." : recruiterTierProgress.next ? `${recruiterTierProgress.remaining.toLocaleString("en-GB")} more unique invites until ${recruiterTierProgress.next.name}.` : "You've unlocked every recruiter tier."}</p>
+                  </div>
+                </details>
+              </div>
+
+              <div className="pixlo-badge-panel-heading pixlo-badge-equip-heading"><div><h3>Equip and order badges</h3><p>Toggle badges on or off. Drag a card with the handle to change the display order. Only one tier per badge family can be equipped at a time.</p></div></div>
               {dashboardBadgesLoading ? <div className="pixlo-badge-loading">Loading earned badges…</div>
               : dashboardBadgesError ? <div className="pixlo-badge-error" role="alert">{dashboardBadgesError}</div>
               : dashboardBadges.filter(badge => badge.badge_key !== "donor" && badge.name.trim().toLowerCase() !== "donor").length === 0
