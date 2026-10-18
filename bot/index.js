@@ -485,6 +485,79 @@ async function announceRoleChange(guild, profile, roleId, action) {
   console.log(`[announcements] sent ${action} embed for role ${roleId} to member ${member.id}`);
 }
 
+const DONOR_ROLE_TIERS = [
+  { key: "donor_supporter", thresholdPence: 500, env: "DISCORD_DONOR_SUPPORTER_ROLE_ID" },
+  { key: "donor_patron", thresholdPence: 1500, env: "DISCORD_DONOR_PATRON_ROLE_ID" },
+  { key: "donor_benefactor", thresholdPence: 3000, env: "DISCORD_DONOR_BENEFACTOR_ROLE_ID" },
+  { key: "donor_sponsor", thresholdPence: 5000, env: "DISCORD_DONOR_SPONSOR_ROLE_ID" },
+  { key: "donor_elite_sponsor", thresholdPence: 10000, env: "DISCORD_DONOR_ELITE_SPONSOR_ROLE_ID" },
+  { key: "donor_mythic_patron", thresholdPence: 25000, env: "DISCORD_DONOR_MYTHIC_PATRON_ROLE_ID" },
+  { key: "donor_eternal_benefactor", thresholdPence: 50000, env: "DISCORD_DONOR_ETERNAL_BENEFACTOR_ROLE_ID" },
+];
+
+async function getAllDonationTotals(liveMode) {
+  const totals = new Map();
+  let offset = 0;
+  const pageSize = 1000;
+  while (true) {
+    const page = await db(`pixlo_donations?select=user_id,amount_pence&user_id=not.is.null&livemode=eq.${liveMode}&order=created_at.asc&limit=${pageSize}&offset=${offset}`);
+    if (!Array.isArray(page) || page.length === 0) break;
+    for (const donation of page) {
+      if (typeof donation.user_id !== "string") continue;
+      const amount = Number(donation.amount_pence);
+      if (Number.isInteger(amount) && amount > 0) totals.set(donation.user_id, (totals.get(donation.user_id) || 0) + amount);
+    }
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+  return totals;
+}
+
+async function syncDonorTierRoles(guild, profiles) {
+  const configuredTiers = DONOR_ROLE_TIERS
+    .map(tier => ({ ...tier, roleId: String(process.env[tier.env] || "").trim() }))
+    .filter(tier => /^\d{17,20}$/.test(tier.roleId));
+  if (!configuredTiers.length) return;
+
+  const liveMode = process.env.PIXLO_DONATIONS_LIVEMODE === "true"
+    || (process.env.PIXLO_DONATIONS_LIVEMODE == null && process.env.PIXLO_PREMIUM_LIVEMODE === "true");
+  const totals = await getAllDonationTotals(liveMode);
+  const roles = [];
+  for (const tier of configuredTiers) {
+    const role = guild.roles.cache.get(tier.roleId);
+    if (!role) {
+      console.error(`[donor-role] Could not find Discord role ${tier.roleId} configured by ${tier.env}.`);
+      continue;
+    }
+    roles.push({ ...tier, role });
+  }
+  if (!roles.length) return;
+
+  let assigned = 0;
+  let removed = 0;
+  for (const profile of profiles) {
+    const discordId = String(profile.discord_id || "");
+    if (!discordId) continue;
+    const totalPence = totals.get(String(profile.id)) || 0;
+    const member = guild.members.cache.get(discordId) || await guild.members.fetch(discordId).catch(() => null);
+    if (!member) continue;
+
+    const desired = [...roles].reverse().find(tier => totalPence >= tier.thresholdPence) || null;
+    for (const tier of roles) {
+      const hasRole = member.roles.cache.has(tier.roleId);
+      const shouldHaveRole = desired?.roleId === tier.roleId;
+      if (shouldHaveRole && !hasRole) {
+        await member.roles.add(tier.roleId, `Pixlo lifetime donor reached ${tier.key}`);
+        assigned += 1;
+      } else if (!shouldHaveRole && hasRole) {
+        await member.roles.remove(tier.roleId, `Pixlo donor tier reconciled from lifetime donations`);
+        removed += 1;
+      }
+    }
+  }
+  console.log(`[donor-role] reconciled ${configuredTiers.length} configured tiers: ${assigned} role(s) added, ${removed} removed.`);
+}
+
 async function syncBadges() {
   if (syncing) { syncAgain = true; return; }
   syncing = true;
@@ -523,6 +596,11 @@ async function syncBadges() {
       }
     } catch (error) {
       console.error("[premium-role] entitlement sync failed:", error instanceof Error ? error.message : error);
+    }
+    try {
+      await syncDonorTierRoles(guild, linkedProfiles);
+    } catch (error) {
+      console.error("[donor-role] donor tier role sync failed (check the donor SQL migration and configured role IDs):", error instanceof Error ? error.message : error);
     }
     const mappingKeys = new Set(mappings.map(item => `${item.discord_role_id}:${item.badge_id}`));
     const profileById = new Map(linkedProfiles.map(profile => [profile.id, profile]));
