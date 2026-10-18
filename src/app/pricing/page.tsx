@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 type PremiumStatus = { authenticated?: boolean; premium?: boolean; error?: string };
 type GiftCheck = "idle" | "checking" | "valid" | "invalid";
-type DonationProgress = { authenticated?: boolean; totalDonatedPence?: number };
+type DonationProgress = { authenticated?: boolean; totalDonatedPence?: number; unavailable?: boolean };
 
 const donorBadgeTiers = [
   { key: "donor_supporter", name: "Supporter", amountPence: 500, icon: "/badges/donor-supporter.svg" },
@@ -102,6 +102,7 @@ export default function PricingPage() {
       .then(async response => {
         const data = await response.json().catch(() => ({}));
         if (response.ok) setDonorStatus(data);
+        else if (response.status === 503) setDonorStatus({ unavailable: true });
         else setDonorStatus({ authenticated: false, totalDonatedPence: 0 });
       })
       .catch(() => {
@@ -401,7 +402,9 @@ export default function PricingPage() {
                       );
                     })}
                   </div>
-                  {donorStatus?.authenticated ? (
+                  {donorStatus?.unavailable ? (
+                    <p className="pricing-donor-signin">Donor tracking needs its database setup before lifetime totals and badges can unlock.</p>
+                  ) : donorStatus?.authenticated ? (
                     <div className="pricing-donor-progress" aria-live="polite">
                       <div className="pricing-donor-progress-copy">
                         <span>{currentDonorTier ? `Current tier: ${currentDonorTier.name}` : "Your donor journey starts here"}</span>
