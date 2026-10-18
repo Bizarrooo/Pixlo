@@ -692,7 +692,7 @@ async function getAllRecruiterInviteCounts(profiles) {
   let offset = 0;
   const pageSize = 1000;
   while (true) {
-    const page = await db(\`pixlo_recruiter_invites?select=inviter_discord_id&order=id.asc&limit=\${pageSize}&offset=\${offset}\`);
+    const page = await db(`pixlo_recruiter_invites?select=inviter_discord_id&order=id.asc&limit=${pageSize}&offset=${offset}`);
     if (!Array.isArray(page) || page.length === 0) break;
     for (const invite of page) {
       const userId = inviterProfileIds.get(String(invite.inviter_discord_id || ""));
@@ -709,13 +709,12 @@ async function syncProgressTierGroup(guild, profiles, config) {
   config.setSyncing(true);
   const log = config.label;
   try {
-    const [tierRows, badgeRows, allAwards] = await Promise.all([
-      db(\`\${config.table}?select=tier_key,badge_id,\${config.thresholdColumn},discord_role_id&order=\${config.thresholdColumn}.asc\`),
-      db(\`badges?select=id,badge_key&is_active=eq.true&badge_key=in.(\${config.tierKeys.join(",")})\`),
-      db(\`user_badges?select=id,user_id,badge_id,source&badge_id=in.(\${config.tierKeys.map(key => encodeURIComponent(key)).join(",")})&limit=1\`).catch(() => []),
+    const [tierRows, badgeRows] = await Promise.all([
+      db(`${config.table}?select=tier_key,badge_id,${config.thresholdColumn},discord_role_id&order=${config.thresholdColumn}.asc`),
+      db(`badges?select=id,badge_key&is_active=eq.true&badge_key=in.(${config.tierKeys.join(",")})`),
     ]);
     if (!Array.isArray(tierRows) || tierRows.length !== config.tierKeys.length) {
-      console.error(\`[\${log}] tier configuration is incomplete. Run the Views and Recruiter tier migration in Supabase.\`);
+      console.error(`[${log}] tier configuration is incomplete. Run the Views and Recruiter tier migration in Supabase.`);
       return;
     }
     const badgeByKey = new Map((Array.isArray(badgeRows) ? badgeRows : []).map(badge => [String(badge.badge_key), badge]));
@@ -731,7 +730,7 @@ async function syncProgressTierGroup(guild, profiles, config) {
       .sort((a, b) => a.threshold - b.threshold)
       .map((tier, index) => ({ ...tier, index }));
     if (tierConfigs.length !== config.tierKeys.length) {
-      console.error(\`[\${log}] one or more database tiers are invalid or their badge was removed.\`);
+      console.error(`[${log}] one or more database tiers are invalid or their badge was removed.`);
       return;
     }
 
@@ -740,7 +739,7 @@ async function syncProgressTierGroup(guild, profiles, config) {
     let awardOffset = 0;
     const pageSize = 1000;
     while (true) {
-      const page = await db(\`user_badges?select=id,user_id,badge_id,source&badge_id=in.(\${tierBadgeIds.join(",")})&order=id.asc&limit=\${pageSize}&offset=\${awardOffset}\`);
+      const page = await db(`user_badges?select=id,user_id,badge_id,source&badge_id=in.(${tierBadgeIds.join(",")})&order=id.asc&limit=${pageSize}&offset=${awardOffset}`);
       if (!Array.isArray(page) || page.length === 0) break;
       existingAwards.push(...page);
       if (page.length < pageSize) break;
@@ -757,7 +756,7 @@ async function syncProgressTierGroup(guild, profiles, config) {
       .filter(tier => /^\d{15,22}$/.test(tier.roleId))
       .map(tier => {
         const role = guild.roles.cache.get(tier.roleId);
-        if (!role) console.error(\`[\${log}] Could not find Discord role \${tier.roleId} for \${tier.key}.\`);
+        if (!role) console.error(`[${log}] Could not find Discord role ${tier.roleId} for ${tier.key}.`);
         return { ...tier, role };
       })
       .filter(tier => Boolean(tier.role));
@@ -794,15 +793,15 @@ async function syncProgressTierGroup(guild, profiles, config) {
             const hasRole = member.roles.cache.has(tier.roleId);
             const shouldHaveRole = effectiveTierIndex >= 0 && tier.index === effectiveTierIndex;
             if (shouldHaveRole && !hasRole) {
-              await member.roles.add(tier.roleId, \`Pixlo \${log} reached \${effectiveTier.key}\`);
+              await member.roles.add(tier.roleId, `Pixlo ${log} reached ${effectiveTier.key}`);
               assigned += 1;
             } else if (!shouldHaveRole && hasRole) {
-              await member.roles.remove(tier.roleId, \`Pixlo \${log} tier upgraded or reconciled\`);
+              await member.roles.remove(tier.roleId, `Pixlo ${log} tier upgraded or reconciled`);
               removed += 1;
             }
           }
         } else if (effectiveTier) {
-          console.warn(\`[\${log}] \${effectiveTier.key} has no configured role; existing tier roles were left unchanged.\`);
+          console.warn(`[${log}] ${effectiveTier.key} has no configured role; existing tier roles were left unchanged.`);
         }
       }
 
@@ -814,7 +813,7 @@ async function syncProgressTierGroup(guild, profiles, config) {
           keptDesiredManualBadge = true;
           continue;
         }
-        await db(\`user_badges?id=eq.\${encodeURIComponent(award.id)}\`, { method: "DELETE", headers: { Prefer: "return=minimal" } });
+        await db(`user_badges?id=eq.${encodeURIComponent(award.id)}`, { method: "DELETE", headers: { Prefer: "return=minimal" } });
         badgesReplaced += 1;
       }
       if (effectiveTier && !keptDesiredManualBadge) {
@@ -826,7 +825,7 @@ async function syncProgressTierGroup(guild, profiles, config) {
         badgesAwarded += 1;
       }
     }
-    console.log(\`[\${log}] synced tiers: \${assigned} role(s) added, \${removed} removed; \${badgesAwarded} badges awarded and \${badgesReplaced} replaced.\`);
+    console.log(`[${log}] synced tiers: ${assigned} role(s) added, ${removed} removed; ${badgesAwarded} badges awarded and ${badgesReplaced} replaced.`);
   } finally {
     config.setSyncing(false);
   }
@@ -901,12 +900,12 @@ async function recordRecruiterInvite(member) {
     inviteUseCache = next;
     inviteCacheReady = true;
     if (!chosenInvite || chosenIncrease < 1) {
-      console.log(\`[recruiter-invite] Could not attribute join by \${member.id}; no invite usage increased.\`);
+      console.log(`[recruiter-invite] Could not attribute join by ${member.id}; no invite usage increased.`);
       return;
     }
     const inviterDiscordId = String(chosenInvite.inviterId || chosenInvite.inviter?.id || "");
     if (!/^\d{15,22}$/.test(inviterDiscordId) || inviterDiscordId === member.id) {
-      console.log(\`[recruiter-invite] Skipping unattributable/self invite for \${member.id}.\`);
+      console.log(`[recruiter-invite] Skipping unattributable/self invite for ${member.id}.`);
       return;
     }
     await db("pixlo_recruiter_invites?on_conflict=invited_discord_id", {
@@ -918,7 +917,7 @@ async function recordRecruiterInvite(member) {
         invite_code: String(chosenInvite.code || ""),
       }),
     });
-    console.log(\`[recruiter-invite] Recorded invitee \${member.id} from inviter \${inviterDiscordId} using code \${chosenInvite.code}.\`);
+    console.log(`[recruiter-invite] Recorded invitee ${member.id} from inviter ${inviterDiscordId} using code ${chosenInvite.code}.`);
   } catch (error) {
     console.error("[recruiter-invite] Could not attribute member join. Check Manage Server permission and the recruiter migration:", error instanceof Error ? error.message : error);
   } finally {
