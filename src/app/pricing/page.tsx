@@ -250,6 +250,13 @@ export default function PricingPage() {
   const selectedDonationTier = selectedDonationPence === null
     ? null
     : [...donorTiersForUi].reverse().find(tier => projectedDonatedPence >= tier.amountPence && (!currentDonorTier || tier.amountPence > currentDonorTier.amountPence)) || null;
+  const highestDonorTier = donorTiersForUi[donorTiersForUi.length - 1] || null;
+  const reachedHighestDonorTier = Boolean(
+    highestDonorTier && (
+      currentDonorTier?.key === highestDonorTier.key ||
+      (selectedDonationPence !== null && projectedDonatedPence >= highestDonorTier.amountPence)
+    )
+  );
 
   return (
     <main className="pricing-global">
@@ -441,11 +448,13 @@ export default function PricingPage() {
                         <span>{donorStatus?.authenticated ? `Current tier: ${currentDonorTier?.name || "No donor tier yet"}` : "Donor tier preview"}</span>
                         <strong>{selectedDonationPence === null
                           ? "Enter a valid amount"
-                          : selectedDonationTier
-                            ? `Donate ${formatGBP(selectedDonationPence)} to unlock ${selectedDonationTier.name}`
-                            : projectedNextDonorTier
-                              ? `${formatGBP(Math.max(0, projectedNextDonorTier.amountPence - projectedDonatedPence))} more to unlock ${projectedNextDonorTier.name}`
-                              : "Eternal Benefactor tier reached"}</strong>
+                          : reachedHighestDonorTier
+                            ? "You reached the highest Donator level. Thank you!"
+                            : selectedDonationTier
+                              ? `Donate ${formatGBP(selectedDonationPence)} to unlock ${selectedDonationTier.name}`
+                              : projectedNextDonorTier
+                                ? `${formatGBP(Math.max(0, projectedNextDonorTier.amountPence - projectedDonatedPence))} more to unlock ${projectedNextDonorTier.name}`
+                                : "You reached the highest Donator level. Thank you!"}</strong>
                       </div>
                       <div className={`pricing-donor-progress-track ${selectedDonationTier ? "is-projecting-unlock" : ""}`} role="progressbar" aria-label="Projected progress towards next donor tier after this donation" aria-valuemin={0} aria-valuemax={100} aria-valuenow={donorProgressPercent}>
                         <span style={{ width: `${donorProgressPercent}%` }} />
