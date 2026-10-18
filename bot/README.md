@@ -1,6 +1,6 @@
 # Pixlo Discord Badge Worker
 
-A separate Node.js worker that reconciles Discord roles to Pixlo profile badges every 15 minutes. It is intentionally not deployed as a Vercel serverless function.
+A separate Node.js worker that reconciles Discord roles to Pixlo profile badges every five minutes. It is intentionally not deployed as a Vercel serverless function.
 
 ## Environment variables
 
