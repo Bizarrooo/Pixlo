@@ -426,7 +426,7 @@ export default function PricingPage() {
                           <span className={`pricing-donor-tier-icon tier-${index}`}><img src={tier.icon} alt="" aria-hidden="true" /></span>
                           <small>{formatGBP(tier.amountPence).replace(".00", "")}</small>
                           <strong>{tier.name}</strong>
-                          {unlocked && <span className="pricing-donor-unlocked" aria-label="Unlocked">✓</span>}
+                          {(alreadyUnlocked || willUnlock) && <span className="pricing-donor-unlocked" aria-label={willUnlock ? "Would unlock with selected donation" : "Unlocked"}>✓</span>}
                         </div>
                       );
                     })}
