@@ -5,6 +5,21 @@ import { useEffect, useState } from "react";
 
 type PremiumStatus = { authenticated?: boolean; premium?: boolean; error?: string };
 type GiftCheck = "idle" | "checking" | "valid" | "invalid";
+type DonationProgress = { authenticated?: boolean; totalDonatedPence?: number };
+
+const donorBadgeTiers = [
+  { key: "donor_supporter", name: "Supporter", amountPence: 500, icon: "/badges/donor-supporter.svg" },
+  { key: "donor_patron", name: "Patron", amountPence: 1500, icon: "/badges/donor-patron.svg" },
+  { key: "donor_benefactor", name: "Benefactor", amountPence: 3000, icon: "/badges/donor-benefactor.svg" },
+  { key: "donor_sponsor", name: "Sponsor", amountPence: 5000, icon: "/badges/donor-sponsor.svg" },
+  { key: "donor_elite_sponsor", name: "Elite Sponsor", amountPence: 10000, icon: "/badges/donor-elite-sponsor.svg" },
+  { key: "donor_mythic_patron", name: "Mythic Patron", amountPence: 25000, icon: "/badges/donor-mythic-patron.svg" },
+  { key: "donor_eternal_benefactor", name: "Eternal Benefactor", amountPence: 50000, icon: "/badges/donor-eternal-benefactor.svg" },
+] as const;
+
+function formatGBP(pence: number) {
+  return `£${(pence / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 const pricingPixelSquares = [
   { left: 2, bottom: 4, size: 58, color: "#ff4e39", opacity: .86 },
@@ -63,6 +78,7 @@ export default function PricingPage() {
   const [donationCustomMode, setDonationCustomMode] = useState(false);
   const [customDonationInput, setCustomDonationInput] = useState("");
   const [donating, setDonating] = useState(false);
+  const [donorStatus, setDonorStatus] = useState<DonationProgress | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -78,6 +94,20 @@ export default function PricingPage() {
       })
       .catch(() => setMessage("Could not check Premium status. Please refresh the page."))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/donations/status", { cache: "no-store", credentials: "include", signal: controller.signal })
+      .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (response.ok) setDonorStatus(data);
+        else setDonorStatus({ authenticated: false, totalDonatedPence: 0 });
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setDonorStatus({ authenticated: false, totalDonatedPence: 0 });
+      });
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -184,6 +214,14 @@ export default function PricingPage() {
   function updateGiftUsername(value: string) {
     setGiftUsername(value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 24));
   }
+
+  const lifetimeDonatedPence = donorStatus?.authenticated ? Number(donorStatus.totalDonatedPence || 0) : 0;
+  const currentDonorTier = [...donorBadgeTiers].reverse().find(tier => lifetimeDonatedPence >= tier.amountPence) || null;
+  const nextDonorTier = donorBadgeTiers.find(tier => lifetimeDonatedPence < tier.amountPence) || null;
+  const previousTierThreshold = currentDonorTier?.amountPence || 0;
+  const donorProgressPercent = nextDonorTier
+    ? Math.max(0, Math.min(100, Math.round(((lifetimeDonatedPence - previousTierThreshold) / (nextDonorTier.amountPence - previousTierThreshold)) * 100)))
+    : 100;
 
   return (
     <main className="pricing-global">
@@ -344,6 +382,51 @@ export default function PricingPage() {
                 <span className="pricing-product-tag">OPTIONAL SUPPORT</span>
                 <h3>Donations</h3>
                 <p>Enjoying Pixlo? A small one-time contribution helps support ongoing development. Checkout is handled securely by Stripe.</p>
+                <section className="pricing-donor-tier-panel" aria-label="Donor badge tiers">
+                  <div className="pricing-donor-tier-heading">
+                    <div><span className="pricing-donor-kicker">BADGE TIERS</span><strong>Every donation adds up.</strong></div>
+                    <span className="pricing-donor-total">{donorStatus?.authenticated ? formatGBP(lifetimeDonatedPence) : "7 tiers"}</span>
+                  </div>
+                  <div className="pricing-donor-tier-rail">
+                    {donorBadgeTiers.map((tier, index) => {
+                      const unlocked = Boolean(donorStatus?.authenticated && lifetimeDonatedPence >= tier.amountPence);
+                      const isCurrent = currentDonorTier?.key === tier.key;
+                      return (
+                        <div className={`pricing-donor-tier-chip ${unlocked ? "is-unlocked" : ""} ${isCurrent ? "is-current" : ""}`} key={tier.key} title={`${tier.name} — ${formatGBP(tier.amountPence)} lifetime donations`}>
+                          <span className={`pricing-donor-tier-icon tier-${index}`}><img src={tier.icon} alt="" aria-hidden="true" /></span>
+                          <small>{formatGBP(tier.amountPence).replace(".00", "")}</small>
+                          <strong>{tier.name}</strong>
+                          {unlocked && <span className="pricing-donor-unlocked" aria-label="Unlocked">✓</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {donorStatus?.authenticated ? (
+                    <div className="pricing-donor-progress" aria-live="polite">
+                      <div className="pricing-donor-progress-copy">
+                        <span>{currentDonorTier ? `Current tier: ${currentDonorTier.name}` : "Your donor journey starts here"}</span>
+                        <strong>{nextDonorTier ? `${formatGBP(nextDonorTier.amountPence - lifetimeDonatedPence)} to ${nextDonorTier.name}` : "All donor tiers unlocked"}</strong>
+                      </div>
+                      <div className="pricing-donor-progress-track" role="progressbar" aria-label="Progress towards next donor tier" aria-valuemin={0} aria-valuemax={100} aria-valuenow={donorProgressPercent}>
+                        <span style={{ width: `${donorProgressPercent}%` }} />
+                      </div>
+                      <small>Lifetime donations: {formatGBP(lifetimeDonatedPence)}{nextDonorTier ? ` of ${formatGBP(nextDonorTier.amountPence)}` : " · maximum tier reached"}</small>
+                    </div>
+                  ) : (
+                    <p className="pricing-donor-signin"><Link href="/login?next=%2Fpricing">Sign in</Link> before donating to track your lifetime total and unlock donor badges. Guest donations are still welcome, but cannot be attached to a Pixlo profile.</p>
+                  )}
+                  <details className="pricing-donor-tier-details">
+                    <summary>View all donor badge tiers</summary>
+                    <div className="pricing-donor-tier-list">
+                      {donorBadgeTiers.map(tier => (
+                        <div key={tier.key} className={`pricing-donor-tier-list-row ${donorStatus?.authenticated && lifetimeDonatedPence >= tier.amountPence ? "is-unlocked" : ""}`}>
+                          <span>{tier.name}</span><strong>{formatGBP(tier.amountPence)}</strong>
+                          {donorStatus?.authenticated && lifetimeDonatedPence >= tier.amountPence && <i>Unlocked</i>}
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                </section>
                 <div className="pricing-donation-options" aria-label="Choose a donation amount">
                   {[100, 300, 500, 1000].map(amount => (
                     <button
