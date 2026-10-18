@@ -184,13 +184,13 @@ export default function PricingPage() {
   }
 
 
-  const customDonationValid = /^\d{1,4}(?:\.\d{1,2})?$/.test(customDonationInput)
+  const customDonationValid = /^\d{1,6}(?:\.\d{1,2})?$/.test(customDonationInput)
     && Number(customDonationInput) >= 1
-    && Number(customDonationInput) <= 1000;
+    && Number(customDonationInput) <= 999999.99;
 
   async function startDonation() {
     if (donationCustomMode && !customDonationValid) {
-      setMessage("Enter a donation between £1 and £1,000, with up to two decimal places.");
+      setMessage("Enter a donation between £1 and £999,999.99, with up to two decimal places.");
       return;
     }
     setDonating(true);
@@ -500,7 +500,7 @@ export default function PricingPage() {
                       id="pricing-custom-donation"
                       type="number"
                       min="1"
-                      max="1000"
+                      max="999999.99"
                       step="0.01"
                       inputMode="decimal"
                       placeholder="Enter amount"
@@ -508,13 +508,13 @@ export default function PricingPage() {
                       onChange={event => {
                         const value = event.target.value;
                         setCustomDonationInput(value);
-                        if (/^\d{1,4}(?:\.\d{1,2})?$/.test(value) && Number(value) >= 1 && Number(value) <= 1000) {
+                        if (/^\d{1,6}(?:\.\d{1,2})?$/.test(value) && Number(value) >= 1 && Number(value) <= 999999.99) {
                           setDonationAmount(Math.round(Number(value) * 100));
                         }
                       }}
                       aria-label="Custom donation amount in pounds"
                     />
-                    <small>£1–£1,000</small>
+                    <small>£1–£999,999.99</small>
                   </label>
                 )}
                 <div className="pricing-product-bottom pricing-donation-bottom">
