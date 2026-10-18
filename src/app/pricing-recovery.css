@@ -493,3 +493,70 @@
 }
 .pricing-hero-copy,
 .pricing-comparison { position: relative !important; z-index: 3 !important; }
+
+
+/* Pricing background correction: reproduce the homepage hero's art-to-paper fade.
+   The shared ambient artwork belongs behind the header and hero together, then dissolves
+   into the same warm white paper used by .px-hero. Do not paint the whole page brown. */
+.pricing-global {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  background: #fffaf5 !important;
+}
+.pricing-global::before {
+  display: block !important;
+  position: absolute !important;
+  z-index: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: 0 !important;
+  height: 800px !important;
+  content: "" !important;
+  pointer-events: none !important;
+  background: #190907 url("/pixlo-ambient.svg") center / cover no-repeat !important;
+  opacity: .98 !important;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.88) 68%, rgba(0,0,0,.42) 83%, transparent 100%) !important;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.88) 68%, rgba(0,0,0,.42) 83%, transparent 100%) !important;
+}
+.pricing-global::after {
+  display: block !important;
+  position: absolute !important;
+  z-index: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: 0 !important;
+  height: 800px !important;
+  content: "" !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(90deg, rgba(21, 7, 6, .86) 0%, rgba(32, 8, 6, .72) 42%, rgba(27, 8, 6, .2) 100%),
+    linear-gradient(180deg, rgba(16, 5, 5, .2) 0%, transparent 56%, rgba(24, 7, 5, .76) 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.88) 68%, rgba(0,0,0,.42) 83%, transparent 100%) !important;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.88) 68%, rgba(0,0,0,.42) 83%, transparent 100%) !important;
+}
+.pricing-global > .pricing-header {
+  position: relative !important;
+  z-index: 2 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+.pricing-container {
+  position: relative !important;
+  z-index: 1 !important;
+}
+.pricing-hero {
+  background: transparent !important;
+  isolation: isolate !important;
+}
+.pricing-hero-art,
+.pricing-hero-shade {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  .pricing-global::before,
+  .pricing-global::after {
+    height: 760px !important;
+  }
+}
