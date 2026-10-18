@@ -426,7 +426,6 @@ export default function PricingPage() {
                   ) : (
                     <p className="pricing-donor-signin"><Link href="/login?next=%2Fpricing">Sign in</Link> before donating to track your lifetime total and unlock donor badges. Guest donations are still welcome, but cannot be attached to a Pixlo profile.</p>
                   )}
-        </details>
                 </section>
                 <div className="pricing-donation-options" aria-label="Choose a donation amount">
                   {[100, 300, 500, 1000].map(amount => (
