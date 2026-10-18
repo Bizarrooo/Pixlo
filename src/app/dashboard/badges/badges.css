@@ -30,3 +30,38 @@
 .badge-admin-info p{color:#b2b2b2}
 .badge-admin-danger{border-color:rgba(255,92,78,.3)!important;background:rgba(255,68,55,.09)!important;color:#ff9c8f!important}
 .badge-admin-danger:hover{background:rgba(255,68,55,.18)!important}
+
+
+/* Owner-only donor tier controls. */
+.badge-admin-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:16px}
+.badge-admin-section-heading>div{min-width:0}
+.badge-admin-section-heading .badge-admin-muted{margin:8px 0 0;line-height:1.6}
+.badge-admin-donor-tier-list{display:grid;gap:10px;margin-top:18px}
+.badge-admin-donor-tier{display:grid;grid-template-columns:minmax(170px,.7fr) minmax(0,1.5fr);gap:18px;align-items:center;padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:linear-gradient(120deg,rgba(255,255,255,.035),rgba(255,111,60,.025))}
+.badge-admin-donor-tier-identity{display:flex;align-items:center;gap:12px;min-width:0}
+.badge-admin-donor-tier-identity .badge-admin-icon{width:44px;height:44px;flex:0 0 44px}
+.badge-admin-donor-tier-identity .badge-admin-info{min-width:0}
+.badge-admin-donor-tier-identity .badge-admin-info strong{display:block}
+.badge-admin-donor-tier-identity .badge-admin-info small{display:block;overflow-wrap:anywhere}
+.badge-admin-donor-tier-identity .badge-admin-info p{margin:5px 0 0;font-size:11px;color:#898989}
+.badge-admin-donor-tier-fields{display:grid;grid-template-columns:minmax(110px,.62fr) minmax(180px,1fr) auto;gap:10px;align-items:end}
+.badge-admin-donor-tier-fields label{display:grid;gap:7px;color:#ddd;font-size:11px;font-weight:750}
+.badge-admin-donor-tier-fields input{width:100%;min-width:0;min-height:40px;padding:9px 11px;border:1px solid #303030;border-radius:9px;background:#101010;color:#fff;font:inherit;font-size:12px;outline:none}
+.badge-admin-donor-tier-fields input:focus{border-color:#ff8058;box-shadow:0 0 0 3px rgba(255,100,65,.14)}
+.badge-admin-donor-tier-fields button{min-height:40px;padding:0 14px;border:1px solid transparent;border-radius:9px;background:linear-gradient(105deg,#ff4545 0%,#ff873b 100%);color:#fff;font-size:11px;font-weight:850;cursor:pointer;white-space:nowrap}
+.badge-admin-donor-tier-fields button:disabled{opacity:.45;cursor:not-allowed}
+.badge-admin-setup-note{padding:15px;border:1px solid rgba(255,142,81,.25);border-radius:12px;background:rgba(255,105,54,.06);color:#ffd5c3}
+.badge-admin-setup-note strong{display:block;margin-bottom:6px}
+.badge-admin-setup-note p{margin:0;color:#c7b3aa;font-size:12px;line-height:1.7}
+.badge-admin-setup-note code{font-size:11px;overflow-wrap:anywhere;color:#ffba91}
+@media(max-width:900px){
+ .badge-admin-donor-tier{grid-template-columns:1fr}
+ .badge-admin-donor-tier-fields{grid-template-columns:minmax(100px,.65fr) minmax(160px,1fr) auto}
+}
+@media(max-width:600px){
+ .badge-admin-donor-tier{padding:11px;gap:12px}
+ .badge-admin-donor-tier-fields{grid-template-columns:1fr 1fr}
+ .badge-admin-donor-tier-fields button{grid-column:1/-1;width:100%}
+ .badge-admin-donor-tier-fields label{min-width:0}
+ .badge-admin-donor-tier-fields label:last-of-type{grid-column:1/-1}
+}
