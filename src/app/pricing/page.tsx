@@ -420,17 +420,7 @@ export default function PricingPage() {
                   ) : (
                     <p className="pricing-donor-signin"><Link href="/login?next=%2Fpricing">Sign in</Link> before donating to track your lifetime total and unlock donor badges. Guest donations are still welcome, but cannot be attached to a Pixlo profile.</p>
                   )}
-                  <details className="pricing-donor-tier-details">
-                    <summary>View all donor badge tiers</summary>
-                    <div className="pricing-donor-tier-list">
-                      {donorBadgeTiers.map(tier => (
-                        <div key={tier.key} className={`pricing-donor-tier-list-row ${donorStatus?.authenticated && lifetimeDonatedPence >= tier.amountPence ? "is-unlocked" : ""}`}>
-                          <span>{tier.name}</span><strong>{formatGBP(tier.amountPence)}</strong>
-                          {donorStatus?.authenticated && lifetimeDonatedPence >= tier.amountPence && <i>Unlocked</i>}
-                        </div>
-                      ))}
-                    </div>
-                  </details>
+        </details>
                 </section>
                 <div className="pricing-donation-options" aria-label="Choose a donation amount">
                   {[100, 300, 500, 1000].map(amount => (
