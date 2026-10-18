@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { serverEnv } from "../../../../lib/server-env";
+import { supabaseConfig } from "../../../../lib/supabase-config";
 
 export const runtime = "nodejs";
 
 const MIN_DONATION_PENCE = 100;
 const MAX_DONATION_PENCE = 100000;
+
+function cookieValue(request: Request, name: string) {
+  const raw = request.headers.get("cookie") || "";
+  const value = raw.match(new RegExp(`(?:^|; )${name}=([^;]+)`))?.[1] || "";
+  try { return decodeURIComponent(value); } catch { return value; }
+}
 
 export async function POST(request: Request) {
   const stripeKey = serverEnv("STRIPE_SECRET_KEY");
@@ -16,6 +23,22 @@ export async function POST(request: Request) {
   const amountPence = Number(body.amountPence);
   if (!Number.isInteger(amountPence) || amountPence < MIN_DONATION_PENCE || amountPence > MAX_DONATION_PENCE) {
     return NextResponse.json({ error: "Enter a donation between £1 and £1,000." }, { status: 400 });
+  }
+
+  // Donations remain available to guests, but signed-in donors can earn and display
+  // cumulative badge tiers. Never silently drop an expired signed-in session.
+  const accessToken = cookieValue(request, "pixlo_access_token");
+  let donorId: string | null = null;
+  if (accessToken) {
+    const { url, key } = supabaseConfig();
+    const authResponse = await fetch(`${url}/auth/v1/user`, {
+      headers: { apikey: key, Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+    if (!authResponse.ok) return NextResponse.json({ error: "Your session has expired. Please sign in again to track donor badge progress." }, { status: 401 });
+    const user = await authResponse.json().catch(() => null);
+    if (typeof user?.id !== "string") return NextResponse.json({ error: "Could not verify your Pixlo account. Please sign in again." }, { status: 401 });
+    donorId = user.id;
   }
 
   const configuredOrigin = serverEnv("NEXT_PUBLIC_SITE_URL") || "https://pixlo1.vercel.app";
@@ -34,6 +57,12 @@ export async function POST(request: Request) {
   form.set("cancel_url", `${origin}/pricing?donation=cancelled`);
   form.set("metadata[product]", "pixlo_donation");
   form.set("metadata[donation_amount_pence]", String(amountPence));
+  if (donorId) {
+    form.set("client_reference_id", donorId);
+    form.set("metadata[user_id]", donorId);
+    form.set("payment_intent_data[metadata][user_id]", donorId);
+    form.set("payment_intent_data[metadata][product]", "pixlo_donation");
+  }
   form.set("line_items[0][quantity]", "1");
   form.set("line_items[0][price_data][currency]", "gbp");
   form.set("line_items[0][price_data][unit_amount]", String(amountPence));
