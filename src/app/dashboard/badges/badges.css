@@ -119,3 +119,9 @@
  .badge-admin-actions button{padding:0 8px}
 }
 @media(prefers-reduced-motion:reduce){.badge-admin-spinner{animation:none}.badge-admin-refresh,.badge-admin-accordion,.badge-admin-tier-card,.badge-admin-tier-save{transition:none}}
+
+.badge-admin-access-denied{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:360px;padding:35px;border:1px solid rgba(255,133,88,.18);border-radius:18px;background:radial-gradient(ellipse at top,rgba(255,101,70,.08),transparent 65%),rgba(255,255,255,.018);text-align:center}
+.badge-admin-access-denied>span{display:grid;place-items:center;width:54px;height:54px;border:1px solid rgba(255,137,90,.22);border-radius:16px;background:linear-gradient(135deg,rgba(255,69,66,.16),rgba(255,165,80,.1));color:#ffad85;font-size:25px}
+.badge-admin-access-denied h2{margin:2px 0 0;color:#fff;font-size:20px;font-weight:950;letter-spacing:-.03em}
+.badge-admin-access-denied p{max-width:440px;margin:0;color:rgba(255,255,255,.54);font-size:12px;line-height:1.7}
+.badge-admin-access-denied a{margin-top:5px;padding:10px 14px;border:1px solid rgba(255,135,84,.28);border-radius:9px;background:linear-gradient(105deg,rgba(255,74,65,.16),rgba(255,159,72,.12));color:#ffc09c;font-size:11px;font-weight:850;text-decoration:none}
