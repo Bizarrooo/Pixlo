@@ -10,7 +10,6 @@ Set these in the worker host (not in browser/client-side variables):
 - `DISCORD_GUILD_ID`: ID of the official Pixlo Discord server.
 - `SUPABASE_URL`: the project URL, e.g. `https://YOUR_PROJECT.supabase.co`.
 - `SUPABASE_SERVICE_ROLE_KEY`: Supabase secret/service-role key. Keep this private.
-- Optional `DISCORD_DONOR_*_ROLE_ID` variables: role IDs for each donor tier. When configured, the bot assigns the highest eligible donor role to each linked Pixlo member and removes lower configured donor-tier roles.
 - Optional `PIXLO_DONATIONS_LIVEMODE`: set to `true` if the live Stripe environment is used; otherwise defaults to `PIXLO_PREMIUM_LIVEMODE` and then `false`.
 
 ## Discord setup
@@ -38,17 +37,10 @@ The worker uses `discord_role_badges` mappings created from the Pixlo owner badg
 
 ## Donor badge tiers
 
-After the donor badge migration has been run in Supabase, the worker can reconcile Discord roles from each linked Pixlo account's cumulative paid donations. Set any or all of these optional variables in the worker host:
+After both donor-tier migrations have been run in Supabase, configure each tier's threshold and Discord role ID in **Pixlo Dashboard → Admin → Manage Pixlo badges → Donor badge tiers**. Those values are stored in Supabase, so you do not need to edit Railway environment variables for each role. The worker reconciles linked Pixlo accounts' cumulative paid donations and configured Discord roles:
 
-- `DISCORD_DONOR_SUPPORTER_ROLE_ID` — £5, Supporter
-- `DISCORD_DONOR_PATRON_ROLE_ID` — £15, Patron
-- `DISCORD_DONOR_BENEFACTOR_ROLE_ID` — £30, Benefactor
-- `DISCORD_DONOR_SPONSOR_ROLE_ID` — £50, Sponsor
-- `DISCORD_DONOR_ELITE_SPONSOR_ROLE_ID` — £100, Elite Sponsor
-- `DISCORD_DONOR_MYTHIC_PATRON_ROLE_ID` — £250, Mythic Patron
-- `DISCORD_DONOR_ETERNAL_BENEFACTOR_ROLE_ID` — £500, Eternal Benefactor
 
-Role IDs are optional; unset variables disable that tier's Discord role. Each member receives the highest configured tier they have reached, while Pixlo awards each eligible profile badge milestone. Role reconciliation runs with the existing five-minute badge sync. The bot needs **Manage Roles**, and every configured donor role must be below the bot's highest role in the server.
+Leave a tier's role ID blank to disable Discord role sync for that tier while keeping website donor badges active. Each account has only one current donor badge: higher tiers replace lower ones. A donor role assigned directly in Discord syncs back to the linked website profile, while donations can upgrade the member to a higher tier. The worker checks frequently in the background. The bot needs **Manage Roles**, and every configured donor role must be below the bot's highest role in the server.
 
 ## Current scope
 
