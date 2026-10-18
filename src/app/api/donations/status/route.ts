@@ -57,12 +57,60 @@ export async function GET(request: Request) {
   const totalDonatedPence = Array.isArray(rows)
     ? rows.reduce((total: number, row: { amount_pence?: unknown }) => total + (Number.isInteger(Number(row.amount_pence)) ? Number(row.amount_pence) : 0), 0)
     : 0;
-  const currentTier = [...DONOR_TIERS].reverse().find(tier => totalDonatedPence >= tier.amountPence) || null;
-  const nextTier = DONOR_TIERS.find(tier => totalDonatedPence < tier.amountPence) || null;
+  const tierKeys = DONOR_TIERS.map(tier => tier.key);
+  const badgesQuery = new URLSearchParams({
+    select: "id,badge_key",
+    is_active: "eq.true",
+    badge_key: `in.(${tierKeys.join(",")})`,
+  });
+  const badgeResponse = await fetch(`${url}/rest/v1/badges?${badgesQuery.toString()}`, {
+    headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store",
+  });
+  if (!badgeResponse.ok) {
+    const detail = await badgeResponse.text().catch(() => "");
+    console.error("[donations/status] Could not read donor badge definitions:", badgeResponse.status, detail.slice(0, 250));
+    return NextResponse.json({ error: "Donor badge setup is incomplete." }, { status: 503 });
+  }
+  const badgeRows = await badgeResponse.json().catch(() => []);
+  const badgeDefinitions = Array.isArray(badgeRows)
+    ? badgeRows.filter((badge: { id?: unknown; badge_key?: unknown }) => typeof badge.id === "string" && typeof badge.badge_key === "string")
+    : [];
+  if (badgeDefinitions.length !== DONOR_TIERS.length) {
+    return NextResponse.json({ error: "Donor badge setup is incomplete." }, { status: 503 });
+  }
+
+  const badgeIds = badgeDefinitions.map((badge: { id: string }) => badge.id);
+  const awardedQuery = new URLSearchParams({
+    select: "badge_id",
+    user_id: `eq.${user.id}`,
+    badge_id: `in.(${badgeIds.join(",")})`,
+  });
+  const awardedResponse = await fetch(`${url}/rest/v1/user_badges?${awardedQuery.toString()}`, {
+    headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store",
+  });
+  if (!awardedResponse.ok) {
+    const detail = await awardedResponse.text().catch(() => "");
+    console.error("[donations/status] Could not read awarded donor badge:", awardedResponse.status, detail.slice(0, 250));
+    return NextResponse.json({ error: "Could not load your donor tier." }, { status: 503 });
+  }
+  const awardedRows = await awardedResponse.json().catch(() => []);
+  const awardedIds = new Set(Array.isArray(awardedRows) ? awardedRows.map((row: { badge_id?: string }) => row.badge_id) : []);
+  const badgeKeyById = new Map(badgeDefinitions.map((badge: { id: string; badge_key: string }) => [badge.id, badge.badge_key]));
+  const badgeTier = [...DONOR_TIERS].reverse().find(tier =>
+    badgeDefinitions.some((badge: { id: string; badge_key: string }) => badge.badge_key === tier.key && awardedIds.has(badge.id))
+  ) || null;
+  const donationTier = [...DONOR_TIERS].reverse().find(tier => totalDonatedPence >= tier.amountPence) || null;
+  const tierIndex = Math.max(
+    donationTier ? DONOR_TIERS.findIndex(tier => tier.key === donationTier.key) : -1,
+    badgeTier ? DONOR_TIERS.findIndex(tier => tier.key === badgeTier.key) : -1,
+  );
+  const currentTier = tierIndex >= 0 ? DONOR_TIERS[tierIndex] : null;
+  const nextTier = DONOR_TIERS.find(tier => tierIndex < 0 || tier.amountPence > (currentTier?.amountPence || 0)) || null;
   const previousThreshold = currentTier?.amountPence || 0;
   const progressPercent = nextTier
     ? Math.max(0, Math.min(100, Math.round(((totalDonatedPence - previousThreshold) / (nextTier.amountPence - previousThreshold)) * 100)))
     : 100;
+
 
   return NextResponse.json({
     authenticated: true,
