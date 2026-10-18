@@ -403,10 +403,11 @@ async function postBadgeInfo(guild) {
   }
 
   const descriptions = [
-    { name: `${customEmojiText(guild, "White_Recruiter_Badge")}  __Recruiter:__`, value: "Successfully invite **10 or more people** into the official Pixlo Discord server." },
+    { name: `${customEmojiText(guild, "White_Recruiter_Badge")}  __Recruiter tiers:__`, value: "**5** unique invites → Scout\n**15** → Recruiter\n**30** → Senior Recruiter\n**50** → Lead Recruiter\n**100** → Elite Recruiter." },
+    { name: "👁️  __Profile views:__", value: "**100** → Seen\n**1,000** → Rising\n**10,000** → Viral\n**25,000** → Buzzing\n**50,000** → Main Character\n**100,000** → Famous." },
     { name: `${customEmojiText(guild, "White_Bug_Hunter_Badge")}  __Bug Hunter:__`, value: "Report **2 or more valid bugs** affecting Pixlo. Each report must be reviewed and confirmed as a valid bug." },
     { name: `${customEmojiText(guild, "White_Server_Booster_Badge")}  __Server Booster:__`, value: "Boost the official Pixlo Discord server at least once and **maintain your boost permanently** to keep this badge." },
-    { name: `${customEmojiText(guild, "White_Donor_Badge")}  __Donor:__`, value: "Support Pixlo with a donation of **£5 or more**." },
+    { name: `${customEmojiText(guild, "White_Donor_Badge")}  __Donor tiers:__`, value: "**£5** → Supporter\n**£15** → Patron\n**£30** → Benefactor\n**£50** → Sponsor\n**£100** → Elite Sponsor\n**£250** → Mythic Patron\n**£500** → Eternal Benefactor. Donation totals are cumulative; the highest tier replaces lower donor tiers." },
     { name: `${customEmojiText(guild, "White_Premium_Badge")}  __Premium:__`, value: "Purchase **Pixlo Premium — Lifetime** through the official Pixlo website." },
     { name: `${customEmojiText(guild, "White_Verification_Badge")}  __Verified:__`, value: "Be a content creator with **5,000+ YouTube subscribers** or **10,000+ TikTok followers**, **or receive direct approval from Bizarro**." },
   ];
