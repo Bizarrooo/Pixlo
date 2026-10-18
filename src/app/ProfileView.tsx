@@ -8,6 +8,7 @@ import CursorTrailCanvas from "./CursorTrailCanvas";
 
 const socialLabels: Record<string, string> = { discord: "Discord", youtube: "YouTube", roblox: "Roblox", github: "GitHub", twitch: "Twitch", instagram: "Instagram", spotify: "Spotify" };
 const socialKeys = ["discord", "youtube", "roblox", "github", "twitch", "instagram", "spotify"] as const;
+const donorBadgeKeys = new Set(["donor_supporter", "donor_patron", "donor_benefactor", "donor_sponsor", "donor_elite_sponsor", "donor_mythic_patron", "donor_eternal_benefactor"]);
 
 function SocialIcon({ name }: { name: string }) {
   const common = { width: 24, height: 24, viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true };
@@ -108,7 +109,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const [playing, setPlaying] = useState(false);
   const [musicPlaybackNeedsTap, setMusicPlaybackNeedsTap] = useState(false);
   const [assets, setAssets] = useState({ avatar: "", banner: "", backgroundImage: "", backgroundVideo: "", musicCover: "", musicAudio: "", musicMediaType: "", customLinkIcons: {} as Record<string, string> });
-  const [profileBadges, setProfileBadges] = useState<Array<{ id: string; name: string; icon_url: string | null; description: string }>>([]);
+  const [profileBadges, setProfileBadges] = useState<Array<{ id: string; name: string; icon_url: string | null; description: string; badge_key?: string }>>([]);
   const [isPremium, setIsPremium] = useState(false);
   const [extrasPage, setExtrasPage] = useState(1);
   const [clockNow, setClockNow] = useState(() => new Date());
@@ -132,6 +133,18 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   const activeTrack = settings.musicTracks[trackIndex] || settings.musicTracks.find(track => track.id === settings.activeMusicId) || settings.musicTracks[0];
   const activeTrackIndex = activeTrack ? settings.musicTracks.findIndex(track => track.id === activeTrack.id) : -1;
+
+  // Donor tiers are earned and equipped automatically. They remain visible even
+  // when the user has not manually selected that badge in dashboard customisation.
+  const visibleProfileBadges = useMemo(() => profileBadges
+    .filter(badge => donorBadgeKeys.has(badge.badge_key || "") || settings.activeBadgeIds.includes(badge.id))
+    .sort((a, b) => {
+      const aOrder = settings.activeBadgeOrder.indexOf(a.id);
+      const bOrder = settings.activeBadgeOrder.indexOf(b.id);
+      if (donorBadgeKeys.has(a.badge_key || "")) return donorBadgeKeys.has(b.badge_key || "") ? 0 : -1;
+      if (donorBadgeKeys.has(b.badge_key || "")) return 1;
+      return (aOrder < 0 ? Number.MAX_SAFE_INTEGER : aOrder) - (bOrder < 0 ? Number.MAX_SAFE_INTEGER : bOrder);
+    }), [profileBadges, settings.activeBadgeIds, settings.activeBadgeOrder]);
 
   useEffect(() => {
     const selection = loadSettingsForUsername(forcedUsername || "");
@@ -678,7 +691,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
           {assets.banner && settings.bannerHeight > 0 && <div className="profile-banner"><img src={assets.banner} alt="" /></div>}
           <div className="profile-inner">
             <div className="profile-avatar-badge-row">
-              {settings.badgePosition === "left" && profileBadges.some(badge => settings.activeBadgeIds.includes(badge.id)) && <section className={`pixlo-profile-badges pixlo-side-badges pixlo-side-badges-left ${settings.badgeGlow ? "pixlo-badges-glow" : ""} ${settings.badgeUnderline ? "pixlo-double-underline" : ""} ${settings.badgeUnderlineGlow ? "pixlo-underline-glow" : ""} ${settings.badgeStyle === "icon" ? "pixlo-badges-icon-only" : ""}`} aria-label="Badges" style={{ "--badge-colour": settings.badgeColour, "--badge-glow-intensity": settings.badgeGlowIntensity / 100, "--badge-scale": settings.badgeScale / 100 } as React.CSSProperties}><div className="pixlo-profile-badges-list">{profileBadges.filter(badge => settings.activeBadgeIds.includes(badge.id)).sort((a,b) => settings.activeBadgeOrder.indexOf(a.id)-settings.activeBadgeOrder.indexOf(b.id)).map(badge => <div className="pixlo-profile-badge" key={badge.id} data-badge-name={badge.name} aria-label={badge.name}>{badge.icon_url ? <span className="pixlo-badge-icon-tint" aria-hidden="true" style={{ maskImage: `url("${badge.icon_url}")`, WebkitMaskImage: `url("${badge.icon_url}")` } as React.CSSProperties} /> : <span>✦</span>}</div>)}</div></section>}
+              {settings.badgePosition === "left" && visibleProfileBadges.length > 0 && <section className={`pixlo-profile-badges pixlo-side-badges pixlo-side-badges-left ${settings.badgeGlow ? "pixlo-badges-glow" : ""} ${settings.badgeUnderline ? "pixlo-double-underline" : ""} ${settings.badgeUnderlineGlow ? "pixlo-underline-glow" : ""} ${settings.badgeStyle === "icon" ? "pixlo-badges-icon-only" : ""}`} aria-label="Badges" style={{ "--badge-colour": settings.badgeColour, "--badge-glow-intensity": settings.badgeGlowIntensity / 100, "--badge-scale": settings.badgeScale / 100 } as React.CSSProperties}><div className="pixlo-profile-badges-list">{visibleProfileBadges.map(badge => <div className="pixlo-profile-badge" key={badge.id} data-badge-name={badge.name} aria-label={badge.name}>{badge.icon_url ? <span className="pixlo-badge-icon-tint" aria-hidden="true" style={{ maskImage: `url("${badge.icon_url}")`, WebkitMaskImage: `url("${badge.icon_url}")` } as React.CSSProperties} /> : <span>✦</span>}</div>)}</div></section>}
               <div className={`avatar-wrap avatar-decoration-${settings.avatarDecoration}`} style={{ width: `${settings.avatarSize}px`, height: `${settings.avatarSize}px` }}>
                 <div className="avatar">{assets.avatar ? <img src={assets.avatar} alt="" /> : <span>{(settings.displayName || settings.username).slice(0, 1).toUpperCase()}</span>}</div>
                 {settings.useDiscordDecoration && settings.discordAvatarDecorationUrl && <img className="discord-avatar-decoration" src={settings.discordAvatarDecorationUrl} alt="" aria-hidden="true" />}
@@ -712,7 +725,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
 
             {settings.showMusicPlayer && settings.musicPlayerPosition === "bottom" && activeTrack && <MusicPlayer track={activeTrack} cover={assets.musicCover} audioRef={audioRef} playing={playing} tracks={settings.musicTracks} onToggle={toggleMusic} onPrev={previousTrack} onNext={nextTrack} loop={settings.musicLoop} />}
-            {settings.badgePosition === "bottom" && profileBadges.some(badge => settings.activeBadgeIds.includes(badge.id)) && <section className={`pixlo-profile-badges pixlo-active-badges ${settings.badgeGlow ? "pixlo-badges-glow" : ""} ${settings.badgeUnderline ? "pixlo-double-underline" : ""} ${settings.badgeUnderlineGlow ? "pixlo-underline-glow" : ""} ${settings.badgeStyle === "icon" ? "pixlo-badges-icon-only" : ""}`} aria-label="Active badges" style={{ "--badge-colour": settings.badgeColour, "--badge-glow-intensity": settings.badgeGlowIntensity / 100, "--badge-scale": settings.badgeScale / 100 } as React.CSSProperties}><div className="pixlo-profile-badges-list">{[...profileBadges.filter(badge => settings.activeBadgeIds.includes(badge.id)).sort((a,b) => settings.activeBadgeOrder.indexOf(a.id)-settings.activeBadgeOrder.indexOf(b.id))].map(badge => <div className="pixlo-profile-badge" key={badge.id} data-badge-name={badge.name} aria-label={badge.name}>{badge.icon_url ? <span className="pixlo-badge-icon-tint" aria-hidden="true" style={{ maskImage: `url("${badge.icon_url}")`, WebkitMaskImage: `url("${badge.icon_url}")` } as React.CSSProperties} /> : <span>✦</span>}</div>)}</div></section>}
+            {settings.badgePosition === "bottom" && profileBadges.some(badge => settings.activeBadgeIds.includes(badge.id)) && <section className={`pixlo-profile-badges pixlo-active-badges ${settings.badgeGlow ? "pixlo-badges-glow" : ""} ${settings.badgeUnderline ? "pixlo-double-underline" : ""} ${settings.badgeUnderlineGlow ? "pixlo-underline-glow" : ""} ${settings.badgeStyle === "icon" ? "pixlo-badges-icon-only" : ""}`} aria-label="Active badges" style={{ "--badge-colour": settings.badgeColour, "--badge-glow-intensity": settings.badgeGlowIntensity / 100, "--badge-scale": settings.badgeScale / 100 } as React.CSSProperties}><div className="pixlo-profile-badges-list">{[...visibleProfileBadges].map(badge => <div className="pixlo-profile-badge" key={badge.id} data-badge-name={badge.name} aria-label={badge.name}>{badge.icon_url ? <span className="pixlo-badge-icon-tint" aria-hidden="true" style={{ maskImage: `url("${badge.icon_url}")`, WebkitMaskImage: `url("${badge.icon_url}")` } as React.CSSProperties} /> : <span>✦</span>}</div>)}</div></section>}
 
             {activeTrack && assets.musicAudio && (
               (activeTrack.source === "background-video" || assets.musicMediaType.startsWith("video/") || musicVideoFallback) ? (
