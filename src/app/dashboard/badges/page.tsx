@@ -23,6 +23,7 @@ export default function BadgeManagementPage() {
   const [recruiterTierSetupRequired, setRecruiterTierSetupRequired] = useState(false);
   const [recruiterTierDrafts, setRecruiterTierDrafts] = useState<Record<string, ManagedTierDraft>>({});
   const [loading, setLoading] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [name, setName] = useState("");
@@ -40,7 +41,9 @@ export default function BadgeManagementPage() {
     try {
       const response = await fetch("/api/admin/badges", { cache: "no-store" });
       const data = await response.json();
+      if (response.status === 403) setAccessDenied(true);
       if (!response.ok) throw new Error(data.error || "Could not load badge settings.");
+      setAccessDenied(false);
       setBadges(Array.isArray(data.badges) ? data.badges : []);
       setMappings(Array.isArray(data.mappings) ? data.mappings : []);
       const loadedDonorTiers: DonorTier[] = Array.isArray(data.donorTiers) ? data.donorTiers : [];
@@ -138,7 +141,7 @@ export default function BadgeManagementPage() {
           <button className="badge-admin-refresh" type="button" onClick={() => void refresh()} disabled={loading || busy}>{loading ? "Loading…" : "Refresh settings ↻"}</button>
         </header>
         {message && <div className="badge-admin-message" role="status">{message}</div>}
-        {loading ? <div className="badge-admin-loading"><span className="badge-admin-spinner" />Loading badge settings…</div> : <>
+        {loading ? <div className="badge-admin-loading"><span className="badge-admin-spinner" />Loading badge settings…</div> : accessDenied ? <section className="badge-admin-access-denied"><span>⌑</span><h2>Owner access only</h2><p>Only the Pixlo owner account can configure badge tiers, Discord roles and manual awards.</p><a href="/dashboard">Back to dashboard</a></section> : <>
           <div className="badge-admin-metrics">
             <article><span className="badge-admin-metric-icon">✦</span><div><small>Badge definitions</small><strong>{badges.length}</strong></div></article>
             <article><span className="badge-admin-metric-icon">⇄</span><div><small>Standard role links</small><strong>{mappings.length}</strong></div></article>
