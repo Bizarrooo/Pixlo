@@ -475,10 +475,6 @@ export default function Dashboard() {
         setRecruiterBadgeTiers(Array.isArray(data.recruiterTiers) ? data.recruiterTiers : []);
         setTotalRecruiterInvites(Math.max(0, Number(data.totalInvites || 0) || 0));
         setBadgeDiscordLinked(Boolean(data.discordLinked));
-        setViewBadgeTiers(Array.isArray(data.viewTiers) ? data.viewTiers : []);
-        setRecruiterBadgeTiers(Array.isArray(data.recruiterTiers) ? data.recruiterTiers : []);
-        setTotalRecruiterInvites(Math.max(0, Number(data.totalInvites || 0) || 0));
-        setBadgeDiscordLinked(Boolean(data.discordLinked));
       })
       .catch(error => { if (!cancelled) setDashboardBadgesError(error instanceof Error ? error.message : "Could not load your badges."); })
       .finally(() => { if (!cancelled) setDashboardBadgesLoading(false); });
@@ -1700,6 +1696,10 @@ export default function Dashboard() {
                       if (!response.ok) throw new Error(data.error || "Could not refresh your badges.");
                       setDashboardBadges(Array.isArray(data.badges) ? data.badges : []);
                       setBadgeCatalog(Array.isArray(data.catalog) ? data.catalog : []);
+                      setViewBadgeTiers(Array.isArray(data.viewTiers) ? data.viewTiers : []);
+                      setRecruiterBadgeTiers(Array.isArray(data.recruiterTiers) ? data.recruiterTiers : []);
+                      setTotalRecruiterInvites(Math.max(0, Number(data.totalInvites || 0) || 0));
+                      setBadgeDiscordLinked(Boolean(data.discordLinked));
                     })
                     .catch(error => setDashboardBadgesError(error instanceof Error ? error.message : "Could not refresh your badges."))
                     .finally(() => setDashboardBadgesLoading(false));
@@ -1764,12 +1764,12 @@ export default function Dashboard() {
                 </article>
               </div>
 
-              <div className="pixlo-badge-catalog-heading"><h3>Collectable badges</h3><span>{badgeCatalog.filter(badge => !DONOR_BADGE_KEYS.has(String(badge.badge_key || "").toLowerCase()) && badge.name.trim().toLowerCase() !== "donor").length} badges</span></div>
+              <div className="pixlo-badge-catalog-heading"><h3>Collectable badges</h3><span>{badgeCatalog.filter(badge => !DONOR_BADGE_KEYS.has(String(badge.badge_key || "").toLowerCase()) && !String(badge.badge_key || "").toLowerCase().startsWith("views_") && !String(badge.badge_key || "").toLowerCase().startsWith("recruiter_") && badge.name.trim().toLowerCase() !== "donor" && badge.name.trim().toLowerCase() !== "recruiter").length} badges</span></div>
               {dashboardBadgesLoading && badgeCatalog.length === 0 ? <div className="pixlo-badge-loading">Loading the badge catalogue…</div>
-              : badgeCatalog.filter(badge => !DONOR_BADGE_KEYS.has(String(badge.badge_key || "").toLowerCase()) && badge.name.trim().toLowerCase() !== "donor").length === 0
+              : badgeCatalog.filter(badge => !DONOR_BADGE_KEYS.has(String(badge.badge_key || "").toLowerCase()) && !String(badge.badge_key || "").toLowerCase().startsWith("views_") && !String(badge.badge_key || "").toLowerCase().startsWith("recruiter_") && badge.name.trim().toLowerCase() !== "donor" && badge.name.trim().toLowerCase() !== "recruiter").length === 0
                 ? <div className="pixlo-badge-empty pixlo-badge-empty-compact"><strong>No collectable badges to display yet.</strong><p>New badges will appear here as they are added to Pixlo.</p></div>
                 : <div className="pixlo-badge-card-grid">
-                  {badgeCatalog.filter(badge => !DONOR_BADGE_KEYS.has(String(badge.badge_key || "").toLowerCase()) && badge.name.trim().toLowerCase() !== "donor").map(badge => {
+                  {badgeCatalog.filter(badge => !DONOR_BADGE_KEYS.has(String(badge.badge_key || "").toLowerCase()) && !String(badge.badge_key || "").toLowerCase().startsWith("views_") && !String(badge.badge_key || "").toLowerCase().startsWith("recruiter_") && badge.name.trim().toLowerCase() !== "donor" && badge.name.trim().toLowerCase() !== "recruiter").map(badge => {
                     const earned = dashboardBadges.some(item => item.id === badge.id);
                     return <article className={"pixlo-badge-card pixlo-catalog-badge-card" + (earned ? " is-earned" : "")} key={badge.id}>
                       <div className="pixlo-badge-card-mark">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
