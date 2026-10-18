@@ -385,6 +385,144 @@ function customEmojiText(guild, emojiName) {
   return emoji ? `<:${emoji.name}:${emoji.id}>` : `:${emojiName}:`;
 }
 
+const MANAGED_TIER_ANNOUNCEMENTS = {
+  donor: {
+    label: "Donor",
+    fallbackIcon: "💝",
+    emojiNames: ["White_Donor_Badge"],
+    color: 0xF0A35E,
+  },
+  views: {
+    label: "Profile Views",
+    fallbackIcon: "👁️",
+    emojiNames: ["White_Views_Badge", "White_Profile_Views_Badge", "White_Eye_Badge", "White_Seen_Badge"],
+    color: 0xF47A42,
+  },
+  recruiter: {
+    label: "Recruiter",
+    fallbackIcon: "🎟️",
+    emojiNames: ["White_Recruiter_Badge"],
+    color: 0x42B99A,
+  },
+};
+
+const MANAGED_TIER_DISPLAY_NAMES = {
+  donor_supporter: "Supporter",
+  donor_patron: "Patron",
+  donor_benefactor: "Benefactor",
+  donor_sponsor: "Sponsor",
+  donor_elite_sponsor: "Elite Sponsor",
+  donor_mythic_patron: "Mythic Patron",
+  donor_eternal_benefactor: "Eternal Benefactor",
+  views_seen: "Seen",
+  views_rising: "Rising",
+  views_viral: "Viral",
+  views_buzzing: "Buzzing",
+  views_main_character: "Main Character",
+  views_famous: "Famous",
+  recruiter_scout: "Scout",
+  recruiter_recruiter: "Recruiter",
+  recruiter_senior_recruiter: "Senior Recruiter",
+  recruiter_lead_recruiter: "Lead Recruiter",
+  recruiter_elite_recruiter: "Elite Recruiter",
+};
+
+function managedTierCategory(tierKey) {
+  if (String(tierKey).startsWith("donor_")) return "donor";
+  if (String(tierKey).startsWith("views_")) return "views";
+  if (String(tierKey).startsWith("recruiter_")) return "recruiter";
+  return null;
+}
+
+function formatManagedTierRequirement(tierKey, threshold) {
+  const value = Number(threshold);
+  if (!Number.isFinite(value) || value < 0) return "Requirement configured in Pixlo";
+  if (String(tierKey).startsWith("donor_")) {
+    return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(value / 100) + " in cumulative donations";
+  }
+  if (String(tierKey).startsWith("views_")) return value.toLocaleString("en-GB") + " profile views";
+  if (String(tierKey).startsWith("recruiter_")) return value.toLocaleString("en-GB") + " unique invites";
+  return "Requirement configured in Pixlo";
+}
+
+async function announceManagedTierBadgeChange(guild, profile, tierKey, action, options = {}) {
+  const categoryKey = managedTierCategory(tierKey);
+  const category = categoryKey ? MANAGED_TIER_ANNOUNCEMENTS[categoryKey] : null;
+  if (!category) return;
+
+  const isAward = action === "award";
+  const channelId = isAward ? AWARD_CHANNEL_ID : REVOCATION_CHANNEL_ID;
+  const channel = await guild.channels.fetch(channelId).catch(() => null);
+  if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
+    console.error(`[tier-announcements] Missing or inaccessible ${action} channel ${channelId} for ${tierKey}`);
+    return;
+  }
+
+  const discordId = String(profile?.discord_id || "");
+  const memberText = /^\\d{15,22}$/.test(discordId) ? `<@${discordId}>` : `@${profile?.username || "Pixlo member"}`;
+  const tierName = MANAGED_TIER_DISPLAY_NAMES[tierKey] || tierKey.replace(/^(donor|views|recruiter)_/, "").replace(/_/g, " ");
+  const replacementName = options.replacementTierKey
+    ? MANAGED_TIER_DISPLAY_NAMES[options.replacementTierKey] || options.replacementTierKey
+    : "";
+  const icon = guild.emojis.cache.find(emoji => category.emojiNames.includes(emoji.name)) || null;
+  const iconText = icon ? `<:${icon.name}:${icon.id}>` : category.fallbackIcon;
+  const count = Number(options.value);
+  const threshold = Number(options.threshold);
+  let progressField = "Requirement: " + formatManagedTierRequirement(tierKey, options.threshold);
+  if (Number.isFinite(count) && count >= 0) {
+    if (categoryKey === "donor") {
+      progressField = "Donation tier: " + formatManagedTierRequirement(tierKey, options.threshold);
+    } else if (categoryKey === "views") {
+      progressField = `Profile views: ${count.toLocaleString("en-GB")} / ${Number.isFinite(threshold) ? threshold.toLocaleString("en-GB") : "—"}`;
+    } else {
+      progressField = `Unique invites: ${count.toLocaleString("en-GB")} / ${Number.isFinite(threshold) ? threshold.toLocaleString("en-GB") : "—"}`;
+    }
+  }
+
+  let description;
+  if (isAward) {
+    if (categoryKey === "donor") {
+      description = `🎉 Congratulations, ${memberText}! You've earned the **${tierName}** donor badge on **Pixlo**. Your highest eligible donor tier is now active.`;
+    } else if (categoryKey === "views") {
+      description = `🎉 Congratulations, ${memberText}! You've unlocked the **${tierName}** profile-views badge on **Pixlo** by reaching this view milestone.`;
+    } else {
+      description = `🎉 Congratulations, ${memberText}! You've unlocked the **${tierName}** Recruiter badge on **Pixlo** by inviting unique members to the Pixlo Discord.`;
+    }
+    if (replacementName) description += ` Your previous tier, **${replacementName}**, has been replaced by this higher tier.`;
+  } else {
+    if (categoryKey === "donor") {
+      description = `The **${tierName}** donor badge for ${memberText} has been revoked from **Pixlo** because their current eligible donor tier changed.`;
+    } else if (categoryKey === "views") {
+      description = `The **${tierName}** profile-views badge for ${memberText} has been revoked from **Pixlo** because the badge is no longer present in their current earned tier.`;
+    } else {
+      description = `The **${tierName}** Recruiter badge for ${memberText} has been revoked from **Pixlo** because the current invite milestone no longer qualifies for it.`;
+    }
+    if (replacementName) description += ` The current tier is **${replacementName}**.`;
+  }
+
+  const embed = new EmbedBuilder()
+    .setColor(isAward ? category.color : 0xE05A47)
+    .setTitle(`${iconText} ${category.label} Badge ${isAward ? "Awarded!" : "Revoked"}`)
+    .setDescription(description)
+    .addFields(
+      { name: "👤 Member", value: memberText, inline: true },
+      { name: isAward ? "🏅 Badge Earned" : "🛡️ Badge Removed", value: tierName, inline: true },
+      { name: categoryKey === "donor" ? "💝 Tier Requirement" : categoryKey === "views" ? "👁️ View Milestone" : "🎟️ Invite Milestone", value: progressField, inline: false },
+    )
+    .setFooter({ text: `Pixlo • ${category.label} badge updates` })
+    .setTimestamp();
+
+  // Custom Discord emojis are PNG-compatible thumbnails; the Views category uses
+  // its eye icon in the title when no matching custom server emoji exists.
+  if (icon) embed.setThumbnail(icon.imageURL({ extension: "png", size: 256 }));
+  try {
+    await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
+    console.log(`[tier-announcements] sent ${action} ${tierKey} for profile ${profile?.username || profile?.id || "unknown"}`);
+  } catch (error) {
+    console.error(`[tier-announcements] could not send ${action} message for ${tierKey}:`, error instanceof Error ? error.message : error);
+  }
+}
+
 async function postBadgeInfo(guild) {
   const channel = await guild.channels.fetch(BADGE_INFO_CHANNEL_ID).catch(() => null);
   if (!channel || !channel.isTextBased() || typeof channel.send !== "function") {
@@ -539,6 +677,7 @@ async function syncDonorTierRoles(guild, profiles) {
       ? badgeDefinitions.filter(badge => typeof badge?.id === "string" && typeof badge?.badge_key === "string")
       : [];
     const badgeByKey = new Map(badges.map(badge => [badge.badge_key, badge]));
+    const badgeKeyById = new Map(badges.map(badge => [String(badge.id), String(badge.badge_key)]));
     if (!Array.isArray(tierRows) || tierRows.length !== DONOR_TIER_KEYS.length || badges.length !== DONOR_TIER_KEYS.length) {
       console.error("[donor-role] donor tier configuration is incomplete. Run the donor badge and donor tier admin migrations in Supabase.");
       return;
@@ -645,11 +784,12 @@ async function syncDonorTierRoles(guild, profiles) {
 
       // Donor tiers are a single upgrade slot, not a cumulative stack.
       const previousAwards = awardsByUser.get(userId) || [];
+      const hadDesiredTierBadge = Boolean(desiredBadge && previousAwards.some(award => String(award.badge_id) === String(desiredBadge.id)));
       let keptDesiredManualBadge = false;
       for (const award of previousAwards) {
         const shouldKeep = Boolean(
           desiredBadge &&
-          award.badge_id === desiredBadge.id &&
+          String(award.badge_id) === String(desiredBadge.id) &&
           award.source === "manual" &&
           !keptDesiredManualBadge
         );
@@ -662,6 +802,14 @@ async function syncDonorTierRoles(guild, profiles) {
           headers: { Prefer: "return=minimal" },
         });
         badgesReplaced += 1;
+        const revokedKey = badgeKeyById.get(String(award.badge_id));
+        if (revokedKey && revokedKey !== desiredBadge?.badge_key) {
+          await announceManagedTierBadgeChange(guild, profile, revokedKey, "revoke", {
+            threshold: tierConfigs.find(tier => tier.key === revokedKey)?.thresholdPence,
+            replacementTierKey: desiredBadge?.badge_key,
+            value: totalPence,
+          });
+        }
       }
 
       if (desiredBadge && !keptDesiredManualBadge) {
@@ -671,6 +819,13 @@ async function syncDonorTierRoles(guild, profiles) {
           body: JSON.stringify({ user_id: userId, badge_id: desiredBadge.id, source: "manual" }),
         });
         badgesAwarded += 1;
+        if (!hadDesiredTierBadge) {
+          await announceManagedTierBadgeChange(guild, profile, desiredBadge.badge_key, "award", {
+            threshold: effectiveTier?.thresholdPence,
+            value: totalPence,
+            replacementTierKey: previousAwards.map(award => badgeKeyById.get(String(award.badge_id))).find(key => key && key !== desiredBadge.badge_key),
+          });
+        }
       }
     }
 
@@ -762,6 +917,8 @@ async function syncProgressTierGroup(guild, profiles, config) {
       })
       .filter(tier => Boolean(tier.role));
 
+    const tierKeyByBadgeId = new Map(tierConfigs.map(tier => [String(tier.badgeId), tier.key]));
+
     let assigned = 0;
     let removed = 0;
     let badgesAwarded = 0;
@@ -807,15 +964,25 @@ async function syncProgressTierGroup(guild, profiles, config) {
       }
 
       const previousAwards = awardsByUser.get(userId) || [];
+      const hadDesiredTierBadge = Boolean(effectiveTier && previousAwards.some(award => String(award.badge_id) === String(effectiveTier.badgeId)));
       let keptDesiredManualBadge = false;
       for (const award of previousAwards) {
-        const shouldKeep = Boolean(effectiveTier && award.badge_id === effectiveTier.badgeId && award.source === "manual" && !keptDesiredManualBadge);
+        const shouldKeep = Boolean(effectiveTier && String(award.badge_id) === String(effectiveTier.badgeId) && award.source === "manual" && !keptDesiredManualBadge);
         if (shouldKeep) {
           keptDesiredManualBadge = true;
           continue;
         }
         await db(`user_badges?id=eq.${encodeURIComponent(award.id)}`, { method: "DELETE", headers: { Prefer: "return=minimal" } });
         badgesReplaced += 1;
+        const revokedKey = tierKeyByBadgeId.get(String(award.badge_id));
+        if (revokedKey && revokedKey !== effectiveTier?.key) {
+          const revokedTier = tierConfigs.find(tier => tier.key === revokedKey);
+          await announceManagedTierBadgeChange(guild, profile, revokedKey, "revoke", {
+            threshold: revokedTier?.threshold,
+            value,
+            replacementTierKey: effectiveTier?.key,
+          });
+        }
       }
       if (effectiveTier && !keptDesiredManualBadge) {
         await db("user_badges", {
@@ -824,6 +991,13 @@ async function syncProgressTierGroup(guild, profiles, config) {
           body: JSON.stringify({ user_id: userId, badge_id: effectiveTier.badgeId, source: "manual" }),
         });
         badgesAwarded += 1;
+        if (!hadDesiredTierBadge) {
+          await announceManagedTierBadgeChange(guild, profile, effectiveTier.key, "award", {
+            threshold: effectiveTier.threshold,
+            value,
+            replacementTierKey: previousAwards.map(award => tierKeyByBadgeId.get(String(award.badge_id))).find(key => key && key !== effectiveTier.key),
+          });
+        }
       }
     }
     console.log(`[${log}] synced tiers: ${assigned} role(s) added, ${removed} removed; ${badgesAwarded} badges awarded and ${badgesReplaced} replaced.`);
