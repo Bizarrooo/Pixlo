@@ -231,10 +231,25 @@ export default function PricingPage() {
     ? discordOrAwardedTier
     : donationEarnedTier;
   const nextDonorTier = donorTiersForUi.find(tier => tier.amountPence > (currentDonorTier?.amountPence || 0)) || null;
-  const previousTierThreshold = currentDonorTier?.amountPence || 0;
-  const donorProgressPercent = nextDonorTier
-    ? Math.max(0, Math.min(100, Math.round(((lifetimeDonatedPence - previousTierThreshold) / (nextDonorTier.amountPence - previousTierThreshold)) * 100)))
-    : 100;
+
+  // Preview the currently selected donation without changing stored lifetime totals.
+  const selectedDonationPence = donationCustomMode
+    ? (customDonationValid ? Math.round(Number(customDonationInput) * 100) : null)
+    : donationAmount;
+  const projectedDonatedPence = lifetimeDonatedPence + (selectedDonationPence ?? 0);
+  const projectedDonorTier = selectedDonationPence === null
+    ? currentDonorTier
+    : [...donorTiersForUi].reverse().find(tier => projectedDonatedPence >= tier.amountPence) || null;
+  const projectedNextDonorTier = donorTiersForUi.find(tier => tier.amountPence > (projectedDonorTier?.amountPence || 0)) || null;
+  const projectedPreviousThreshold = projectedDonorTier?.amountPence || 0;
+  const donorProgressPercent = selectedDonationPence === null
+    ? 0
+    : projectedNextDonorTier
+      ? Math.max(0, Math.min(100, Math.round(((projectedDonatedPence - projectedPreviousThreshold) / (projectedNextDonorTier.amountPence - projectedPreviousThreshold)) * 100)))
+      : 100;
+  const selectedDonationTier = selectedDonationPence === null
+    ? null
+    : [...donorTiersForUi].reverse().find(tier => projectedDonatedPence >= tier.amountPence && (!currentDonorTier || tier.amountPence > currentDonorTier.amountPence)) || null;
 
   return (
     <main className="pricing-global">
@@ -402,10 +417,12 @@ export default function PricingPage() {
                   </div>
                   <div className="pricing-donor-tier-rail">
                     {donorTiersForUi.map((tier, index) => {
-                      const unlocked = Boolean(donorStatus?.authenticated && (lifetimeDonatedPence >= tier.amountPence || (currentDonorTier?.amountPence || 0) >= tier.amountPence));
+                      const alreadyUnlocked = Boolean(donorStatus?.authenticated && (lifetimeDonatedPence >= tier.amountPence || (currentDonorTier?.amountPence || 0) >= tier.amountPence));
+                      const willUnlock = Boolean(selectedDonationPence !== null && projectedDonatedPence >= tier.amountPence && !alreadyUnlocked);
                       const isCurrent = currentDonorTier?.key === tier.key;
+                      const isProjected = projectedDonorTier?.key === tier.key && !isCurrent;
                       return (
-                        <div className={`pricing-donor-tier-chip ${unlocked ? "is-unlocked" : ""} ${isCurrent ? "is-current" : ""}`} key={tier.key} title={`${tier.name} — ${formatGBP(tier.amountPence)} lifetime donations`}>
+                        <div className={`pricing-donor-tier-chip ${alreadyUnlocked ? "is-unlocked" : ""} ${willUnlock ? "is-projected-unlocked" : ""} ${isCurrent ? "is-current" : ""} ${isProjected ? "is-projected-current" : ""}`} key={tier.key} title={`${tier.name} — ${formatGBP(tier.amountPence)} lifetime donations`}>
                           <span className={`pricing-donor-tier-icon tier-${index}`}><img src={tier.icon} alt="" aria-hidden="true" /></span>
                           <small>{formatGBP(tier.amountPence).replace(".00", "")}</small>
                           <strong>{tier.name}</strong>
@@ -418,19 +435,27 @@ export default function PricingPage() {
                     <p className="pricing-donor-signin">Donor tracking needs its database setup before lifetime totals and badges can unlock.</p>
                   ) : donorStatus === null ? (
                     <p className="pricing-donor-signin">Checking your lifetime donor total…</p>
-                  ) : donorStatus.authenticated ? (
+                  ) : (
                     <div className="pricing-donor-progress" aria-live="polite">
                       <div className="pricing-donor-progress-copy">
-                        <span>{currentDonorTier ? `Current tier: ${currentDonorTier.name}` : "Your donor journey starts here"}</span>
-                        <strong>{nextDonorTier ? `${formatGBP(nextDonorTier.amountPence - lifetimeDonatedPence)} to ${nextDonorTier.name}` : "All donor tiers unlocked"}</strong>
+                        <span>{donorStatus?.authenticated ? `Current tier: ${currentDonorTier?.name || "No donor tier yet"}` : "Donor tier preview"}</span>
+                        <strong>{selectedDonationPence === null
+                          ? "Enter a valid amount"
+                          : selectedDonationTier
+                            ? `Donate ${formatGBP(selectedDonationPence)} to unlock ${selectedDonationTier.name}`
+                            : projectedNextDonorTier
+                              ? `${formatGBP(Math.max(0, projectedNextDonorTier.amountPence - projectedDonatedPence))} more to unlock ${projectedNextDonorTier.name}`
+                              : "Eternal Benefactor tier reached"}</strong>
                       </div>
-                      <div className="pricing-donor-progress-track" role="progressbar" aria-label="Progress towards next donor tier" aria-valuemin={0} aria-valuemax={100} aria-valuenow={donorProgressPercent}>
+                      <div className={`pricing-donor-progress-track ${selectedDonationTier ? "is-projecting-unlock" : ""}`} role="progressbar" aria-label="Projected progress towards next donor tier after this donation" aria-valuemin={0} aria-valuemax={100} aria-valuenow={donorProgressPercent}>
                         <span style={{ width: `${donorProgressPercent}%` }} />
                       </div>
-                      <small>Lifetime donations: {formatGBP(lifetimeDonatedPence)}{nextDonorTier ? ` of ${formatGBP(nextDonorTier.amountPence)}` : " · maximum tier reached"}</small>
+                      <small>{donorStatus?.authenticated
+                        ? `After this donation: ${formatGBP(projectedDonatedPence)} lifetime total`
+                        : `Preview from £0.00. ${formatGBP(selectedDonationPence ?? 0)} is selected.`}
+                        {projectedNextDonorTier ? ` · ${formatGBP(Math.max(0, projectedNextDonorTier.amountPence - projectedDonatedPence))} until ${projectedNextDonorTier.name}` : " · highest tier reached"}</small>
+                      {!donorStatus?.authenticated && <p className="pricing-donor-signin"><Link href="/login?next=%2Fpricing">Sign in</Link> to attach this donation to your Pixlo profile and actually unlock a donor badge. Guest donations are welcome but cannot be attached to a profile.</p>}
                     </div>
-                  ) : (
-                    <p className="pricing-donor-signin"><Link href="/login?next=%2Fpricing">Sign in</Link> before donating to track your lifetime total and unlock donor badges. Guest donations are still welcome, but cannot be attached to a Pixlo profile.</p>
                   )}
                 </section>
                 <div className="pricing-donation-options" aria-label="Choose a donation amount">
