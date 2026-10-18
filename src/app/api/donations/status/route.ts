@@ -4,14 +4,14 @@ import { supabaseConfig } from "../../../../lib/supabase-config";
 
 export const runtime = "nodejs";
 
-const DONOR_TIERS = [
-  { key: "donor_supporter", name: "Supporter", amountPence: 500 },
-  { key: "donor_patron", name: "Patron", amountPence: 1500 },
-  { key: "donor_benefactor", name: "Benefactor", amountPence: 3000 },
-  { key: "donor_sponsor", name: "Sponsor", amountPence: 5000 },
-  { key: "donor_elite_sponsor", name: "Elite Sponsor", amountPence: 10000 },
-  { key: "donor_mythic_patron", name: "Mythic Patron", amountPence: 25000 },
-  { key: "donor_eternal_benefactor", name: "Eternal Benefactor", amountPence: 50000 },
+const DONOR_TIER_KEYS = [
+  "donor_supporter",
+  "donor_patron",
+  "donor_benefactor",
+  "donor_sponsor",
+  "donor_elite_sponsor",
+  "donor_mythic_patron",
+  "donor_eternal_benefactor",
 ] as const;
 
 function cookieValue(request: Request, name: string) {
@@ -57,29 +57,47 @@ export async function GET(request: Request) {
   const totalDonatedPence = Array.isArray(rows)
     ? rows.reduce((total: number, row: { amount_pence?: unknown }) => total + (Number.isInteger(Number(row.amount_pence)) ? Number(row.amount_pence) : 0), 0)
     : 0;
-  const tierKeys = DONOR_TIERS.map(tier => tier.key);
-  const badgesQuery = new URLSearchParams({
-    select: "id,badge_key",
-    is_active: "eq.true",
-    badge_key: `in.(${tierKeys.join(",")})`,
-  });
-  const badgeResponse = await fetch(`${url}/rest/v1/badges?${badgesQuery.toString()}`, {
-    headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store",
-  });
-  if (!badgeResponse.ok) {
-    const detail = await badgeResponse.text().catch(() => "");
-    console.error("[donations/status] Could not read donor badge definitions:", badgeResponse.status, detail.slice(0, 250));
-    return NextResponse.json({ error: "Donor badge setup is incomplete." }, { status: 503 });
+  const [tierRowsRaw, badgeRowsRaw] = await Promise.all([
+    fetch(
+      `${url}/rest/v1/pixlo_donor_tiers?select=tier_key,badge_id,threshold_pence,discord_role_id&order=threshold_pence.asc`,
+      { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
+    ),
+    fetch(
+      `${url}/rest/v1/badges?select=id,badge_key,name,icon_url&is_active=eq.true&badge_key=in.(${DONOR_TIER_KEYS.join(",")})`,
+      { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: "no-store" },
+    ),
+  ]);
+  if (!tierRowsRaw.ok || !badgeRowsRaw.ok) {
+    return NextResponse.json({ error: "Donor tier database setup is incomplete." }, { status: 503 });
   }
-  const badgeRows = await badgeResponse.json().catch(() => []);
-  const badgeDefinitions = Array.isArray(badgeRows)
-    ? badgeRows.filter((badge: { id?: unknown; badge_key?: unknown }) => typeof badge.id === "string" && typeof badge.badge_key === "string")
-    : [];
-  if (badgeDefinitions.length !== DONOR_TIERS.length) {
-    return NextResponse.json({ error: "Donor badge setup is incomplete." }, { status: 503 });
+  const tierRows = await tierRowsRaw.json().catch(() => []);
+  const badgeRows = await badgeRowsRaw.json().catch(() => []);
+  const badgeByKey = new Map(
+    (Array.isArray(badgeRows) ? badgeRows : [])
+      .filter((badge: { id?: unknown; badge_key?: unknown }) => typeof badge.id === "string" && typeof badge.badge_key === "string")
+      .map((badge: { id: string; badge_key: string; name?: string; icon_url?: string | null }) => [badge.badge_key, badge]),
+  );
+  const tiers = (Array.isArray(tierRows) ? tierRows : [])
+    .filter((tier: { tier_key?: unknown; badge_id?: unknown; threshold_pence?: unknown }) =>
+      typeof tier.tier_key === "string" && DONOR_TIER_KEYS.includes(tier.tier_key as typeof DONOR_TIER_KEYS[number]) &&
+      Number.isInteger(Number(tier.threshold_pence)) && badgeByKey.has(tier.tier_key))
+    .map((tier: { tier_key: string; badge_id: string; threshold_pence: number; discord_role_id?: string | null }) => {
+      const badge = badgeByKey.get(tier.tier_key)!;
+      return {
+        key: tier.tier_key,
+        name: String(badge.name || tier.tier_key),
+        amountPence: Number(tier.threshold_pence),
+        icon: typeof badge.icon_url === "string" ? badge.icon_url : null,
+        badgeId: tier.badge_id,
+        discordRoleId: typeof tier.discord_role_id === "string" ? tier.discord_role_id : null,
+      };
+    })
+    .sort((a: { amountPence: number }, b: { amountPence: number }) => a.amountPence - b.amountPence);
+  if (tiers.length !== DONOR_TIER_KEYS.length) {
+    return NextResponse.json({ error: "Donor tier database setup is incomplete." }, { status: 503 });
   }
 
-  const badgeIds = badgeDefinitions.map((badge: { id: string }) => badge.id);
+  const badgeIds = tiers.map((tier: { badgeId: string }) => tier.badgeId);
   const awardedQuery = new URLSearchParams({
     select: "badge_id",
     user_id: `eq.${user.id}`,
@@ -95,29 +113,32 @@ export async function GET(request: Request) {
   }
   const awardedRows = await awardedResponse.json().catch(() => []);
   const awardedIds = new Set(Array.isArray(awardedRows) ? awardedRows.map((row: { badge_id?: string }) => row.badge_id) : []);
-  const badgeTier = [...DONOR_TIERS].reverse().find(tier =>
-    badgeDefinitions.some((badge: { id: string; badge_key: string }) => badge.badge_key === tier.key && awardedIds.has(badge.id))
-  ) || null;
-  const donationTier = [...DONOR_TIERS].reverse().find(tier => totalDonatedPence >= tier.amountPence) || null;
+  const badgeTier = [...tiers].reverse().find((tier: { badgeId: string }) => awardedIds.has(tier.badgeId)) || null;
+  const donationTier = [...tiers].reverse().find((tier: { amountPence: number }) => totalDonatedPence >= tier.amountPence) || null;
   const tierIndex = Math.max(
-    donationTier ? DONOR_TIERS.findIndex(tier => tier.key === donationTier.key) : -1,
-    badgeTier ? DONOR_TIERS.findIndex(tier => tier.key === badgeTier.key) : -1,
+    donationTier ? tiers.findIndex((tier: { key: string }) => tier.key === donationTier.key) : -1,
+    badgeTier ? tiers.findIndex((tier: { key: string }) => tier.key === badgeTier.key) : -1,
   );
-  const currentTier = tierIndex >= 0 ? DONOR_TIERS[tierIndex] : null;
-  const nextTier = DONOR_TIERS.find(tier => tierIndex < 0 || tier.amountPence > (currentTier?.amountPence || 0)) || null;
+  const currentTier = tierIndex >= 0 ? tiers[tierIndex] : null;
+  const nextTier = tiers.find((tier: { amountPence: number }) => tier.amountPence > (currentTier?.amountPence || 0)) || null;
   const previousThreshold = currentTier?.amountPence || 0;
   const progressPercent = nextTier
     ? Math.max(0, Math.min(100, Math.round(((totalDonatedPence - previousThreshold) / (nextTier.amountPence - previousThreshold)) * 100)))
     : 100;
-
+  const publicTiers = tiers.map((tier: { key: string; name: string; amountPence: number; icon: string | null }) => ({
+    key: tier.key,
+    name: tier.name,
+    amountPence: tier.amountPence,
+    icon: tier.icon,
+  }));
 
   return NextResponse.json({
     authenticated: true,
     totalDonatedPence,
-    currentTier,
-    nextTier,
+    currentTier: currentTier ? { key: currentTier.key, name: currentTier.name, amountPence: currentTier.amountPence } : null,
+    nextTier: nextTier ? { key: nextTier.key, name: nextTier.name, amountPence: nextTier.amountPence } : null,
     progressPercent,
     amountToNextPence: nextTier ? Math.max(0, nextTier.amountPence - totalDonatedPence) : 0,
-    tiers: DONOR_TIERS,
+    tiers: publicTiers,
   }, { headers: { "Cache-Control": "no-store, max-age=0" } });
 }
