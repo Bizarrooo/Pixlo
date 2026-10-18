@@ -32,30 +32,38 @@ export async function GET(request: Request) {
   const serviceKey = serverEnv("SUPABASE_SERVICE_ROLE_KEY");
   if (!serviceKey) return NextResponse.json({ error: "SUPABASE_SERVICE_ROLE_KEY is missing from the server environment." }, { status: 503 });
   const { url } = supabaseConfig();
-  const [badgesResponse, mappingsResponse, donorTiersResponse] = await Promise.all([
+  const [badgesResponse, mappingsResponse, donorTiersResponse, viewTiersResponse, recruiterTiersResponse] = await Promise.all([
     fetch(`${url}/rest/v1/badges?select=*&order=created_at.desc`, { headers: adminHeaders(serviceKey), cache: "no-store" }),
     fetch(`${url}/rest/v1/discord_role_badges?select=discord_role_id,badge_id,created_at`, { headers: adminHeaders(serviceKey), cache: "no-store" }),
     fetch(`${url}/rest/v1/pixlo_donor_tiers?select=tier_key,badge_id,threshold_pence,discord_role_id,created_at,updated_at&order=threshold_pence.asc`, { headers: adminHeaders(serviceKey), cache: "no-store" }),
+    fetch(`${url}/rest/v1/pixlo_view_tiers?select=tier_key,badge_id,threshold_views,discord_role_id,created_at,updated_at&order=threshold_views.asc`, { headers: adminHeaders(serviceKey), cache: "no-store" }),
+    fetch(`${url}/rest/v1/pixlo_recruiter_tiers?select=tier_key,badge_id,threshold_invites,discord_role_id,created_at,updated_at&order=threshold_invites.asc`, { headers: adminHeaders(serviceKey), cache: "no-store" }),
   ]);
   if (!badgesResponse.ok || !mappingsResponse.ok) return NextResponse.json({ error: "Could not load badge settings. Check that the badge migration ran successfully." }, { status: 503 });
   const badges = await badgesResponse.json();
   const mappings = await mappingsResponse.json();
   const donorTierSetupRequired = !donorTiersResponse.ok;
-  const donorTierRows = donorTierSetupRequired ? [] : await donorTiersResponse.json();
-  const donorBadgeById = new Map((Array.isArray(badges) ? badges : []).map((badge: Row) => [String(badge.id), badge]));
+  const viewTierSetupRequired = !viewTiersResponse.ok;
+  const recruiterTierSetupRequired = !recruiterTiersResponse.ok;
+  const [donorTierRows, viewTierRows, recruiterTierRows] = await Promise.all([
+    donorTierSetupRequired ? Promise.resolve([]) : donorTiersResponse.json(),
+    viewTierSetupRequired ? Promise.resolve([]) : viewTiersResponse.json(),
+    recruiterTierSetupRequired ? Promise.resolve([]) : recruiterTiersResponse.json(),
+  ]);
+  const badgeById = new Map((Array.isArray(badges) ? badges : []).map((badge: Row) => [String(badge.id), badge]));
   const donorTiers = (Array.isArray(donorTierRows) ? donorTierRows : []).map((tier: Row) => {
-    const badge = donorBadgeById.get(String(tier.badge_id)) || {};
-    return {
-      tier_key: String(tier.tier_key || ""),
-      badge_id: String(tier.badge_id || ""),
-      name: String(badge.name || tier.tier_key || ""),
-      description: String(badge.description || ""),
-      icon_url: typeof badge.icon_url === "string" ? badge.icon_url : null,
-      threshold_pence: Number(tier.threshold_pence || 0),
-      discord_role_id: typeof tier.discord_role_id === "string" ? tier.discord_role_id : "",
-    };
+    const badge = badgeById.get(String(tier.badge_id)) || {};
+    return { tier_key: String(tier.tier_key || ""), badge_id: String(tier.badge_id || ""), name: String(badge.name || tier.tier_key || ""), description: String(badge.description || ""), icon_url: typeof badge.icon_url === "string" ? badge.icon_url : null, threshold_pence: Number(tier.threshold_pence || 0), discord_role_id: typeof tier.discord_role_id === "string" ? tier.discord_role_id : "" };
   });
-  return NextResponse.json({ badges, mappings, donorTiers, donorTierSetupRequired }, { headers: { "Cache-Control": "no-store" } });
+  const viewTiers = (Array.isArray(viewTierRows) ? viewTierRows : []).map((tier: Row) => {
+    const badge = badgeById.get(String(tier.badge_id)) || {};
+    return { tier_key: String(tier.tier_key || ""), badge_id: String(tier.badge_id || ""), name: String(badge.name || tier.tier_key || ""), description: String(badge.description || ""), icon_url: typeof badge.icon_url === "string" ? badge.icon_url : null, threshold_views: Number(tier.threshold_views || 0), discord_role_id: typeof tier.discord_role_id === "string" ? tier.discord_role_id : "" };
+  });
+  const recruiterTiers = (Array.isArray(recruiterTierRows) ? recruiterTierRows : []).map((tier: Row) => {
+    const badge = badgeById.get(String(tier.badge_id)) || {};
+    return { tier_key: String(tier.tier_key || ""), badge_id: String(tier.badge_id || ""), name: String(badge.name || tier.tier_key || ""), description: String(badge.description || ""), icon_url: typeof badge.icon_url === "string" ? badge.icon_url : null, threshold_invites: Number(tier.threshold_invites || 0), discord_role_id: typeof tier.discord_role_id === "string" ? tier.discord_role_id : "" };
+  });
+  return NextResponse.json({ badges, mappings, donorTiers, donorTierSetupRequired, viewTiers, viewTierSetupRequired, recruiterTiers, recruiterTierSetupRequired }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(request: Request) {
@@ -147,6 +155,51 @@ export async function POST(request: Request) {
         return json({ error: "Could not save donor tier settings. Check the Supabase donor-tier migration and role ID." }, 400);
       }
       if (!Array.isArray(result) || result.length === 0) return json({ error: "Donor tier not found. Run the donor-tier migration in Supabase." }, 404);
+      return json({ ok: true });
+    }
+
+    if (action === "save_view_tier" || action === "save_recruiter_tier") {
+      const viewAction = action === "save_view_tier";
+      const tierKey = String(body?.tier_key || "").trim();
+      const validKeys = viewAction
+        ? ["views_seen", "views_rising", "views_viral", "views_buzzing", "views_main_character", "views_famous"]
+        : ["recruiter_scout", "recruiter_recruiter", "recruiter_senior_recruiter", "recruiter_lead_recruiter", "recruiter_elite_recruiter"];
+      const thresholdField = viewAction ? "threshold_views" : "threshold_invites";
+      const rawThreshold = Number(body?.[thresholdField]);
+      const maxThreshold = viewAction ? 1000000000000 : 1000000;
+      const roleId = String(body?.discord_role_id || "").trim();
+      const iconUrl = typeof body?.icon_url === "string" ? body.icon_url.trim() : null;
+      if (!validKeys.includes(tierKey)) return json({ error: "Choose a valid badge tier." }, 400);
+      if (!Number.isSafeInteger(rawThreshold) || rawThreshold < 1 || rawThreshold > maxThreshold) {
+        return json({ error: viewAction ? "Enter a view threshold from 1 to 1,000,000,000,000." : "Enter an invite threshold from 1 to 1,000,000." }, 400);
+      }
+      if (roleId && !/^\\d{15,22}$/.test(roleId)) return json({ error: "Enter a valid Discord role ID or leave it blank to disable role syncing for this tier." }, 400);
+      if (iconUrl && !(/^(https:\/\/|\/)/i.test(iconUrl) && !/^\/\//.test(iconUrl))) return json({ error: "Use an HTTPS image URL or a site-relative icon path." }, 400);
+      const table = viewAction ? "pixlo_view_tiers" : "pixlo_recruiter_tiers";
+      const thresholdColumn = thresholdField;
+      const currentResponse = await requestDb(`${table}?select=tier_key,${thresholdColumn}&order=${thresholdColumn}.asc`, "GET");
+      const currentRows = await currentResponse.json().catch(() => null);
+      if (!currentResponse.ok || !Array.isArray(currentRows)) return json({ error: "Tier settings are not available. Run supabase/migrations/202610180004_pixlo_view_and_recruiter_tiers.sql in Supabase first." }, 503);
+      const orderedRows = [...currentRows].sort((a: Row, b: Row) => Number(a[thresholdColumn]) - Number(b[thresholdColumn]));
+      const index = orderedRows.findIndex((row: Row) => String(row.tier_key) === tierKey);
+      if (index < 0) return json({ error: "Tier not found. Run the latest Views and Recruiter tier migration." }, 404);
+      const previous = index > 0 ? Number(orderedRows[index - 1][thresholdColumn]) : null;
+      const next = index < orderedRows.length - 1 ? Number(orderedRows[index + 1][thresholdColumn]) : null;
+      if ((previous !== null && rawThreshold <= previous) || (next !== null && rawThreshold >= next)) {
+        return json({ error: "Keep tier thresholds in strictly ascending order. This tier must stay between the tiers directly above and below it." }, 400);
+      }
+      const patch: Row = { [thresholdColumn]: rawThreshold, discord_role_id: roleId || null, updated_at: new Date().toISOString() };
+      const updated = await requestDb(`${table}?tier_key=eq.${encodeURIComponent(tierKey)}`, "PATCH", patch, "return=representation");
+      const rows = await updated.json().catch(() => null);
+      if (!updated.ok) {
+        const detail = await updated.text().catch(() => "");
+        return json({ error: /23505/.test(JSON.stringify(rows) + detail) ? "That threshold or Discord role is already assigned to another tier." : "Could not save the tier. Check the database migration and role ID." }, 400);
+      }
+      if (!Array.isArray(rows) || rows.length === 0) return json({ error: "Tier was not found." }, 404);
+      if (iconUrl !== null) {
+        const badgeUpdate = await requestDb(`badges?id=eq.${encodeURIComponent(String(rows[0].badge_id))}`, "PATCH", { icon_url: iconUrl || null, updated_at: new Date().toISOString() }, "return=minimal");
+        if (!badgeUpdate.ok) return json({ error: "The tier threshold was saved, but its icon URL could not be saved." }, 400);
+      }
       return json({ ok: true });
     }
 
