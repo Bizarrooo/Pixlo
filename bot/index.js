@@ -673,10 +673,23 @@ async function syncBadges() {
       getAllDiscordAwards(),
     ]);
 
-    const mappings = Array.isArray(roleMappings) ? roleMappings : [];
     const linkedProfiles = Array.isArray(profiles) ? profiles : [];
     const awards = Array.isArray(currentAwards) ? currentAwards : [];
-    console.log(`[badge-sync] loaded ${mappings.length} role-to-badge mappings and ${linkedProfiles.length} Pixlo profiles linked to Discord; server member cache has ${guild.members.cache.size} members`);
+
+    // Donor tiers are synchronised by amount + highest donor role, not by the
+    // generic role-mapping table, so older donor badges cannot stack back up.
+    let donorBadgeIds = new Set();
+    try {
+      const donorDefinitions = await db(`badges?select=id,badge_key&badge_key=in.(${DONOR_ROLE_TIERS.map(tier => tier.key).join(",")})`);
+      if (Array.isArray(donorDefinitions)) {
+        donorBadgeIds = new Set(donorDefinitions.map(badge => String(badge.id)));
+      }
+    } catch (error) {
+      console.error("[badge-sync] Could not load donor badge definitions for role-mapping exclusion:", error instanceof Error ? error.message : error);
+    }
+    const mappings = (Array.isArray(roleMappings) ? roleMappings : [])
+      .filter(mapping => !donorBadgeIds.has(String(mapping.badge_id)));
+    console.log(`[badge-sync] loaded ${mappings.length} non-donor role-to-badge mappings and ${linkedProfiles.length} Pixlo profiles linked to Discord; server member cache has ${guild.members.cache.size} members`);
 
     try {
       const [premiumEntitlements, premiumGifts, premiumRevocations] = await Promise.all([
