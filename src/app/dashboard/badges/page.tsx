@@ -5,10 +5,15 @@ import { useCallback, useEffect, useState } from "react";
 
 type Badge = { id: string; badge_key: string; name: string; description: string; icon_url: string | null; is_active: boolean };
 type Mapping = { discord_role_id: string; badge_id: string; created_at: string };
+type DonorTier = { tier_key: string; badge_id: string; name: string; description: string; icon_url: string | null; threshold_pence: number; discord_role_id: string };
+type DonorTierDraft = { amount: string; roleId: string };
 
 export default function BadgeManagementPage() {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [mappings, setMappings] = useState<Mapping[]>([]);
+  const [donorTiers, setDonorTiers] = useState<DonorTier[]>([]);
+  const [donorTierSetupRequired, setDonorTierSetupRequired] = useState(false);
+  const [donorTierDrafts, setDonorTierDrafts] = useState<Record<string, DonorTierDraft>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -30,6 +35,13 @@ export default function BadgeManagementPage() {
       if (!response.ok) throw new Error(data.error || "Could not load badge settings.");
       setBadges(Array.isArray(data.badges) ? data.badges : []);
       setMappings(Array.isArray(data.mappings) ? data.mappings : []);
+      const loadedDonorTiers: DonorTier[] = Array.isArray(data.donorTiers) ? data.donorTiers : [];
+      setDonorTiers(loadedDonorTiers);
+      setDonorTierSetupRequired(Boolean(data.donorTierSetupRequired));
+      setDonorTierDrafts(Object.fromEntries(loadedDonorTiers.map((tier) => [tier.tier_key, {
+        amount: (Number(tier.threshold_pence || 0) / 100).toFixed(2),
+        roleId: tier.discord_role_id || "",
+      }])));
       setMapBadgeId((current: string) => current || data.badges?.[0]?.id || "");
       setAwardBadgeId((current: string) => current || data.badges?.[0]?.id || "");
       return null;
@@ -125,6 +137,40 @@ export default function BadgeManagementPage() {
                 <button className="badge-admin-danger" disabled={busy} onClick={() => { if (window.confirm(`Delete the ${badge.name} badge and its awards?`)) void act({ action: "delete_badge", id: badge.id }, "Badge deleted."); }}>Delete</button>
               </article>)}
             </div>}
+          </section>
+
+          <section className="badge-admin-panel badge-admin-donor-panel">
+            <div className="badge-admin-section-heading">
+              <div><h2>Donor badge tiers <span>{donorTiers.length || 7}</span></h2><p className="badge-admin-muted">Set each upgrade threshold and connect its Discord role. Donor badges are a single tier slot: a higher tier replaces the one below it.</p></div>
+            </div>
+            {donorTierSetupRequired ? (
+              <div className="badge-admin-setup-note">
+                <strong>Donor tier database setup needed</strong>
+                <p>Run <code>supabase/migrations/202610180001_pixlo_donor_badge_tiers.sql</code> and then <code>supabase/migrations/202610180002_pixlo_donor_tier_admin.sql</code> in Supabase → SQL Editor, in that order. Refresh this page afterwards.</p>
+              </div>
+            ) : donorTiers.length === 0 ? (
+              <p className="badge-admin-muted">The donor-tier table has no tiers yet. Run the donor-tier migrations, then refresh.</p>
+            ) : (
+              <div className="badge-admin-donor-tier-list">
+                {donorTiers.map(tier => {
+                  const draft = donorTierDrafts[tier.tier_key] || { amount: (tier.threshold_pence / 100).toFixed(2), roleId: tier.discord_role_id || "" };
+                  return (
+                    <article className="badge-admin-donor-tier" key={tier.tier_key}>
+                      <div className="badge-admin-donor-tier-identity">
+                        <div className="badge-admin-icon">{tier.icon_url ? <img src={tier.icon_url} alt="" /> : <span>✦</span>}</div>
+                        <div className="badge-admin-info"><strong>{tier.name}</strong><small>{tier.tier_key}</small><p>Current threshold: £{(tier.threshold_pence / 100).toFixed(2)}</p></div>
+                      </div>
+                      <div className="badge-admin-donor-tier-fields">
+                        <label>Donation threshold (£)<input type="number" min="1" max="1000" step="0.01" value={draft.amount} onChange={event => setDonorTierDrafts(current => ({ ...current, [tier.tier_key]: { ...draft, amount: event.target.value } }))} /></label>
+                        <label>Discord role ID<input inputMode="numeric" value={draft.roleId} onChange={event => setDonorTierDrafts(current => ({ ...current, [tier.tier_key]: { ...draft, roleId: event.target.value.replace(/[^0-9]/g, "").slice(0, 22) } }))} placeholder="Paste role ID — leave blank to unlink" /></label>
+                        <button type="button" disabled={busy || !Number.isFinite(Number(draft.amount)) || Number(draft.amount) < 1 || Number(draft.amount) > 1000 || !/^\d{15,22}$/.test(draft.roleId) && Boolean(draft.roleId)} onClick={() => void act({ action: "save_donor_tier", tier_key: tier.tier_key, threshold_pence: Math.round(Number(draft.amount) * 100), discord_role_id: draft.roleId }, `${tier.name} tier saved.`)}>Save tier</button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+            <p className="badge-admin-note">Role IDs are saved in Supabase, so you can configure them here instead of editing Railway environment variables. The Discord worker must be running, and the bot needs Manage Roles with its highest role above the donor roles.</p>
           </section>
 
           <section className="badge-admin-panel">
