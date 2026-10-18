@@ -173,7 +173,7 @@ export async function POST(request: Request) {
       if (!Number.isSafeInteger(rawThreshold) || rawThreshold < 1 || rawThreshold > maxThreshold) {
         return json({ error: viewAction ? "Enter a view threshold from 1 to 1,000,000,000,000." : "Enter an invite threshold from 1 to 1,000,000." }, 400);
       }
-      if (roleId && !/^\\d{15,22}$/.test(roleId)) return json({ error: "Enter a valid Discord role ID or leave it blank to disable role syncing for this tier." }, 400);
+      if (roleId && !/^\d{15,22}$/.test(roleId)) return json({ error: "Enter a valid Discord role ID or leave it blank to disable role syncing for this tier." }, 400);
       if (iconUrl && !(/^(https:\/\/|\/)/i.test(iconUrl) && !/^\/\//.test(iconUrl))) return json({ error: "Use an HTTPS image URL or a site-relative icon path." }, 400);
       const table = viewAction ? "pixlo_view_tiers" : "pixlo_recruiter_tiers";
       const thresholdColumn = thresholdField;
