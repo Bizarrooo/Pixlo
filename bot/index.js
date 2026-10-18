@@ -519,8 +519,10 @@ async function syncDonorTierRoles(guild, profiles) {
     .filter(tier => /^\d{17,20}$/.test(tier.roleId));
   if (!configuredTiers.length) return;
 
-  const liveMode = process.env.PIXLO_DONATIONS_LIVEMODE === "true"
-    || (process.env.PIXLO_DONATIONS_LIVEMODE == null && process.env.PIXLO_PREMIUM_LIVEMODE === "true");
+  const configuredDonationsMode = String(process.env.PIXLO_DONATIONS_LIVEMODE || "").trim().toLowerCase();
+  const liveMode = configuredDonationsMode
+    ? configuredDonationsMode === "true"
+    : process.env.PIXLO_PREMIUM_LIVEMODE === "true";
   const totals = await getAllDonationTotals(liveMode);
   const roles = [];
   for (const tier of configuredTiers) {
