@@ -112,8 +112,25 @@ export async function POST(request: Request) {
       if (!Number.isInteger(thresholdPence) || thresholdPence < 100 || thresholdPence > 100000) {
         return json({ error: "Set a tier threshold between £1.00 and £1,000.00." }, 400);
       }
-      if (roleId && !/^\\d{15,22}$/.test(roleId)) {
+      if (roleId && !/^\d{15,22}$/.test(roleId)) {
         return json({ error: "Enter a valid Discord role ID, or leave it blank to disable role syncing for this tier." }, 400);
+      }
+      const orderedKeys = [
+        "donor_supporter", "donor_patron", "donor_benefactor", "donor_sponsor",
+        "donor_elite_sponsor", "donor_mythic_patron", "donor_eternal_benefactor",
+      ];
+      const currentTierRowsResponse = await requestDb("pixlo_donor_tiers?select=tier_key,threshold_pence", "GET");
+      const currentTierRows = await currentTierRowsResponse.json().catch(() => null);
+      if (!currentTierRowsResponse.ok || !Array.isArray(currentTierRows)) {
+        return json({ error: "Donor tier settings are not available. Run the donor-tier admin migration in Supabase first." }, 503);
+      }
+      const currentThresholds = new Map(currentTierRows.map((tier: Row) => [String(tier.tier_key), Number(tier.threshold_pence)]));
+      const rank = orderedKeys.indexOf(tierKey);
+      const previousThreshold = rank > 0 ? currentThresholds.get(orderedKeys[rank - 1]) : undefined;
+      const nextThreshold = rank < orderedKeys.length - 1 ? currentThresholds.get(orderedKeys[rank + 1]) : undefined;
+      if ((typeof previousThreshold === "number" && thresholdPence <= previousThreshold) ||
+          (typeof nextThreshold === "number" && thresholdPence >= nextThreshold)) {
+        return json({ error: "Keep tier thresholds in ascending order. Each tier must cost more than the tier below and less than the tier above." }, 400);
       }
       const response = await requestDb(
         `pixlo_donor_tiers?tier_key=eq.${encodeURIComponent(tierKey)}`,
