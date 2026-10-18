@@ -19,5 +19,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Validate Discord bot JavaScript
+        run: node --check bot/index.js
       - name: Build Pixlo
         run: npm run build
