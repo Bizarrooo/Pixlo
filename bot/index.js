@@ -22,6 +22,7 @@ const announcedRevocationRecipients = new Set();
 const processingPremiumGiftIds = new Set();
 const processingPremiumPurchaseKeys = new Set();
 let premiumFastSyncing = false;
+let donorTierSyncing = false;
 const pendingRoleChanges = new Map();
 let syncing = false;
 let syncAgain = false;
@@ -514,152 +515,157 @@ async function getAllDonationTotals(liveMode) {
 }
 
 async function syncDonorTierRoles(guild, profiles) {
+  if (donorTierSyncing) return;
+  donorTierSyncing = true;
+  try {
   const configuredDonationsMode = String(process.env.PIXLO_DONATIONS_LIVEMODE || "").trim().toLowerCase();
-  const liveMode = configuredDonationsMode
-    ? configuredDonationsMode === "true"
-    : process.env.PIXLO_PREMIUM_LIVEMODE === "true";
-
-  const tierKeys = DONOR_ROLE_TIERS.map(tier => tier.key);
-  const [totals, badgeDefinitions] = await Promise.all([
-    getAllDonationTotals(liveMode),
-    db(`badges?select=id,badge_key&is_active=eq.true&badge_key=in.(${tierKeys.join(",")})`),
-  ]);
-  const badges = Array.isArray(badgeDefinitions)
-    ? badgeDefinitions.filter(badge => typeof badge?.id === "string" && typeof badge?.badge_key === "string")
-    : [];
-  const badgeByKey = new Map(badges.map(badge => [badge.badge_key, badge]));
-  if (badges.length !== DONOR_ROLE_TIERS.length) {
-    console.error("[donor-role] donor badge definitions are incomplete. Run the donor badge migration in Supabase.");
-    return;
-  }
-  const donorBadgeIds = badges.map(badge => badge.id);
-
-  // Read existing awards across all sources so this tier group can stay mutually exclusive.
-  const existingAwards = [];
-  let awardOffset = 0;
-  const pageSize = 1000;
-  while (true) {
-    const page = await db(`user_badges?select=id,user_id,badge_id,source&badge_id=in.(${donorBadgeIds.join(",")})&order=id.asc&limit=${pageSize}&offset=${awardOffset}`);
-    if (!Array.isArray(page) || page.length === 0) break;
-    existingAwards.push(...page);
-    if (page.length < pageSize) break;
-    awardOffset += pageSize;
-  }
-  const awardsByUser = new Map();
-  for (const award of existingAwards) {
-    const current = awardsByUser.get(String(award.user_id)) || [];
-    current.push(award);
-    awardsByUser.set(String(award.user_id), current);
-  }
-
-  const configuredTiers = DONOR_ROLE_TIERS
-    .map((tier, index) => ({
-      ...tier,
-      index,
-      roleId: String(process.env[tier.env] || "").trim(),
-    }))
-    .filter(tier => /^\d{17,20}$/.test(tier.roleId))
-    .map(tier => {
-      const role = guild.roles.cache.get(tier.roleId);
-      if (!role) console.error(`[donor-role] Could not find Discord role ${tier.roleId} configured by ${tier.env}.`);
-      return { ...tier, role };
-    })
-    .filter(tier => Boolean(tier.role));
-
-  let assigned = 0;
-  let removed = 0;
-  let badgesAwarded = 0;
-  let badgesReplaced = 0;
-
-  for (const profile of profiles) {
-    const userId = String(profile.id || "");
-    if (!userId) continue;
-
-    const totalPence = totals.get(userId) || 0;
-    let donationTierIndex = -1;
-    for (const tier of DONOR_ROLE_TIERS) {
-      if (totalPence >= tier.thresholdPence) donationTierIndex = DONOR_ROLE_TIERS.findIndex(item => item.key === tier.key);
+    const liveMode = configuredDonationsMode
+      ? configuredDonationsMode === "true"
+      : process.env.PIXLO_PREMIUM_LIVEMODE === "true";
+  
+    const tierKeys = DONOR_ROLE_TIERS.map(tier => tier.key);
+    const [totals, badgeDefinitions] = await Promise.all([
+      getAllDonationTotals(liveMode),
+      db(`badges?select=id,badge_key&is_active=eq.true&badge_key=in.(${tierKeys.join(",")})`),
+    ]);
+    const badges = Array.isArray(badgeDefinitions)
+      ? badgeDefinitions.filter(badge => typeof badge?.id === "string" && typeof badge?.badge_key === "string")
+      : [];
+    const badgeByKey = new Map(badges.map(badge => [badge.badge_key, badge]));
+    if (badges.length !== DONOR_ROLE_TIERS.length) {
+      console.error("[donor-role] donor badge definitions are incomplete. Run the donor badge migration in Supabase.");
+      return;
     }
-
-    const discordId = String(profile.discord_id || "");
-    const member = discordId
-      ? (guild.members.cache.get(discordId) || await guild.members.fetch(discordId).catch(() => null))
-      : null;
-
-    // A role assigned in Discord can also grant that site's donor badge. If the
-    // donation-earned tier is higher, it upgrades the member; otherwise a manually
-    // granted higher role is respected and syncs back to the profile.
-    let heldRoleTierIndex = -1;
-    if (member) {
-      for (const tier of configuredTiers) {
-        if (member.roles.cache.has(tier.roleId)) heldRoleTierIndex = Math.max(heldRoleTierIndex, tier.index);
+    const donorBadgeIds = badges.map(badge => badge.id);
+  
+    // Read existing awards across all sources so this tier group can stay mutually exclusive.
+    const existingAwards = [];
+    let awardOffset = 0;
+    const pageSize = 1000;
+    while (true) {
+      const page = await db(`user_badges?select=id,user_id,badge_id,source&badge_id=in.(${donorBadgeIds.join(",")})&order=id.asc&limit=${pageSize}&offset=${awardOffset}`);
+      if (!Array.isArray(page) || page.length === 0) break;
+      existingAwards.push(...page);
+      if (page.length < pageSize) break;
+      awardOffset += pageSize;
+    }
+    const awardsByUser = new Map();
+    for (const award of existingAwards) {
+      const current = awardsByUser.get(String(award.user_id)) || [];
+      current.push(award);
+      awardsByUser.set(String(award.user_id), current);
+    }
+  
+    const configuredTiers = DONOR_ROLE_TIERS
+      .map((tier, index) => ({
+        ...tier,
+        index,
+        roleId: String(process.env[tier.env] || "").trim(),
+      }))
+      .filter(tier => /^\d{17,20}$/.test(tier.roleId))
+      .map(tier => {
+        const role = guild.roles.cache.get(tier.roleId);
+        if (!role) console.error(`[donor-role] Could not find Discord role ${tier.roleId} configured by ${tier.env}.`);
+        return { ...tier, role };
+      })
+      .filter(tier => Boolean(tier.role));
+  
+    let assigned = 0;
+    let removed = 0;
+    let badgesAwarded = 0;
+    let badgesReplaced = 0;
+  
+    for (const profile of profiles) {
+      const userId = String(profile.id || "");
+      if (!userId) continue;
+  
+      const totalPence = totals.get(userId) || 0;
+      let donationTierIndex = -1;
+      for (const tier of DONOR_ROLE_TIERS) {
+        if (totalPence >= tier.thresholdPence) donationTierIndex = DONOR_ROLE_TIERS.findIndex(item => item.key === tier.key);
       }
-    }
-    const effectiveTierIndex = Math.max(donationTierIndex, heldRoleTierIndex);
-    const effectiveTier = effectiveTierIndex >= 0 ? DONOR_ROLE_TIERS[effectiveTierIndex] : null;
-    const desiredBadge = effectiveTier ? badgeByKey.get(effectiveTier.key) || null : null;
-
-    // Keep only the highest effective donor role. If the exact role is not configured,
-    // leave existing Discord roles alone, but keep the website badge in sync.
-    if (member && configuredTiers.length) {
-      const exactDesiredRole = configuredTiers.find(tier => tier.index === effectiveTierIndex);
-      if (effectiveTierIndex < 0 || exactDesiredRole) {
+  
+      const discordId = String(profile.discord_id || "");
+      const member = discordId
+        ? (guild.members.cache.get(discordId) || await guild.members.fetch(discordId).catch(() => null))
+        : null;
+  
+      // A role assigned in Discord can also grant that site's donor badge. If the
+      // donation-earned tier is higher, it upgrades the member; otherwise a manually
+      // granted higher role is respected and syncs back to the profile.
+      let heldRoleTierIndex = -1;
+      if (member) {
         for (const tier of configuredTiers) {
-          const hasRole = member.roles.cache.has(tier.roleId);
-          const shouldHaveRole = effectiveTierIndex >= 0 && tier.index === effectiveTierIndex;
-          if (shouldHaveRole && !hasRole) {
-            await member.roles.add(tier.roleId, `Pixlo donor reached ${effectiveTier.key}`);
-            assigned += 1;
-          } else if (!shouldHaveRole && hasRole) {
-            await member.roles.remove(tier.roleId, "Pixlo donor tier upgraded or reconciled");
-            removed += 1;
-          }
+          if (member.roles.cache.has(tier.roleId)) heldRoleTierIndex = Math.max(heldRoleTierIndex, tier.index);
         }
-      } else {
-        console.warn(`[donor-role] No configured Discord role for ${effectiveTier.key}; leaving the member's current donor roles unchanged.`);
+      }
+      const effectiveTierIndex = Math.max(donationTierIndex, heldRoleTierIndex);
+      const effectiveTier = effectiveTierIndex >= 0 ? DONOR_ROLE_TIERS[effectiveTierIndex] : null;
+      const desiredBadge = effectiveTier ? badgeByKey.get(effectiveTier.key) || null : null;
+  
+      // Keep only the highest effective donor role. If the exact role is not configured,
+      // leave existing Discord roles alone, but keep the website badge in sync.
+      if (member && configuredTiers.length) {
+        const exactDesiredRole = configuredTiers.find(tier => tier.index === effectiveTierIndex);
+        if (effectiveTierIndex < 0 || exactDesiredRole) {
+          for (const tier of configuredTiers) {
+            const hasRole = member.roles.cache.has(tier.roleId);
+            const shouldHaveRole = effectiveTierIndex >= 0 && tier.index === effectiveTierIndex;
+            if (shouldHaveRole && !hasRole) {
+              await member.roles.add(tier.roleId, `Pixlo donor reached ${effectiveTier.key}`);
+              assigned += 1;
+            } else if (!shouldHaveRole && hasRole) {
+              await member.roles.remove(tier.roleId, "Pixlo donor tier upgraded or reconciled");
+              removed += 1;
+            }
+          }
+        } else {
+          console.warn(`[donor-role] No configured Discord role for ${effectiveTier.key}; leaving the member's current donor roles unchanged.`);
+        }
+      }
+  
+      // Donor tier badges form a single upgrade slot: old milestones are replaced,
+      // not stacked. Awards use the managed manual source so Discord-role mappings
+      // cannot make an old tier reappear on the public profile.
+      const previousAwards = awardsByUser.get(userId) || [];
+      let keptDesiredManualBadge = false;
+      for (const award of previousAwards) {
+        const shouldKeep = Boolean(
+          desiredBadge &&
+          award.badge_id === desiredBadge.id &&
+          award.source === "manual" &&
+          !keptDesiredManualBadge
+        );
+        if (shouldKeep) {
+          keptDesiredManualBadge = true;
+          continue;
+        }
+        await db(`user_badges?id=eq.${encodeURIComponent(award.id)}`, {
+          method: "DELETE",
+          headers: { Prefer: "return=minimal" },
+        });
+        badgesReplaced += 1;
+      }
+  
+      if (desiredBadge && !keptDesiredManualBadge) {
+        await db("user_badges", {
+          method: "POST",
+          headers: { Prefer: "return=minimal" },
+          body: JSON.stringify({
+            user_id: userId,
+            badge_id: desiredBadge.id,
+            source: "manual",
+          }),
+        });
+        badgesAwarded += 1;
       }
     }
-
-    // Donor tier badges form a single upgrade slot: old milestones are replaced,
-    // not stacked. Awards use the managed manual source so Discord-role mappings
-    // cannot make an old tier reappear on the public profile.
-    const previousAwards = awardsByUser.get(userId) || [];
-    let keptDesiredManualBadge = false;
-    for (const award of previousAwards) {
-      const shouldKeep = Boolean(
-        desiredBadge &&
-        award.badge_id === desiredBadge.id &&
-        award.source === "manual" &&
-        !keptDesiredManualBadge
-      );
-      if (shouldKeep) {
-        keptDesiredManualBadge = true;
-        continue;
-      }
-      await db(`user_badges?id=eq.${encodeURIComponent(award.id)}`, {
-        method: "DELETE",
-        headers: { Prefer: "return=minimal" },
-      });
-      badgesReplaced += 1;
-    }
-
-    if (desiredBadge && !keptDesiredManualBadge) {
-      await db("user_badges", {
-        method: "POST",
-        headers: { Prefer: "return=minimal" },
-        body: JSON.stringify({
-          user_id: userId,
-          badge_id: desiredBadge.id,
-          source: "manual",
-        }),
-      });
-      badgesAwarded += 1;
-    }
+  
+    console.log(`[donor-role] reconciled ${configuredTiers.length} configured roles: ${assigned} role(s) added, ${removed} removed; ${badgesAwarded} current tier badge(s) awarded and ${badgesReplaced} old donor badge(s) replaced.`);
+  } finally {
+    donorTierSyncing = false;
   }
-
-  console.log(`[donor-role] reconciled ${configuredTiers.length} configured roles: ${assigned} role(s) added, ${removed} removed; ${badgesAwarded} current tier badge(s) awarded and ${badgesReplaced} old donor badge(s) replaced.`);
 }
-
 async function syncBadges() {
   if (syncing) { syncAgain = true; return; }
   syncing = true;
