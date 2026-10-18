@@ -459,7 +459,7 @@ async function announceManagedTierBadgeChange(guild, profile, tierKey, action, o
   }
 
   const discordId = String(profile?.discord_id || "");
-  const memberText = /^\\d{15,22}$/.test(discordId) ? `<@${discordId}>` : `@${profile?.username || "Pixlo member"}`;
+  const memberText = /^\d{15,22}$/.test(discordId) ? `<@${discordId}>` : `@${profile?.username || "Pixlo member"}`;
   const tierName = MANAGED_TIER_DISPLAY_NAMES[tierKey] || tierKey.replace(/^(donor|views|recruiter)_/, "").replace(/_/g, " ");
   const replacementName = options.replacementTierKey
     ? MANAGED_TIER_DISPLAY_NAMES[options.replacementTierKey] || options.replacementTierKey
