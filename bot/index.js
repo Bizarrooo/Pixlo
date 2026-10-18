@@ -812,20 +812,22 @@ async function syncDonorTierRoles(guild, profiles) {
       // Discord automation is disabled; the profile badge can still be awarded.
       if (member && configuredTiers.length) {
         const exactDesiredRole = configuredTiers.find(tier => tier.index === effectiveTierIndex);
-        if (effectiveTierIndex < 0 || exactDesiredRole) {
-          for (const tier of configuredTiers) {
-            const hasRole = member.roles.cache.has(tier.roleId);
-            const shouldHaveRole = effectiveTierIndex >= 0 && tier.index === effectiveTierIndex;
-            if (shouldHaveRole && !hasRole) {
-              await member.roles.add(tier.roleId, `Pixlo donor reached ${effectiveTier.key}`);
-              assigned += 1;
-            } else if (!shouldHaveRole && hasRole) {
-              await member.roles.remove(tier.roleId, "Pixlo donor tier upgraded or reconciled");
-              removed += 1;
-            }
+        if (effectiveTier && !exactDesiredRole) {
+          console.warn(`[donor-role] ${effectiveTier.key} has no mapped Discord role; removing any lower-tier donor roles instead of leaving them active.`);
+        }
+        // Donor roles are mutually exclusive: keep only the highest eligible tier.
+        // If that tier has no configured role, remove every lower donor role so a
+        // stale lower-tier role cannot remain as if it were the member's current tier.
+        for (const tier of configuredTiers) {
+          const hasRole = member.roles.cache.has(tier.roleId);
+          const shouldHaveRole = Boolean(effectiveTier && exactDesiredRole && tier.index === effectiveTierIndex);
+          if (shouldHaveRole && !hasRole) {
+            await member.roles.add(tier.roleId, `Pixlo donor reached ${effectiveTier.key}`);
+            assigned += 1;
+          } else if (!shouldHaveRole && hasRole) {
+            await member.roles.remove(tier.roleId, "Pixlo donor tier upgraded or reconciled");
+            removed += 1;
           }
-        } else if (effectiveTier) {
-          console.warn(`[donor-role] ${effectiveTier.key} has no mapped role in the Pixlo admin area; existing donor roles were left unchanged.`);
         }
       }
 
@@ -993,20 +995,21 @@ async function syncProgressTierGroup(guild, profiles, config) {
       const effectiveTier = effectiveTierIndex >= 0 ? tierConfigs[effectiveTierIndex] : null;
       if (member && configuredTiers.length) {
         const exactDesiredRole = configuredTiers.find(tier => tier.index === effectiveTierIndex);
-        if (effectiveTierIndex < 0 || exactDesiredRole) {
-          for (const tier of configuredTiers) {
-            const hasRole = member.roles.cache.has(tier.roleId);
-            const shouldHaveRole = effectiveTierIndex >= 0 && tier.index === effectiveTierIndex;
-            if (shouldHaveRole && !hasRole) {
-              await member.roles.add(tier.roleId, `Pixlo ${log} reached ${effectiveTier.key}`);
-              assigned += 1;
-            } else if (!shouldHaveRole && hasRole) {
-              await member.roles.remove(tier.roleId, `Pixlo ${log} tier upgraded or reconciled`);
-              removed += 1;
-            }
+        if (effectiveTier && !exactDesiredRole) {
+          console.warn(`[${log}] ${effectiveTier.key} has no configured Discord role; removing any lower-tier roles instead of leaving them active.`);
+        }
+        // Views and Recruiter roles are mutually exclusive: keep only the highest
+        // eligible tier. If its role is unconfigured, remove stale lower-tier roles.
+        for (const tier of configuredTiers) {
+          const hasRole = member.roles.cache.has(tier.roleId);
+          const shouldHaveRole = Boolean(effectiveTier && exactDesiredRole && tier.index === effectiveTierIndex);
+          if (shouldHaveRole && !hasRole) {
+            await member.roles.add(tier.roleId, `Pixlo ${log} reached ${effectiveTier.key}`);
+            assigned += 1;
+          } else if (!shouldHaveRole && hasRole) {
+            await member.roles.remove(tier.roleId, `Pixlo ${log} tier upgraded or reconciled`);
+            removed += 1;
           }
-        } else if (effectiveTier) {
-          console.warn(`[${log}] ${effectiveTier.key} has no configured role; existing tier roles were left unchanged.`);
         }
       }
 
