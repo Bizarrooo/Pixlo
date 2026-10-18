@@ -514,7 +514,6 @@ export default function PricingPage() {
                       }}
                       aria-label="Custom donation amount in pounds"
                     />
-                    <small>£1–£999,999.99</small>
                   </label>
                 )}
                 <div className="pricing-product-bottom pricing-donation-bottom">
