@@ -32,8 +32,22 @@ export async function GET(_request: Request, context: { params: Promise<{ badgeK
   if (!fileName) return NextResponse.json({ error: "Badge icon not found." }, { status: 404 });
 
   try {
+    let svg: Buffer;
     const filePath = path.join(process.cwd(), "public", "badges", fileName);
-    const svg = await readFile(filePath);
+    try {
+      svg = await readFile(filePath);
+    } catch {
+      // Serverless deployments may not bundle the public directory beside the route.
+      // The filename comes only from the fixed allowlist above.
+      const configuredOrigin = String(
+        process.env.PIXLO_PUBLIC_ORIGIN ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://pixlo1.vercel.app"),
+      ).replace(/\/$/, "");
+      const iconResponse = await fetch(`${configuredOrigin}/badges/${fileName}`, { cache: "force-cache" });
+      if (!iconResponse.ok) throw new Error(`Source badge icon returned HTTP ${iconResponse.status}`);
+      svg = Buffer.from(await iconResponse.arrayBuffer());
+    }
+
     const png = await sharp(svg, { density: 192 })
       .resize(256, 256, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png()
