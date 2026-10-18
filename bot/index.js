@@ -860,6 +860,7 @@ client.once("ready", async () => {
           }),
         ]);
         await syncPremiumRole(guild, profiles, entitlements, gifts, revocations);
+        await syncDonorTierRoles(guild, profiles);
         console.log(`[premium-fast-sync] loaded ${profiles.length} profiles, ${entitlements.length} active entitlements, ${gifts.filter(gift => gift.status === "completed" && !gift.award_announced_at && !gift.announced_at).length + gifts.filter(gift => gift.status === "revoked" && !gift.award_announced_at).length} unannounced completed gifts, ${revocations.length} pending revocations`);
         for (const gift of gifts) {
           try { await announcePremiumGift(guild, profiles, gift); }
