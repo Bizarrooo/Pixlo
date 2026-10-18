@@ -197,7 +197,7 @@ export async function POST(request: Request) {
       }
       if (!Array.isArray(rows) || rows.length === 0) return json({ error: "Tier was not found." }, 404);
       if (iconUrl !== null) {
-        const badgeUpdate = await requestDb(`badges?id=eq.${encodeURIComponent(String(rows[0].badge_id))}`, "PATCH", { icon_url: iconUrl || null, updated_at: new Date().toISOString() }, "return=minimal");
+        const badgeUpdate = await requestDb(`badges?id=eq.${encodeURIComponent(String(rows[0].badge_id))}`, "PATCH", { icon_url: iconUrl || null }, "return=minimal");
         if (!badgeUpdate.ok) return json({ error: "The tier threshold was saved, but its icon URL could not be saved." }, 400);
       }
       return json({ ok: true });
