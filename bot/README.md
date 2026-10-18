@@ -45,3 +45,11 @@ Leave a tier's role ID blank to disable Discord role sync for that tier while ke
 ## Current scope
 
 The dashboard currently accepts a direct HTTPS icon URL. A dedicated image upload flow and a user-facing badge visibility toggle are still separate follow-up tasks.
+
+## Views and recruiter badge tiers
+
+Run `supabase/migrations/202610180004_pixlo_view_and_recruiter_tiers.sql` in Supabase SQL Editor after the main badge migration. Configure view thresholds, each view icon URL, and optional Discord role IDs under **Pixlo Dashboard → Admin → Manage badges & tiers**. The same page configures Scout, Recruiter, Senior Recruiter, Lead Recruiter, and Elite Recruiter invite thresholds and roles.
+
+For invite attribution, the bot needs the **Server Members** and **Guild Invites** gateway intents and **Manage Server** permission so it can read invite-use counts. Also grant **Manage Roles** and place its highest role above all configured tier roles. Restart/redeploy the worker after updating its code or permissions.
+
+The bot records attributable invite joins from the point the updated worker is running. Each invited Discord account counts once. Vanity URL joins and joins where no invite-use change can be identified are not counted; previous invite history cannot be backfilled reliably.
