@@ -49,6 +49,12 @@ function badgeTierFamily(badgeKey?: string): "views" | "donor" | "recruiter" | n
   return null;
 }
 
+function isProgressionTierBadge(badge: DashboardBadge): boolean {
+  const key = String(badge.badge_key || "").toLowerCase();
+  const name = String(badge.name || "").trim().toLowerCase();
+  return badgeTierFamily(key) !== null || key === "donor" || name === "donor" || name === "recruiter";
+}
+
 function buildTierProgress(
   items: Array<{ key: string; name: string; threshold: number; icon_url: string | null; badge_id?: string }>,
   value: number,
@@ -1961,8 +1967,8 @@ export default function Dashboard() {
               <div className="pixlo-badge-panel-heading pixlo-badge-equip-heading"><div><h3>Equip and order badges</h3><p>Toggle badges on or off. Drag a card with the handle to change the display order. Only one tier per badge family can be equipped at a time.</p></div></div>
               {dashboardBadgesLoading ? <div className="pixlo-badge-loading">Loading earned badges…</div>
               : dashboardBadgesError ? <div className="pixlo-badge-error" role="alert">{dashboardBadgesError}</div>
-              : dashboardBadges.filter(badge => badge.badge_key !== "donor" && badge.name.trim().toLowerCase() !== "donor").length === 0
-                ? <div className="pixlo-badge-empty pixlo-badge-empty-compact"><strong>No earned badges to customise yet.</strong><p>Earn a badge first, then you can equip it here.</p></div>
+              : dashboardBadges.filter(badge => !isProgressionTierBadge(badge)).length === 0
+                ? <div className="pixlo-badge-empty pixlo-badge-empty-compact"><strong>No standard badges to customise yet.</strong><p>Your Views, Donor and Recruiter tiers are managed by the progress panels above. Earn other badges to customise them here.</p></div>
                 : <div className="pixlo-badge-equipped-list">
                   {[...dashboardBadges].filter(badge => badge.badge_key !== "donor" && badge.name.trim().toLowerCase() !== "donor").sort((a,b) => {
                     const order = settings.activeBadgeOrder || [];
@@ -1975,7 +1981,7 @@ export default function Dashboard() {
                       const from = event.dataTransfer.getData("text/plain");
                       if (!from || from === badge.id) return;
                       setSettings(current => {
-                        const valid = dashboardBadges.filter(item => item.badge_key !== "donor" && item.name.trim().toLowerCase() !== "donor").map(item => item.id);
+                        const valid = dashboardBadges.filter(item => !isProgressionTierBadge(item)).map(item => item.id);
                         const order = [...(current.activeBadgeOrder || []).filter(id => valid.includes(id)), ...valid.filter(id => !(current.activeBadgeOrder || []).includes(id))];
                         const a = order.indexOf(from), b = order.indexOf(badge.id);
                         if (a < 0 || b < 0) return current;
