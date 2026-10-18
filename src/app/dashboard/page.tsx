@@ -7,7 +7,18 @@ import { rememberPixloAccount } from "../accountSwitcher";
 import DashboardSidebar, { DashboardNavIcon, customizeTabs, optimiseTabs, type DashboardPrimarySection } from "./DashboardSidebar";
 import CursorTrailCanvas from "../CursorTrailCanvas";
 
-type DashboardBadge = { id: string; name: string; description: string; icon_url: string | null };
+type DashboardBadge = { id: string; badge_key?: string; name: string; description: string; icon_url: string | null; awarded_at?: string };
+type BadgeHubTab = "Your badges" | "All badges" | "Customize" | "Shop";
+type BadgeDonorStatus = { authenticated?: boolean; totalDonatedPence?: number; tiers?: Array<{ key: string; name: string; amountPence: number; icon?: string | null }> };
+const PROFILE_VIEW_TIERS = [
+  { key: "seen", name: "Seen", views: 100 },
+  { key: "rising", name: "Rising", views: 1000 },
+  { key: "known", name: "Known", views: 10000 },
+  { key: "spotlight", name: "Spotlight", views: 25000 },
+  { key: "popular", name: "Popular", views: 50000 },
+  { key: "iconic", name: "Iconic", views: 100000 },
+];
+const DONOR_BADGE_KEYS = new Set(["donor", "donor_supporter", "donor_patron", "donor_benefactor", "donor_sponsor", "donor_elite_sponsor", "donor_mythic_patron", "donor_eternal_benefactor"]);
 
 const socials: [SocialKey, string][] = [
   ["discord", "Discord"], ["youtube", "YouTube"], ["roblox", "Roblox"], ["github", "GitHub"], ["twitch", "Twitch"], ["instagram", "Instagram"], ["spotify", "Spotify"],
@@ -372,6 +383,11 @@ export default function Dashboard() {
   const [previewBadges, setPreviewBadges] = useState<DashboardBadge[]>([]);
   const [dashboardBadgesLoading, setDashboardBadgesLoading] = useState(false);
   const [dashboardBadgesError, setDashboardBadgesError] = useState("");
+  const [badgeCatalog, setBadgeCatalog] = useState<DashboardBadge[]>([]);
+  const [badgeHubTab, setBadgeHubTab] = useState<BadgeHubTab>("Your badges");
+  const [badgeTierModal, setBadgeTierModal] = useState<"views" | "donor" | null>(null);
+  const [badgeViews, setBadgeViews] = useState(0);
+  const [badgeDonorStatus, setBadgeDonorStatus] = useState<BadgeDonorStatus | null>(null);
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const [saved, setSaved] = useState(false);
   const [presetsPremium, setPresetsPremium] = useState(false);
@@ -429,21 +445,39 @@ export default function Dashboard() {
   }, [settingsReady]);
 
   useEffect(() => {
-    if (active !== "Badges" || !settingsReady || !discordUser) return;
+    if (active !== "Badges" || !settingsReady || !settings.username) return;
     let cancelled = false;
     setDashboardBadgesLoading(true);
     setDashboardBadgesError("");
-    fetch(`/api/public-profile/${encodeURIComponent(settings.username)}`, { cache: "no-store" })
+    fetch("/api/profile/badges", { cache: "no-store", credentials: "include" })
       .then(async response => {
         const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.profile) throw new Error(data.error || "Could not load your badges.");
-        return data.profile.badges as DashboardBadge[] | undefined;
+        if (!response.ok) throw new Error(data.error || "Could not load your badges.");
+        if (cancelled) return;
+        setDashboardBadges(Array.isArray(data.badges) ? data.badges : []);
+        setBadgeCatalog(Array.isArray(data.catalog) ? data.catalog : []);
       })
-      .then(badges => { if (!cancelled) setDashboardBadges(Array.isArray(badges) ? badges : []); })
       .catch(error => { if (!cancelled) setDashboardBadgesError(error instanceof Error ? error.message : "Could not load your badges."); })
       .finally(() => { if (!cancelled) setDashboardBadgesLoading(false); });
+
+    fetch("/api/profile-stats?username=" + encodeURIComponent(settings.username), { cache: "no-store", credentials: "include" })
+      .then(async response => ({ ok: response.ok, data: await response.json().catch(() => ({})) }))
+      .then(({ ok, data }) => { if (!cancelled && ok) setBadgeViews(Math.max(0, Number(data?.viewer?.views ?? data?.views ?? 0) || 0)); })
+      .catch(() => {});
+    fetch("/api/donations/status", { cache: "no-store", credentials: "include" })
+      .then(async response => ({ ok: response.ok, data: await response.json().catch(() => ({})) }))
+      .then(({ ok, data }) => { if (!cancelled) setBadgeDonorStatus(ok ? data : null); })
+      .catch(() => { if (!cancelled) setBadgeDonorStatus(null); });
+
     return () => { cancelled = true; };
-  }, [active, settingsReady, settings.username, discordUser]);
+  }, [active, settingsReady, settings.username]);
+
+  useEffect(() => {
+    if (!badgeTierModal) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setBadgeTierModal(null); };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [badgeTierModal]);
   useEffect(() => {
     if (!settingsReady || !settings.username) { setPreviewBadges([]); return; }
     let cancelled = false;
@@ -1613,46 +1647,209 @@ export default function Dashboard() {
             </div>}
           </div>}
 
-          {active === "Badges" && <div className="form-stack">
-            <SectionIntro title="Your Pixlo badges" />
-            {!discordUser ? <section className="discord-connect-card" style={{ padding: 24, borderRadius: 18 }}>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-                <div className="discord-connect-icon"><SocialIcon name="discord" /></div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h3 style={{ margin: "0 0 8px", fontSize: 20 }}>Badges are locked</h3>
-                  <p style={{ margin: "0 0 18px", lineHeight: 1.65, opacity: 0.82 }}>Unlock this section once you link Discord and join the official Pixlo Discord server.</p>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                    <a className="connect-button" href="https://discord.gg/Bkz4P9gVy7" target="_blank" rel="noreferrer">Join official server ↗</a>
-                    <a className="connect-button discord-connect-action" href="/api/auth/discord">Link Discord <span aria-hidden="true">↗</span></a>
-                  </div>
-                  <p style={{ margin: "14px 0 0", fontSize: 12, opacity: 0.65 }}>Join the server first, then link your Discord account to unlock your badges.</p>
-                </div>
+          {active === "Badges" && <div className="form-stack pixlo-badge-hub">
+            <header className="pixlo-badge-hub-header">
+              <div>
+                <span className="pixlo-badge-kicker">PROFILE REWARDS</span>
+                <h2>Badges</h2>
+                <p>Collect badges on Pixlo, track your milestones, and choose how they appear on your profile.</p>
               </div>
-            </section> : <>
-              <p className="hint">Your earned Pixlo badges appear here. Badges are linked to your Discord membership and eligible server roles.</p>
-              <p className="hint">Switch badges on to equip them. Drag using the three-line handle to choose their order. Changes apply when you save.</p>
-              <Setting label="Badge position" text="Place badges beside your profile picture or underneath the profile content."><select value={settings.badgePosition} onChange={e => { set("badgePosition", e.target.value as "left" | "right" | "bottom"); setSaved(false); }}><option value="left">Left side of profile picture</option><option value="right">Right side of profile picture</option><option value="bottom">Underneath everything</option></select></Setting>
-              <Setting label="Badge appearance" text="Choose whether badges have a pill background and border or show only the badge icon."><select value={settings.badgeStyle} onChange={e => { set("badgeStyle", e.target.value as "default" | "icon"); setSaved(false); }}><option value="default">Background and border</option><option value="icon">Icon only — no background or border</option></select></Setting>
-              <div className="colour-grid"><Colour label="Badge colour" value={settings.badgeColour} onChange={v => { set("badgeColour", v); setSaved(false); }} /><Setting label="Badge glow" text="Add a coloured glow to equipped badges."><Toggle value={settings.badgeGlow} onChange={v => { set("badgeGlow", v); setSaved(false); }} /></Setting></div>
-              <Range label="Badge glow intensity" value={settings.badgeGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("badgeGlowIntensity", v); setSaved(false); }} />
-              <Range label="Badge size" value={settings.badgeScale} min={50} max={300} suffix="%" onChange={v => { set("badgeScale", v); setSaved(false); }} />
-              <div className="colour-grid"><Setting label="Double underline" text="Show two centred lines beneath your badges."><Toggle value={settings.badgeUnderline} onChange={v => { set("badgeUnderline", v); setSaved(false); }} /></Setting><Setting label="Underline glow" text="Add a matching glow to the double underline."><Toggle value={settings.badgeUnderlineGlow} onChange={v => { set("badgeUnderlineGlow", v); setSaved(false); }} /></Setting></div>
-              {dashboardBadges.some(badge => badge.name.trim().toLowerCase() === "verified") && <><Setting label="Show Verified badge beside display name" text="Place the Verified icon immediately to the right of your display name on your public profile."><Toggle value={settings.showVerifiedBadgeNextToUsername} onChange={v => { set("showVerifiedBadgeNextToUsername", v); setSaved(false); }} /></Setting>{settings.showVerifiedBadgeNextToUsername && <Colour label="Verified check colour" value={settings.verifiedBadgeColour} onChange={v => { set("verifiedBadgeColour", v); setSaved(false); }} />}</>}
-              <div className="badge-refresh-row"><span>Badge list</span><button type="button" disabled={dashboardBadgesLoading} onClick={async () => { setDashboardBadgesLoading(true); setDashboardBadgesError(""); try { const response = await fetch("/api/public-profile/" + encodeURIComponent(settings.username) + "?refresh=" + Date.now(), { cache: "no-store" }); const data = await response.json().catch(() => ({})); if (!response.ok || !data.profile) throw new Error(data.error || "Could not refresh your badges."); setDashboardBadges(Array.isArray(data.profile.badges) ? data.profile.badges : []); } catch (error) { setDashboardBadgesError(error instanceof Error ? error.message : "Could not refresh your badges."); } finally { setDashboardBadgesLoading(false); } }}>{dashboardBadgesLoading ? "Refreshing…" : "Refresh ↻"}</button></div>{dashboardBadgesLoading ? <div className="empty-state">Loading your badges…</div> : dashboardBadgesError ? <div className="discord-error-notice">{dashboardBadgesError}</div> : dashboardBadges.length === 0 ? <div className="empty-state">You haven't earned any badges yet. Keep an eye on the official Pixlo Discord server for roles and rewards.</div> : <div className="active-links-list pixlo-badge-editor-list">
-                {[...dashboardBadges].sort((a,b) => { const order = settings.activeBadgeOrder || []; const ai = order.indexOf(a.id), bi = order.indexOf(b.id); return (ai < 0 ? 9999 : ai) - (bi < 0 ? 9999 : bi); }).map(badge => {
-                  const equipped = settings.activeBadgeIds.includes(badge.id);
-                  return <div className="active-link-row" key={badge.id} draggable onDragStart={event => { event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", badge.id); event.currentTarget.classList.add("dragging"); }} onDragEnd={event => event.currentTarget.classList.remove("dragging")} onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); const from = event.dataTransfer.getData("text/plain"); if (!from || from === badge.id) return; setSettings(current => { const valid = dashboardBadges.map(item => item.id); const order = [...(current.activeBadgeOrder || []).filter(id => valid.includes(id)), ...valid.filter(id => !(current.activeBadgeOrder || []).includes(id))]; const a = order.indexOf(from), b = order.indexOf(badge.id); if (a < 0 || b < 0) return current; const next = [...order]; const [moved] = next.splice(a, 1); next.splice(b, 0, moved); return { ...current, activeBadgeOrder: next }; }); setSaved(false); }}>
-                    <span className="active-link-handle" title="Drag to reorder" aria-hidden="true"><i /><i /><i /></span>
-                    <div className="badge-admin-icon">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
-                    <div className="pixlo-badge-editor-info"><b>{badge.name}</b><span>{badge.description || "Pixlo badge"}</span></div>
-                    <Toggle value={equipped} onChange={v => { setSettings(current => ({ ...current, activeBadgeIds: v ? [...current.activeBadgeIds, badge.id] : current.activeBadgeIds.filter(id => id !== badge.id) })); setSaved(false); }} />
-                  </div>;
-                })}
-              </div>}
-            </>}
-          </div>}
+              <a href={"/user/" + encodeURIComponent(settings.username)} target="_blank" rel="noreferrer" className="pixlo-badge-profile-link">View profile ↗</a>
+            </header>
 
-          
+            <nav className="pixlo-badge-tabs" aria-label="Badge sections">
+              {(["Your badges", "All badges", "Customize", "Shop"] as BadgeHubTab[]).map(tab => (
+                <button type="button" key={tab} className={badgeHubTab === tab ? "is-active" : ""} aria-selected={badgeHubTab === tab} onClick={() => setBadgeHubTab(tab)}>
+                  {tab}{tab === "Your badges" && <span>{dashboardBadges.filter(badge => badge.badge_key !== "donor" && badge.name.trim().toLowerCase() !== "donor").length}</span>}
+                </button>
+              ))}
+            </nav>
+
+            {badgeHubTab === "Your badges" && <section className="pixlo-badge-tab-panel">
+              <div className="pixlo-badge-panel-heading">
+                <div><h3>Your collection</h3><p>Badges awarded to your Pixlo account. Equipping and display settings live under Customize.</p></div>
+                <button type="button" className="pixlo-badge-quiet-button" disabled={dashboardBadgesLoading} onClick={() => {
+                  setDashboardBadgesLoading(true);
+                  setDashboardBadgesError("");
+                  fetch("/api/profile/badges?refresh=" + Date.now(), { cache: "no-store", credentials: "include" })
+                    .then(async response => {
+                      const data = await response.json().catch(() => ({}));
+                      if (!response.ok) throw new Error(data.error || "Could not refresh your badges.");
+                      setDashboardBadges(Array.isArray(data.badges) ? data.badges : []);
+                      setBadgeCatalog(Array.isArray(data.catalog) ? data.catalog : []);
+                    })
+                    .catch(error => setDashboardBadgesError(error instanceof Error ? error.message : "Could not refresh your badges."))
+                    .finally(() => setDashboardBadgesLoading(false));
+                }}>{dashboardBadgesLoading ? "Refreshing…" : "Refresh ↻"}</button>
+              </div>
+              {dashboardBadgesLoading && dashboardBadges.length === 0 ? <div className="pixlo-badge-empty"><span className="pixlo-badge-empty-icon">✦</span><strong>Loading your badges…</strong><p>Checking your earned rewards.</p></div>
+              : dashboardBadgesError ? <div className="pixlo-badge-error" role="alert">{dashboardBadgesError}</div>
+              : dashboardBadges.filter(badge => badge.badge_key !== "donor" && badge.name.trim().toLowerCase() !== "donor").length === 0
+                ? <div className="pixlo-badge-empty"><span className="pixlo-badge-empty-icon">✦</span><strong>No badges yet.</strong><p>Check All badges to discover profile milestones and rewards available on Pixlo.</p><button type="button" onClick={() => setBadgeHubTab("All badges")}>Explore all badges <span>↗</span></button></div>
+                : <div className="pixlo-badge-card-grid pixlo-earned-badge-grid">
+                  {[...dashboardBadges].filter(badge => badge.badge_key !== "donor" && badge.name.trim().toLowerCase() !== "donor").sort((a, b) => {
+                    const order = settings.activeBadgeOrder || [];
+                    const ai = order.indexOf(a.id), bi = order.indexOf(b.id);
+                    return (ai < 0 ? 9999 : ai) - (bi < 0 ? 9999 : bi);
+                  }).map(badge => (
+                    <article className="pixlo-badge-card pixlo-earned-badge-card" key={badge.id}>
+                      <div className="pixlo-badge-card-mark">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
+                      <div className="pixlo-badge-card-copy"><strong>{badge.name}</strong><p>{badge.description || "A badge earned on Pixlo."}</p></div>
+                      <span className={settings.activeBadgeIds.includes(badge.id) ? "pixlo-badge-state is-equipped" : "pixlo-badge-state"}>{settings.activeBadgeIds.includes(badge.id) ? "Equipped" : "Earned"}</span>
+                    </article>
+                  ))}
+                </div>}
+            </section>}
+
+            {badgeHubTab === "All badges" && <section className="pixlo-badge-tab-panel">
+              <div className="pixlo-badge-panel-heading">
+                <div><h3>Explore badges</h3><p>See the progression milestones and collectable badges available across Pixlo.</p></div>
+              </div>
+              <div className="pixlo-badge-progression-grid">
+                <article className="pixlo-badge-progression-card">
+                  <div className="pixlo-badge-progression-top">
+                    <span className="pixlo-badge-progression-icon views-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.8 10-6.8S22 12 22 12s-3.6 6.8-10 6.8S2 12 2 12Z"/><circle cx="12" cy="12" r="3.2"/></svg></span>
+                    <span className="pixlo-badge-category-label">PROFILE MILESTONES</span>
+                  </div>
+                  <h4>Profile views</h4>
+                  <p>Build your audience and work through six view milestones, from Seen to Iconic.</p>
+                  <div className="pixlo-badge-progress-meta"><strong>{badgeViews.toLocaleString("en-GB")} views</strong><span>{PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews) ? "Next: " + PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews)!.name : "All milestones reached"}</span></div>
+                  <div className="pixlo-badge-progress-track"><span style={{ width: (PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews) ? Math.max(2, Math.min(100, Math.round((badgeViews / (PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews)?.views || 1)) * 100))) : 100) + "%" }} /></div>
+                  <button type="button" className="pixlo-badge-primary-button" onClick={() => setBadgeTierModal("views")}>View tiers <span>↗</span></button>
+                </article>
+                <article className="pixlo-badge-progression-card">
+                  <div className="pixlo-badge-progression-top">
+                    <span className="pixlo-badge-progression-icon donor-icon">$</span>
+                    <span className="pixlo-badge-category-label">LIFETIME SUPPORT</span>
+                  </div>
+                  <h4>Donor badges</h4>
+                  <p>Every donation contributes towards your next donor badge. Higher tiers replace lower tiers.</p>
+                  <div className="pixlo-badge-progress-meta"><strong>{badgeDonorStatus?.authenticated ? "£" + (Number(badgeDonorStatus.totalDonatedPence || 0) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "Sign in to track"}</strong><span>{badgeDonorStatus?.tiers?.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0)) ? "Next: " + badgeDonorStatus.tiers.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0))!.name : badgeDonorStatus?.authenticated ? "Top tier reached" : "7 lifetime tiers"}</span></div>
+                  <div className="pixlo-badge-progress-track"><span style={{ width: (badgeDonorStatus?.tiers?.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0)) ? Math.max(2, Math.min(100, Math.round((Number(badgeDonorStatus.totalDonatedPence || 0) / (badgeDonorStatus.tiers.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0))?.amountPence || 1)) * 100))) : badgeDonorStatus?.authenticated ? 100 : 0) + "%" }} /></div>
+                  <button type="button" className="pixlo-badge-primary-button" onClick={() => setBadgeTierModal("donor")}>View tiers <span>↗</span></button>
+                </article>
+              </div>
+
+              <div className="pixlo-badge-catalog-heading"><h3>Collectable badges</h3><span>{badgeCatalog.filter(badge => !DONOR_BADGE_KEYS.has(String(badge.badge_key || "").toLowerCase()) && badge.name.trim().toLowerCase() !== "donor").length} badges</span></div>
+              {dashboardBadgesLoading && badgeCatalog.length === 0 ? <div className="pixlo-badge-loading">Loading the badge catalogue…</div>
+              : badgeCatalog.filter(badge => !DONOR_BADGE_KEYS.has(String(badge.badge_key || "").toLowerCase()) && badge.name.trim().toLowerCase() !== "donor").length === 0
+                ? <div className="pixlo-badge-empty pixlo-badge-empty-compact"><strong>No collectable badges to display yet.</strong><p>New badges will appear here as they are added to Pixlo.</p></div>
+                : <div className="pixlo-badge-card-grid">
+                  {badgeCatalog.filter(badge => !DONOR_BADGE_KEYS.has(String(badge.badge_key || "").toLowerCase()) && badge.name.trim().toLowerCase() !== "donor").map(badge => {
+                    const earned = dashboardBadges.some(item => item.id === badge.id);
+                    return <article className={"pixlo-badge-card pixlo-catalog-badge-card" + (earned ? " is-earned" : "")} key={badge.id}>
+                      <div className="pixlo-badge-card-mark">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
+                      <div className="pixlo-badge-card-copy"><strong>{badge.name}</strong><p>{badge.description || "A collectable Pixlo badge."}</p></div>
+                      <span className={earned ? "pixlo-badge-state is-equipped" : "pixlo-badge-state"}>{earned ? "Earned" : "Not earned"}</span>
+                    </article>;
+                  })}
+                </div>}
+            </section>}
+
+            {badgeHubTab === "Customize" && <section className="pixlo-badge-tab-panel pixlo-badge-customize-panel">
+              <div className="pixlo-badge-panel-heading"><div><h3>Customise your badges</h3><p>Choose which earned badges appear on your public profile and tune their style.</p></div></div>
+              <div className="pixlo-badge-custom-grid">
+                <Setting label="Badge position" text="Place badges beside your profile picture or underneath the profile content."><select value={settings.badgePosition} onChange={e => { set("badgePosition", e.target.value as "left" | "right" | "bottom"); setSaved(false); }}><option value="left">Left side of profile picture</option><option value="right">Right side of profile picture</option><option value="bottom">Underneath everything</option></select></Setting>
+                <Setting label="Badge appearance" text="Choose a pill background or show only the badge icon."><select value={settings.badgeStyle} onChange={e => { set("badgeStyle", e.target.value as "default" | "icon"); setSaved(false); }}><option value="default">Background and border</option><option value="icon">Icon only — no background or border</option></select></Setting>
+                <Colour label="Badge colour" value={settings.badgeColour} onChange={v => { set("badgeColour", v); setSaved(false); }} />
+                <Setting label="Badge glow" text="Add a coloured glow to equipped badges."><Toggle value={settings.badgeGlow} onChange={v => { set("badgeGlow", v); setSaved(false); }} /></Setting>
+                <Range label="Badge glow intensity" value={settings.badgeGlowIntensity} min={0} max={200} suffix="%" onChange={v => { set("badgeGlowIntensity", v); setSaved(false); }} />
+                <Range label="Badge size" value={settings.badgeScale} min={50} max={300} suffix="%" onChange={v => { set("badgeScale", v); setSaved(false); }} />
+                <Setting label="Double underline" text="Show two centred lines beneath your badges."><Toggle value={settings.badgeUnderline} onChange={v => { set("badgeUnderline", v); setSaved(false); }} /></Setting>
+                <Setting label="Underline glow" text="Add a matching glow to the double underline."><Toggle value={settings.badgeUnderlineGlow} onChange={v => { set("badgeUnderlineGlow", v); setSaved(false); }} /></Setting>
+                {dashboardBadges.some(badge => badge.name.trim().toLowerCase() === "verified") && <Setting label="Show Verified badge beside display name" text="Place the Verified icon immediately to the right of your display name on your public profile."><Toggle value={settings.showVerifiedBadgeNextToUsername} onChange={v => { set("showVerifiedBadgeNextToUsername", v); setSaved(false); }} /></Setting>}
+                {settings.showVerifiedBadgeNextToUsername && dashboardBadges.some(badge => badge.name.trim().toLowerCase() === "verified") && <Colour label="Verified check colour" value={settings.verifiedBadgeColour} onChange={v => { set("verifiedBadgeColour", v); setSaved(false); }} />}
+              </div>
+
+              <div className="pixlo-badge-panel-heading pixlo-badge-equip-heading"><div><h3>Equip and order badges</h3><p>Toggle badges on or off. Drag a card with the handle to change the display order. Save your dashboard to apply the changes.</p></div></div>
+              {dashboardBadgesLoading ? <div className="pixlo-badge-loading">Loading earned badges…</div>
+              : dashboardBadgesError ? <div className="pixlo-badge-error" role="alert">{dashboardBadgesError}</div>
+              : dashboardBadges.filter(badge => badge.badge_key !== "donor" && badge.name.trim().toLowerCase() !== "donor").length === 0
+                ? <div className="pixlo-badge-empty pixlo-badge-empty-compact"><strong>No earned badges to customise yet.</strong><p>Earn a badge first, then you can equip it here.</p></div>
+                : <div className="pixlo-badge-equipped-list">
+                  {[...dashboardBadges].filter(badge => badge.badge_key !== "donor" && badge.name.trim().toLowerCase() !== "donor").sort((a,b) => {
+                    const order = settings.activeBadgeOrder || [];
+                    const ai = order.indexOf(a.id), bi = order.indexOf(b.id);
+                    return (ai < 0 ? 9999 : ai) - (bi < 0 ? 9999 : bi);
+                  }).map(badge => {
+                    const equipped = settings.activeBadgeIds.includes(badge.id);
+                    return <div className="pixlo-badge-equip-row" key={badge.id} draggable onDragStart={event => { event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", badge.id); event.currentTarget.classList.add("dragging"); }} onDragEnd={event => event.currentTarget.classList.remove("dragging")} onDragOver={event => event.preventDefault()} onDrop={event => {
+                      event.preventDefault();
+                      const from = event.dataTransfer.getData("text/plain");
+                      if (!from || from === badge.id) return;
+                      setSettings(current => {
+                        const valid = dashboardBadges.filter(item => item.badge_key !== "donor" && item.name.trim().toLowerCase() !== "donor").map(item => item.id);
+                        const order = [...(current.activeBadgeOrder || []).filter(id => valid.includes(id)), ...valid.filter(id => !(current.activeBadgeOrder || []).includes(id))];
+                        const a = order.indexOf(from), b = order.indexOf(badge.id);
+                        if (a < 0 || b < 0) return current;
+                        const next = [...order]; const [moved] = next.splice(a, 1); next.splice(b, 0, moved);
+                        return { ...current, activeBadgeOrder: next };
+                      });
+                      setSaved(false);
+                    }}>
+                      <span className="pixlo-badge-drag-handle" title="Drag to reorder" aria-hidden="true">⠿</span>
+                      <div className="pixlo-badge-mini-mark">{badge.icon_url ? <img src={badge.icon_url} alt="" /> : <span>✦</span>}</div>
+                      <div className="pixlo-badge-equip-copy"><strong>{badge.name}</strong><small>{badge.description || "Pixlo badge"}</small></div>
+                      <Toggle value={equipped} onChange={v => { setSettings(current => ({ ...current, activeBadgeIds: v ? [...current.activeBadgeIds, badge.id] : current.activeBadgeIds.filter(id => id !== badge.id) })); setSaved(false); }} />
+                    </div>;
+                  })}
+                </div>}
+            </section>}
+
+            {badgeHubTab === "Shop" && <section className="pixlo-badge-tab-panel">
+              <div className="pixlo-badge-panel-heading"><div><h3>Badge shop</h3><p>Explore ways to support Pixlo and add more to your profile.</p></div></div>
+              <div className="pixlo-badge-shop-grid">
+                <article className="pixlo-badge-shop-card"><span className="pixlo-badge-shop-icon premium-shop-icon">◆</span><div><h4>Premium badge</h4><p>Unlock lifetime Premium and its exclusive customisation features with one payment.</p></div><a href="/pricing#premium">Explore Premium ↗</a></article>
+                <article className="pixlo-badge-shop-card"><span className="pixlo-badge-shop-icon donor-shop-icon">$</span><div><h4>Donor badge tiers</h4><p>Donations add up over time. Reach higher tiers to upgrade your donor badge.</p></div><a href="/pricing#extras">View donations ↗</a></article>
+              </div>
+              <p className="pixlo-badge-shop-note">Badges that require special events, staff recognition, or Discord roles cannot be purchased here.</p>
+            </section>}
+
+            {badgeTierModal && <div className="pixlo-badge-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setBadgeTierModal(null); }}>
+              <section className="pixlo-badge-tier-modal" role="dialog" aria-modal="true" aria-labelledby="pixlo-badge-tier-title">
+                <button type="button" className="pixlo-badge-modal-close" aria-label="Close badge tiers" onClick={() => setBadgeTierModal(null)}>×</button>
+                <div className="pixlo-badge-modal-heading">
+                  <span className={"pixlo-badge-modal-emblem " + (badgeTierModal === "views" ? "views-icon" : "donor-icon")}>{badgeTierModal === "views" ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.8 10-6.8S22 12 22 12s-3.6 6.8-10 6.8S2 12 2 12Z"/><circle cx="12" cy="12" r="3.2"/></svg> : "$"}</span>
+                  <div><h3 id="pixlo-badge-tier-title">{badgeTierModal === "views" ? "Profile view tiers" : "Donor badge tiers"}</h3><p>{badgeTierModal === "views" ? "Build your profile audience and unlock the next milestone." : "Your lifetime donations determine your donor badge tier."}</p></div>
+                </div>
+                {badgeTierModal === "views" ? <div className="pixlo-badge-tier-grid">
+                  {PROFILE_VIEW_TIERS.map(tier => {
+                    const reached = badgeViews >= tier.views;
+                    const previous = PROFILE_VIEW_TIERS[PROFILE_VIEW_TIERS.findIndex(item => item.key === tier.key) - 1]?.views || 0;
+                    const progress = reached ? 100 : Math.max(0, Math.min(100, Math.round(((badgeViews - previous) / (tier.views - previous)) * 100)));
+                    return <article key={tier.key} className={"pixlo-badge-tier-item" + (reached ? " is-reached" : "")}>
+                      <span className="pixlo-badge-tier-icon views-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.8 10-6.8S22 12 22 12s-3.6 6.8-10 6.8S2 12 2 12Z"/><circle cx="12" cy="12" r="3.2"/></svg></span>
+                      <strong>{tier.name}</strong><small>{tier.views.toLocaleString("en-GB")} views</small>
+                      <div className="pixlo-badge-tier-mini-track"><span style={{ width: progress + "%" }} /></div>
+                      <span className="pixlo-badge-tier-lock">{reached ? "✓ Reached" : "🔒 Locked"}</span>
+                    </article>;
+                  })}
+                </div> : <div className="pixlo-badge-tier-grid">
+                  {(badgeDonorStatus?.tiers || []).map(tier => {
+                    const total = Number(badgeDonorStatus?.totalDonatedPence || 0);
+                    const reached = Boolean(badgeDonorStatus?.authenticated && total >= tier.amountPence);
+                    return <article key={tier.key} className={"pixlo-badge-tier-item" + (reached ? " is-reached" : "")}>
+                      <span className="pixlo-badge-tier-icon donor-icon">{tier.icon ? <img src={tier.icon} alt="" /> : "$"}</span>
+                      <strong>{tier.name}</strong><small>{"£" + (tier.amountPence / 100).toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} lifetime</small>
+                      <div className="pixlo-badge-tier-mini-track"><span style={{ width: (badgeDonorStatus?.authenticated ? Math.max(0, Math.min(100, Math.round((total / tier.amountPence) * 100))) : 0) + "%" }} /></div>
+                      <span className="pixlo-badge-tier-lock">{reached ? "✓ Reached" : "🔒 Locked"}</span>
+                    </article>;
+                  })}
+                  {!badgeDonorStatus?.tiers?.length && <p className="pixlo-badge-tier-empty">Donor tiers are temporarily unavailable. Check back in a moment.</p>}
+                </div>}
+                <footer className="pixlo-badge-tier-footer">
+                  {badgeTierModal === "views" ? <>
+                    <span>Profile views</span><strong>{badgeViews.toLocaleString("en-GB")}</strong>
+                    <span>Next tier</span><strong>{PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews) ? PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews)!.name + ", " + (PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews)!.views - badgeViews).toLocaleString("en-GB") + " to go" : "All milestones reached"}</strong>
+                  </> : <>
+                    <span>Lifetime donations</span><strong>{badgeDonorStatus?.authenticated ? "£" + (Number(badgeDonorStatus.totalDonatedPence || 0) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "Sign in to track"}</strong>
+                    <span>Next tier</span><strong>{badgeDonorStatus?.tiers?.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0)) ? badgeDonorStatus.tiers.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0))!.name + ", £" + ((badgeDonorStatus.tiers.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0))!.amountPence - Number(badgeDonorStatus.totalDonatedPence || 0)) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " to go" : badgeDonorStatus?.authenticated ? "Top donor tier reached" : "Open Pricing to learn more"}</strong>
+                  </>}
+                </footer>
+                <p className="pixlo-badge-modal-note">{badgeTierModal === "views" ? "View milestones track the live profile-view counter. Your catalogue will show any badges that have actually been awarded to your account." : "Donor tier rewards are awarded from confirmed Stripe donations. A higher donor tier replaces the lower tier rather than stacking."}</p>
+              </section>
+            </div>}
+          </div>}
 {activePrimary === "optimise" && active === "Cursor Trail" && <div className="form-stack cursor-trail-page">
   <SectionIntro title="Cursor trail" text="Customise how your trail looks. Move your cursor over the live profile preview to test it." />
   {!presetsPremiumReady ? <div className="premium-gradient-card">Checking Premium access…</div> : !presetsPremium ? <div className="premium-gradient-card"><h3>Premium feature</h3><p>Cursor trails and their custom colour, glow, movement and lifetime settings are available to Pixlo Premium members.</p><a className="presets-unlock-button" href="/premium">Explore Premium ↗</a></div> : <>
