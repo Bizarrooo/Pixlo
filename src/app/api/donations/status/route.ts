@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { serverEnv } from "../../../../../lib/server-env";
-import { supabaseConfig } from "../../../../../lib/supabase-config";
+import { serverEnv } from "../../../../lib/server-env";
+import { supabaseConfig } from "../../../../lib/supabase-config";
 
 export const runtime = "nodejs";
 
