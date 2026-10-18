@@ -466,6 +466,8 @@ async function announceManagedTierBadgeChange(guild, profile, tierKey, action, o
     : "";
   const icon = guild.emojis.cache.find(emoji => category.emojiNames.includes(emoji.name)) || null;
   const iconText = icon ? `<:${icon.name}:${icon.id}>` : category.fallbackIcon;
+  const publicOrigin = String(process.env.PIXLO_PUBLIC_ORIGIN || "https://pixlo1.vercel.app").replace(/\/$/, "");
+  const tierIconUrl = `${publicOrigin}/api/badge-icon/${encodeURIComponent(tierKey)}`;
   const count = Number(options.value);
   const threshold = Number(options.threshold);
   let progressField = "Requirement: " + formatManagedTierRequirement(tierKey, options.threshold);
@@ -512,9 +514,9 @@ async function announceManagedTierBadgeChange(guild, profile, tierKey, action, o
     .setFooter({ text: `Pixlo • ${category.label} badge updates` })
     .setTimestamp();
 
-  // Custom Discord emojis are PNG-compatible thumbnails; the Views category uses
-  // its eye icon in the title when no matching custom server emoji exists.
-  if (icon) embed.setThumbnail(icon.imageURL({ extension: "png", size: 256 }));
+  // Use the exact tier's icon as a transparent PNG, not the generic Recruiter/Donor
+  // category emoji. The category emoji still labels the embed title.
+  embed.setThumbnail(tierIconUrl);
   try {
     await channel.send({ embeds: [embed], allowedMentions: { parse: [], users: [], roles: [] } });
     console.log(`[tier-announcements] sent ${action} ${tierKey} for profile ${profile?.username || profile?.id || "unknown"}`);
@@ -831,19 +833,25 @@ async function syncDonorTierRoles(guild, profiles) {
         }
       }
 
-      // Donor tiers are a single upgrade slot, not a cumulative stack.
+      // Keep every tier at or below the highest eligible tier unlocked on the profile.
+      // Discord roles remain exclusive (only the highest role is kept), while the
+      // profile can equip any lower tier the member has earned.
       const previousAwards = awardsByUser.get(userId) || [];
+      const unlockedTierKeys = new Set(
+        effectiveTierIndex >= 0 ? tierConfigs.filter(tier => tier.index <= effectiveTierIndex).map(tier => tier.key) : [],
+      );
       const hadDesiredTierBadge = Boolean(desiredBadge && previousAwards.some(award => String(award.badge_id) === String(desiredBadge.id)));
-      let keptDesiredManualBadge = false;
+      const keptTierKeys = new Set();
       for (const award of previousAwards) {
+        const awardedKey = badgeKeyById.get(String(award.badge_id));
         const shouldKeep = Boolean(
-          desiredBadge &&
-          String(award.badge_id) === String(desiredBadge.id) &&
+          awardedKey &&
+          unlockedTierKeys.has(awardedKey) &&
           award.source === "manual" &&
-          !keptDesiredManualBadge
+          !keptTierKeys.has(awardedKey)
         );
         if (shouldKeep) {
-          keptDesiredManualBadge = true;
+          keptTierKeys.add(awardedKey);
           continue;
         }
         await db(`user_badges?id=eq.${encodeURIComponent(award.id)}`, {
@@ -851,28 +859,31 @@ async function syncDonorTierRoles(guild, profiles) {
           headers: { Prefer: "return=minimal" },
         });
         badgesReplaced += 1;
-        const revokedKey = badgeKeyById.get(String(award.badge_id));
-        if (revokedKey && revokedKey !== desiredBadge?.badge_key) {
-          await announceManagedTierBadgeChange(guild, profile, revokedKey, "revoke", {
-            threshold: tierConfigs.find(tier => tier.key === revokedKey)?.thresholdPence,
+        if (awardedKey && !unlockedTierKeys.has(awardedKey)) {
+          await announceManagedTierBadgeChange(guild, profile, awardedKey, "revoke", {
+            threshold: tierConfigs.find(tier => tier.key === awardedKey)?.thresholdPence,
             replacementTierKey: desiredBadge?.badge_key,
             value: totalPence,
           });
         }
       }
 
-      if (desiredBadge && !keptDesiredManualBadge) {
+      for (const unlockedTier of tierConfigs.filter(tier => unlockedTierKeys.has(tier.key))) {
+        if (keptTierKeys.has(unlockedTier.key)) continue;
+        const badge = badgeByKey.get(unlockedTier.key);
+        if (!badge) continue;
         await db("user_badges", {
           method: "POST",
           headers: { Prefer: "return=minimal" },
-          body: JSON.stringify({ user_id: userId, badge_id: desiredBadge.id, source: "manual" }),
+          body: JSON.stringify({ user_id: userId, badge_id: badge.id, source: "manual" }),
         });
+        keptTierKeys.add(unlockedTier.key);
         badgesAwarded += 1;
-        if (!hadDesiredTierBadge) {
-          await announceManagedTierBadgeChange(guild, profile, desiredBadge.badge_key, "award", {
-            threshold: effectiveTier?.thresholdPence,
+        if (unlockedTier.key === effectiveTier?.key && !hadDesiredTierBadge) {
+          await announceManagedTierBadgeChange(guild, profile, unlockedTier.key, "award", {
+            threshold: unlockedTier.thresholdPence,
             value: totalPence,
-            replacementTierKey: previousAwards.map(award => badgeKeyById.get(String(award.badge_id))).find(key => key && key !== desiredBadge.badge_key),
+            replacementTierKey: previousAwards.map(award => badgeKeyById.get(String(award.badge_id))).find(key => key && key !== unlockedTier.key),
           });
         }
       }
@@ -1014,38 +1025,52 @@ async function syncProgressTierGroup(guild, profiles, config) {
       }
 
       const previousAwards = awardsByUser.get(userId) || [];
+      // Every lower tier is unlocked once a member reaches or is granted a higher tier.
+      // Their Discord roles are kept exclusive above, but all unlocked badge variants
+      // remain available for them to select in Badges → Customise.
+      const unlockedTierKeys = new Set(
+        effectiveTierIndex >= 0 ? tierConfigs.filter(tier => tier.index <= effectiveTierIndex).map(tier => tier.key) : [],
+      );
       const hadDesiredTierBadge = Boolean(effectiveTier && previousAwards.some(award => String(award.badge_id) === String(effectiveTier.badgeId)));
-      let keptDesiredManualBadge = false;
+      const keptTierKeys = new Set();
       for (const award of previousAwards) {
-        const shouldKeep = Boolean(effectiveTier && String(award.badge_id) === String(effectiveTier.badgeId) && award.source === "manual" && !keptDesiredManualBadge);
+        const awardedKey = tierKeyByBadgeId.get(String(award.badge_id));
+        const shouldKeep = Boolean(
+          awardedKey &&
+          unlockedTierKeys.has(awardedKey) &&
+          award.source === "manual" &&
+          !keptTierKeys.has(awardedKey)
+        );
         if (shouldKeep) {
-          keptDesiredManualBadge = true;
+          keptTierKeys.add(awardedKey);
           continue;
         }
         await db(`user_badges?id=eq.${encodeURIComponent(award.id)}`, { method: "DELETE", headers: { Prefer: "return=minimal" } });
         badgesReplaced += 1;
-        const revokedKey = tierKeyByBadgeId.get(String(award.badge_id));
-        if (revokedKey && revokedKey !== effectiveTier?.key) {
-          const revokedTier = tierConfigs.find(tier => tier.key === revokedKey);
-          await announceManagedTierBadgeChange(guild, profile, revokedKey, "revoke", {
+        if (awardedKey && !unlockedTierKeys.has(awardedKey)) {
+          const revokedTier = tierConfigs.find(tier => tier.key === awardedKey);
+          await announceManagedTierBadgeChange(guild, profile, awardedKey, "revoke", {
             threshold: revokedTier?.threshold,
             value,
             replacementTierKey: effectiveTier?.key,
           });
         }
       }
-      if (effectiveTier && !keptDesiredManualBadge) {
+
+      for (const unlockedTier of tierConfigs.filter(tier => unlockedTierKeys.has(tier.key))) {
+        if (keptTierKeys.has(unlockedTier.key)) continue;
         await db("user_badges", {
           method: "POST",
           headers: { Prefer: "return=minimal" },
-          body: JSON.stringify({ user_id: userId, badge_id: effectiveTier.badgeId, source: "manual" }),
+          body: JSON.stringify({ user_id: userId, badge_id: unlockedTier.badgeId, source: "manual" }),
         });
+        keptTierKeys.add(unlockedTier.key);
         badgesAwarded += 1;
-        if (!hadDesiredTierBadge) {
-          await announceManagedTierBadgeChange(guild, profile, effectiveTier.key, "award", {
-            threshold: effectiveTier.threshold,
+        if (unlockedTier.key === effectiveTier?.key && !hadDesiredTierBadge) {
+          await announceManagedTierBadgeChange(guild, profile, unlockedTier.key, "award", {
+            threshold: unlockedTier.threshold,
             value,
-            replacementTierKey: previousAwards.map(award => tierKeyByBadgeId.get(String(award.badge_id))).find(key => key && key !== effectiveTier.key),
+            replacementTierKey: previousAwards.map(award => tierKeyByBadgeId.get(String(award.badge_id))).find(key => key && key !== unlockedTier.key),
           });
         }
       }
