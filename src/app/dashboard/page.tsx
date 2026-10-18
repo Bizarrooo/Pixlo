@@ -11,13 +11,21 @@ import "./dashboard-badges.css";
 type DashboardBadge = { id: string; badge_key?: string; name: string; description: string; icon_url: string | null; awarded_at?: string };
 type BadgeHubTab = "Your badges" | "All badges" | "Customize" | "Shop";
 type BadgeDonorStatus = { authenticated?: boolean; totalDonatedPence?: number; tiers?: Array<{ key: string; name: string; amountPence: number; icon?: string | null }> };
-const PROFILE_VIEW_TIERS = [
-  { key: "seen", name: "Seen", views: 100 },
-  { key: "rising", name: "Rising", views: 1000 },
-  { key: "known", name: "Known", views: 10000 },
-  { key: "spotlight", name: "Spotlight", views: 25000 },
-  { key: "popular", name: "Popular", views: 50000 },
-  { key: "iconic", name: "Iconic", views: 100000 },
+type BadgeProgressTier = { tier_key: string; name: string; description?: string; icon_url: string | null; threshold_views?: number; threshold_invites?: number };
+const PROFILE_VIEW_TIERS: BadgeProgressTier[] = [
+  { tier_key: "views_seen", name: "Seen", threshold_views: 100, icon_url: "/badges/views-seen.svg" },
+  { tier_key: "views_rising", name: "Rising", threshold_views: 1000, icon_url: "/badges/views-rising.svg" },
+  { tier_key: "views_viral", name: "Viral", threshold_views: 10000, icon_url: "/badges/views-viral.svg" },
+  { tier_key: "views_buzzing", name: "Buzzing", threshold_views: 25000, icon_url: "/badges/views-buzzing.svg" },
+  { tier_key: "views_main_character", name: "Main Character", threshold_views: 50000, icon_url: "/badges/views-main-character.svg" },
+  { tier_key: "views_famous", name: "Famous", threshold_views: 100000, icon_url: "/badges/views-famous.svg" },
+];
+const RECRUITER_TIER_FALLBACK: BadgeProgressTier[] = [
+  { tier_key: "recruiter_scout", name: "Scout", threshold_invites: 5, icon_url: "/badges/recruiter-scout.svg" },
+  { tier_key: "recruiter_recruiter", name: "Recruiter", threshold_invites: 15, icon_url: "/badges/recruiter-recruiter.svg" },
+  { tier_key: "recruiter_senior_recruiter", name: "Senior Recruiter", threshold_invites: 30, icon_url: "/badges/recruiter-senior-recruiter.svg" },
+  { tier_key: "recruiter_lead_recruiter", name: "Lead Recruiter", threshold_invites: 50, icon_url: "/badges/recruiter-lead-recruiter.svg" },
+  { tier_key: "recruiter_elite_recruiter", name: "Elite Recruiter", threshold_invites: 100, icon_url: "/badges/recruiter-elite-recruiter.svg" },
 ];
 const DONOR_BADGE_KEYS = new Set(["donor", "donor_supporter", "donor_patron", "donor_benefactor", "donor_sponsor", "donor_elite_sponsor", "donor_mythic_patron", "donor_eternal_benefactor"]);
 
@@ -386,10 +394,16 @@ export default function Dashboard() {
   const [dashboardBadgesError, setDashboardBadgesError] = useState("");
   const [badgeCatalog, setBadgeCatalog] = useState<DashboardBadge[]>([]);
   const [badgeHubTab, setBadgeHubTab] = useState<BadgeHubTab>("Your badges");
-  const [badgeTierModal, setBadgeTierModal] = useState<"views" | "donor" | null>(null);
+  const [badgeTierModal, setBadgeTierModal] = useState<"views" | "donor" | "recruiter" | null>(null);
   const [badgeViews, setBadgeViews] = useState(0);
   const [badgeDonorStatus, setBadgeDonorStatus] = useState<BadgeDonorStatus | null>(null);
+  const [viewBadgeTiers, setViewBadgeTiers] = useState<BadgeProgressTier[]>([]);
+  const [recruiterBadgeTiers, setRecruiterBadgeTiers] = useState<BadgeProgressTier[]>([]);
+  const [totalRecruiterInvites, setTotalRecruiterInvites] = useState(0);
+  const [badgeDiscordLinked, setBadgeDiscordLinked] = useState(false);
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
+  const effectiveViewTiers = viewBadgeTiers.length ? viewBadgeTiers : PROFILE_VIEW_TIERS;
+  const effectiveRecruiterTiers = recruiterBadgeTiers.length ? recruiterBadgeTiers : RECRUITER_TIER_FALLBACK;
   const [saved, setSaved] = useState(false);
   const [presetsPremium, setPresetsPremium] = useState(false);
   const [presetsPremiumReady, setPresetsPremiumReady] = useState(false);
@@ -457,6 +471,14 @@ export default function Dashboard() {
         if (cancelled) return;
         setDashboardBadges(Array.isArray(data.badges) ? data.badges : []);
         setBadgeCatalog(Array.isArray(data.catalog) ? data.catalog : []);
+        setViewBadgeTiers(Array.isArray(data.viewTiers) ? data.viewTiers : []);
+        setRecruiterBadgeTiers(Array.isArray(data.recruiterTiers) ? data.recruiterTiers : []);
+        setTotalRecruiterInvites(Math.max(0, Number(data.totalInvites || 0) || 0));
+        setBadgeDiscordLinked(Boolean(data.discordLinked));
+        setViewBadgeTiers(Array.isArray(data.viewTiers) ? data.viewTiers : []);
+        setRecruiterBadgeTiers(Array.isArray(data.recruiterTiers) ? data.recruiterTiers : []);
+        setTotalRecruiterInvites(Math.max(0, Number(data.totalInvites || 0) || 0));
+        setBadgeDiscordLinked(Boolean(data.discordLinked));
       })
       .catch(error => { if (!cancelled) setDashboardBadgesError(error instanceof Error ? error.message : "Could not load your badges."); })
       .finally(() => { if (!cancelled) setDashboardBadgesLoading(false); });
@@ -1713,9 +1735,9 @@ export default function Dashboard() {
                     <span className="pixlo-badge-category-label">PROFILE MILESTONES</span>
                   </div>
                   <h4>Profile views</h4>
-                  <p>Build your audience and work through six view milestones, from Seen to Iconic.</p>
-                  <div className="pixlo-badge-progress-meta"><strong>{badgeViews.toLocaleString("en-GB")} views</strong><span>{PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews) ? "Next: " + PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews)!.name : "All milestones reached"}</span></div>
-                  <div className="pixlo-badge-progress-track"><span style={{ width: (PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews) ? Math.max(2, Math.min(100, Math.round((badgeViews / (PROFILE_VIEW_TIERS.find(tier => tier.views > badgeViews)?.views || 1)) * 100))) : 100) + "%" }} /></div>
+                  <p>Build your audience and work through six view milestones, from Seen to Famous.</p>
+                  <div className="pixlo-badge-progress-meta"><strong>{badgeViews.toLocaleString("en-GB")} views</strong><span>{effectiveViewTiers.find(tier => Number(tier.threshold_views || 0) > badgeViews) ? "Next: " + effectiveViewTiers.find(tier => Number(tier.threshold_views || 0) > badgeViews)!.name : "All milestones reached"}</span></div>
+                  <div className="pixlo-badge-progress-track"><span style={{ width: (effectiveViewTiers.find(tier => Number(tier.threshold_views || 0) > badgeViews) ? Math.max(2, Math.min(100, Math.round((badgeViews / (effectiveViewTiers.find(tier => Number(tier.threshold_views || 0) > badgeViews)?.threshold_views || 1)) * 100))) : 100) + "%" }} /></div>
                   <button type="button" className="pixlo-badge-primary-button" onClick={() => setBadgeTierModal("views")}>View tiers <span>↗</span></button>
                 </article>
                 <article className="pixlo-badge-progression-card">
@@ -1728,6 +1750,17 @@ export default function Dashboard() {
                   <div className="pixlo-badge-progress-meta"><strong>{badgeDonorStatus?.authenticated ? "£" + (Number(badgeDonorStatus.totalDonatedPence || 0) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "Sign in to track"}</strong><span>{badgeDonorStatus?.tiers?.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0)) ? "Next: " + badgeDonorStatus.tiers.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0))!.name : badgeDonorStatus?.authenticated ? "Top tier reached" : "7 lifetime tiers"}</span></div>
                   <div className="pixlo-badge-progress-track"><span style={{ width: (badgeDonorStatus?.tiers?.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0)) ? Math.max(2, Math.min(100, Math.round((Number(badgeDonorStatus.totalDonatedPence || 0) / (badgeDonorStatus.tiers.find(tier => tier.amountPence > Number(badgeDonorStatus.totalDonatedPence || 0))?.amountPence || 1)) * 100))) : badgeDonorStatus?.authenticated ? 100 : 0) + "%" }} /></div>
                   <button type="button" className="pixlo-badge-primary-button" onClick={() => setBadgeTierModal("donor")}>View tiers <span>↗</span></button>
+                </article>
+                <article className="pixlo-badge-progression-card">
+                  <div className="pixlo-badge-progression-top">
+                    <span className="pixlo-badge-progression-icon recruiter-icon"><img src="/badges/recruiter-scout.svg" alt="" /></span>
+                    <span className="pixlo-badge-category-label">COMMUNITY GROWTH</span>
+                  </div>
+                  <h4>Recruiter badges</h4>
+                  <p>Invite people to the official Pixlo Discord and progress through five recruiter milestones.</p>
+                  <div className="pixlo-badge-progress-meta"><strong>{badgeDiscordLinked ? totalRecruiterInvites.toLocaleString("en-GB") + " invites" : "Link Discord to track"}</strong><span>{effectiveRecruiterTiers.find(tier => Number(tier.threshold_invites || 0) > totalRecruiterInvites) ? "Next: " + effectiveRecruiterTiers.find(tier => Number(tier.threshold_invites || 0) > totalRecruiterInvites)!.name : badgeDiscordLinked ? "All tiers reached" : "5 → 100 invites"}</span></div>
+                  <div className="pixlo-badge-progress-track"><span style={{ width: (badgeDiscordLinked ? (effectiveRecruiterTiers.find(tier => Number(tier.threshold_invites || 0) > totalRecruiterInvites) ? Math.max(2, Math.min(100, Math.round((totalRecruiterInvites / (effectiveRecruiterTiers.find(tier => Number(tier.threshold_invites || 0) > totalRecruiterInvites)?.threshold_invites || 1)) * 100))) : 100) : 0) + "%" }} /></div>
+                  <button type="button" className="pixlo-badge-primary-button" onClick={() => setBadgeTierModal("recruiter")}>View tiers <span>↗</span></button>
                 </article>
               </div>
 
