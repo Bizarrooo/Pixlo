@@ -28,6 +28,7 @@ let recruiterTierSyncing = false;
 let inviteUseCache = new Map();
 let inviteCacheReady = false;
 let inviteProcessing = false;
+let recruiterInviteQueue = Promise.resolve();
 const pendingRoleChanges = new Map();
 let syncing = false;
 let syncAgain = false;
@@ -877,8 +878,15 @@ async function recordRecruiterInvite(member) {
   try {
     const guild = member.guild;
     const previous = inviteUseCache;
+    const hadCache = inviteCacheReady;
     const invites = await guild.invites.fetch();
     const next = new Map(invites.map(invite => [String(invite.code), inviteShape(invite)]));
+    if (!hadCache) {
+      inviteUseCache = next;
+      inviteCacheReady = true;
+      console.warn("[recruiter-invite] Established a fresh invite baseline; this join could not be attributed safely.");
+      return;
+    }
     let chosenInvite = null;
     let chosenIncrease = 0;
     for (const invite of invites.values()) {
@@ -1185,7 +1193,10 @@ setInterval(() => {
 }, 15_000).unref();
 
 client.on("guildMemberAdd", member => {
-  void recordRecruiterInvite(member).finally(() => scheduleSync());
+  recruiterInviteQueue = recruiterInviteQueue
+    .then(() => recordRecruiterInvite(member))
+    .catch(error => console.error("[recruiter-invite] join queue failed:", error instanceof Error ? error.message : error))
+    .finally(() => scheduleSync());
 });
 client.on("guildMemberRemove", scheduleSync);
 client.on("inviteCreate", invite => {
