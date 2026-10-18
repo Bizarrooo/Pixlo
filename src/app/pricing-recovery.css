@@ -560,3 +560,250 @@
     height: 760px !important;
   }
 }
+
+
+/* Donor Badge Tiers — compact progress tracker styled for Pixlo's orange/red palette. */
+.pricing-donor-tier-panel{
+  width:100%;
+  margin:17px 0 5px;
+  padding:13px 13px 12px;
+  border:1px solid rgba(231,126,69,.19);
+  border-radius:14px;
+  background:linear-gradient(145deg,rgba(255,250,244,.94),rgba(255,242,229,.73));
+  box-shadow:0 7px 22px rgba(106,48,22,.045);
+}
+.pricing-donor-tier-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.pricing-donor-tier-heading>div{display:grid;gap:4px;min-width:0}
+.pricing-donor-kicker{
+  color:#d66a32;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.15em;
+}
+.pricing-donor-tier-heading>div>strong{
+  color:#28201c;
+  font-size:13px;
+  font-weight:850;
+  letter-spacing:-.025em;
+}
+.pricing-donor-total{
+  flex:0 0 auto;
+  color:#d95e2b;
+  font-size:13px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+.pricing-donor-tier-rail{
+  display:flex;
+  align-items:stretch;
+  gap:6px;
+  width:100%;
+  overflow-x:auto;
+  padding:2px 1px 8px;
+  scrollbar-width:thin;
+  scrollbar-color:#efad7c transparent;
+}
+.pricing-donor-tier-chip{
+  position:relative;
+  display:flex;
+  flex:1 0 64px;
+  min-width:64px;
+  max-width:100px;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:8px 4px 7px;
+  border:1px solid rgba(132,91,67,.12);
+  border-radius:10px;
+  background:rgba(255,255,255,.67);
+  text-align:center;
+  transition:transform .18s,border-color .18s,background .18s,box-shadow .18s;
+}
+.pricing-donor-tier-chip.is-unlocked{
+  border-color:rgba(239,125,49,.38);
+  background:linear-gradient(155deg,#fffaf2,#ffead8);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.8),0 3px 9px rgba(205,91,36,.055);
+}
+.pricing-donor-tier-chip.is-current{
+  border-color:#ed7b3c;
+  box-shadow:0 0 0 1px rgba(237,123,60,.12),0 5px 14px rgba(218,96,42,.11);
+  transform:translateY(-2px);
+}
+.pricing-donor-tier-icon{
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  flex:0 0 28px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#ffb654,#f04d32);
+  box-shadow:0 4px 10px rgba(225,94,41,.2);
+  opacity:.48;
+  filter:saturate(.65);
+}
+.pricing-donor-tier-chip.is-unlocked .pricing-donor-tier-icon{
+  opacity:1;
+  filter:none;
+}
+.pricing-donor-tier-icon img{
+  display:block;
+  width:16px;
+  height:16px;
+  object-fit:contain;
+}
+.pricing-donor-tier-icon.tier-1{background:linear-gradient(145deg,#ffad54,#ed6534)}
+.pricing-donor-tier-icon.tier-2{background:linear-gradient(145deg,#ffc96a,#f18a36)}
+.pricing-donor-tier-icon.tier-3{background:linear-gradient(145deg,#ff8d49,#df432f)}
+.pricing-donor-tier-icon.tier-4{background:linear-gradient(145deg,#ffbd62,#d84e2f)}
+.pricing-donor-tier-icon.tier-5{background:linear-gradient(145deg,#ee8251,#9b3c40)}
+.pricing-donor-tier-icon.tier-6{background:linear-gradient(145deg,#f5bd69,#a9432c)}
+.pricing-donor-tier-chip>small{
+  color:#a35c3d;
+  font-size:9px;
+  font-weight:850;
+  font-variant-numeric:tabular-nums;
+  line-height:1.1;
+}
+.pricing-donor-tier-chip>strong{
+  display:block;
+  width:100%;
+  color:#766257;
+  font-size:8px;
+  font-weight:800;
+  line-height:1.2;
+  overflow-wrap:anywhere;
+}
+.pricing-donor-tier-chip.is-unlocked>strong{color:#743b27}
+.pricing-donor-unlocked{
+  position:absolute;
+  top:4px;
+  right:4px;
+  display:grid;
+  place-items:center;
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  background:#29a875;
+  color:white;
+  font-size:8px;
+  font-weight:950;
+}
+.pricing-donor-progress{
+  margin-top:7px;
+  padding-top:11px;
+  border-top:1px solid rgba(145,92,60,.12);
+}
+.pricing-donor-progress-copy{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+.pricing-donor-progress-copy>span{
+  color:#76675f;
+  font-size:9px;
+  font-weight:650;
+  line-height:1.5;
+}
+.pricing-donor-progress-copy>strong{
+  max-width:57%;
+  color:#d9602e;
+  font-size:9px;
+  font-weight:900;
+  line-height:1.5;
+  text-align:right;
+}
+.pricing-donor-progress-track{
+  height:6px;
+  overflow:hidden;
+  border-radius:99px;
+  background:#f0dfd1;
+  box-shadow:inset 0 1px 2px rgba(92,54,33,.08);
+}
+.pricing-donor-progress-track>span{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#f44831 0%,#ff8c37 65%,#ffbd57 100%);
+  box-shadow:0 0 10px rgba(249,123,47,.22);
+  transition:width .35s ease;
+}
+.pricing-donor-progress>small{
+  display:block;
+  margin-top:7px;
+  color:#9c887b;
+  font-size:9px;
+  line-height:1.45;
+  font-variant-numeric:tabular-nums;
+}
+.pricing-donor-signin{
+  margin:8px 0 0!important;
+  color:#89776c!important;
+  font-size:10px!important;
+  line-height:1.6!important;
+}
+.pricing-donor-signin a{
+  color:#ce592a!important;
+  font-weight:900!important;
+  text-decoration:underline!important;
+  text-underline-offset:2px;
+}
+.pricing-donor-tier-details{
+  margin-top:10px;
+  border-top:1px solid rgba(145,92,60,.12);
+}
+.pricing-donor-tier-details>summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 0 1px;
+  color:#a55731;
+  font-size:10px;
+  font-weight:850;
+  cursor:pointer;
+  list-style:none;
+}
+.pricing-donor-tier-details>summary::-webkit-details-marker{display:none}
+.pricing-donor-tier-details>summary::after{
+  content:"+";
+  font-size:16px;
+  line-height:1;
+  font-weight:650;
+}
+.pricing-donor-tier-details[open]>summary::after{content:"−"}
+.pricing-donor-tier-list{display:grid;gap:0;margin-top:7px}
+.pricing-donor-tier-list-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:10px;
+  padding:7px 0;
+  border-top:1px solid rgba(145,92,60,.09);
+  color:#8b796e;
+  font-size:10px;
+}
+.pricing-donor-tier-list-row strong{
+  color:#9f6243;
+  font-size:10px;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+.pricing-donor-tier-list-row i{
+  color:#25885e;
+  font-size:8px;
+  font-style:normal;
+  font-weight:900;
+}
+.pricing-donor-tier-list-row.is-unlocked>span{color:#613823;font-weight:800}
+@media(max-width:760px){
+  .pricing-donor-tier-panel{padding:11px 10px}
+  .pricing-donor-tier-chip{flex-basis:65px}
+}
