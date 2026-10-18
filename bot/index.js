@@ -368,7 +368,7 @@ async function syncPremiumRole(guild, profiles, entitlements, gifts = [], revoca
 const BADGE_EMOJI_BY_KEYWORD = [
   { match: /recruit/i, emoji: "White_Recruiter_Badge" },
   { match: /booster/i, emoji: "White_Server_Booster_Badge" },
-  { match: /donor/i, emoji: "White_Donor_Badge" },
+  { match: /donor|supporter|patron|benefactor|sponsor/i, emoji: "White_Donor_Badge" },
   { match: /bug/i, emoji: "White_Bug_Hunter_Badge" },
   { match: /premium/i, emoji: "White_Premium_Badge" },
   { match: /verif/i, emoji: "White_Verification_Badge" },
