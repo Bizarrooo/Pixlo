@@ -11,7 +11,9 @@ import "./dashboard-badges.css";
 type DashboardBadge = { id: string; badge_key?: string; name: string; description: string; icon_url: string | null; awarded_at?: string };
 type BadgeHubTab = "Your badges" | "All badges" | "Customize" | "Shop";
 type BadgeDonorStatus = { authenticated?: boolean; totalDonatedPence?: number; tiers?: Array<{ key: string; name: string; amountPence: number; icon?: string | null }> };
-type BadgeProgressTier = { tier_key: string; name: string; description?: string; icon_url: string | null; threshold_views?: number; threshold_invites?: number };
+type BadgeProgressTier = { tier_key: string; badge_id?: string; name: string; description?: string; icon_url: string | null; threshold_views?: number; threshold_invites?: number };
+type BadgeTierProgressItem = { key: string; name: string; threshold: number; icon_url: string | null; badge_id?: string; unlocked: boolean };
+type BadgeTierProgressModel = { tiers: BadgeTierProgressItem[]; current: BadgeTierProgressItem | null; next: BadgeTierProgressItem | null; progressPercent: number; remaining: number };
 const PROFILE_VIEW_TIERS: BadgeProgressTier[] = [
   { tier_key: "views_seen", name: "Seen", threshold_views: 100, icon_url: "/badges/views-seen.svg" },
   { tier_key: "views_rising", name: "Rising", threshold_views: 1000, icon_url: "/badges/views-rising.svg" },
@@ -28,6 +30,64 @@ const RECRUITER_TIER_FALLBACK: BadgeProgressTier[] = [
   { tier_key: "recruiter_elite_recruiter", name: "Elite Recruiter", threshold_invites: 100, icon_url: "/badges/recruiter-elite-recruiter.svg" },
 ];
 const DONOR_BADGE_KEYS = new Set(["donor", "donor_supporter", "donor_patron", "donor_benefactor", "donor_sponsor", "donor_elite_sponsor", "donor_mythic_patron", "donor_eternal_benefactor"]);
+
+const DONOR_TIER_ORDER = [
+  "donor_supporter",
+  "donor_patron",
+  "donor_benefactor",
+  "donor_sponsor",
+  "donor_elite_sponsor",
+  "donor_mythic_patron",
+  "donor_eternal_benefactor",
+];
+
+function badgeTierFamily(badgeKey?: string): "views" | "donor" | "recruiter" | null {
+  const key = String(badgeKey || "");
+  if (key.startsWith("views_")) return "views";
+  if (key.startsWith("donor_") && key !== "donor") return "donor";
+  if (key.startsWith("recruiter_")) return "recruiter";
+  return null;
+}
+
+function buildTierProgress(
+  items: Array<{ key: string; name: string; threshold: number; icon_url: string | null; badge_id?: string }>,
+  value: number,
+  earnedBadgeKeys: Set<string>,
+): BadgeTierProgressModel {
+  const highestAwardedIndex = items.reduce((highest, item, index) => earnedBadgeKeys.has(item.key) ? index : highest, -1);
+  const metric = Number.isFinite(value) ? Math.max(0, value) : 0;
+  const tiers = items.map((item, index) => ({
+    ...item,
+    unlocked: index <= highestAwardedIndex || metric >= item.threshold,
+  }));
+  const currentIndex = tiers.reduce((highest, item, index) => item.unlocked ? index : highest, -1);
+  const current = currentIndex >= 0 ? tiers[currentIndex] : null;
+  const next = tiers[currentIndex + 1] || null;
+  const baseline = current?.threshold || 0;
+  const progressPercent = next
+    ? Math.max(0, Math.min(100, Math.round(((metric - baseline) / Math.max(1, next.threshold - baseline)) * 100)))
+    : 100;
+  return {
+    tiers,
+    current,
+    next,
+    progressPercent,
+    remaining: next ? Math.max(0, next.threshold - metric) : 0,
+  };
+}
+
+function autoEquipHighestDonorTier(settings: ProfileSettings, badges: DashboardBadge[]): ProfileSettings {
+  const donorBadges = badges.filter(badge => DONOR_TIER_ORDER.includes(String(badge.badge_key || "")));
+  const donorIds = donorBadges.map(badge => badge.id);
+  if (settings.activeBadgeIds.some(id => donorIds.includes(id))) return settings;
+  const highest = [...donorBadges].sort((a, b) => DONOR_TIER_ORDER.indexOf(String(a.badge_key)) - DONOR_TIER_ORDER.indexOf(String(b.badge_key))).at(-1);
+  if (!highest) return settings;
+  return {
+    ...settings,
+    activeBadgeIds: [...settings.activeBadgeIds.filter(id => !donorIds.includes(id)), highest.id],
+    activeBadgeOrder: [...settings.activeBadgeOrder.filter(id => !donorIds.includes(id)), highest.id],
+  };
+}
 
 const socials: [SocialKey, string][] = [
   ["discord", "Discord"], ["youtube", "YouTube"], ["roblox", "Roblox"], ["github", "GitHub"], ["twitch", "Twitch"], ["instagram", "Instagram"], ["spotify", "Spotify"],
@@ -404,6 +464,30 @@ export default function Dashboard() {
   const canManageOwnViews = profileUserId === "3f29f647-4b99-4f53-adf0-eb678bef1c5f";
   const effectiveViewTiers = viewBadgeTiers.length ? viewBadgeTiers : PROFILE_VIEW_TIERS;
   const effectiveRecruiterTiers = recruiterBadgeTiers.length ? recruiterBadgeTiers : RECRUITER_TIER_FALLBACK;
+  const earnedBadgeKeys = new Set(dashboardBadges.map(badge => String(badge.badge_key || "")));
+  const donorStatusTiers = badgeDonorStatus?.tiers || [];
+  const viewsTierProgress = buildTierProgress(effectiveViewTiers.map(tier => ({
+    key: tier.tier_key,
+    name: tier.name,
+    threshold: Number(tier.threshold_views || 0),
+    icon_url: tier.icon_url,
+    badge_id: tier.badge_id || badgeCatalog.find(badge => badge.badge_key === tier.tier_key)?.id,
+  })), badgeViews, earnedBadgeKeys);
+  const donorTierProgress = buildTierProgress(donorStatusTiers.map(tier => ({
+    key: tier.key,
+    name: tier.name,
+    threshold: Number(tier.amountPence || 0),
+    icon_url: tier.icon || badgeCatalog.find(badge => badge.badge_key === tier.key)?.icon_url || null,
+    badge_id: badgeCatalog.find(badge => badge.badge_key === tier.key)?.id,
+  })), Number(badgeDonorStatus?.totalDonatedPence || 0), earnedBadgeKeys);
+  const recruiterTierProgress = buildTierProgress(effectiveRecruiterTiers.map(tier => ({
+    key: tier.tier_key,
+    name: tier.name,
+    threshold: Number(tier.threshold_invites || 0),
+    icon_url: tier.icon_url,
+    badge_id: tier.badge_id || badgeCatalog.find(badge => badge.badge_key === tier.tier_key)?.id,
+  })), badgeDiscordLinked ? totalRecruiterInvites : 0, earnedBadgeKeys);
+
   const [saved, setSaved] = useState(false);
   const [presetsPremium, setPresetsPremium] = useState(false);
   const [presetsPremiumReady, setPresetsPremiumReady] = useState(false);
@@ -469,7 +553,9 @@ export default function Dashboard() {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || "Could not load your badges.");
         if (cancelled) return;
-        setDashboardBadges(Array.isArray(data.badges) ? data.badges : []);
+        const receivedBadges = Array.isArray(data.badges) ? data.badges as DashboardBadge[] : [];
+        setDashboardBadges(receivedBadges);
+        setSettings(current => autoEquipHighestDonorTier(current, receivedBadges));
         setBadgeCatalog(Array.isArray(data.catalog) ? data.catalog : []);
         setViewBadgeTiers(Array.isArray(data.viewTiers) ? data.viewTiers : []);
         setRecruiterBadgeTiers(Array.isArray(data.recruiterTiers) ? data.recruiterTiers : []);
@@ -739,6 +825,22 @@ export default function Dashboard() {
   }, [settingsReady, settings.avatar, settings.banner, settings.backgroundImage, settings.backgroundVideo, settings.enterScreenBackgroundImage, settings.enterScreenBackgroundVideo, settings.customLinks, settings.musicTracks, settings.activeMusicId]);
 
   const set = <K extends keyof ProfileSettings>(key: K, value: ProfileSettings[K]) => { setSettings(s => ({ ...s, [key]: value })); setSaved(false); };
+  const equipBadgeTier = (tierKey: string) => {
+    const family = badgeTierFamily(tierKey);
+    const targetBadge = badgeCatalog.find(badge => badge.badge_key === tierKey) || dashboardBadges.find(badge => badge.badge_key === tierKey);
+    if (!family || !targetBadge) return;
+    const familyIds = [...badgeCatalog, ...dashboardBadges]
+      .filter(badge => badgeTierFamily(badge.badge_key) === family)
+      .map(badge => badge.id);
+    setSettings(current => ({
+      ...current,
+      activeBadgeIds: [...current.activeBadgeIds.filter(id => !familyIds.includes(id)), targetBadge.id],
+      activeBadgeOrder: [...current.activeBadgeOrder.filter(id => !familyIds.includes(id)), targetBadge.id],
+    }));
+    setSaved(false);
+    setBadgeTierModal(null);
+  };
+
   const navigateDashboard = (primary: DashboardPrimarySection, destination: string) => {
     setActivePrimary(primary);
     setActive(destination);
@@ -1694,7 +1796,9 @@ export default function Dashboard() {
                     .then(async response => {
                       const data = await response.json().catch(() => ({}));
                       if (!response.ok) throw new Error(data.error || "Could not refresh your badges.");
-                      setDashboardBadges(Array.isArray(data.badges) ? data.badges : []);
+                      const receivedBadges = Array.isArray(data.badges) ? data.badges as DashboardBadge[] : [];
+                      setDashboardBadges(receivedBadges);
+                      setSettings(current => autoEquipHighestDonorTier(current, receivedBadges));
                       setBadgeCatalog(Array.isArray(data.catalog) ? data.catalog : []);
                       setViewBadgeTiers(Array.isArray(data.viewTiers) ? data.viewTiers : []);
                       setRecruiterBadgeTiers(Array.isArray(data.recruiterTiers) ? data.recruiterTiers : []);
