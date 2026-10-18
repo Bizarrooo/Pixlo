@@ -450,11 +450,9 @@ export default function PricingPage() {
                           ? "Enter a valid amount"
                           : reachedHighestDonorTier
                             ? "You reached the highest Donator level. Thank you!"
-                            : selectedDonationTier
-                              ? `Donate ${formatGBP(selectedDonationPence)} to unlock ${selectedDonationTier.name}`
-                              : projectedNextDonorTier
-                                ? `${formatGBP(Math.max(0, projectedNextDonorTier.amountPence - projectedDonatedPence))} more to unlock ${projectedNextDonorTier.name}`
-                                : "You reached the highest Donator level. Thank you!"}</strong>
+                            : projectedNextDonorTier
+                              ? `${formatGBP(Math.max(0, projectedNextDonorTier.amountPence - projectedDonatedPence))} more to unlock ${projectedNextDonorTier.name}`
+                              : "You reached the highest Donator level. Thank you!"}</strong>
                       </div>
                       <div className={`pricing-donor-progress-track ${selectedDonationTier ? "is-projecting-unlock" : ""}`} role="progressbar" aria-label="Projected progress towards next donor tier after this donation" aria-valuemin={0} aria-valuemax={100} aria-valuenow={donorProgressPercent}>
                         <span style={{ width: `${donorProgressPercent}%` }} />
