@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 type PremiumStatus = { authenticated?: boolean; premium?: boolean; error?: string };
 type GiftCheck = "idle" | "checking" | "valid" | "invalid";
-type DonationProgress = { authenticated?: boolean; totalDonatedPence?: number; unavailable?: boolean; currentTier?: { key: string; name: string; amountPence: number } | null };
+type DonationProgress = { authenticated?: boolean; totalDonatedPence?: number; unavailable?: boolean; currentTier?: { key: string; name: string; amountPence: number } | null; tiers?: Array<{ key: string; name: string; amountPence: number; icon?: string | null }> };
 
 const donorBadgeTiers = [
   { key: "donor_supporter", name: "Supporter", amountPence: 500, icon: "/badges/donor-supporter.svg" },
@@ -217,14 +217,20 @@ export default function PricingPage() {
   }
 
   const lifetimeDonatedPence = donorStatus?.authenticated ? Number(donorStatus.totalDonatedPence || 0) : 0;
-  const donationEarnedTier = [...donorBadgeTiers].reverse().find(tier => lifetimeDonatedPence >= tier.amountPence) || null;
+  const donorTiersForUi = donorStatus?.tiers?.length
+    ? donorStatus.tiers.map(tier => ({
+        ...tier,
+        icon: tier.icon || donorBadgeTiers.find(fallback => fallback.key === tier.key)?.icon || "/badges/donor-supporter.svg",
+      }))
+    : donorBadgeTiers;
+  const donationEarnedTier = [...donorTiersForUi].reverse().find(tier => lifetimeDonatedPence >= tier.amountPence) || null;
   const discordOrAwardedTier = donorStatus?.authenticated && donorStatus.currentTier
-    ? donorBadgeTiers.find(tier => tier.key === donorStatus.currentTier?.key) || null
+    ? donorTiersForUi.find(tier => tier.key === donorStatus.currentTier?.key) || null
     : null;
   const currentDonorTier = discordOrAwardedTier && (!donationEarnedTier || discordOrAwardedTier.amountPence > donationEarnedTier.amountPence)
     ? discordOrAwardedTier
     : donationEarnedTier;
-  const nextDonorTier = donorBadgeTiers.find(tier => tier.amountPence > (currentDonorTier?.amountPence || 0)) || null;
+  const nextDonorTier = donorTiersForUi.find(tier => tier.amountPence > (currentDonorTier?.amountPence || 0)) || null;
   const previousTierThreshold = currentDonorTier?.amountPence || 0;
   const donorProgressPercent = nextDonorTier
     ? Math.max(0, Math.min(100, Math.round(((lifetimeDonatedPence - previousTierThreshold) / (nextDonorTier.amountPence - previousTierThreshold)) * 100)))
@@ -395,7 +401,7 @@ export default function PricingPage() {
                     <span className="pricing-donor-total">{donorStatus?.authenticated ? formatGBP(lifetimeDonatedPence) : "7 tiers"}</span>
                   </div>
                   <div className="pricing-donor-tier-rail">
-                    {donorBadgeTiers.map((tier, index) => {
+                    {donorTiersForUi.map((tier, index) => {
                       const unlocked = Boolean(donorStatus?.authenticated && (lifetimeDonatedPence >= tier.amountPence || (currentDonorTier?.amountPence || 0) >= tier.amountPence));
                       const isCurrent = currentDonorTier?.key === tier.key;
                       return (
