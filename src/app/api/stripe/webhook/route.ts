@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     if (typeof checkoutSessionId !== "string" || !checkoutSessionId.startsWith("cs_")) {
       return NextResponse.json({ error: "Donation checkout session is missing or invalid." }, { status: 400 });
     }
-    if (!Number.isInteger(amountTotal) || amountTotal < 100 || amountTotal > 100000 || currency !== "gbp") {
+    if (!Number.isInteger(amountTotal) || amountTotal < 100 || amountTotal > 99999999 || currency !== "gbp") {
       return NextResponse.json({ error: "Donation amount or currency is invalid." }, { status: 400 });
     }
 
