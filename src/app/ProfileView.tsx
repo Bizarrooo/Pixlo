@@ -323,7 +323,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   }, []);
 
   useEffect(() => {
-    if (!ready || profileStatus !== "found" || embedMode || !settings.musicAutoplay || manualPauseRef.current) return;
+    if (!ready || profileStatus !== "found" || embedMode || !entered || !settings.musicAutoplay || manualPauseRef.current) return;
 
     const startMedia = () => {
       const audio = audioRef.current;
