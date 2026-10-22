@@ -97,8 +97,8 @@ export default function CursorTrailCanvas({
       const rect = canvas.getBoundingClientRect();
       canvasWidth = Math.max(1, rect.width);
       canvasHeight = Math.max(1, rect.height);
-      // A capped backing scale avoids spending several times more work on retina displays.
-      // A 1:1 backing store is deliberately used on high-DPI displays to avoid\n      // rendering a full-screen particle layer at 1.5–4x the pixel cost.\n      pixelRatio = 1;
+      // A 1:1 backing store avoids the large pixel cost of retina-sized full-screen canvases.
+      pixelRatio = 1;
       const width = Math.max(1, Math.round(canvasWidth * pixelRatio));
       const height = Math.max(1, Math.round(canvasHeight * pixelRatio));
       if (canvas.width !== width || canvas.height !== height) {
