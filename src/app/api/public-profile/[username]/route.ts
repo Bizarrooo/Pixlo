@@ -80,7 +80,7 @@ export async function GET(_request: Request, context: { params: Promise<{ userna
         premium: isPremium,
         badges,
       },
-    }, { headers: { "Cache-Control": "private, no-store, max-age=0, must-revalidate" } });
+    }, { headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=60" } });
   } catch {
     return NextResponse.json({ profile: null, error: "Unable to load this profile." }, { status: 500 });
   }
