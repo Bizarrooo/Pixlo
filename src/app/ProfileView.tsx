@@ -99,9 +99,25 @@ function rgbaFromHex(hex: string, alpha: number) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
 }
 
-function ProfileClockWidget({ timezone }: { timezone: string }) {
-  // Keep the one-second ticker isolated from ProfileView so the full profile
-  // does not re-render every second just to update the Premium clocks.
+function timeZoneOffsetMinutes(date: Date, timezone: string) {
+  const label = new Intl.DateTimeFormat("en-US", { timeZone: timezone, timeZoneName: "shortOffset" })
+    .formatToParts(date).find(part => part.type === "timeZoneName")?.value || "GMT";
+  const match = /GMT(?:(\\+|\\-)(\\d{1,2})(?::(\\d{2}))?)?/.exec(label);
+  if (!match || !match[1]) return 0;
+  return (match[1] === "-" ? -1 : 1) * (Number(match[2] || 0) * 60 + Number(match[3] || 0));
+}
+
+function ProfileClockWidget({
+  timezone, cardColour, accentColour, textColour, opacity, blur,
+}: {
+  timezone: string;
+  cardColour: string;
+  accentColour: string;
+  textColour: string;
+  opacity: number;
+  blur: number;
+}) {
+  // Isolate the one-second ticker from the rest of the profile.
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const interval = window.setInterval(() => setNow(new Date()), 1000);
@@ -109,50 +125,59 @@ function ProfileClockWidget({ timezone }: { timezone: string }) {
   }, []);
 
   const formatters = useMemo(() => ({
-    targetHour: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", hourCycle: "h23" }),
-    targetMinute: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, minute: "2-digit" }),
-    targetSecond: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, second: "2-digit" }),
-    targetLabel: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", minute: "2-digit" }),
-    targetDigitalTime: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }),
-    targetDate: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, weekday: "long", day: "numeric", month: "long", year: "numeric" }),
-    targetZone: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, timeZoneName: "long" }),
-    localDigitalTime: new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }),
-    localDate: new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric" }),
+    time: new Intl.DateTimeFormat("en-US", { timeZone: timezone, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true }),
+    date: new Intl.DateTimeFormat("en-US", { timeZone: timezone, weekday: "short", month: "short", day: "numeric" }),
+    faceLabel: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", minute: "2-digit" }),
+    hour: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", hourCycle: "h23" }),
+    minute: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, minute: "2-digit" }),
+    second: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, second: "2-digit" }),
+    abbreviation: new Intl.DateTimeFormat("en-US", { timeZone: timezone, timeZoneName: "short" }),
+    localTime: new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }),
   }), [timezone]);
 
-  const targetHour = Number(formatters.targetHour.format(now)) % 12;
-  const targetMinute = Number(formatters.targetMinute.format(now));
-  const targetSecond = Number(formatters.targetSecond.format(now));
-  const targetZoneName = formatters.targetZone.formatToParts(now).find(part => part.type === "timeZoneName")?.value;
-  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " ");
+  const targetHour = Number(formatters.hour.format(now)) % 12;
+  const targetMinute = Number(formatters.minute.format(now));
+  const targetSecond = Number(formatters.second.format(now));
+  const zoneAbbreviation = formatters.abbreviation.formatToParts(now).find(part => part.type === "timeZoneName")?.value || timezone;
+  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const localOffset = timeZoneOffsetMinutes(now, localTimezone);
+  const targetOffset = timeZoneOffsetMinutes(now, timezone);
+  const offsetDelta = localOffset - targetOffset;
+  const offsetAbs = Math.abs(offsetDelta);
+  const offsetLabel = offsetDelta === 0
+    ? "same time"
+    : `(${offsetDelta > 0 ? "+" : "−"}${Math.floor(offsetAbs / 60)}h${offsetAbs % 60 ? ` ${offsetAbs % 60}m` : ""})`;
+  const city = timezone.split("/").slice(-1)[0]?.replace(/_/g, " ") || timezone;
+  const widgetStyle = {
+    "--timezone-accent": accentColour,
+    "--timezone-text": textColour,
+    background: `linear-gradient(112deg, ${rgbaFromHex(cardColour, opacity / 100)} 0%, ${rgbaFromHex(accentColour, Math.max(0.12, opacity / 100 * 0.72))} 100%)`,
+    borderColor: rgbaFromHex(accentColour, 0.32),
+    color: textColour,
+    backdropFilter: blur > 0 ? `blur(${blur}px)` : "none",
+    WebkitBackdropFilter: blur > 0 ? `blur(${blur}px)` : "none",
+  } as React.CSSProperties;
 
   return (
-    <div className="pixlo-timezone-grid">
-      <div className="pixlo-timezone-primary">
-        <div className="pixlo-analog-clock" aria-label={formatters.targetLabel.format(now)}>
-          <span className="pixlo-clock-face">
-            <i className="pixlo-clock-hour" style={{ transform: `rotate(${targetHour * 30 + targetMinute / 2}deg)` }} />
-            <i className="pixlo-clock-minute" style={{ transform: `rotate(${targetMinute * 6}deg)` }} />
-            <i className="pixlo-clock-second" style={{ transform: `rotate(${targetSecond * 6}deg)` }} />
-            <b />
-          </span>
-        </div>
-        <div className="pixlo-timezone-digital">
-          <strong>{formatters.targetDigitalTime.format(now)}</strong>
-          <span>{formatters.targetDate.format(now)}</span>
-          <small>{targetZoneName}</small>
-        </div>
+    <div className="pixlo-timezone-widget" style={widgetStyle} aria-label={`Time in ${city}`}>
+      <div className="pixlo-timezone-clock" aria-label={formatters.faceLabel.format(now)}>
+        <span className="pixlo-clock-face">
+          <i className="pixlo-clock-hour" style={{ transform: `rotate(${targetHour * 30 + targetMinute / 2}deg)` }} />
+          <i className="pixlo-clock-minute" style={{ transform: `rotate(${targetMinute * 6}deg)` }} />
+          <i className="pixlo-clock-second" style={{ transform: `rotate(${targetSecond * 6}deg)` }} />
+          <b />
+        </span>
       </div>
-      <div className="pixlo-local-time">
-        <span className="pixlo-local-time-icon">⌖</span>
-        <div>
-          <small>YOUR LOCAL TIME</small>
-          <strong>{formatters.localDigitalTime.format(now)}</strong>
-          <span>{formatters.localDate.format(now)}</span>
-          <em>{localTimezone}</em>
+      <div className="pixlo-timezone-widget-content">
+        <div className="pixlo-timezone-widget-topline">
+          <span className="pixlo-timezone-city">{city}</span>
+          <span className="pixlo-timezone-label"><i aria-hidden="true">◷</i> Timezone</span>
         </div>
-        <i className="pixlo-local-live-dot" />
+        <strong className="pixlo-timezone-time">{formatters.time.format(now)}</strong>
+        <span className="pixlo-timezone-date">{formatters.date.format(now)} · {zoneAbbreviation}</span>
+        <span className="pixlo-timezone-local">Your time: {formatters.localTime.format(now)} <b>{offsetLabel}</b></span>
       </div>
+      <span className="pixlo-timezone-live" aria-hidden="true" />
     </div>
   );
 }
@@ -172,6 +197,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const [isPremium, setIsPremium] = useState(false);
   const [extrasPage, setExtrasPage] = useState(1);
   const extrasPageRefs = useRef<Record<number, HTMLElement | null>>({});
+  const extrasViewportRef = useRef<HTMLDivElement | null>(null);
+  const lastPointerPositionRef = useRef<{ x: number; y: number } | null>(null);
   const [trackIndex, setTrackIndex] = useState(0);
   const [musicVideoFallback, setMusicVideoFallback] = useState(false);
   const [parallaxReturning, setParallaxReturning] = useState(false);
@@ -316,8 +343,14 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
 
   useEffect(() => {
     if (settings.extrasLayout === "pages") return;
+    const viewport = extrasViewportRef.current;
     const target = extrasPageRefs.current[extrasPage];
-    if (target) target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: settings.extrasLayout === "horizontal" ? "center" : "nearest" });
+    if (!viewport || !target) return;
+    if (settings.extrasLayout === "horizontal") {
+      viewport.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
+    } else {
+      viewport.scrollTo({ top: target.offsetTop - viewport.offsetTop, behavior: "smooth" });
+    }
   }, [extrasPage, settings.extrasLayout, settings.timezonePage]);
 
   useEffect(() => {
@@ -603,35 +636,30 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const applyCardParallax = (x: number, y: number) => {
     const root = profilePageRef.current;
     if (!root) return;
-    const strength = settings.parallax ? settings.parallaxStrength : 0;
-    const power = settings.parallax && strength > 0
-      ? Math.min(1.7, Math.pow(Math.min(100, Math.max(0, strength)) / 35, 0.72))
-      : 0;
+    const strength = settings.parallax ? Math.max(0, Math.min(100, settings.parallaxStrength)) : 0;
+    const power = settings.parallax && strength > 0 ? Math.min(1.8, Math.pow(strength / 32, 0.72)) : 0;
     root.style.setProperty("--mouse-x", `${x * strength}px`);
     root.style.setProperty("--mouse-y", `${y * strength}px`);
-    root.style.setProperty("--parallax-rotate-x", `${y * -18 * power}deg`);
-    root.style.setProperty("--parallax-rotate-y", `${x * 22 * power}deg`);
-    root.style.setProperty("--parallax-light-x", `${50 + x * 45 * power}%`);
-    root.style.setProperty("--parallax-light-y", `${50 + y * 45 * power}%`);
-    root.style.setProperty("--parallax-shadow-x", `${x * -10 * power}px`);
-    root.style.setProperty("--parallax-shadow-y", `${y * -8 * power}px`);
+    root.style.setProperty("--parallax-rotate-x", `${y * -14 * power}deg`);
+    root.style.setProperty("--parallax-rotate-y", `${x * 18 * power}deg`);
+    root.style.setProperty("--parallax-light-x", `${50 + x * 48 * power}%`);
+    root.style.setProperty("--parallax-light-y", `${50 + y * 48 * power}%`);
+    root.style.setProperty("--parallax-shadow-x", `${x * -13 * power}px`);
+    root.style.setProperty("--parallax-shadow-y", `${y * -10 * power}px`);
   };
   const updateCardPointer = (event: React.PointerEvent<HTMLElement>) => {
-    if (!settings.parallax || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const bounds = pointerBoundsRef.current;
-    if (!bounds) return;
-    const trackingMargin = 72;
-    if (
-      event.clientX < bounds.left - trackingMargin ||
-      event.clientX > bounds.right + trackingMargin ||
-      event.clientY < bounds.top - trackingMargin ||
-      event.clientY > bounds.bottom + trackingMargin
-    ) {
+    if (!settings.parallax || event.pointerType === "touch" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const card = profilePageRef.current?.querySelector<HTMLElement>(".profile-card");
+    if (!card) return;
+    const bounds = card.getBoundingClientRect();
+    pointerBoundsRef.current = bounds;
+    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) {
       resetCardPointer();
       return;
     }
     if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
     parallaxReturnTimerRef.current = null;
+    setParallaxReturning(false);
     parallaxTargetRef.current = {
       x: Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2)),
       y: Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2)),
@@ -645,15 +673,21 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     }
   };
   const handleCardPointerEnter = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!settings.parallax || event.pointerType === "touch") return;
     if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
     parallaxReturnTimerRef.current = null;
     setParallaxReturning(false);
-    if (!pointerBoundsRef.current) pointerBoundsRef.current = event.currentTarget.parentElement?.getBoundingClientRect() || event.currentTarget.getBoundingClientRect();
+    pointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
   };
   const handleCardPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" || !settings.parallax) return;
-    pointerBoundsRef.current = event.currentTarget.parentElement?.getBoundingClientRect() || event.currentTarget.getBoundingClientRect();
-    updateCardPointer(event);
+    const bounds = event.currentTarget.getBoundingClientRect();
+    pointerBoundsRef.current = bounds;
+    parallaxTargetRef.current = {
+      x: Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2)),
+      y: Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2)),
+    };
+    applyCardParallax(parallaxTargetRef.current.x, parallaxTargetRef.current.y);
   };
   const resetCardPointer = () => {
     pointerBoundsRef.current = null;
@@ -668,11 +702,37 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     parallaxReturnTimerRef.current = window.setTimeout(() => {
       setParallaxReturning(false);
       parallaxReturnTimerRef.current = null;
-    }, 700);
+    }, 300);
   };
   const handleCardPointerUp = (event: React.PointerEvent<HTMLElement>) => {
     if (event.pointerType === "touch" || event.type === "pointercancel") resetCardPointer();
   };
+
+  useEffect(() => {
+    const rememberPointer = (event: PointerEvent) => {
+      if (event.pointerType !== "touch") lastPointerPositionRef.current = { x: event.clientX, y: event.clientY };
+    };
+    window.addEventListener("pointermove", rememberPointer, { passive: true });
+    return () => window.removeEventListener("pointermove", rememberPointer);
+  }, []);
+
+  useEffect(() => {
+    if (!ready || profileStatus !== "found" || !settings.parallax || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const frame = window.requestAnimationFrame(() => {
+      const pointer = lastPointerPositionRef.current;
+      const card = profilePageRef.current?.querySelector<HTMLElement>(".profile-card");
+      if (!pointer || !card) return;
+      const bounds = card.getBoundingClientRect();
+      if (pointer.x < bounds.left || pointer.x > bounds.right || pointer.y < bounds.top || pointer.y > bounds.bottom) return;
+      pointerBoundsRef.current = bounds;
+      parallaxTargetRef.current = {
+        x: Math.max(-1, Math.min(1, ((pointer.x - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2)),
+        y: Math.max(-1, Math.min(1, ((pointer.y - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2)),
+      };
+      applyCardParallax(parallaxTargetRef.current.x, parallaxTargetRef.current.y);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [ready, profileStatus, settings.parallax, settings.parallaxStrength]);
 
   return (
     <main ref={profilePageRef} className={`profile-page ${isPremium && settings.timezoneEnabled && !presetPreviewMode && !embedMode && forcedUsername ? "has-extras" : ""} ${settings.gradientTextEnabled ? "gradient-text-on" : ""} ${settings.gradientSocialsEnabled ? "gradient-socials-on" : ""} ${settings.gradientBadgesEnabled ? "gradient-badges-on" : ""} ${settings.parallax ? "parallax-on" : ""} ${parallaxReturning ? "parallax-returning" : ""} ${settings.animated ? "effects-on" : ""} ${settings.floating ? "floating-card" : ""} ${settings.particles ? "particles-on" : ""} ${settings.grain ? "grain-on" : ""} ${settings.scanlines ? "scanlines-on" : ""} layout-${settings.layout.toLowerCase().replace(" ", "-")}`} style={style}>
@@ -738,16 +798,16 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       )}
       <section
         className={`profile-wrap ${presetPreviewMode ? "preset-preview-mode" : ""}`}
-        onPointerMove={updateCardPointer}
-        onPointerLeave={resetCardPointer}
-        onPointerUp={handleCardPointerUp}
-        onPointerCancel={resetCardPointer}
       >
         <div
           className={`profile-card ${settings.glow ? "glow-enabled" : ""} ${settings.alignment === "left" ? "text-left" : ""}`}
           style={{ boxShadow: shadow, "--glow-strength": settings.glowIntensity } as React.CSSProperties}
           onPointerEnter={handleCardPointerEnter}
+          onPointerMove={updateCardPointer}
+          onPointerLeave={resetCardPointer}
           onPointerDown={handleCardPointerDown}
+          onPointerUp={handleCardPointerUp}
+          onPointerCancel={resetCardPointer}
         >
           {assets.banner && settings.bannerHeight > 0 && <div className="profile-banner"><img src={assets.banner} alt="" /></div>}
           <div className="profile-inner">
@@ -839,13 +899,38 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
         <nav className="pixlo-extras-pages" aria-label="Extra pages">
           {Array.from({ length: Math.max(2, settings.timezonePage) }, (_, index) => index + 1).map(page => <button type="button" key={page} className={extrasPage === page ? "active" : ""} onClick={() => setExtrasPage(page)} aria-current={extrasPage === page ? "page" : undefined}><span>{String(page).padStart(2, "0")}</span><small>{page === 1 ? "Overview" : page === settings.timezonePage ? "Extra" : "Coming soon"}</small></button>)}
         </nav>
-        <div className="pixlo-extras-viewport" key={settings.extrasLayout}>
-          {(settings.extrasLayout === "pages" ? [extrasPage] : Array.from({ length: Math.max(2, settings.timezonePage) }, (_, index) => index + 1)).map(page => <article key={`${page}-${extrasPage}`} ref={node => { extrasPageRefs.current[page] = node; }} className={`pixlo-extras-panel ${extrasPage === page ? "is-current" : ""} ${page === settings.timezonePage ? "pixlo-timezone-panel" : ""}`}>
+        <div
+          ref={extrasViewportRef}
+          className="pixlo-extras-viewport"
+          key={settings.extrasLayout}
+          onScroll={event => {
+            if (settings.extrasLayout === "pages") return;
+            const viewport = event.currentTarget;
+            const viewportRect = viewport.getBoundingClientRect();
+            let nearestPage = extrasPage;
+            let nearestDistance = Number.POSITIVE_INFINITY;
+            for (const [pageString, node] of Object.entries(extrasPageRefs.current)) {
+              if (!node) continue;
+              const rect = node.getBoundingClientRect();
+              const distance = settings.extrasLayout === "horizontal"
+                ? Math.abs(rect.left - viewportRect.left)
+                : Math.abs(rect.top - viewportRect.top);
+              if (distance < nearestDistance) { nearestDistance = distance; nearestPage = Number(pageString); }
+            }
+            if (nearestPage !== extrasPage) setExtrasPage(nearestPage);
+          }}
+        >
+          {(settings.extrasLayout === "pages" ? [extrasPage] : Array.from({ length: Math.max(2, settings.timezonePage) }, (_, index) => index + 1)).map(page => <article key={page} ref={node => { extrasPageRefs.current[page] = node; }} className={`pixlo-extras-panel ${extrasPage === page ? "is-current" : ""} ${page === settings.timezonePage ? "pixlo-timezone-panel" : ""}`}>
             {page === 1 ? <div className="pixlo-extras-welcome"><span className="pixlo-extras-orbit" aria-hidden="true"><i /><i /><i /></span><div><span className="pixlo-extras-kicker">YOUR SPACE, EXPANDED</span><h3>More than a profile.</h3><p>Explore little widgets and useful details picked by the profile owner. New extras can live here without crowding the main page.</p><button type="button" onClick={() => setExtrasPage(settings.timezonePage)}>Explore extras <span>↗</span></button></div><span className="pixlo-extras-page-number">01</span></div>
             : page === settings.timezonePage ? <div className="pixlo-timezone-content">
-                <div className="pixlo-timezone-topline"><span className="pixlo-extras-kicker">WORLD CLOCK</span><span className="pixlo-timezone-zone">{settings.timezone.replace(/_/g, " ").split("/").slice(-1)[0]}</span></div>
-                <ProfileClockWidget timezone={settings.timezone} />
-                <div className="pixlo-timezone-footer"><span><i /> Both clocks update live</span><span>TIMEZONE COMPARISON</span></div>
+                <ProfileClockWidget
+                  timezone={settings.timezone}
+                  cardColour={settings.timezoneCardColour}
+                  accentColour={settings.timezoneAccentColour}
+                  textColour={settings.timezoneTextColour}
+                  opacity={settings.timezoneOpacity}
+                  blur={settings.timezoneBlur}
+                />
               </div>
             : <div className="pixlo-extras-empty"><span className="pixlo-extras-empty-icon">✳</span><span className="pixlo-extras-kicker">PAGE {String(page).padStart(2, "0")}</span><h3>Something good is coming.</h3><p>This page is ready for another Premium extra.</p><span className="pixlo-extras-page-number">{String(page).padStart(2, "0")}</span></div>}
           </article>)}
