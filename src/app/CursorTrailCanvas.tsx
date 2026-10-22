@@ -88,10 +88,10 @@ export default function CursorTrailCanvas({
     const motionScale = clamp(speed, 40, 300) / 100;
     const particleLifetime = clamp(lifetime, 300, 15000);
     const spacing = clamp(9.5 - densityValue * 0.021, 4.2, 9);
-    const maxParticles = clamp(Math.round(68 + densityValue * 0.26), 80, 135);
+    const maxParticles = clamp(Math.round(105 + densityValue * 0.48), 125, 225);
     const glowScale = clamp(glow, 0, 200) / 100;
     const trailLifetime = clamp(310 / Math.max(0.65, motionScale), 155, 340);
-    const maxTrailPoints = 56;
+    const maxTrailPoints = 76;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -210,28 +210,56 @@ export default function CursorTrailCanvas({
 
       const gradient = context.createLinearGradient(first.x, first.y, last.x, last.y);
       gradient.addColorStop(0, rgba(colourRGB, 0));
-      gradient.addColorStop(0.3, rgba(colourRGB, 0.14));
-      gradient.addColorStop(0.74, rgba(colourRGB, 0.32));
-      gradient.addColorStop(1, rgba(colourRGB, 0.78));
+      gradient.addColorStop(0.38, rgba(colourRGB, 0.12));
+      gradient.addColorStop(0.72, rgba(colourRGB, 0.42));
+      gradient.addColorStop(1, rgba(colourRGB, 0.96));
 
       context.save();
       context.lineCap = "round";
       context.lineJoin = "round";
-      context.strokeStyle = gradient;
-      context.lineWidth = clamp(sizeScale * 2.4, 1.1, 4.2);
-      context.shadowColor = colour;
-      context.shadowBlur = Math.min(8, glowScale * 4.5);
       context.beginPath();
       context.moveTo(first.x, first.y);
-      for (let index = 1; index < trailPoints.length; index += 1) {
-        const point = trailPoints[index];
-        if (point) context.lineTo(point.x, point.y);
+      for (let index = 1; index < trailPoints.length - 1; index += 1) {
+        const current = trailPoints[index];
+        const next = trailPoints[index + 1];
+        if (!current || !next) continue;
+        const midX = (current.x + next.x) / 2;
+        const midY = (current.y + next.y) / 2;
+        context.quadraticCurveTo(current.x, current.y, midX, midY);
       }
+      context.lineTo(last.x, last.y);
+
+      // Broad colour bloom under a tight, bright core gives the trail a polished
+      // neon-ribbon look without adding extra DOM layers.
+      context.strokeStyle = gradient;
+      context.lineWidth = clamp(sizeScale * 4.8, 2.2, 8.5);
+      context.shadowColor = colour;
+      context.shadowBlur = Math.min(19, 7 + glowScale * 7);
+      context.globalAlpha = 0.7;
       context.stroke();
+
       context.shadowBlur = 0;
-      context.strokeStyle = "rgba(255,255,255,0.34)";
-      context.lineWidth = Math.max(0.45, sizeScale * 0.52);
+      context.globalAlpha = 0.92;
+      context.strokeStyle = gradient;
+      context.lineWidth = clamp(sizeScale * 2.1, 1.1, 3.7);
       context.stroke();
+
+      context.globalAlpha = 0.82;
+      context.strokeStyle = "rgba(255,255,255,0.78)";
+      context.lineWidth = Math.max(0.55, sizeScale * 0.62);
+      context.stroke();
+
+      // Bright tip sits precisely at the current pointer position.
+      const headRadius = clamp(2.2 + sizeScale * 1.7, 3, 8);
+      const head = context.createRadialGradient(last.x, last.y, 0, last.x, last.y, headRadius * 2.8);
+      head.addColorStop(0, "rgba(255,255,255,0.96)");
+      head.addColorStop(0.22, rgba(colourRGB, 0.82));
+      head.addColorStop(1, rgba(colourRGB, 0));
+      context.globalAlpha = 0.95;
+      context.fillStyle = head;
+      context.beginPath();
+      context.arc(last.x, last.y, headRadius * 2.8, 0, Math.PI * 2);
+      context.fill();
       context.restore();
     };
 
