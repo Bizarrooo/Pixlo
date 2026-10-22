@@ -2452,6 +2452,14 @@ export default function Dashboard() {
                   <option value="Europe/London">London · United Kingdom</option><option value="Europe/Paris">Paris · France</option><option value="Europe/Berlin">Berlin · Germany</option><option value="Europe/Istanbul">Istanbul · Türkiye</option><option value="America/New_York">New York · United States</option><option value="America/Los_Angeles">Los Angeles · United States</option><option value="America/Chicago">Chicago · United States</option><option value="America/Toronto">Toronto · Canada</option><option value="America/Sao_Paulo">São Paulo · Brazil</option><option value="Asia/Dubai">Dubai · UAE</option><option value="Asia/Kolkata">Mumbai · India</option><option value="Asia/Singapore">Singapore</option><option value="Asia/Tokyo">Tokyo · Japan</option><option value="Asia/Seoul">Seoul · South Korea</option><option value="Australia/Sydney">Sydney · Australia</option><option value="Pacific/Auckland">Auckland · New Zealand</option><option value="UTC">UTC</option>
                 </select></Field>
                 <Field label="Place timezone on page" hint="Page 1 is intentionally reserved for the Extra intro — timezone can never be placed there."><select value={String(settings.timezonePage)} onChange={e => set("timezonePage", Math.max(2, Number(e.target.value)))} className="extras-select">{Array.from({length: 11}, (_, i) => i + 2).map(page => <option key={page} value={page}>Page {page}</option>)}</select></Field>
+                <div className="extras-customisation-heading"><h4>Widget appearance</h4><p>Colours and glass effect for the live timezone card.</p></div>
+                <div className="colour-grid">
+                  <Colour label="Background colour" value={settings.timezoneCardColour} onChange={v => set("timezoneCardColour", v)} />
+                  <Colour label="Accent colour" value={settings.timezoneAccentColour} onChange={v => set("timezoneAccentColour", v)} />
+                  <Colour label="Text colour" value={settings.timezoneTextColour} onChange={v => set("timezoneTextColour", v)} />
+                </div>
+                <Range label="Background opacity" value={settings.timezoneOpacity} min={25} max={100} suffix="%" onChange={v => set("timezoneOpacity", v)} />
+                <Range label="Glass blur" value={settings.timezoneBlur} min={0} max={30} suffix="px" onChange={v => set("timezoneBlur", v)} />
               </div>
               
 
