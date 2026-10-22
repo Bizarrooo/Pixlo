@@ -7548,7 +7548,7 @@ html { scroll-behavior:smooth; }
 /* Public cursor trail: pin its drawing surface to the viewport, not the document.
    This keeps pointer coordinates stable while scrolling and gives the canvas a
    real viewport-sized drawing area instead of the browser's 300x150 default. */
-.pixlo-cursor-trail-layer {
+.pixlo-cursor-trail-layer:not(.preview-cursor-trail-layer) {
   position: fixed !important;
   inset: 0 !important;
   width: 100vw !important;
