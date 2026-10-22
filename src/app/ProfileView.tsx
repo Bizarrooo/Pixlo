@@ -132,7 +132,7 @@ function ProfileClockWidget({
     minute: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, minute: "2-digit" }),
     second: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, second: "2-digit" }),
     abbreviation: new Intl.DateTimeFormat("en-US", { timeZone: timezone, timeZoneName: "short" }),
-    localTime: new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }),
+    localTime: new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
   }), [timezone]);
 
   const targetHour = Number(formatters.hour.format(now)) % 12;
@@ -142,7 +142,7 @@ function ProfileClockWidget({
   const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const localOffset = timeZoneOffsetMinutes(now, localTimezone);
   const targetOffset = timeZoneOffsetMinutes(now, timezone);
-  const offsetDelta = localOffset - targetOffset;
+  const offsetDelta = targetOffset - localOffset;
   const offsetAbs = Math.abs(offsetDelta);
   const offsetLabel = offsetDelta === 0
     ? "same time"
