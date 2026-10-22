@@ -102,7 +102,7 @@ function rgbaFromHex(hex: string, alpha: number) {
 function timeZoneOffsetMinutes(date: Date, timezone: string) {
   const label = new Intl.DateTimeFormat("en-US", { timeZone: timezone, timeZoneName: "shortOffset" })
     .formatToParts(date).find(part => part.type === "timeZoneName")?.value || "GMT";
-  const match = /GMT(?:(\\+|\\-)(\\d{1,2})(?::(\\d{2}))?)?/.exec(label);
+  const match = /GMT(?:(\+|\-)(\d{1,2})(?::(\d{2}))?)?/.exec(label);
   if (!match || !match[1]) return 0;
   return (match[1] === "-" ? -1 : 1) * (Number(match[2] || 0) * 60 + Number(match[3] || 0));
 }
