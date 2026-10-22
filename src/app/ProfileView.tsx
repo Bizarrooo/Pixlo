@@ -99,6 +99,64 @@ function rgbaFromHex(hex: string, alpha: number) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
 }
 
+function ProfileClockWidget({ timezone }: { timezone: string }) {
+  // Keep the one-second ticker isolated from ProfileView so the full profile
+  // does not re-render every second just to update the Premium clocks.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const formatters = useMemo(() => ({
+    targetHour: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", hourCycle: "h23" }),
+    targetMinute: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, minute: "2-digit" }),
+    targetSecond: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, second: "2-digit" }),
+    targetLabel: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", minute: "2-digit" }),
+    targetDigitalTime: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }),
+    targetDate: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, weekday: "long", day: "numeric", month: "long", year: "numeric" }),
+    targetZone: new Intl.DateTimeFormat("en-GB", { timeZone: timezone, timeZoneName: "long" }),
+    localDigitalTime: new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }),
+    localDate: new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric" }),
+  }), [timezone]);
+
+  const targetHour = Number(formatters.targetHour.format(now)) % 12;
+  const targetMinute = Number(formatters.targetMinute.format(now));
+  const targetSecond = Number(formatters.targetSecond.format(now));
+  const targetZoneName = formatters.targetZone.formatToParts(now).find(part => part.type === "timeZoneName")?.value;
+  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " ");
+
+  return (
+    <div className="pixlo-timezone-grid">
+      <div className="pixlo-timezone-primary">
+        <div className="pixlo-analog-clock" aria-label={formatters.targetLabel.format(now)}>
+          <span className="pixlo-clock-face">
+            <i className="pixlo-clock-hour" style={{ transform: `rotate(${targetHour * 30 + targetMinute / 2}deg)` }} />
+            <i className="pixlo-clock-minute" style={{ transform: `rotate(${targetMinute * 6}deg)` }} />
+            <i className="pixlo-clock-second" style={{ transform: `rotate(${targetSecond * 6}deg)` }} />
+            <b />
+          </span>
+        </div>
+        <div className="pixlo-timezone-digital">
+          <strong>{formatters.targetDigitalTime.format(now)}</strong>
+          <span>{formatters.targetDate.format(now)}</span>
+          <small>{targetZoneName}</small>
+        </div>
+      </div>
+      <div className="pixlo-local-time">
+        <span className="pixlo-local-time-icon">⌖</span>
+        <div>
+          <small>YOUR LOCAL TIME</small>
+          <strong>{formatters.localDigitalTime.format(now)}</strong>
+          <span>{formatters.localDate.format(now)}</span>
+          <em>{localTimezone}</em>
+        </div>
+        <i className="pixlo-local-live-dot" />
+      </div>
+    </div>
+  );
+}
+
 export default function ProfileView({ forcedUsername }: { forcedUsername?: string }) {
   const [settings, setSettings] = useState<ProfileSettings>(defaultSettings);
   const [presetPreviewMode, setPresetPreviewMode] = useState(false);
@@ -113,7 +171,6 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   const [profileBadges, setProfileBadges] = useState<Array<{ id: string; name: string; icon_url: string | null; description: string; badge_key?: string }>>([]);
   const [isPremium, setIsPremium] = useState(false);
   const [extrasPage, setExtrasPage] = useState(1);
-  const [clockNow, setClockNow] = useState(() => new Date());
   const extrasPageRefs = useRef<Record<number, HTMLElement | null>>({});
   const [trackIndex, setTrackIndex] = useState(0);
   const [musicVideoFallback, setMusicVideoFallback] = useState(false);
@@ -252,11 +309,6 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
       .catch(() => { if (!cancelled) setProfileStatus("error"); });
     return () => { cancelled = true; };
   }, [forcedUsername]);
-
-  useEffect(() => {
-    const interval = window.setInterval(() => setClockNow(new Date()), 1000);
-    return () => window.clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     setExtrasPage(1);
@@ -792,15 +844,7 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
             {page === 1 ? <div className="pixlo-extras-welcome"><span className="pixlo-extras-orbit" aria-hidden="true"><i /><i /><i /></span><div><span className="pixlo-extras-kicker">YOUR SPACE, EXPANDED</span><h3>More than a profile.</h3><p>Explore little widgets and useful details picked by the profile owner. New extras can live here without crowding the main page.</p><button type="button" onClick={() => setExtrasPage(settings.timezonePage)}>Explore extras <span>↗</span></button></div><span className="pixlo-extras-page-number">01</span></div>
             : page === settings.timezonePage ? <div className="pixlo-timezone-content">
                 <div className="pixlo-timezone-topline"><span className="pixlo-extras-kicker">WORLD CLOCK</span><span className="pixlo-timezone-zone">{settings.timezone.replace(/_/g, " ").split("/").slice(-1)[0]}</span></div>
-                <div className="pixlo-timezone-grid">
-                  <div className="pixlo-timezone-primary">
-                    <div className="pixlo-analog-clock" aria-label={new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, hour: "2-digit", minute: "2-digit" }).format(clockNow)}>
-                      <span className="pixlo-clock-face"><i className="pixlo-clock-hour" style={{ transform: `rotate(${(Number(new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, hour: "2-digit", hourCycle: "h23" }).format(clockNow)) % 12) * 30 + Number(new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, minute: "2-digit" }).format(clockNow)) / 2}deg)` }} /><i className="pixlo-clock-minute" style={{ transform: `rotate(${Number(new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, minute: "2-digit" }).format(clockNow)) * 6}deg)` }} /><i className="pixlo-clock-second" style={{ transform: `rotate(${Number(new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, second: "2-digit" }).format(clockNow)) * 6}deg)` }} /><b /></span>
-                    </div>
-                    <div className="pixlo-timezone-digital"><strong>{new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).format(clockNow)}</strong><span>{new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(clockNow)}</span><small>{new Intl.DateTimeFormat("en-GB", { timeZone: settings.timezone, timeZoneName: "long" }).formatToParts(clockNow).find(part => part.type === "timeZoneName")?.value}</small></div>
-                  </div>
-                  <div className="pixlo-local-time"><span className="pixlo-local-time-icon">⌖</span><div><small>YOUR LOCAL TIME</small><strong>{new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).format(clockNow)}</strong><span>{new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric" }).format(clockNow)}</span><em>{Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " ")}</em></div><i className="pixlo-local-live-dot" /></div>
-                </div>
+                <ProfileClockWidget timezone={settings.timezone} />
                 <div className="pixlo-timezone-footer"><span><i /> Both clocks update live</span><span>TIMEZONE COMPARISON</span></div>
               </div>
             : <div className="pixlo-extras-empty"><span className="pixlo-extras-empty-icon">✳</span><span className="pixlo-extras-kicker">PAGE {String(page).padStart(2, "0")}</span><h3>Something good is coming.</h3><p>This page is ready for another Premium extra.</p><span className="pixlo-extras-page-number">{String(page).padStart(2, "0")}</span></div>}
