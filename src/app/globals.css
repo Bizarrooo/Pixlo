@@ -7566,3 +7566,29 @@ html { scroll-behavior:smooth; }
   z-index: 100000 !important;
   pointer-events: none !important;
 }
+
+/* Pointer-driven motion should react on the next frame, not ease behind the mouse.
+   Keep the slower easing only for the intentional return-to-rest animation. */
+.profile-page.parallax-on .profile-card {
+  transition: filter 90ms ease, box-shadow 140ms ease !important;
+}
+.profile-page.parallax-on .background-image,
+.profile-page.parallax-on .background-media {
+  transition: none !important;
+}
+.profile-page.parallax-on .profile-card > .profile-banner,
+.profile-page.parallax-on .profile-inner > * {
+  transition: translate 0ms linear !important;
+}
+.profile-page.parallax-on .profile-inner > .socials > .social {
+  transition: filter 90ms ease, opacity 90ms ease !important;
+}
+.profile-page.parallax-on.parallax-returning .profile-card {
+  transition: transform 280ms cubic-bezier(.22,.75,.15,1), filter 120ms ease, box-shadow 160ms ease !important;
+}
+.profile-page.parallax-on.parallax-returning .background-image,
+.profile-page.parallax-on.parallax-returning .background-media,
+.profile-page.parallax-on.parallax-returning .ambient-one,
+.profile-page.parallax-on.parallax-returning .ambient-two {
+  transition: transform 280ms cubic-bezier(.22,.75,.15,1) !important;
+}
