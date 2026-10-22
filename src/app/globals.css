@@ -7777,3 +7777,36 @@ body:has(.profile-page)::-webkit-scrollbar,
 .profile-page.parallax-on.parallax-returning .ambient-two {
   transition: transform 300ms cubic-bezier(.22,.75,.15,1) !important;
 }
+
+/* Final parallax transform: make the setting visibly move the card, not just its lighting. */
+.profile-page.parallax-on .profile-card {
+  transform:
+    perspective(1000px)
+    rotateX(var(--parallax-rotate-x, 0deg))
+    rotateY(var(--parallax-rotate-y, 0deg))
+    translate3d(calc(var(--mouse-x, 0px) * .9), calc(var(--mouse-y, 0px) * .9), 0)
+    scale3d(1.045, 1.045, 1) !important;
+}
+@media(max-width:700px) {
+  .profile-page.parallax-on .profile-card {
+    transform:
+      perspective(900px)
+      rotateX(var(--parallax-rotate-x, 0deg))
+      rotateY(var(--parallax-rotate-y, 0deg))
+      translate3d(calc(var(--mouse-x, 0px) * .52), calc(var(--mouse-y, 0px) * .52), 0)
+      scale3d(1.02, 1.02, 1) !important;
+  }
+}
+.profile-page.parallax-on.parallax-returning .profile-card {
+  transform:
+    perspective(1000px)
+    rotateX(0deg)
+    rotateY(0deg)
+    translate3d(0, 0, 0)
+    scale3d(1.045, 1.045, 1) !important;
+}
+
+/* Clear hierarchy for the new timezone appearance controls in the dashboard. */
+.extras-customisation-heading { display:flex; flex-direction:column; gap:5px; padding-top:6px; border-top:1px solid rgba(255,255,255,.07); }
+.extras-customisation-heading h4 { margin:0; font-size:13px; font-weight:800; color:#fff; }
+.extras-customisation-heading p { margin:0; color:rgba(255,255,255,.52); font-size:11px; line-height:1.5; }
