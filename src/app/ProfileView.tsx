@@ -346,10 +346,12 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     const viewport = extrasViewportRef.current;
     const target = extrasPageRefs.current[extrasPage];
     if (!viewport || !target) return;
+    const viewportRect = viewport.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
     if (settings.extrasLayout === "horizontal") {
-      viewport.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
+      viewport.scrollTo({ left: viewport.scrollLeft + targetRect.left - viewportRect.left, behavior: "smooth" });
     } else {
-      viewport.scrollTo({ top: target.offsetTop - viewport.offsetTop, behavior: "smooth" });
+      viewport.scrollTo({ top: viewport.scrollTop + targetRect.top - viewportRect.top, behavior: "smooth" });
     }
   }, [extrasPage, settings.extrasLayout, settings.timezonePage]);
 
@@ -649,14 +651,8 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
   };
   const updateCardPointer = (event: React.PointerEvent<HTMLElement>) => {
     if (!settings.parallax || event.pointerType === "touch" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const card = profilePageRef.current?.querySelector<HTMLElement>(".profile-card");
-    if (!card) return;
-    const bounds = card.getBoundingClientRect();
-    pointerBoundsRef.current = bounds;
-    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) {
-      resetCardPointer();
-      return;
-    }
+    const bounds = pointerBoundsRef.current;
+    if (!bounds) return;
     if (parallaxReturnTimerRef.current !== null) window.clearTimeout(parallaxReturnTimerRef.current);
     parallaxReturnTimerRef.current = null;
     setParallaxReturning(false);
@@ -678,6 +674,17 @@ export default function ProfileView({ forcedUsername }: { forcedUsername?: strin
     parallaxReturnTimerRef.current = null;
     setParallaxReturning(false);
     pointerBoundsRef.current = event.currentTarget.getBoundingClientRect();
+    if (lastPointerPositionRef.current) {
+      const pointer = lastPointerPositionRef.current;
+      const bounds = pointerBoundsRef.current;
+      if (pointer.x >= bounds.left && pointer.x <= bounds.right && pointer.y >= bounds.top && pointer.y <= bounds.bottom) {
+        parallaxTargetRef.current = {
+          x: Math.max(-1, Math.min(1, ((pointer.x - bounds.left) / Math.max(bounds.width, 1) - 0.5) * 2)),
+          y: Math.max(-1, Math.min(1, ((pointer.y - bounds.top) / Math.max(bounds.height, 1) - 0.5) * 2)),
+        };
+        applyCardParallax(parallaxTargetRef.current.x, parallaxTargetRef.current.y);
+      }
+    }
   };
   const handleCardPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "touch" || !settings.parallax) return;
