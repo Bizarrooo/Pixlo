@@ -88,17 +88,17 @@ export default function CursorTrailCanvas({
     const motionScale = clamp(speed, 40, 300) / 100;
     const particleLifetime = clamp(lifetime, 300, 15000);
     const spacing = clamp(9.5 - densityValue * 0.021, 4.2, 9);
-    const maxParticles = clamp(Math.round(100 + densityValue * 0.42), 110, 210);
+    const maxParticles = clamp(Math.round(68 + densityValue * 0.26), 80, 135);
     const glowScale = clamp(glow, 0, 200) / 100;
     const trailLifetime = clamp(310 / Math.max(0.65, motionScale), 155, 340);
-    const maxTrailPoints = 78;
+    const maxTrailPoints = 56;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       canvasWidth = Math.max(1, rect.width);
       canvasHeight = Math.max(1, rect.height);
       // A capped backing scale avoids spending several times more work on retina displays.
-      pixelRatio = Math.min(1.25, Math.max(1, window.devicePixelRatio || 1));
+      // A 1:1 backing store is deliberately used on high-DPI displays to avoid\n      // rendering a full-screen particle layer at 1.5–4x the pixel cost.\n      pixelRatio = 1;
       const width = Math.max(1, Math.round(canvasWidth * pixelRatio));
       const height = Math.max(1, Math.round(canvasHeight * pixelRatio));
       if (canvas.width !== width || canvas.height !== height) {
@@ -158,10 +158,13 @@ export default function CursorTrailCanvas({
 
     const movePointer = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+      // Viewport trails use client coordinates directly. The canvas is fixed to the
+      // viewport, so scrolling must never enter the pointer-coordinate calculation.
+      // Preview trails stay container-relative inside the dashboard editor.
+      const rect = mode === "viewport" ? null : canvas.getBoundingClientRect();
+      const x = mode === "viewport" ? event.clientX : event.clientX - (rect?.left || 0);
+      const y = mode === "viewport" ? event.clientY : event.clientY - (rect?.top || 0);
+      if (x < 0 || y < 0 || x > canvasWidth || y > canvasHeight) {
         lastPointer = null;
         spacingRemainder = 0;
         return;
